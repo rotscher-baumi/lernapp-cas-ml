@@ -1,0 +1,1032 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>CAS ML Lernhilfe</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: ein ruhiger Lesestrom mit klebender Kapitel-Leiste; Demos sind abgesetzte Flächen.
+   Palette: kühles Grau mit Blaustich, ein Blau als Akzent, Bernstein nur für Warnungen. */
+:root{
+  --bg:#F4F7F8; --surface:#FFFFFF; --fg:#15212A; --muted:#55646E; --line:#D9E1E5;
+  --accent:#2A5BD7; --accent-soft:#E4ECFC; --warn:#A35500; --warn-soft:#FFF1DE;
+  --ok:#17784F; --ok-soft:#E1F3EA; --code-bg:#EAEFF2; --bad:#B3261E;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1519; --surface:#16202A; --fg:#E5ECF1; --muted:#9AABB7; --line:#27343F;
+    --accent:#86A9FF; --accent-soft:#1A2848; --warn:#F0A44B; --warn-soft:#38280F;
+    --ok:#55C99C; --ok-soft:#123226; --code-bg:#1B2731; --bad:#FF8A80; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1519; --surface:#16202A; --fg:#E5ECF1; --muted:#9AABB7; --line:#27343F;
+  --accent:#86A9FF; --accent-soft:#1A2848; --warn:#F0A44B; --warn-soft:#38280F;
+  --ok:#55C99C; --ok-soft:#123226; --code-bg:#1B2731; --bad:#FF8A80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(64px + env(safe-area-inset-top,0px))}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.65;
+  padding-block:0 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+.wrap{max-width:760px;margin:0 auto}
+header.top{padding:32px 0 20px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-size:clamp(30px,7vw,46px);line-height:1.1;margin:8px 0 12px;text-wrap:balance;letter-spacing:-.01em}
+h2{font-family:var(--f-display);font-size:clamp(24px,5vw,31px);line-height:1.2;margin:0 0 6px;text-wrap:balance}
+h3{font-family:var(--f-display);font-size:19px;line-height:1.3;margin:28px 0 8px;text-wrap:balance}
+p{margin:0 0 14px}
+.lead{font-size:18px;color:var(--muted);max-width:60ch}
+nav.chips{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);
+  margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px));
+  border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap;display:flex;gap:8px;scrollbar-width:none}
+nav.chips::-webkit-scrollbar{display:none}
+nav.chips a{flex:none;font-size:14px;font-weight:500;color:var(--fg);text-decoration:none;padding:6px 12px;border-radius:999px;border:1px solid var(--line)}
+nav.chips a.on{background:var(--accent);border-color:var(--accent);color:#fff}
+section{padding-top:44px}
+.kicker{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.box{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:16px;margin:16px 0}
+.box>*:last-child{margin-bottom:0}
+.merk{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;margin:18px 0;border-radius:0 8px 8px 0}
+.merk b,.falle b{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:2px}
+.falle{border-left:4px solid var(--warn);background:var(--warn-soft);padding:12px 16px;margin:18px 0;border-radius:0 8px 8px 0}
+.falle b{color:var(--warn)} .merk b{color:var(--accent)}
+.merk>*:last-child,.falle>*:last-child{margin-bottom:0}
+code{font-family:var(--f-mono);font-size:.9em;background:var(--code-bg);padding:1px 5px;border-radius:4px}
+pre{font-family:var(--f-mono);font-size:13px;line-height:1.55;background:var(--code-bg);border-radius:8px;padding:12px 14px;margin:12px 0 16px;overflow-x:auto;max-width:100%}
+pre code{background:none;padding:0;font-size:inherit}
+.tablewrap{overflow-x:auto;max-width:100%;margin:12px 0 16px}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:420px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:500}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+ul,ol{padding-left:22px;margin:0 0 14px} li{margin-bottom:4px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0}
+.grid2>div{min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:14px}
+.grid2 h4{margin:0 0 4px;font-family:var(--f-display);font-size:16px}
+.grid2 p{font-size:14.5px;margin:0;color:var(--muted)}
+.steps{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;margin:14px 0}
+.steps .st{flex:1 1 150px;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px}
+.steps .st b{display:block;font-family:var(--f-display)}
+.steps .st span{font-size:13.5px;color:var(--muted)}
+.steps .ar{align-self:center;color:var(--muted);font-family:var(--f-mono)}
+.demo{border:1px solid var(--accent);background:var(--surface);border-radius:12px;padding:16px;margin:20px 0}
+.demo h4{margin:0 0 4px;font-family:var(--f-display);font-size:17px}
+.demo .tag{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.demo p.hint{font-size:14px;color:var(--muted)}
+.ctl{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;margin:8px 0;font-size:14px}
+.ctl output{font-family:var(--f-mono);font-size:13px;min-width:48px;text-align:right}
+input[type=range]{width:100%;accent-color:var(--accent);min-width:0}
+button,select{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:7px 12px;border-radius:8px;cursor:pointer;min-height:40px}
+button.pri{background:var(--accent);color:#fff;border-color:var(--accent)}
+button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+svg.plot{display:block;width:100%;height:auto;max-width:100%;background:var(--bg);border-radius:8px;border:1px solid var(--line)}
+svg .ax{stroke:var(--line);stroke-width:1} svg .lbl{fill:var(--muted);font-family:var(--f-mono);font-size:10px}
+svg .pt{fill:var(--fg)} svg .ln{stroke:var(--accent);stroke-width:2.5;fill:none} svg .ln2{stroke:var(--warn);stroke-width:2;fill:none}
+svg .dash{stroke:var(--muted);stroke-width:1.5;fill:none;stroke-dasharray:5 4} svg .res{stroke:var(--bad);stroke-width:1.5;opacity:.7}
+.stats{display:flex;flex-wrap:wrap;gap:8px 18px;font-family:var(--f-mono);font-size:13px;margin:10px 0 0}
+.stats span b{font-weight:500;color:var(--accent)}
+.res-ok{color:var(--ok);font-weight:600} .res-bad{color:var(--bad);font-weight:600}
+td.l{background:var(--accent-soft)} td.r{background:var(--warn-soft)} td.b{background:var(--ok-soft)}
+details.q{border:1px solid var(--line);background:var(--surface);border-radius:8px;margin:8px 0}
+details.q summary{padding:12px 14px;cursor:pointer;font-weight:500;list-style:none}
+details.q summary::-webkit-details-marker{display:none}
+details.q summary::before{content:"+";font-family:var(--f-mono);color:var(--accent);margin-right:10px}
+details.q[open] summary::before{content:"–"}
+details.q .a{padding:0 14px 12px;color:var(--muted)}
+.toc{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:18px 0}
+.toc a{display:block;text-decoration:none;color:var(--fg);border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px 14px}
+.toc a b{display:block;font-family:var(--f-display)} .toc a span{font-size:13.5px;color:var(--muted)}
+.when{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-size:13.5px;color:var(--muted)}
+textarea.code{display:block;width:100%;max-width:100%;font-family:var(--f-mono);font-size:13px;line-height:1.5;background:var(--code-bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;resize:vertical;tab-size:4;white-space:pre;overflow:auto}
+.ex{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:16px;margin:14px 0}
+.ex h4{margin:0 0 4px;font-family:var(--f-display);font-size:17px}
+.ex .task{font-size:15px;margin-bottom:10px}
+.ex pre.out{margin:10px 0 0;background:var(--bg);border:1px solid var(--line);min-height:20px;white-space:pre-wrap;word-break:break-word}
+.verdict{margin-top:8px;font-size:14px;font-weight:600}
+.verdict.good{color:var(--ok)} .verdict.bad{color:var(--bad)} .verdict.info{color:var(--muted);font-weight:400}
+#freeOut{white-space:pre-wrap;word-break:break-word}
+.fig{margin:16px auto;max-width:560px}
+.fig svg{display:block;width:100%;height:auto;overflow:visible}
+.fig figcaption{font-size:13.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+.d-box{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+.d-hl{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.d-ok{fill:var(--ok-soft);stroke:var(--ok);stroke-width:1.5}
+.d-warn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5}
+.d-dim{fill:var(--bg);stroke:var(--muted);stroke-width:1.2;stroke-dasharray:3 3}
+.d-t,.d-tb,.d-tm,.d-m{text-anchor:middle;dominant-baseline:central}
+.d-t{fill:var(--fg);font-family:var(--f-mono);font-size:13px}
+.d-tm{fill:var(--muted);font-family:var(--f-mono);font-size:13px}
+.d-tb{fill:var(--fg);font-family:var(--f-display);font-size:14px;font-weight:700}
+.d-m{fill:var(--muted);font-family:var(--f-body);font-size:11.5px}
+.d-ml{text-anchor:start}
+.d-ln{stroke:var(--muted);stroke-width:1.5;fill:none}
+.d-dash{stroke:var(--muted);stroke-width:1.5;fill:none;stroke-dasharray:5 4}
+.d-arr{stroke:var(--muted);stroke-width:1.5;fill:none;marker-end:url(#mk-grey)}
+.d-arrb{stroke:var(--accent);stroke-width:2;fill:none;marker-end:url(#mk-blue)}
+.mk-g{fill:var(--muted)} .mk-b{fill:var(--accent)}
+.d-pa{fill:var(--accent)} .d-pb{fill:var(--warn)} .d-pg{fill:var(--muted)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+
+<div class="wrap">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><marker id="mk-grey" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-g" d="M0 0L10 5L0 10z"/></marker><marker id="mk-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-b" d="M0 0L10 5L0 10z"/></marker></defs></svg>
+<header class="top">
+  <div class="eyebrow">CAS Machine Learning · HSLU · Herbstsemester 2026</div>
+  <h1>Der Stoff bis jetzt, einfach erklärt</h1>
+  <p class="lead">Modul 1 (Python und Pandas, 16./17. Oktober) und Supervised Learning, Tag 1. Jedes Kapitel erklärt zuerst die Idee, zeigt dann Code und endet mit dem Merksatz und der häufigsten Falle. Die Demos kannst du direkt ausprobieren.</p>
+</header>
+
+<nav class="chips" id="chips" aria-label="Kapitel">
+  <a href="#ueberblick">Überblick</a><a href="#ds">Data Science</a><a href="#git">Git</a><a href="#python">Python</a>
+  <a href="#pandas">Pandas</a><a href="#viz">Grafiken</a><a href="#hood">Unter der Haube</a><a href="#ml">Supervised ML</a><a href="#ueben">Üben</a><a href="#test">Selbsttest</a>
+</nav>
+
+<section id="ueberblick">
+  <div class="kicker">Überblick</div>
+  <h2>Was bisher lief</h2>
+  <p>Der rote Faden: Du holst Daten in Python, räumst sie mit Pandas auf, schaust sie dir in Grafiken an und lässt danach ein Modell daraus lernen. Alles Spätere im CAS baut darauf auf.</p>
+  <div class="steps">
+    <div class="st"><b>1 · Daten verstehen</b><span>Data Science, Git, Python</span></div><div class="ar">→</div>
+    <div class="st"><b>2 · Daten bearbeiten</b><span>Pandas, Merge, Cleaning</span></div><div class="ar">→</div>
+    <div class="st"><b>3 · Daten zeigen</b><span>Matplotlib, Seaborn</span></div><div class="ar">→</div>
+    <div class="st"><b>4 · Daten lernen lassen</b><span>Regression, Overfitting</span></div>
+  </div>
+  <div class="toc">
+    <a href="#ds"><b>Data Science</b><span>Rollen, CRISP-DM, ML-Typen</span></a>
+    <a href="#git"><b>Git</b><span>3 Zustände, 5 Befehle</span></a>
+    <a href="#python"><b>Python</b><span>Datentypen, Funktionen, Comprehensions</span></a>
+    <a href="#pandas"><b>Pandas</b><span>DataFrame, Filter, groupby, merge</span></a>
+    <a href="#viz"><b>Grafiken</b><span>Welcher Chart für welche Frage</span></a>
+    <a href="#hood"><b>Unter der Haube</b><span>NumPy, View/Copy, Arrow</span></a>
+    <a href="#ml"><b>Supervised ML</b><span>Gradient Descent bis Hyperparameter</span></a>
+    <a href="#ueben"><b>Üben</b><span>Python-Aufgaben direkt hier, Notebooks</span></a>
+    <a href="#test"><b>Selbsttest</b><span>Fragen zum Aufklappen</span></a>
+  </div>
+  <div class="merk"><b>Tipp zum Lernen</b><p>Lies ein Kapitel, öffne dann im Repo das passende Notebook (Live Coding) und ändere eine Zahl. Verstehen kommt beim Verändern, nicht beim Lesen.</p></div>
+</section>
+
+<section id="ds">
+  <div class="kicker">Modul 1 · Freitag 16.10</div>
+  <h2>Data Science: Worum geht es überhaupt?</h2>
+  <p><b>Data Science macht Daten nützlich.</b> Aus Zahlen werden Entscheidungen. Dafür braucht es vier Dinge zusammen: Mathematik und Statistik, Programmieren, Kommunikation und Fachwissen über das Geschäft.</p>
+  <figure class="fig"><svg viewBox="0 0 360 210" role="img" aria-label="Data Science ruht auf vier Säulen: Mathematik und Statistik, Programmieren, Kommunikation, Fachwissen"><line class="d-ln" x1="180" y1="105" x2="73" y2="32"/><line class="d-ln" x1="180" y1="105" x2="287" y2="32"/><line class="d-ln" x1="180" y1="105" x2="73" y2="178"/><line class="d-ln" x1="180" y1="105" x2="287" y2="178"/><circle class="d-hl" cx="180" cy="105" r="42"/><text class="d-tb" x="180" y="98">Data</text><text class="d-tb" x="180" y="115">Science</text><rect class="d-box" x="8" y="10" width="130" height="44" rx="8"/><text class="d-tb" x="73" y="26" style="font-size:13px">Mathematik</text><text class="d-m" x="73" y="43">und Statistik</text><rect class="d-box" x="222" y="10" width="130" height="44" rx="8"/><text class="d-tb" x="287" y="26" style="font-size:13px">Programmieren</text><text class="d-m" x="287" y="43">meist Python</text><rect class="d-box" x="8" y="156" width="130" height="44" rx="8"/><text class="d-tb" x="73" y="172" style="font-size:13px">Kommunikation</text><text class="d-m" x="73" y="189">schreiben und erklären</text><rect class="d-box" x="222" y="156" width="130" height="44" rx="8"/><text class="d-tb" x="287" y="172" style="font-size:13px">Fachwissen</text><text class="d-m" x="287" y="189">das Geschäft verstehen</text></svg><figcaption>Fehlt eine Säule, wird es schwierig: Ein tolles Modell ohne Fachwissen oder ohne verständliche Präsentation bringt wenig.</figcaption></figure>
+
+  <h3>Analytics oder Science?</h3>
+  <div class="grid2">
+    <div><h4>Data Analytics</h4><p>Rohdaten holen, ordnen, auswerten. Antwort auf «Was ist passiert?». Ergebnis: Berichte, Grafiken, Empfehlungen.</p></div>
+    <div><h4>Data Science</h4><p>Zusätzlich Modelle und Vorhersagen (Machine Learning). Antwort auf «Was passiert als Nächstes?» und «Was sollen wir tun?».</p></div>
+  </div>
+  <p>Die Landkarte aus dem Kurs: Beschreibende Analyse trifft <i>keine</i> Entscheidungen, Statistik <i>wenige</i>, Machine Learning <i>viele</i> (automatisch, im grossen Stil).</p>
+  <figure class="fig"><svg viewBox="0 0 360 158" role="img" aria-label="Von der beschreibenden Analyse über Statistik zu Machine Learning steigt die Zahl der Entscheidungen"><rect class="d-box" x="8" y="6" width="104" height="48" rx="8"/><text class="d-tb" x="60" y="23">Beschreibende</text><text class="d-tb" x="60" y="40">Analyse</text><text class="d-m" x="60" y="68">keine</text><text class="d-m" x="60" y="81">Entscheidungen</text><rect class="d-hl" x="48" y="126" width="24" height="10" rx="3"/><rect class="d-box" x="128" y="6" width="104" height="48" rx="8"/><text class="d-tb" x="180" y="30">Statistik</text><text class="d-m" x="180" y="68">wenige</text><text class="d-m" x="180" y="81">Entscheidungen</text><rect class="d-hl" x="168" y="110" width="24" height="26" rx="3"/><rect class="d-box" x="248" y="6" width="104" height="48" rx="8"/><text class="d-tb" x="300" y="23">Machine</text><text class="d-tb" x="300" y="40">Learning</text><text class="d-m" x="300" y="68">viele</text><text class="d-m" x="300" y="81">Entscheidungen</text><rect class="d-hl" x="288" y="90" width="24" height="46" rx="3"/><line class="d-ln" x1="8" y1="136" x2="352" y2="136"/><text class="d-m" x="180" y="152">Anzahl automatisch getroffener Entscheidungen</text></svg><figcaption>Je weiter rechts, desto mehr Entscheidungen übernimmt der Rechner selbst.</figcaption></figure>
+
+  <h3>Algorithmus und Machine Learning</h3>
+  <p>Klassisch programmierst du die Regeln selbst: <code>Daten + Regeln → Antwort</code>. Beim Machine Learning gibst du Daten und die gewünschten Antworten, und der Computer findet die Regeln: <code>Daten + Antworten → Regeln</code>. Diese gefundenen Regeln nennt man das <b>Modell</b>.</p>
+  <figure class="fig"><svg viewBox="0 0 360 140" role="img" aria-label="Klassisches Programmieren gegen Machine Learning"><text class="d-m d-ml" x="6" y="10">Klassisch: du schreibst die Regeln</text><rect class="d-box" x="6" y="18" width="62" height="32" rx="6"/><text class="d-t" x="37.0" y="34.0">Daten</text><text class="d-t" x="76" y="34">+</text><rect class="d-hl" x="84" y="18" width="66" height="32" rx="6"/><text class="d-t" style="font-size:11.5px" x="117.0" y="34.0">Regeln</text><line class="d-arr" x1="154" y1="34" x2="176" y2="34"/><rect class="d-box" x="180" y="18" width="70" height="32" rx="6"/><text class="d-t" x="215.0" y="34.0">Computer</text><line class="d-arr" x1="254" y1="34" x2="276" y2="34"/><rect class="d-ok" x="280" y="18" width="74" height="32" rx="6"/><text class="d-t" x="317.0" y="34.0">Antwort</text><text class="d-m d-ml" x="6" y="88">Machine Learning: der Computer findet die Regeln</text><rect class="d-box" x="6" y="96" width="62" height="32" rx="6"/><text class="d-t" x="37.0" y="112.0">Daten</text><text class="d-t" x="76" y="112">+</text><rect class="d-hl" x="84" y="96" width="66" height="32" rx="6"/><text class="d-t" style="font-size:11.5px" x="117.0" y="112.0">Antworten</text><line class="d-arr" x1="154" y1="112" x2="176" y2="112"/><rect class="d-box" x="180" y="96" width="70" height="32" rx="6"/><text class="d-t" x="215.0" y="112.0">Computer</text><line class="d-arr" x1="254" y1="112" x2="276" y2="112"/><rect class="d-ok" x="280" y="96" width="74" height="32" rx="6"/><text class="d-t" x="317.0" y="112.0">Modell</text></svg><figcaption>Blau: was du lieferst. Grün: was herauskommt. Beim Machine Learning ist das Ergebnis die Regel selbst, genannt Modell.</figcaption></figure>
+
+  <h3>Wer macht was?</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Rolle</th><th>Kernaufgabe</th></tr>
+    <tr><td><b>Data Analyst</b></td><td>Daten abfragen (SQL), bereinigen, zusammenfassen, visualisieren. Modelliert nicht.</td></tr>
+    <tr><td><b>Data Scientist</b></td><td>Statistik, Modelle, fragegetriebene Analyse, Resultate an Management erklären.</td></tr>
+    <tr><td><b>Data Engineer</b></td><td>Datenpipelines (ETL), Speicherung, Infrastruktur, Zuverlässigkeit.</td></tr>
+    <tr><td><b>ML Engineer</b></td><td>Algorithmen anwenden, Modelle sauber in Software bringen.</td></tr>
+    <tr><td><b>AI Engineer</b></td><td>Deep Learning, Chatbots und Agenten, Docker, CI/CD, Cloud.</td></tr>
+  </table></div>
+
+  <h3>CRISP-DM: der Ablauf jedes Projekts</h3>
+  <figure class="fig"><svg viewBox="0 0 360 216" role="img" aria-label="Der CRISP-DM-Kreislauf mit sechs Schritten"><rect class="d-hl" x="131" y="10" width="98" height="28" rx="14"/><text class="d-tb" x="180" y="24" style="font-size:12.5px">1 Business</text><rect class="d-hl" x="226" y="52" width="98" height="28" rx="14"/><text class="d-tb" x="275" y="66" style="font-size:12.5px">2 Daten</text><rect class="d-hl" x="226" y="136" width="98" height="28" rx="14"/><text class="d-tb" x="275" y="150" style="font-size:12.5px">3 Aufbereiten</text><rect class="d-hl" x="131" y="178" width="98" height="28" rx="14"/><text class="d-tb" x="180" y="192" style="font-size:12.5px">4 Modell</text><rect class="d-hl" x="36" y="136" width="98" height="28" rx="14"/><text class="d-tb" x="85" y="150" style="font-size:12.5px">5 Bewerten</text><rect class="d-hl" x="36" y="52" width="98" height="28" rx="14"/><text class="d-tb" x="85" y="66" style="font-size:12.5px">6 Einsatz</text><path class="d-arrb" d="M229 24 Q275 24 275 52"/><path class="d-arrb" d="M275 80 L275 136"/><path class="d-arrb" d="M275 164 Q275 192 229 192"/><path class="d-arrb" d="M131 192 Q85 192 85 164"/><path class="d-arrb" d="M85 136 L85 80"/><path class="d-arrb" d="M85 52 Q85 24 131 24"/><text class="d-tb" x="180" y="96">Daten</text><text class="d-m" x="180" y="113">oft zurück zu 2 oder 3</text><text class="d-m" x="180" y="126">und dann nochmals</text></svg><figcaption>CRISP-DM ist ein Kreislauf. Nach der Bewertung geht man oft zurück zu Daten oder Aufbereitung, bis das Ergebnis passt.</figcaption></figure>
+  <p>Wichtig: Der Weg ist keine Einbahnstrasse. Nach der Bewertung geht man oft zurück zu Schritt 2 oder 3.</p>
+
+  <h3>Die vier ML-Arten</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Art</th><th>Idee</th><th>Beispiel</th></tr>
+    <tr><td>Supervised</td><td>Lernen aus Beispielen <i>mit</i> Lösung (Label)</td><td>Hauspreis vorhersagen, Spam erkennen</td></tr>
+    <tr><td>Unsupervised</td><td>Struktur finden, ohne Lösung</td><td>Kunden in Gruppen einteilen</td></tr>
+    <tr><td>Semi-supervised</td><td>Erst gruppieren, dann Gruppen benennen und als Trainingsdaten nutzen</td><td>Wenig Labels, viele Daten</td></tr>
+    <tr><td>Reinforcement</td><td>Ausprobieren, Belohnung erhalten</td><td>Spiele, Fahren, Trading</td></tr>
+  </table></div>
+  <figure class="fig"><svg viewBox="0 0 360 174" role="img" aria-label="Links gefärbte Punkte mit Trennlinie, rechts graue Punkte mit zwei gefundenen Gruppen"><rect class="d-box" x="4" y="4" width="172" height="130" rx="8"/><rect class="d-box" x="184" y="4" width="172" height="130" rx="8"/><circle class="d-pa" cx="36" cy="40" r="5"/><circle class="d-pg" cx="216" cy="40" r="5"/><circle class="d-pa" cx="52" cy="34" r="5"/><circle class="d-pg" cx="232" cy="34" r="5"/><circle class="d-pa" cx="62" cy="56" r="5"/><circle class="d-pg" cx="242" cy="56" r="5"/><circle class="d-pa" cx="44" cy="70" r="5"/><circle class="d-pg" cx="224" cy="70" r="5"/><circle class="d-pa" cx="72" cy="42" r="5"/><circle class="d-pg" cx="252" cy="42" r="5"/><circle class="d-pb" cx="120" cy="92" r="5"/><circle class="d-pg" cx="300" cy="92" r="5"/><circle class="d-pb" cx="136" cy="80" r="5"/><circle class="d-pg" cx="316" cy="80" r="5"/><circle class="d-pb" cx="148" cy="100" r="5"/><circle class="d-pg" cx="328" cy="100" r="5"/><circle class="d-pb" cx="126" cy="114" r="5"/><circle class="d-pg" cx="306" cy="114" r="5"/><circle class="d-pb" cx="152" cy="84" r="5"/><circle class="d-pg" cx="332" cy="84" r="5"/><line class="d-dash" x1="100" y1="12" x2="86" y2="126"/><ellipse class="d-dash" cx="233" cy="52" rx="42" ry="30"/><ellipse class="d-dash" cx="316" cy="96" rx="40" ry="30"/><text class="d-tb" x="90" y="152" style="font-size:13px">Supervised</text><text class="d-m" x="90" y="166">Punkte haben ein Label</text><text class="d-tb" x="270" y="152" style="font-size:13px">Unsupervised</text><text class="d-m" x="270" y="166">Gruppen selbst finden</text></svg><figcaption>Links kennt das Modell die Farbe jedes Punktes und lernt die Trennlinie. Rechts gibt es keine Farben, der Algorithmus sucht die Gruppen selbst.</figcaption></figure>
+  <div class="merk"><b>Merksatz</b><p>Labels (die richtigen Antworten) sind bei Supervised Learning meist das Schwierigste zu bekommen.</p></div>
+</section>
+
+<section id="git">
+  <div class="kicker">Modul 1 · Freitag 16.10</div>
+  <h2>Git: Versionen deiner Arbeit</h2>
+  <p>Git speichert jede Änderung als <b>Schnappschuss</b>. Du kannst zu einer älteren Version zurück, mit mehreren Leuten parallel arbeiten und siehst, wer wann was warum geändert hat. GitHub und GitLab sind nur Webseiten, die Git-Repositories hosten (HSLU nutzt GitLab, dein Studium-Repo liegt auf GitHub).</p>
+
+  <h3>Die drei Zustände</h3>
+  <div class="steps">
+    <div class="st"><b>Arbeitsordner</b><span>Hier bearbeitest du Dateien.</span></div><div class="ar">git add →</div>
+    <div class="st"><b>Staging</b><span>Änderungen, die in den nächsten Schnappschuss sollen.</span></div><div class="ar">git commit →</div>
+    <div class="st"><b>Repository</b><span>Der .git-Ordner mit der gesamten Historie.</span></div>
+  </div>
+  <p>Stell dir ein Foto-Shooting vor: Du stellst Dinge auf (Arbeitsordner), wählst, wer aufs Bild soll (Staging) und drückst dann den Auslöser (Commit).</p>
+  <pre><code>git clone URL          # Kopie eines Repos holen
+git status             # Was hat sich geändert?
+git add datei.py       # Eine Datei fürs Staging vormerken
+git add .              # Alles vormerken
+git commit -m "Text"   # Schnappschuss speichern</code></pre>
+  <div class="falle"><b>Falle</b><p>Ein Commit speichert nur, was im Staging liegt. Wenn du <code>git add</code> vergessen hast, fehlt die Datei im Schnappschuss. Mit <code>git status</code> siehst du das sofort.</p></div>
+</section>
+
+<section id="python">
+  <div class="kicker">Modul 1 · Freitag 16.10</div>
+  <h2>Python Grundlagen</h2>
+  <p>Python ist lesbar, schnell zu lernen und hat riesige Bibliotheken für Daten und ML. Darum nutzt der ganze Kurs es.</p>
+
+  <h3>Syntax in drei Regeln</h3>
+  <ul>
+    <li>Blöcke werden durch <b>Einrückung</b> gebildet, nicht durch Klammern.</li>
+    <li>Variablen brauchen keinen Typ (<i>dynamisch typisiert</i>): <code>x = 3.5</code> reicht.</li>
+    <li>Kommentare beginnen mit <code>#</code>.</li>
+  </ul>
+  <pre><code>zahl = 7
+if zahl &gt; 5:
+    print("gross")      # Einrückung = gehört zum if
+else:
+    print("klein")</code></pre>
+
+  <h3>Die vier Behälter</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Typ</th><th>Schreibweise</th><th>Eigenschaft</th></tr>
+    <tr><td>List</td><td><code>[1, 2, 3]</code></td><td>geordnet, veränderbar, Duplikate erlaubt</td></tr>
+    <tr><td>Tuple</td><td><code>(1, 2, 3)</code></td><td>geordnet, <b>nicht</b> veränderbar</td></tr>
+    <tr><td>Dict</td><td><code>{"a": 1}</code></td><td>Zugriff über einen eindeutigen Schlüssel</td></tr>
+    <tr><td>Set</td><td><code>{1, 2, 3}</code></td><td>keine Duplikate, keine feste Reihenfolge</td></tr>
+  </table></div>
+  <figure class="fig"><svg viewBox="0 0 360 218" role="img" aria-label="Vier Behälter im Vergleich: List, Tuple, Dict und Set"><rect class="d-box" x="6" y="6" width="170" height="104" rx="8"/><rect class="d-box" x="184" y="6" width="170" height="104" rx="8"/><rect class="d-box" x="6" y="118" width="170" height="104" rx="8"/><rect class="d-box" x="184" y="118" width="170" height="104" rx="8"/><text class="d-tb" x="91" y="24">List  [ ]</text><rect class="d-hl" x="18" y="40" width="34" height="30" rx="6"/><text class="d-t" x="35.0" y="55.0">1</text><rect class="d-hl" x="56" y="40" width="34" height="30" rx="6"/><text class="d-t" x="73.0" y="55.0">2</text><rect class="d-hl" x="94" y="40" width="34" height="30" rx="6"/><text class="d-t" x="111.0" y="55.0">3</text><rect class="d-hl" x="132" y="40" width="34" height="30" rx="6"/><text class="d-t" x="149.0" y="55.0">2</text><text class="d-m" x="91" y="88">geordnet · veränderbar</text><text class="d-m" x="91" y="101">Duplikate erlaubt</text><text class="d-tb" x="269" y="24">Tuple  ( )</text><rect class="d-hl" x="200" y="40" width="34" height="30" rx="6"/><text class="d-t" x="217.0" y="55.0">1</text><rect class="d-hl" x="238" y="40" width="34" height="30" rx="6"/><text class="d-t" x="255.0" y="55.0">2</text><rect class="d-hl" x="276" y="40" width="34" height="30" rx="6"/><text class="d-t" x="293.0" y="55.0">3</text><rect class="d-warn" x="323" y="54" width="16" height="13" rx="2"/><path class="d-ln" d="M326 54v-4a5 5 0 0 1 10 0v4"/><text class="d-m" x="269" y="88">geordnet · fix</text><text class="d-m" x="269" y="101">nicht veränderbar</text><text class="d-tb" x="91" y="136">Dict  { }</text><rect class="d-warn" x="16" y="148" width="28" height="24" rx="6"/><text class="d-t" x="30.0" y="160.0">a</text><line class="d-arr" x1="46" y1="160" x2="62" y2="160"/><rect class="d-hl" x="64" y="148" width="28" height="24" rx="6"/><text class="d-t" x="78.0" y="160.0">1</text><rect class="d-warn" x="98" y="148" width="28" height="24" rx="6"/><text class="d-t" x="112.0" y="160.0">b</text><line class="d-arr" x1="128" y1="160" x2="144" y2="160"/><rect class="d-hl" x="146" y="148" width="28" height="24" rx="6"/><text class="d-t" x="160.0" y="160.0">2</text><text class="d-m" x="91" y="196">Zugriff über Schlüssel</text><text class="d-m" x="91" y="209">Schlüssel sind eindeutig</text><text class="d-tb" x="269" y="136">Set  { }</text><ellipse class="d-hl" cx="269" cy="165" rx="60" ry="19"/><text class="d-t" x="239" y="161">3</text><text class="d-t" x="269" y="168">1</text><text class="d-t" x="299" y="161">2</text><text class="d-m" x="269" y="196">keine Duplikate</text><text class="d-m" x="269" y="209">keine feste Reihenfolge</text></svg><figcaption>Die vier Behälter auf einen Blick. Orange markiert, was beim Tuple gesperrt ist und was beim Dict der Schlüssel ist.</figcaption></figure>
+
+  <h3>Listen: Index und Slicing</h3>
+  <p>Gezählt wird ab <b>0</b>. Mit <code>[von:bis]</code> schneidest du ein Stück heraus; das Ende ist <i>nicht</i> dabei.</p>
+  <figure class="fig"><svg viewBox="0 0 360 150" role="img" aria-label="Liste mit Indizes von 0 bis 4 und von minus 5 bis minus 1, die Elemente 20 und 30 sind markiert"><text class="d-m" x="90" y="8">von (dabei)</text><text class="d-m" x="210" y="8">bis (nicht dabei)</text><line class="d-ln" x1="90" y1="20" x2="90" y2="52"/><line class="d-ln" x1="210" y1="20" x2="210" y2="52"/><rect class="d-box" x="32" y="54" width="56" height="40" rx="6"/><text class="d-t" x="60.0" y="74.0">10</text><text class="d-m" x="60" y="46">0</text><text class="d-m" x="60" y="110">-5</text><rect class="d-hl" x="92" y="54" width="56" height="40" rx="6"/><text class="d-t" x="120.0" y="74.0">20</text><text class="d-m" x="120" y="46">1</text><text class="d-m" x="120" y="110">-4</text><rect class="d-hl" x="152" y="54" width="56" height="40" rx="6"/><text class="d-t" x="180.0" y="74.0">30</text><text class="d-m" x="180" y="46">2</text><text class="d-m" x="180" y="110">-3</text><rect class="d-box" x="212" y="54" width="56" height="40" rx="6"/><text class="d-t" x="240.0" y="74.0">40</text><text class="d-m" x="240" y="46">3</text><text class="d-m" x="240" y="110">-2</text><rect class="d-box" x="272" y="54" width="56" height="40" rx="6"/><text class="d-t" x="300.0" y="74.0">50</text><text class="d-m" x="300" y="46">4</text><text class="d-m" x="300" y="110">-1</text><path class="d-ln" d="M94 116v8h112v-8"/><text class="d-t" x="150" y="140">l[1:3]  →  [20, 30]</text></svg><figcaption>Oben stehen die Positionen ab 0, unten die Positionen von hinten. <code>l[1:3]</code> nimmt Position 1 und 2, die 3 ist nicht mehr dabei.</figcaption></figure>
+  <pre><code>l = [10, 20, 30, 40, 50]
+l[0]        # 10   (erstes Element)
+l[-1]       # 50   (letztes Element)
+l[1:3]      # [20, 30]   (Index 1 und 2)
+l[::-1]     # [50, 40, 30, 20, 10]   (Schritt -1 = umdrehen)
+l.append(60)        # hinten anhängen
+l.sort()            # sortieren
+"a,b,c".split(",")  # ['a','b','c']  (Text in Liste)
+"-".join(["a","b"]) # 'a-b'          (Liste in Text)</code></pre>
+
+  <h3>Schleifen und Bedingungen</h3>
+  <pre><code>for x in [1, 2, 3]:          # über die Elemente
+    print(x)
+for i in range(len(l)):      # über den Index
+    print(i, l[i])
+
+if x &lt; 0:   print("negativ")
+elif x == 0: print("null")
+else:        print("positiv")</code></pre>
+
+  <h3>Funktionen</h3>
+  <p>Eine Funktion verpackt Code, den du mehrfach brauchst. <code>def</code> definiert sie, <code>return</code> gibt das Ergebnis zurück.</p>
+  <figure class="fig"><svg viewBox="0 0 360 108" role="img" aria-label="Eine Funktion nimmt Parameter entgegen und gibt mit return ein Ergebnis zurück"><rect class="d-box" x="6" y="18" width="100" height="28" rx="6"/><text class="d-t" style="font-size:12px" x="56.0" y="32.0">preis = 100</text><rect class="d-box" x="6" y="58" width="100" height="28" rx="6"/><text class="d-t" style="font-size:12px" x="56.0" y="72.0">satz = 0.081</text><line class="d-arr" x1="108" y1="32" x2="130" y2="44"/><line class="d-arr" x1="108" y1="72" x2="130" y2="60"/><rect class="d-hl" x="134" y="14" width="140" height="76" rx="8"/><text class="d-tb" x="204" y="36" style="font-size:12.5px">preis_mit_mwst()</text><text class="d-t" x="204" y="64" style="font-size:10.5px">return preis*(1+satz)</text><line class="d-arrb" x1="276" y1="52" x2="292" y2="52"/><rect class="d-ok" x="294" y="36" width="58" height="32" rx="6"/><text class="d-t" x="323.0" y="52.0">108.1</text><text class="d-m d-ml" x="6" y="104">Eingabe (Parameter)</text><text class="d-m" x="323" y="84">Ausgabe</text><text class="d-m" x="323" y="97">(return)</text></svg><figcaption>Eine Funktion ist eine Box: Werte rein, Ergebnis raus. Ohne <code>return</code> kommt <code>None</code> zurück.</figcaption></figure>
+  <pre><code>def preis_mit_mwst(preis, satz=0.081):
+    return preis * (1 + satz)
+
+preis_mit_mwst(100)    # 108.1</code></pre>
+
+  <h3>Imports</h3>
+  <pre><code>import numpy                  # ganze Bibliothek
+import pandas as pd           # mit Kurzname (Konvention)
+from sklearn import metrics   # nur ein Teil</code></pre>
+
+  <h3>Die «Funktionalen» Werkzeuge</h3>
+  <p>Das sind die Dinge, die am Anfang verwirren. Eigentlich sind es nur Abkürzungen für Schleifen.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Werkzeug</th><th>Was es tut</th><th>Beispiel</th></tr>
+    <tr><td><code>lambda</code></td><td>Mini-Funktion ohne Namen</td><td><code>lambda x: x * 2</code></td></tr>
+    <tr><td><code>map(f, liste)</code></td><td>wendet <code>f</code> auf jedes Element an</td><td><code>list(map(lambda x: x*2, [1,2,3]))</code> → <code>[2,4,6]</code></td></tr>
+    <tr><td><code>filter(f, liste)</code></td><td>behält Elemente, bei denen <code>f</code> <code>True</code> ergibt</td><td><code>list(filter(lambda x: x&gt;1, [1,2,3]))</code> → <code>[2,3]</code></td></tr>
+    <tr><td><code>zip(a, b)</code></td><td>paart Elemente aus zwei Listen</td><td><code>list(zip([1,2],["a","b"]))</code> → <code>[(1,'a'),(2,'b')]</code></td></tr>
+  </table></div>
+  <figure class="fig"><svg viewBox="0 0 360 224" role="img" aria-label="Drei Werkzeuge: map wendet an, filter behält, zip paart"><rect class="d-box" x="14" y="14" width="28" height="26" rx="6"/><text class="d-t" x="28.0" y="27.0">1</text><rect class="d-box" x="46" y="14" width="28" height="26" rx="6"/><text class="d-t" x="60.0" y="27.0">2</text><rect class="d-box" x="78" y="14" width="28" height="26" rx="6"/><text class="d-t" x="92.0" y="27.0">3</text><line class="d-arrb" x1="116" y1="27" x2="208" y2="27"/><text class="d-m" x="162" y="17">map(× 2)</text><rect class="d-ok" x="214" y="14" width="28" height="26" rx="6"/><text class="d-t" x="228.0" y="27.0">2</text><rect class="d-ok" x="246" y="14" width="28" height="26" rx="6"/><text class="d-t" x="260.0" y="27.0">4</text><rect class="d-ok" x="278" y="14" width="28" height="26" rx="6"/><text class="d-t" x="292.0" y="27.0">6</text><rect class="d-dim" x="14" y="90" width="28" height="26" rx="6"/><text class="d-tm" x="28.0" y="103.0">1</text><rect class="d-box" x="46" y="90" width="28" height="26" rx="6"/><text class="d-t" x="60.0" y="103.0">2</text><rect class="d-box" x="78" y="90" width="28" height="26" rx="6"/><text class="d-t" x="92.0" y="103.0">3</text><line class="d-arrb" x1="116" y1="103" x2="208" y2="103"/><text class="d-m" x="162" y="93">filter(&gt; 1)</text><rect class="d-ok" x="214" y="90" width="28" height="26" rx="6"/><text class="d-t" x="228.0" y="103.0">2</text><rect class="d-ok" x="246" y="90" width="28" height="26" rx="6"/><text class="d-t" x="260.0" y="103.0">3</text><rect class="d-box" x="14" y="162" width="28" height="26" rx="6"/><text class="d-t" x="28.0" y="175.0">1</text><rect class="d-box" x="46" y="162" width="28" height="26" rx="6"/><text class="d-t" x="60.0" y="175.0">2</text><rect class="d-warn" x="14" y="192" width="28" height="26" rx="6"/><text class="d-t" x="28.0" y="205.0">a</text><rect class="d-warn" x="46" y="192" width="28" height="26" rx="6"/><text class="d-t" x="60.0" y="205.0">b</text><line class="d-arrb" x1="116" y1="190" x2="198" y2="190"/><text class="d-m" x="157" y="180">zip(…)</text><rect class="d-ok" x="206" y="177" width="62" height="26" rx="6"/><text class="d-t" x="237.0" y="190.0">(1,a)</text><rect class="d-ok" x="274" y="177" width="62" height="26" rx="6"/><text class="d-t" x="305.0" y="190.0">(2,b)</text></svg><figcaption><code>map</code> verändert jedes Element, <code>filter</code> wirft aus (das gestrichelte Feld fällt weg), <code>zip</code> legt zwei Listen paarweise nebeneinander.</figcaption></figure>
+
+  <h3>Comprehensions: die Schleife in einer Zeile</h3>
+  <pre><code># lang:
+quadrate = []
+for x in range(5):
+    if x % 2 == 0:
+        quadrate.append(x * x)
+
+# kurz (List Comprehension):  [Ausdruck  for x in ...  if Bedingung]
+quadrate = [x * x for x in range(5) if x % 2 == 0]   # [0, 4, 16]
+
+# Dictionary Comprehension
+{x: x * x for x in range(3)}                          # {0:0, 1:1, 2:4}</code></pre>
+    <figure class="fig"><svg viewBox="0 0 360 176" role="img" aria-label="Eine List Comprehension in drei Schritten: Quelle, Filter, Rechnen"><text class="d-m d-ml" x="6" y="24">Quelle</text><text class="d-t d-ml" style="font-size:11px" x="6" y="38">range(5)</text><text class="d-m d-ml" x="6" y="80">Filter</text><text class="d-t d-ml" style="font-size:11px" x="6" y="94">if x % 2 == 0</text><text class="d-m d-ml" x="6" y="136">Rechnen</text><text class="d-t d-ml" style="font-size:11px" x="6" y="150">x * x</text><rect class="d-box" x="96" y="14" width="42" height="28" rx="6"/><text class="d-t" x="117.0" y="28.0">0</text><rect class="d-hl" x="96" y="70" width="42" height="28" rx="6"/><text class="d-t" x="117.0" y="84.0">0</text><line class="d-arr" x1="117" y1="44" x2="117" y2="68"/><line class="d-arr" x1="117" y1="100" x2="117" y2="124"/><rect class="d-ok" x="96" y="126" width="42" height="28" rx="6"/><text class="d-t" x="117.0" y="140.0">0</text><rect class="d-box" x="148" y="14" width="42" height="28" rx="6"/><text class="d-t" x="169.0" y="28.0">1</text><rect class="d-dim" x="148" y="70" width="42" height="28" rx="6"/><text class="d-tm" x="169.0" y="84.0">1</text><line class="d-arr" x1="169" y1="44" x2="169" y2="68"/><rect class="d-box" x="200" y="14" width="42" height="28" rx="6"/><text class="d-t" x="221.0" y="28.0">2</text><rect class="d-hl" x="200" y="70" width="42" height="28" rx="6"/><text class="d-t" x="221.0" y="84.0">2</text><line class="d-arr" x1="221" y1="44" x2="221" y2="68"/><line class="d-arr" x1="221" y1="100" x2="221" y2="124"/><rect class="d-ok" x="200" y="126" width="42" height="28" rx="6"/><text class="d-t" x="221.0" y="140.0">4</text><rect class="d-box" x="252" y="14" width="42" height="28" rx="6"/><text class="d-t" x="273.0" y="28.0">3</text><rect class="d-dim" x="252" y="70" width="42" height="28" rx="6"/><text class="d-tm" x="273.0" y="84.0">3</text><line class="d-arr" x1="273" y1="44" x2="273" y2="68"/><rect class="d-box" x="304" y="14" width="42" height="28" rx="6"/><text class="d-t" x="325.0" y="28.0">4</text><rect class="d-hl" x="304" y="70" width="42" height="28" rx="6"/><text class="d-t" x="325.0" y="84.0">4</text><line class="d-arr" x1="325" y1="44" x2="325" y2="68"/><line class="d-arr" x1="325" y1="100" x2="325" y2="124"/><rect class="d-ok" x="304" y="126" width="42" height="28" rx="6"/><text class="d-t" x="325.0" y="140.0">16</text><text class="d-m" x="223" y="170">Ergebnis: [0, 4, 16]</text></svg><figcaption>Die Comprehension ist ein Fliessband: Zahlen kommen aus <code>range(5)</code>, der Filter lässt nur gerade durch, am Ende wird quadriert.</figcaption></figure>
+  <p>Lesen von hinten nach vorn hilft: «Für jedes x in range(5), falls gerade, nimm x mal x.»</p>
+
+  <h3>Dateien</h3>
+  <pre><code>with open("file.txt", "r") as f:   # r = lesen, w = schreiben, a = anhängen
+    text = f.read()</code></pre>
+  <div class="merk"><b>Merksatz</b><p>Listen sind veränderbar, Tuples nicht. Dicts findest du über Schlüssel, nicht über Positionen. Das brauchst du später ständig, weil ein DataFrame im Kern ein Dict von Spalten ist.</p></div>
+</section>
+
+<section id="pandas">
+  <div class="kicker">Modul 1 · Freitag 16.10 und Samstag 17.10</div>
+  <h2>Pandas: Excel, aber programmierbar</h2>
+  <p>Pandas ist die Bibliothek für Tabellen. Zeilen sind Beobachtungen (ein Kunde, ein Verkauf), Spalten sind Variablen (Alter, Preis). Sie ist das wichtigste Werkzeug zum Aufräumen und Vorbereiten von Daten.</p>
+
+  <h3>Series und DataFrame</h3>
+  <ul>
+    <li><b>Series</b>: eine einzelne Spalte, eindimensional, mit Index (Beschriftung links).</li>
+    <li><b>DataFrame</b>: die ganze Tabelle. Jede Spalte ist eine Series.</li>
+  </ul>
+  <pre><code>import pandas as pd
+
+s  = pd.Series([10, 34, 623, 32])
+df = pd.read_csv("customers.csv")      # Datei laden
+df2 = pd.DataFrame({"name": ["Ana", "Ben"], "alter": [31, 45]})</code></pre>
+
+  <h3>Erst anschauen, dann arbeiten</h3>
+  <pre><code>df.head()       # erste 5 Zeilen
+df.shape        # (Zeilen, Spalten)
+df.info()       # Spalten, Typen, Anzahl nicht-leerer Werte
+df.describe()   # Min, Max, Mittelwert, Quartile
+df.sample(10, random_state=42)   # 10 zufällige Zeilen, reproduzierbar</code></pre>
+  <div class="falle"><b>Falle</b><p><code>head()</code> zeigt oft nur eine Ecke der Daten (z. B. alles aus demselben Quartier). <code>sample()</code> ist ehrlicher.</p></div>
+
+  <h3>Auswählen und filtern</h3>
+  <pre><code>df["alter"]                 # eine Spalte (Series)
+df[["name", "alter"]]       # mehrere Spalten (DataFrame)
+df.loc[0, "name"]           # nach Label: Zeile 0, Spalte "name"
+df.iloc[0, 1]               # nach Position: 1. Zeile, 2. Spalte
+
+maske = df["alter"] &gt; 40    # True/False pro Zeile = "Boolean Mask"
+df[maske]                   # nur die Zeilen mit True
+df_gross = df[df["alter"] &gt; 40].copy()   # .copy() = eigene, unabhängige Tabelle</code></pre>
+  <p><code>loc</code> fragt nach <b>Namen</b>, <code>iloc</code> nach <b>Positionen</b>. Die Maske ist wie ein Sieb: Nur was <code>True</code> hat, geht durch.</p>
+
+  <h3>Neue Spalten, Typen, Sortieren</h3>
+  <pre><code>df["preis_pro_m2"] = df["preis"] / df["flaeche"]     # neue Spalte aus Rechnung
+df["datum"] = pd.to_datetime(df["datum"])            # Text in echtes Datum
+df["monat"] = df["datum"].dt.month                   # Teil eines Datums
+df.sort_values("preis", ascending=False)             # sortieren
+df["stadt"].value_counts()                           # wie oft kommt jeder Wert vor?</code></pre>
+
+  <h3>Fehlende Werte</h3>
+  <pre><code>df.isna().sum()                     # leere Werte pro Spalte
+df.dropna(subset=["preis"])         # Zeilen löschen, wo "preis" fehlt
+df["alter"].fillna(df["alter"].median())   # auffüllen</code></pre>
+  <div class="falle"><b>Falle aus dem NYC-Notebook</b><p>In jeder Spalte fehlen nur etwa 5 Prozent. Aber in <i>verschiedenen</i> Zeilen. Ein pauschales <code>dropna()</code> wirft dadurch rund 43 Prozent aller Zeilen weg. Besser: nur dort löschen, wo die Spalte wirklich nötig ist.</p></div>
+
+  <h3>groupby: Gruppieren und Zusammenfassen</h3>
+  <p>Idee in drei Schritten: <b>aufteilen</b> nach einer Spalte, <b>rechnen</b> pro Gruppe, <b>zusammensetzen</b>.</p>
+  <pre><code>df.groupby("stadt")["preis"].mean()                    # Durchschnitt pro Stadt
+df.groupby("jahr")["preis"].agg(["count", "sum", "mean", "median"])</code></pre>
+  <div class="falle"><b>Falle</b><p><code>df.groupby("jahr").sum()</code> addiert <i>alle</i> Spalten, auch Postleitzahlen. Wähle zuerst die Spalte, die du wirklich meinst.</p></div>
+
+  <h3>merge: Tabellen verbinden</h3>
+  <p>Zwei Tabellen haben eine gemeinsame Spalte (den Schlüssel). Mit <code>pd.merge(a, b, on="schluessel", how=...)</code> führst du sie zusammen. Das Argument <code>how</code> entscheidet, was mit Schlüsseln passiert, die nur in einer Tabelle vorkommen. Probier es aus:</p>
+
+  <div class="demo" id="mergeDemo">
+    <div class="tag">Demo</div><h4>Merge-Arten</h4>
+    <div id="mergeTables"></div>
+    <div class="btnrow" id="mergeBtns" role="group" aria-label="Merge-Art">
+      <button data-how="inner" class="pri">inner</button><button data-how="left">left</button><button data-how="right">right</button><button data-how="outer">outer</button>
+    </div>
+    <p class="hint" id="mergeText"></p>
+    <div class="tablewrap"><table id="mergeResult"></table></div>
+  </div>
+  <div class="tablewrap"><table>
+    <tr><th>how=</th><th>Behält</th><th>Wann nehmen?</th></tr>
+    <tr><td><code>inner</code></td><td>nur Schlüssel aus beiden</td><td>Zeile nützt nur mit beiden Infos</td></tr>
+    <tr><td><code>left</code></td><td>alle aus der linken Tabelle</td><td>Haupttabelle anreichern (am häufigsten)</td></tr>
+    <tr><td><code>right</code></td><td>alle aus der rechten Tabelle</td><td>wie left, nur vertauscht</td></tr>
+    <tr><td><code>outer</code></td><td>alle aus beiden</td><td>alles sehen, z. B. beim Debuggen</td></tr>
+  </table></div>
+  <pre><code>pd.merge(df1, df2, on="property_id", how="inner", validate="one_to_one")
+# indicator=True fügt Spalte _merge hinzu: both / left_only / right_only</code></pre>
+  <p>Nützlich: <code>validate="one_to_one"</code> bricht ab, falls ein Schlüssel doppelt vorkommt. <code>indicator=True</code> zeigt, woher jede Zeile kam.</p>
+
+  <h3>Eigene Kategorien: map und pd.cut</h3>
+  <pre><code>bins   = [-float("inf"), 500, 3500, 10000, float("inf")]
+labels = ["cheap", "normal", "expensive", "super expensive"]
+df["kategorie"] = pd.cut(df["preis_pro_sqft"], bins=bins, labels=labels)</code></pre>
+  <p><code>pd.cut</code> sortiert Zahlen in Fächer. Ergebnis ist eine <i>geordnete</i> Kategorie, Grafiken folgen also der richtigen Reihenfolge.</p>
+
+  <h3>Was man aus der NYC-Analyse lernt</h3>
+  <p>Das Live-Coding war nicht nur Technik, sondern auch Denkschulung. Diese vier Lektionen sind mindestens so wichtig wie die Befehle:</p>
+  <ol>
+    <li><b>Mittelwert gegen Median:</b> In Manhattan lag der Durchschnittspreis bei etwa 15.8 Mio., der Median bei 5.65 Mio. Ein paar Riesendeals ziehen den Mittelwert hoch. Bei schiefen Daten ist der Median das typische «Normal».</li>
+    <li><b>Platzhalter-Nullen:</b> <code>YEAR BUILT = 0</code> heisst «unbekannt», nicht «Jahr null». <code>describe()</code> zeigt das in der Min-Zeile.</li>
+    <li><b>Proxy ist nicht Wahrheit:</b> Verkaufspreis 0 Dollar wurde als «Eltern an Kinder» gedeutet. Das ist eine Annahme, es können auch Scheidung oder Nachlass sein.</li>
+    <li><b>Fairer Vergleich:</b> 2017 «gewann», weil es 8 Monate in den Daten hatte, 2016 nur 4. Pro Monat gerechnet dreht das Bild.</li>
+  </ol>
+  <div class="merk"><b>Merksatz</b><p>Zuerst die Frage, dann die Daten prüfen (<code>info</code>, <code>describe</code>, <code>isna</code>), dann rechnen. Ein sauberer Code mit falscher Annahme liefert trotzdem ein falsches Resultat.</p></div>
+</section>
+
+<section id="viz">
+  <div class="kicker">Modul 1 · Samstag 17.10</div>
+  <h2>Grafiken: Matplotlib und Seaborn</h2>
+  <p>Gute Grafiken beginnen vor dem Code: Zuerst die Frage, dann der Charttyp.</p>
+
+  <div class="demo" id="chartPick">
+    <div class="tag">Demo</div><h4>Welcher Chart passt zu meiner Frage?</h4>
+    <label for="qsel" class="hint" style="display:block">Meine Frage lautet:</label>
+    <select id="qsel" style="max-width:100%">
+      <option value="0">Welche Kategorie ist am grössten?</option>
+      <option value="1">Wie verändert sich etwas über die Zeit?</option>
+      <option value="2">Hängen zwei Zahlen zusammen?</option>
+      <option value="3">Wie verteilen sich die Werte einer Variable?</option>
+      <option value="4">Wie vergleiche ich Verteilungen mehrerer Gruppen?</option>
+      <option value="5">Wie setzt sich ein Ganzes zusammen?</option>
+    </select>
+    <p id="qout" style="margin-top:12px"></p>
+  </div>
+
+  <h3>Matplotlib: Figure und Axes</h3>
+  <p>Eine <b>Figure</b> ist die ganze Leinwand. Darauf liegen eine oder mehrere <b>Axes</b>, das sind die einzelnen Diagramme. Du zeichnest immer auf einer bestimmten Axes. Das ist der «objektorientierte Stil», den der Kurs nutzt.</p>
+  <pre><code>import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(10, 5))       # Leinwand + ein Diagramm
+ax.plot(temps["month"], temps["Luzern"], label="Luzern", marker="o")
+ax.set_title("Temperatur Luzern vs Lugano")   # Titel
+ax.set_xlabel("Monat")
+ax.set_ylabel("Temperatur (°C)")              # Einheit nicht vergessen
+ax.legend()
+ax.spines[["top", "right"]].set_visible(False)   # Rahmen aufräumen
+fig.tight_layout()
+fig.savefig("temp.png", dpi=150)
+plt.show()</code></pre>
+  <p>Mehrere Diagramme: <code>fig, axes = plt.subplots(2, 2)</code> gibt dir ein 2×2-Feld, du zeichnest mit <code>axes[0, 1].bar(...)</code> und so weiter.</p>
+
+  <h3>Typische Befehle pro Charttyp</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Chart</th><th>Matplotlib</th><th>Seaborn</th></tr>
+    <tr><td>Linie</td><td><code>ax.plot(x, y)</code></td><td><code>sns.lineplot(data=df, x=, y=, hue=)</code></td></tr>
+    <tr><td>Balken</td><td><code>ax.bar(x, h)</code> / <code>ax.barh</code></td><td><code>sns.barplot(...)</code></td></tr>
+    <tr><td>Streuung</td><td><code>ax.scatter(x, y)</code></td><td><code>sns.scatterplot(...)</code></td></tr>
+    <tr><td>Histogramm</td><td><code>ax.hist(werte, bins=10)</code></td><td><code>sns.histplot(x=werte, kde=True)</code></td></tr>
+    <tr><td>Boxplot</td><td><code>ax.boxplot(...)</code></td><td><code>sns.boxplot(...)</code></td></tr>
+    <tr><td>Kuchen</td><td><code>ax.pie(werte)</code></td><td>(absichtlich keiner)</td></tr>
+  </table></div>
+
+  <h3>Seaborn: weniger Code, DataFrame direkt</h3>
+  <p>Seaborn baut auf Matplotlib auf. Du gibst den DataFrame und Spaltennamen an, <code>hue="stadt"</code> färbt nach Gruppe und erzeugt die Legende. Alles aus Matplotlib (<code>ax.set_title</code> usw.) funktioniert weiterhin.</p>
+  <p>Seaborn mag <b>lange (tidy) Daten</b>: eine Zeile pro Beobachtung, eine Spalte pro Variable. Breite Tabellen wandelst du mit <code>melt</code> um:</p>
+  <pre><code># breit: month | Luzern | Lugano
+lang = temps.melt(id_vars="month", var_name="city", value_name="temperature")
+# lang:  month | city | temperature      (24 Zeilen statt 12)
+sns.lineplot(data=lang, x="month", y="temperature", hue="city")</code></pre>
+
+  <h3>Wichtigste Gestaltungsregeln</h3>
+  <ul>
+    <li>Der Titel sagt, <b>was</b> man sieht (am besten die Aussage), die Achsen tragen <b>Einheiten</b>.</li>
+    <li>Balken starten bei <b>Null</b>. Eine abgeschnittene Achse lässt 720 gegenüber 290 wie ein Vielfaches wirken.</li>
+    <li>Weniger ist mehr: kein 3D, wenig Gitter, wenige Farben, jede mit einer Aufgabe.</li>
+    <li>Kuchendiagramme nur bei wenigen Teilen. Zum Vergleichen sind <b>Balken</b> besser, weil wir Längen besser vergleichen als Winkel.</li>
+    <li>Rot-Grün vermeiden und Bedeutung nie nur über Farbe zeigen (Linienstil, Marker, Beschriftung).</li>
+    <li>Streudiagramm zeigt: Zusammenhang ist nicht Ursache (<i>Korrelation ≠ Kausalität</i>).</li>
+    <li>Histogramm: die Zahl der <code>bins</code> verändert die Geschichte, probiere mehrere.</li>
+  </ul>
+  <div class="merk"><b>Merksatz</b><p>Erst Frage, dann Chart. Danach Titel, Achsen mit Einheit, Null-Basislinie, aufräumen.</p></div>
+</section>
+
+<section id="hood">
+  <div class="kicker">Modul 1 · Vertiefung</div>
+  <h2>Pandas unter der Haube</h2>
+  <p>Dieses Kapitel erklärt, <i>warum</i> Pandas schnell ist und warum manche Fehlermeldungen auftauchen. Es ist Vertiefung: Wenn du sonst genug zu tun hast, überspringe es zuerst.</p>
+
+  <h3>Eine Spalte ist ein Array im Speicher</h3>
+  <p>Eine numerische Spalte ist ein <b>NumPy-Array</b>: viele Zahlen vom gleichen Typ, direkt hintereinander im Speicher. Eine Python-Liste dagegen enthält nur Verweise (Pointer) auf einzelne Objekte, die irgendwo verstreut liegen.</p>
+  <div class="grid2">
+    <div><h4>Python-Liste</h4><p>Jedes Element ist ein eigenes Objekt (rund 28 Byte pro Zahl). Flexibel, aber langsam und schwer.</p></div>
+    <div><h4>NumPy-Array</h4><p>Rohe Zahlen, ein Typ, lückenlos gepackt (z. B. 8 Byte pro <code>int64</code>). Schnell und kompakt.</p></div>
+  </div>
+  <p>Schnell ist NumPy aus drei Gründen: eine kompilierte C-Schleife statt Python-Schleife, zusammenhängender Speicher mit festem Typ und SIMD (die CPU rechnet mit einem Befehl mehrere Zahlen gleichzeitig). Im Kursbeispiel war <code>x * 2</code> rund 70-mal schneller als die Listen-Schleife (Messung auf einem Rechner, deiner liefert andere Zahlen).</p>
+  <div class="merk"><b>Merksatz</b><p>«Vektorisiert» (<code>x * 2</code>) ist schnell, <code>.apply()</code> und Python-Schleifen sind langsam.</p></div>
+
+  <h3>dtype: der Typ bestimmt die Grösse</h3>
+  <pre><code>a = np.array([1, 2, 3, 4, 5])   # int64: 8 Byte pro Wert = 40 Byte
+a.astype(np.int8)               # 1 Byte pro Wert = 5 Byte, aber nur -128 bis 127!</code></pre>
+
+  <h3>Broadcasting</h3>
+  <p>Arrays mit verschiedener Form werden passend «gestreckt», ohne zu kopieren. Regel: Formen von rechts anlegen, jede Dimension muss gleich oder 1 sein.</p>
+  <pre><code>col = np.array([[0], [10], [20]])   # Form (3, 1)
+row = np.array([1, 2, 3])           # Form (3,)
+col + row   # [[ 1, 2, 3],
+            #  [11,12,13],
+            #  [21,22,23]]</code></pre>
+
+  <h3>View oder Copy?</h3>
+  <p>Ein <b>View</b> ist ein neues Fenster auf dieselben Daten: ändert man den View, ändert sich das Original. Eine <b>Copy</b> hat eigene Daten.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Code</th><th>Ergebnis</th><th>Warum</th></tr>
+    <tr><td><code>a[1:4]</code></td><td>View</td><td>normaler Ausschnitt</td></tr>
+    <tr><td><code>a[::2]</code></td><td>View</td><td>Schrittweite ist auch ein Ausschnitt</td></tr>
+    <tr><td><code>a[[0, 2, 4]]</code></td><td>Copy</td><td>Indexliste, kein einheitlicher Abstand</td></tr>
+    <tr><td><code>a[a &gt; 2]</code></td><td>Copy</td><td>Maske sammelt Werte neu ein</td></tr>
+    <tr><td><code>a.reshape(2, 3)</code></td><td>View</td><td>nur andere Form, gleiche Bytes</td></tr>
+  </table></div>
+  <p>In Pandas 3 gilt <b>Copy-on-Write</b>: Jedes Ergebnis verhält sich wie eine Kopie. Darum ändert verkettetes Zuweisen wie <code>df["preis"][0] = 100</code> das <code>df</code> nicht mehr. Schreibe mit einem einzigen <code>loc</code>:</p>
+  <pre><code>df.loc[0, "preis"] = 100</code></pre>
+
+  <h3>Strings und Arrow</h3>
+  <p>Früher waren Textspalten <code>object</code>: eine Liste von Pointern auf einzelne Python-Strings (langsam, viel Speicher). Pandas 3 speichert Text mit <b>Apache Arrow</b> in drei Blöcken: ein Bitfeld für «fehlt», Positionen, wo jeder Text beginnt, und alle Buchstaben hintereinander. Im Kursbeispiel brauchte das für eine Million Strings 13.5 MB statt 58.3 MB.</p>
+  <p><b>Parquet</b> ist das passende Dateiformat auf der Festplatte: spaltenweise gespeichert, komprimiert, mit Schema. Man liest nur die Spalten, die man braucht.</p>
+</section>
+
+<section id="ml">
+  <div class="kicker">Modul 2 · Supervised Learning, Tag 1</div>
+  <h2>Supervised Learning: Regression</h2>
+  <p>Beim Supervised Learning gibst du dem Modell Beispiele mit bekannter Antwort. Bei der <b>Regression</b> ist die Antwort eine Zahl (z. B. Hauspreis). Das Modell soll lernen, daraus für <i>neue</i> Fälle gut zu raten.</p>
+
+  <h3>1 · Gradient Descent: so «lernt» ein Modell</h3>
+  <p>Stell dir einen Nebel auf einem Berg vor. Du willst ins Tal, siehst aber nur, wie steil der Boden unter deinen Füssen ist. Also gehst du immer ein Stück bergab. Genau das macht der Algorithmus.</p>
+  <pre><code>x_neu = x_alt - lernrate * steigung_bei(x_alt)</code></pre>
+  <p>Die <b>Steigung</b> (Ableitung) sagt dir die Richtung. Die <b>Lernrate</b> bestimmt die Schrittgrösse. Zu klein: du kommst kaum vorwärts. Zu gross: du springst über das Tal hinaus. Hier ist die Funktion <code>y = x²</code>, das Tal liegt bei 0:</p>
+
+  <div class="demo" id="gdDemo">
+    <div class="tag">Demo</div><h4>Gradient Descent auf y = x²</h4>
+    <svg class="plot" id="gdSvg" viewBox="0 0 320 200" role="img" aria-label="Parabel mit Gradient-Descent-Schritten"></svg>
+    <div class="ctl"><label for="gdLr">Lernrate</label><input type="range" id="gdLr" min="0.05" max="1.1" step="0.05" value="0.2"><output id="gdLrO"></output></div>
+    <div class="btnrow"><button class="pri" id="gdStep">1 Schritt</button><button id="gdTen">10 Schritte</button><button id="gdReset">Zurücksetzen</button></div>
+    <div class="stats"><span>Schritt <b id="gdN">0</b></span><span>x = <b id="gdX"></b></span><span>y = <b id="gdY"></b></span></div>
+    <p class="hint" id="gdMsg"></p>
+  </div>
+  <p>Probiere 0.1, 0.5, 1.0 und 1.05. Bei 1.0 springt er nur hin und her, darüber entfernt er sich immer weiter. Bei echten Problemen gibt es zusätzlich viele Täler (lokale Minima). Eine Strategie ist, die Lernrate mit der Zeit zu verkleinern.</p>
+
+  <h3>2 · Lineare Regression: die beste Gerade</h3>
+  <p>Gesucht ist die Gerade <code>y = a·x + b</code>, die möglichst nahe an allen Punkten liegt. Wie nah, misst die <b>Fehlerfunktion</b> (Loss). Die Abweichung eines Punktes von der Geraden heisst <b>Residuum</b>.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Mass</th><th>Bedeutung</th></tr>
+    <tr><td><b>MAE</b></td><td>mittlerer absoluter Fehler: Durchschnitt der Beträge der Residuen</td></tr>
+    <tr><td><b>MSE</b></td><td>mittlerer quadrierter Fehler: bestraft grosse Ausreisser viel stärker (RMSE = Wurzel daraus, wieder in der Einheit von y)</td></tr>
+    <tr><td><b>R²</b></td><td>wie viel Prozent des Fehlers die Regression gegenüber «immer den Mittelwert raten» beseitigt. 0 = nicht besser als Mittelwert, 1 = perfekt</td></tr>
+  </table></div>
+  <div class="demo" id="lrDemo">
+    <div class="tag">Demo</div><h4>Gerade selbst anpassen</h4>
+    <svg class="plot" id="lrSvg" viewBox="0 0 320 220" role="img" aria-label="Punkte mit Regressionsgerade und roten Residuen"></svg>
+    <div class="ctl"><label for="lrA">Steigung</label><input type="range" id="lrA" min="-1" max="2" step="0.05" value="0"><output id="lrAO"></output></div>
+    <div class="ctl"><label for="lrB">Achsenabschnitt</label><input type="range" id="lrB" min="-2" max="8" step="0.1" value="5"><output id="lrBO"></output></div>
+    <div class="btnrow"><button class="pri" id="lrBest">Beste Gerade (Least Squares)</button><button id="lrMean">Nur Mittelwert</button></div>
+    <div class="stats"><span>MAE <b id="lrMae"></b></span><span>MSE <b id="lrMse"></b></span><span>R² <b id="lrR2"></b></span></div>
+    <p class="hint">Die roten Striche sind die Residuen. Wenn du nur den Mittelwert nimmst, ist R² genau 0. Die beste Gerade minimiert den quadrierten Fehler.</p>
+  </div>
+  <p>Gradient Descent ist der Weg, wie ein Computer diese Werte findet: mit zufälligen Koeffizienten starten, Fehler messen, Koeffizienten leicht ändern, wiederholen, bis es nicht mehr besser wird. <b>Mehrere Merkmale</b> sind einfach mehr Koeffizienten. Für Kurven nimmt man <b>polynomiale Regression</b> (x, x², x³ als Merkmale).</p>
+
+  <h3>3 · Daten vorbereiten</h3>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Fehlende Werte</h4>
+  <ul>
+    <li><b>Löschen</b>: einfach, aber du verlierst Daten.</li>
+    <li><b>Auffüllen (Imputation)</b>: Mittelwert/Median (schnell, ignoriert Zusammenhänge), Modus oder Konstante (auch für Kategorien, kann verzerren), k-nächste-Nachbarn (genauer, teuer), Regression oder Interpolation.</li>
+  </ul>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Skalieren</h4>
+  <p>Merkmale haben ganz verschiedene Grössenordnungen (Verbrauch 8 l/100km, Hubraum 3600 cc). Ohne Skalieren dominieren die grossen Zahlen. Darum bringt man alle auf eine vergleichbare Skala.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Methode</th><th>Ergebnis</th></tr>
+    <tr><td>Standard Scaling</td><td>Mittelwert 0, Standardabweichung 1 (Form der Verteilung bleibt)</td></tr>
+    <tr><td>Min-Max Scaling</td><td>Werte zwischen 0 und 1</td></tr>
+    <tr><td>Mean Normalization</td><td>Mittelwert 0, Werte zwischen -1 und 1</td></tr>
+  </table></div>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Kategorien in Zahlen</h4>
+  <p>Wochentage nie einfach als 1, 2, 3 codieren: Das würde «Mittwoch ist grösser als Montag» behaupten. Stattdessen <b>One-Hot-Encoding</b>: pro Kategorie eine Spalte mit 0 oder 1.</p>
+  <pre><code>from sklearn.preprocessing import StandardScaler
+X = pd.DataFrame(StandardScaler().fit_transform(data), columns=data.columns)
+
+data["einkommen_klasse"] = pd.cut(data["MedInc"], bins=[-1, 3, 6, 16],
+                                  labels=["low", "medium", "high"])
+data = pd.get_dummies(data, columns=["einkommen_klasse"])   # One-Hot</code></pre>
+  <div class="falle"><b>Falle (Data Leakage)</b><p>Im Beispiel der Folien wird zur Vereinfachung <i>vor</i> dem Aufteilen skaliert. Sauber ist, den Scaler nur auf den Trainingsdaten zu lernen. Genau dafür gibt es <code>Pipeline</code> (siehe unten). Dazu kommt morgen mehr.</p></div>
+
+  <h3>4 · Train, Validation, Test und Cross-Validation</h3>
+  <p>Ein Modell, das auf seinen Trainingsdaten gut ist, kann trotzdem bei neuen Daten versagen. Wir wollen die Leistung auf <b>ungesehenen</b> Daten kennen (Generalisierung). Deshalb teilen wir die Daten zufällig auf, z. B. 60/20/20:</p>
+  <div class="steps">
+    <div class="st"><b>Training (60 %)</b><span>Modell lernt hier.</span></div>
+    <div class="st"><b>Validation (20 %)</b><span>Modelle und Einstellungen vergleichen.</span></div>
+    <div class="st"><b>Test (20 %)</b><span>Zum Schluss, nur ein einziges Mal.</span></div>
+  </div>
+  <p>Warum nicht gleich den Test benutzen? Weil du die Validation beim Feintunen oft ansiehst und sie dadurch indirekt mitlernt. Der Test ist die Prüfung, die du erst am Schluss schreibst. Danach trainierst du das beste Modell nochmals mit Training und Validation zusammen (mehr Daten helfen).</p>
+  <p><b>Cross-Validation (k-Fold)</b>: Die Daten werden in k gleich grosse Teile geteilt. k-mal trainierst du auf k−1 Teilen und prüfst auf dem übrigen, dann bildest du den Durchschnitt. Das nutzt die Daten besser, kostet aber k-mal mehr Rechenzeit. Varianten: Stratified (gleiche Klassenanteile pro Teil) und Leave-One-Out.</p>
+  <pre><code>from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import cross_val_score
+
+pipe = Pipeline([("scaler", StandardScaler()), ("model", LinearRegression())])
+scores = cross_val_score(pipe, X, y, cv=10)   # 10 Folds
+scores.mean(), scores.std()</code></pre>
+  <div class="merk"><b>Merksatz</b><p>Pipeline = Schritte (Skalieren, Modell) werden zusammen behandelt, bei jedem Fold nur mit dessen Trainingsteil gelernt. Das verhindert Leakage und macht den Code sauber.</p></div>
+
+  <h3>5 · Feature Selection</h3>
+  <p>Mehr Merkmale sind nicht automatisch besser. Mit vielen Dimensionen werden Daten «dünn» und Modelle schwerer zu trainieren (<i>Curse of Dimensionality</i>). Überflüssige Merkmale erhöhen das Risiko von Overfitting und machen das Modell schwer erklärbar.</p>
+  <ul>
+    <li><b>Filter</b>: Merkmale nach Statistik oder Korrelation bewerten (z. B. <code>X.corr()</code>).</li>
+    <li><b>Wrapper</b>: Mit einem Modell verschiedene Merkmalmengen ausprobieren.</li>
+    <li><b>Embedded</b>: Die Auswahl steckt im Modell (Lasso, siehe unten).</li>
+  </ul>
+  <pre><code>import seaborn as sns
+sns.heatmap(data.corr(), annot=True, cmap="Reds")</code></pre>
+  <div class="falle"><b>Falle</b><p>Korrelation ist keine Ursache. Der Folienwitz mit Piraten und Erderwärmung zeigt es: Zwei Dinge können zusammen laufen, ohne dass das eine das andere verursacht.</p></div>
+
+  <h3>6 · Bias und Variance: Under- und Overfitting</h3>
+  <ul>
+    <li><b>Underfitting (hoher Bias)</b>: Das Modell ist zu einfach, es verpasst das Muster. Schlecht auf Training <i>und</i> Test.</li>
+    <li><b>Overfitting (hohe Variance)</b>: Das Modell lernt auch das Rauschen auswendig. Sehr gut auf Training, schlecht auf Test.</li>
+  </ul>
+  <p>Komplexere Modelle haben weniger Bias, aber mehr Variance. Gesucht ist der Mittelweg. Hier ein Polynom verschiedenen Grades, das Punkte einer Sinuskurve mit Rauschen anpasst:</p>
+
+  <div class="demo" id="bvDemo">
+    <div class="tag">Demo</div><h4>Modellkomplexität: Polynomgrad</h4>
+    <svg class="plot" id="bvSvg" viewBox="0 0 320 220" role="img" aria-label="Datenpunkte, wahre Kurve und angepasstes Polynom"></svg>
+    <div class="ctl"><label for="bvDeg">Grad</label><input type="range" id="bvDeg" min="1" max="9" step="1" value="1"><output id="bvDegO"></output></div>
+    <div class="stats"><span>Trainingsfehler <b id="bvTr"></b></span><span>Testfehler <b id="bvTe"></b></span></div>
+    <p class="hint" id="bvMsg"></p>
+    <svg class="plot" id="bvErr" viewBox="0 0 320 150" role="img" aria-label="Trainings- und Testfehler je Polynomgrad" style="margin-top:12px"></svg>
+    <p class="hint">Blau: Trainingsfehler. Orange: Testfehler (60 neue Punkte, die das Modell nie sah). Der Trainingsfehler sinkt immer weiter, der Testfehler hat sein Minimum in der Mitte. Der senkrechte Strich zeigt den gewählten Grad.</p>
+  </div>
+  <div class="tablewrap"><table>
+    <tr><th>Diagnose</th><th>Training</th><th>Test</th><th>Gegenmittel</th></tr>
+    <tr><td>Underfitting</td><td>schlecht</td><td>schlecht (ähnlich)</td><td>mehr Merkmale, höherer Grad</td></tr>
+    <tr><td>Overfitting</td><td>sehr gut</td><td>deutlich schlechter</td><td>weniger Merkmale, Regularisierung, mehr Daten</td></tr>
+  </table></div>
+
+  <h3>7 · Regularisierung</h3>
+  <p>Regularisierung bremst Overfitting: Zur Fehlerfunktion kommt eine <b>Strafe für grosse Koeffizienten</b>. Die Stärke regelt ein Parameter (<code>alpha</code> bzw. λ). Grosse Koeffizienten sind das typische Zeichen eines Modells, das dem Rauschen nachrennt.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Methode</th><th>Strafe</th><th>Wirkung</th></tr>
+    <tr><td><b>Ridge</b> (L2)</td><td>Summe der quadrierten Koeffizienten</td><td>macht alle Koeffizienten kleiner; gut bei vielen korrelierten Merkmalen</td></tr>
+    <tr><td><b>Lasso</b> (L1)</td><td>Summe der Beträge der Koeffizienten</td><td>setzt unwichtige Koeffizienten auf <b>exakt 0</b> (automatische Feature Selection)</td></tr>
+    <tr><td><b>ElasticNet</b></td><td>L1 und L2 gemischt</td><td>Kompromiss, robuster als jedes allein</td></tr>
+  </table></div>
+  <div class="merk"><b>Merksatz</b><p>Ridge schrumpft, Lasso streicht. Je grösser alpha, desto stärker die Bremse (bei sehr grossem alpha droht Underfitting).</p></div>
+
+  <h3>8 · Hyperparameter und Modellwahl</h3>
+  <p><b>Parameter</b> lernt das Modell selbst (die Koeffizienten). <b>Hyperparameter</b> stellst du vorher ein (Lernrate, alpha, Polynomgrad). Gute Werte findest du durch Suchen, jeweils mit Cross-Validation:</p>
+  <ul>
+    <li><b>Grid Search</b>: alle Kombinationen aus deiner Liste durchprobieren (gründlich, aber langsam).</li>
+    <li><b>Random Search</b>: zufällige Auswahl der Kombinationen (oft fast so gut, viel schneller).</li>
+  </ul>
+  <pre><code>from sklearn.linear_model import Lasso
+from sklearn.model_selection import GridSearchCV
+
+pipe = Pipeline([("scaler", StandardScaler()), ("lasso", Lasso())])
+grid = {"lasso__alpha": [0.1, 1, 10], "lasso__max_iter": [100, 1000, 10000]}
+search = GridSearchCV(pipe, grid, cv=5, n_jobs=-1)
+search.fit(X_trainval, y_trainval)
+search.best_params_, search.best_estimator_</code></pre>
+  <p>Der Name vor dem doppelten Unterstrich (<code>lasso__alpha</code>) ist der Name des Schritts in der Pipeline.</p>
+
+  <h3>Der ganze Ablauf auf einen Blick</h3>
+  <ol>
+    <li>Daten laden, Zielgrösse <code>y</code> von den Merkmalen <code>X</code> trennen.</li>
+    <li>Test-Set beiseite legen und nicht mehr anfassen.</li>
+    <li>Pipeline bauen (Skalieren, ggf. Features, Modell).</li>
+    <li>Mit Cross-Validation und Grid/Random Search Modelle und Hyperparameter vergleichen.</li>
+    <li>Bestes Modell auf allen Trainingsdaten neu trainieren.</li>
+    <li>Einmal auf dem Test-Set bewerten (MSE, MAE, R²) und fertig.</li>
+  </ol>
+</section>
+
+<section id="ueben">
+  <div class="kicker">Selbst coden</div>
+  <h2>Üben: Python hier, Pandas im Notebook</h2>
+  <p>Lesen reicht nicht, du musst selber tippen. Es gibt zwei Wege, und sie ergänzen sich.</p>
+  <div class="grid2">
+    <div><h4>Hier auf der Seite</h4><p>9 Aufgaben zu den Python-Grundlagen. Code ändern, «Ausführen» drücken, mit «Prüfen» kontrollieren. Läuft im Browser, auch am iPhone, aber ohne Pandas.</p></div>
+    <div><h4>Im Notebook</h4><p><code>Python_Pandas_Uebungen_own.ipynb</code> (12 Aufgaben) und <code>Supervised_Learning_1_Uebungen_own.ipynb</code> (10 Aufgaben) mit echtem Pandas und scikit-learn. Alle Daten entstehen im Notebook, du brauchst keine Dateien.</p></div>
+  </div>
+  <div class="merk"><b>Notebooks starten (Windows)</b><p>Die beiden Dateien liegen im Repo unter <code>lernapp/notebooks/</code>, getrennt von den Kursunterlagen. Öffne sie in VS Code mit deiner Python-Umgebung aus dem Kurs. Es braucht <code>pandas</code>, <code>numpy</code>, <code>matplotlib</code>, <code>scikit-learn</code>. Führe die Zellen von oben nach unten aus, ersetze <code>...</code> und lasse die Prüfzelle laufen. Die Lösung steht darunter, aufklappbar.</p></div>
+
+  <h3>Python-Aufgaben</h3>
+  <p class="hint" style="color:var(--muted);font-size:14px">Beim ersten Ausführen lädt die Seite einmalig den Python-Interpreter (Skulpt, rund 1 MB). Er versteht die Grundlagen aus diesem Kurs, aber nicht jede neue Python-Funktion.</p>
+  <div id="exList"></div>
+
+  <div class="demo">
+    <div class="tag">Spielwiese</div><h4>Freies Feld</h4>
+    <p class="hint">Probiere alles aus, was du im Kapitel Python gesehen hast.</p>
+    <label for="freeCode" class="hint" style="display:block">Python-Code</label>
+    <textarea id="freeCode" class="code" rows="8" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off">fruechte = ["Apfel", "Birne", "Kirsche"]
+for i, f in enumerate(fruechte):
+    print(i, f.upper())
+print([len(f) for f in fruechte])</textarea>
+    <div class="btnrow"><button class="pri" id="freeRun">Ausführen</button></div>
+    <pre id="freeOut" hidden></pre>
+  </div>
+</section>
+
+<section id="test">
+  <div class="kicker">Zum Prüfen</div>
+  <h2>Selbsttest</h2>
+  <p>Antworte zuerst im Kopf, dann klappe auf.</p>
+  <details class="q"><summary>Was ist der Unterschied zwischen <code>loc</code> und <code>iloc</code>?</summary><div class="a"><code>loc</code> wählt nach Labels (Index- und Spaltennamen), <code>iloc</code> nach Positionen (0, 1, 2 …).</div></details>
+  <details class="q"><summary>Du verbindest zwei Tabellen und willst keine Zeile der Haupttabelle verlieren. Welches <code>how</code>?</summary><div class="a"><code>left</code>, mit der Haupttabelle links. Fehlende Partner werden NaN.</div></details>
+  <details class="q"><summary>Warum ist der Median bei Hauspreisen oft besser als der Mittelwert?</summary><div class="a">Ein paar sehr teure Objekte ziehen den Mittelwert nach oben. Der Median ist unempfindlich gegen Ausreisser.</div></details>
+  <details class="q"><summary>Warum gibt <code>df.groupby("jahr").sum()</code> oft Unsinn?</summary><div class="a">Es summiert alle Spalten, auch sinnlose wie Postleitzahlen. Wähle vorher die gewünschte Spalte: <code>df.groupby("jahr")["preis"].sum()</code>.</div></details>
+  <details class="q"><summary>Wann ist ein Kuchendiagramm keine gute Wahl?</summary><div class="a">Bei vielen Teilen oder wenn man genau vergleichen oder ranken will. Längen (Balken) lesen wir besser als Winkel.</div></details>
+  <details class="q"><summary>Warum ist <code>x * 2</code> auf einem NumPy-Array so viel schneller als eine Python-Schleife?</summary><div class="a">Kompilierte Schleife, zusammenhängender Speicher mit festem Typ und SIMD. Es gibt keine Objekte und keine Typprüfung pro Element.</div></details>
+  <details class="q"><summary>Ist <code>a[[0, 2, 4]]</code> ein View oder eine Copy?</summary><div class="a">Eine Copy, weil eine Indexliste keinen einheitlichen Abstand beschreibt. <code>a[::2]</code> dagegen ist ein View.</div></details>
+  <details class="q"><summary>Dein Modell hat Trainingsfehler 1 und Testfehler 20. Was ist los und was tust du?</summary><div class="a">Overfitting. Weniger oder einfachere Merkmale, Regularisierung (Ridge/Lasso), mehr Daten.</div></details>
+  <details class="q"><summary>Warum braucht man neben dem Test-Set auch ein Validation-Set?</summary><div class="a">Die Validation wird beim Feintunen mehrfach benutzt und lernt indirekt mit. Das Test-Set bleibt ungesehen und gibt am Schluss die ehrliche Schätzung.</div></details>
+  <details class="q"><summary>Wann nimmst du Lasso statt Ridge?</summary><div class="a">Wenn du viele Merkmale hast und vermutest, dass einige unwichtig sind: Lasso setzt deren Koeffizienten auf exakt 0.</div></details>
+  <details class="q"><summary>Wozu dient <code>Pipeline</code>?</summary><div class="a">Sie verkettet Schritte wie Skalieren und Modell. In der Cross-Validation wird so jeder Schritt nur mit den Trainingsdaten des jeweiligen Folds gelernt, das verhindert Leakage.</div></details>
+  <details class="q"><summary>Was ist der Unterschied zwischen Grid und Random Search?</summary><div class="a">Grid probiert alle Kombinationen, Random eine zufällige Auswahl. Random ist oft ähnlich gut und deutlich schneller.</div></details>
+
+  <footer>
+    Grundlage: Folien und Notebooks aus dem Kurs-Repository (Dr. D. Mousadakos, Dr. M. Rowan). Zahlenbeispiele stammen aus diesen Unterlagen. Supervised Learning Tag 2 (Klassifikation) ist hier noch nicht enthalten.
+  </footer>
+</div>
+
+<script>
+//--MATH-START
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gauss(r){let u=0,v=0;while(u===0)u=r();while(v===0)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function solve(A,b){const n=b.length;const M=A.map((r,i)=>r.concat([b[i]]));
+  for(let i=0;i<n;i++){let p=i;for(let r=i+1;r<n;r++)if(Math.abs(M[r][i])>Math.abs(M[p][i]))p=r;[M[i],M[p]]=[M[p],M[i]];
+    for(let r=i+1;r<n;r++){const f=M[r][i]/M[i][i];for(let c=i;c<=n;c++)M[r][c]-=f*M[i][c]}}
+  const x=new Array(n).fill(0);for(let i=n-1;i>=0;i--){let s=M[i][n];for(let c=i+1;c<n;c++)s-=M[i][c]*x[c];x[i]=s/M[i][i]}return x}
+function polyFit(xs,ys,deg){const n=deg+1;const A=[],b=[];
+  for(let i=0;i<n;i++){A.push([]);let sb=0;for(let j=0;j<n;j++){let s=0;for(const x of xs)s+=Math.pow(x,i+j);A[i].push(s+(i===j?1e-9:0))}
+    for(let k=0;k<xs.length;k++)sb+=ys[k]*Math.pow(xs[k],i);b.push(sb)}
+  return solve(A,b)}
+function polyEval(c,x){let s=0;for(let i=0;i<c.length;i++)s+=c[i]*Math.pow(x,i);return s}
+function mse(c,xs,ys){let s=0;for(let i=0;i<xs.length;i++){const d=polyEval(c,xs[i])-ys[i];s+=d*d}return s/xs.length}
+function lineFit(xs,ys){const n=xs.length;const mx=xs.reduce((a,b)=>a+b)/n,my=ys.reduce((a,b)=>a+b)/n;
+  let sxy=0,sxx=0;for(let i=0;i<n;i++){sxy+=(xs[i]-mx)*(ys[i]-my);sxx+=(xs[i]-mx)**2}const a=sxy/sxx;return{a:a,b:my-a*mx,my:my}}
+function mergeRows(how){const L=[["A","SOHO"],["B","HARLEM"],["C","BUSHWICK"],["D","ASTORIA"]];const R=[["C",850000],["D",1200000],["E",640000],["F",2300000]];
+  const keys=[];const lk=L.map(r=>r[0]),rk=R.map(r=>r[0]);
+  const all=how==="inner"?lk.filter(k=>rk.includes(k)):how==="left"?lk:how==="right"?rk:Array.from(new Set(lk.concat(rk))).sort();
+  return all.map(k=>{const l=L.find(r=>r[0]===k),r=R.find(r=>r[0]===k);return{key:k,hood:l?l[1]:null,price:r?r[1]:null,src:l&&r?"both":l?"left_only":"right_only"}})}
+//--MATH-END
+
+const $=id=>document.getElementById(id);
+const fmt=(v,d)=>Number(v).toFixed(d);
+
+/* Kapitel-Leiste: aktives Kapitel markieren */
+(function(){const links=[...document.querySelectorAll('#chips a')];const secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+  function upd(){let cur=0;const y=window.scrollY+120;secs.forEach((s,i)=>{if(s&&s.offsetTop<=y)cur=i});
+    links.forEach((a,i)=>a.classList.toggle('on',i===cur));
+    const on=links[cur];if(on&&on.scrollIntoView){const c=$('chips');const r=on.getBoundingClientRect(),cr=c.getBoundingClientRect();
+      if(r.left<cr.left||r.right>cr.right)c.scrollLeft+=r.left-cr.left-16}}
+  window.addEventListener('scroll',upd,{passive:true});upd()})();
+
+/* Merge-Demo */
+(function(){
+  $('mergeTables').innerHTML='<div class="grid2"><div><h4>buildings (links)</h4><div class="tablewrap"><table style="min-width:0"><tr><th>property_id</th><th>NEIGHBORHOOD</th></tr><tr><td>A</td><td>SOHO</td></tr><tr><td>B</td><td>HARLEM</td></tr><tr><td>C</td><td>BUSHWICK</td></tr><tr><td>D</td><td>ASTORIA</td></tr></table></div></div><div><h4>sales (rechts)</h4><div class="tablewrap"><table style="min-width:0"><tr><th>property_id</th><th>SALE PRICE</th></tr><tr><td>C</td><td class="num">850&#8217;000</td></tr><tr><td>D</td><td class="num">1&#8217;200&#8217;000</td></tr><tr><td>E</td><td class="num">640&#8217;000</td></tr><tr><td>F</td><td class="num">2&#8217;300&#8217;000</td></tr></table></div></div></div>';
+  const txt={inner:'Nur C und D sind in beiden Tabellen. Alles andere fällt weg (4 Zeilen auf 2).',
+    left:'Alle Zeilen der linken Tabelle bleiben. A und B haben keinen Preis (NaN). E und F fallen weg.',
+    right:'Alle Zeilen der rechten Tabelle bleiben. E und F haben keinen Stadtteil (NaN). A und B fallen weg.',
+    outer:'Alles bleibt, was fehlt, wird NaN. Gut, um Lücken zu finden.'};
+  const cls={both:'b',left_only:'l',right_only:'r'};
+  function show(how){const rows=mergeRows(how);
+    $('mergeText').textContent="how='"+how+"': "+rows.length+" Zeilen. "+txt[how]+" Farbe: grün = in beiden, blau = nur links, orange = nur rechts.";
+    $('mergeResult').innerHTML='<tr><th>property_id</th><th>NEIGHBORHOOD</th><th>SALE PRICE</th><th>_merge</th></tr>'+
+      rows.map(r=>{const c=cls[r.src];return '<tr><td class="'+c+'">'+r.key+'</td><td class="'+c+'">'+(r.hood===null?'NaN':r.hood)+'</td><td class="'+c+' num">'+(r.price===null?'NaN':r.price.toLocaleString('de-CH'))+'</td><td class="'+c+'">'+r.src+'</td></tr>'}).join('');
+    document.querySelectorAll('#mergeBtns button').forEach(b=>b.classList.toggle('pri',b.dataset.how===how))}
+  document.querySelectorAll('#mergeBtns button').forEach(b=>b.addEventListener('click',()=>show(b.dataset.how)));show('inner')})();
+
+/* Chart-Auswahl */
+(function(){
+  const out=[
+    ['Balkendiagramm','Sortiere die Balken und starte bei Null. Bei langen Beschriftungen waagrecht (barh).'],
+    ['Liniendiagramm','Die x-Achse hat eine natürliche Reihenfolge, meist Zeit. Höchstens 4 bis 5 Linien, mit eigenem Marker oder Linienstil.'],
+    ['Streudiagramm (Scatter)','Ein Punkt pro Beobachtung. Achte auf Richtung, Stärke und Ausreisser. Dritte Variable über Farbe oder Grösse. Zusammenhang ist keine Ursache.'],
+    ['Histogramm','Zeigt, wie oft welcher Wertebereich vorkommt. Probiere verschiedene bins, sie verändern das Bild.'],
+    ['Boxplot','Linie = Median, Box = mittlere 50 Prozent, Striche = Spannweite, Punkte = Ausreisser. Ideal zum Vergleichen von Gruppen.'],
+    ['Gestapelter Balken oder Kuchen','Nur wenn die Teile wirklich ein Ganzes ergeben und es wenige sind (höchstens 5 Kuchenstücke). Zum genauen Vergleichen lieber Balken.']];
+  function upd(){const o=out[+$('qsel').value];$('qout').innerHTML='Nimm ein <b>'+o[0]+'</b>. '+o[1]}
+  $('qsel').addEventListener('change',upd);upd()})();
+
+/* Gradient Descent */
+(function(){
+  const W=320,H=200,X0=-5,X1=5,Y1=26;const sx=x=>(x-X0)/(X1-X0)*W,sy=y=>H-14-(y/Y1)*(H-26);
+  let x,path,n;
+  function reset(){x=-4;path=[x];n=0;draw()}
+  function step(){const lr=+$('gdLr').value;x=x-lr*2*x;n++;path.push(x);if(path.length>60)path.shift();draw()}
+  function draw(){const lr=+$('gdLr').value;$('gdLrO').textContent=fmt(lr,2);
+    let curve='';for(let i=0;i<=100;i++){const xv=X0+i*(X1-X0)/100;curve+=(i?'L':'M')+sx(xv).toFixed(1)+' '+sy(xv*xv).toFixed(1)}
+    let s='<line class="ax" x1="0" y1="'+(H-14)+'" x2="'+W+'" y2="'+(H-14)+'"/><line class="ax" x1="'+sx(0)+'" y1="0" x2="'+sx(0)+'" y2="'+H+'"/>';
+    s+='<text class="lbl" x="'+(sx(0)+4)+'" y="'+(H-3)+'">Tal bei x=0</text><path class="ln" d="'+curve+'"/>';
+    const vis=path.filter(p=>Math.abs(p)<=5);
+    for(let i=1;i<vis.length;i++)s+='<line class="dash" x1="'+sx(vis[i-1])+'" y1="'+sy(vis[i-1]**2)+'" x2="'+sx(vis[i])+'" y2="'+sy(vis[i]**2)+'"/>';
+    vis.forEach((p,i)=>{const last=(p===x&&i===vis.length-1);s+='<circle cx="'+sx(p)+'" cy="'+sy(p*p)+'" r="'+(last?6:3.5)+'" style="fill:'+(last?'var(--warn)':'var(--fg)')+'"/>'});
+    $('gdSvg').innerHTML=s;$('gdN').textContent=n;
+    const out=Math.abs(x)>5;$('gdX').textContent=out?(Math.abs(x)>1e4?'sehr gross':fmt(x,2)):fmt(x,3);$('gdY').textContent=Math.abs(x)>1e2?'riesig':fmt(x*x,3);
+    let m;if(n===0)m='Start bei x = -4. Orange ist die aktuelle Position.';
+    else if(Math.abs(x)>5)m='Der Punkt ist über den Rand hinaus gesprungen: Die Lernrate ist zu gross, die Werte wachsen immer weiter (Divergenz).';
+    else if(lr>=0.95&&lr<=1.05)m='Bei Lernrate 1 springt der Punkt immer zwischen -x und +x, ohne anzukommen.';
+    else if(Math.abs(x)<0.01)m='Angekommen: x ist praktisch 0, das Minimum ist gefunden (Konvergenz).';
+    else m='Jeder Schritt bringt dich näher ans Tal. Bei kleiner Lernrate dauert es länger.';
+    $('gdMsg').textContent=m}
+  $('gdStep').addEventListener('click',step);$('gdTen').addEventListener('click',()=>{for(let i=0;i<10;i++)step()});
+  $('gdReset').addEventListener('click',reset);$('gdLr').addEventListener('input',reset);reset()})();
+
+/* Lineare Regression */
+(function(){
+  const xs=[1,2,3,4,5,6,7,8],ys=[2.1,2.9,4.6,4.8,6.6,6.4,8.3,8.9];
+  const W=320,H=220,PX=28,PY=18;const sx=x=>PX+(x/9)*(W-PX-10),sy=y=>H-PY-(y/10)*(H-PY-10);
+  const best=lineFit(xs,ys);const n=xs.length;
+  function draw(){const a=+$('lrA').value,b=+$('lrB').value;$('lrAO').textContent=fmt(a,2);$('lrBO').textContent=fmt(b,1);
+    let s='<line class="ax" x1="'+PX+'" y1="'+(H-PY)+'" x2="'+(W-10)+'" y2="'+(H-PY)+'"/><line class="ax" x1="'+PX+'" y1="10" x2="'+PX+'" y2="'+(H-PY)+'"/>';
+    for(let t=0;t<=10;t+=5)s+='<text class="lbl" x="4" y="'+(sy(t)+3)+'">'+t+'</text>';
+    for(let t=0;t<=8;t+=4)s+='<text class="lbl" x="'+(sx(t)-3)+'" y="'+(H-4)+'">'+t+'</text>';
+    let sse=0,sae=0,sst=0;
+    for(let i=0;i<n;i++){const p=a*xs[i]+b,r=ys[i]-p;sse+=r*r;sae+=Math.abs(r);sst+=(ys[i]-best.my)**2;
+      s+='<line class="res" x1="'+sx(xs[i])+'" y1="'+sy(ys[i])+'" x2="'+sx(xs[i])+'" y2="'+sy(p)+'"/>'}
+    s+='<line class="ln" x1="'+sx(0)+'" y1="'+sy(b)+'" x2="'+sx(9)+'" y2="'+sy(a*9+b)+'"/>';
+    for(let i=0;i<n;i++)s+='<circle class="pt" cx="'+sx(xs[i])+'" cy="'+sy(ys[i])+'" r="4"/>';
+    $('lrSvg').innerHTML=s;$('lrMae').textContent=fmt(sae/n,2);$('lrMse').textContent=fmt(sse/n,2);$('lrR2').textContent=fmt(1-sse/sst,2)}
+  function set(a,b){$('lrA').value=Math.max(-1,Math.min(2,a));$('lrB').value=Math.max(-2,Math.min(8,b));draw()}
+  $('lrA').addEventListener('input',draw);$('lrB').addEventListener('input',draw);
+  $('lrBest').addEventListener('click',()=>set(Math.round(best.a*20)/20,Math.round(best.b*10)/10));
+  $('lrMean').addEventListener('click',()=>set(0,Math.round(best.my*10)/10));draw()})();
+
+/* Bias / Variance */
+(function(){
+  const r=mulberry32(4);const f=x=>Math.sin(2*Math.PI*x);
+  const tx=[],ty=[];for(let i=0;i<10;i++){const x=i/9;tx.push(x*2-1);ty.push(f(x)+0.3*gauss(r))}
+  const ex=[],ey=[];for(let i=0;i<60;i++){const x=r();ex.push(x*2-1);ey.push(f(x)+0.3*gauss(r))}
+  const coefs=[],tr=[],te=[];for(let d=1;d<=9;d++){const c=polyFit(tx,ty,d);coefs.push(c);tr.push(mse(c,tx,ty));te.push(mse(c,ex,ey))}
+  const W=320,H=220,YMIN=-2,YMAX=2;const sx=x=>8+((x+1)/2)*(W-16),sy=y=>H-8-((Math.max(YMIN,Math.min(YMAX,y))-YMIN)/(YMAX-YMIN))*(H-16);
+  function draw(){const d=+$('bvDeg').value;$('bvDegO').textContent=d;const c=coefs[d-1];
+    let s='<line class="ax" x1="0" y1="'+sy(0)+'" x2="'+W+'" y2="'+sy(0)+'"/>';
+    let tp='',cp='';for(let i=0;i<=100;i++){const x=-1+i*0.02,xo=(x+1)/2;tp+=(i?'L':'M')+sx(x).toFixed(1)+' '+sy(f(xo)).toFixed(1);cp+=(i?'L':'M')+sx(x).toFixed(1)+' '+sy(polyEval(c,x)).toFixed(1)}
+    s+='<path class="dash" d="'+tp+'"/><path class="ln" d="'+cp+'"/>';
+    for(let i=0;i<tx.length;i++)s+='<circle class="pt" cx="'+sx(tx[i])+'" cy="'+sy(ty[i])+'" r="4"/>';
+    $('bvSvg').innerHTML=s;$('bvTr').textContent=fmt(tr[d-1],3);$('bvTe').textContent=fmt(te[d-1],3);
+    const minTe=Math.min.apply(null,te),bestD=te.indexOf(minTe)+1;let m;
+    if(d<bestD&&te[d-1]>2*minTe)m='Zu einfach: Die Kurve verpasst das Muster. Beide Fehler sind hoch (Underfitting, hoher Bias).';
+    else if(d>bestD&&te[d-1]>1.5*minTe)m='Zu komplex: Die Kurve folgt dem Rauschen der 10 Punkte. Trainingsfehler tief, Testfehler deutlich höher (Overfitting, hohe Variance).';
+    else m='Guter Bereich: Die Kurve fängt das Muster, ohne dem Rauschen nachzulaufen.';
+    $('bvMsg').textContent=m+' Gestrichelt: die wahre Sinuskurve (sieht das Modell nicht).';
+    const EW=320,EH=150,EM=Math.max.apply(null,te.concat(tr).filter(v=>v<1.0).concat([0.5])),ex2=i=>30+(i/8)*(EW-45),ey2=v=>EH-22-(Math.min(v,EM)/EM)*(EH-36);
+    let g='<line class="ax" x1="30" y1="'+(EH-22)+'" x2="'+(EW-10)+'" y2="'+(EH-22)+'"/>';
+    for(let k=1;k<=9;k++)g+='<text class="lbl" x="'+(ex2(k-1)-3)+'" y="'+(EH-8)+'">'+k+'</text>';
+    g+='<text class="lbl" x="30" y="10">Fehler (MSE), oben abgeschnitten bei '+fmt(EM,2)+'</text>';
+    const path=a=>a.map((v,i)=>(i?'L':'M')+ex2(i).toFixed(1)+' '+ey2(v).toFixed(1)).join('');
+    g+='<path class="ln" d="'+path(tr)+'"/><path class="ln2" d="'+path(te)+'"/>';
+    g+='<line class="dash" x1="'+ex2(d-1)+'" y1="14" x2="'+ex2(d-1)+'" y2="'+(EH-22)+'"/>';
+    $('bvErr').innerHTML=g}
+  $('bvDeg').addEventListener('input',draw);draw()})();
+
+/* Python-Übungen: Skulpt wird erst beim ersten Ausführen geladen */
+(function(){
+  const BASE='https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/';
+  let skPromise=null;
+  function loadScript(src){return new Promise((ok,bad)=>{const s=document.createElement('script');s.src=src;s.onload=ok;
+    s.onerror=()=>bad(new Error('Der Python-Interpreter konnte nicht geladen werden. Prüfe die Internetverbindung und versuche es nochmals.'));document.head.appendChild(s)})}
+  function loadSk(){if(!skPromise){skPromise=loadScript(BASE+'skulpt.min.js').then(()=>loadScript(BASE+'skulpt-stdlib.js'));skPromise.catch(()=>{skPromise=null})}return skPromise}
+  function builtinRead(x){if(Sk.builtinFiles===undefined||Sk.builtinFiles['files'][x]===undefined)throw "File not found: '"+x+"'";return Sk.builtinFiles['files'][x]}
+  function formatErr(err,userLines){
+    let m=String(err&&err.toString?err.toString():err);
+    m=m.replace(/^AssertionError:\s*/,'');
+    m=m.replace(/\s+on line (\d+)(\s+of\s+\S+)?\.?$/,(all,n)=>Number(n)<=userLines?' (Zeile '+n+')':'');
+    return m||'Unbekannter Fehler'}
+  function runPy(code,userLines){let buf='';
+    return loadSk().then(()=>{Sk.configure({output:t=>{buf+=t},read:builtinRead,__future__:Sk.python3,execLimit:5000});
+      return Sk.misceval.asyncToPromise(()=>Sk.importMainWithBody('<stdin>',false,code,true))})
+      .then(()=>({ok:true,out:buf}),err=>({ok:false,out:buf,err:formatErr(err,userLines)}))}
+  const SRV=location.protocol.startsWith('http');let saveT=null;
+  function srvPush(){clearTimeout(saveT);saveT=setTimeout(()=>{try{const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);o[k]=localStorage.getItem(k)}
+    fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)}).catch(()=>{})}catch(e){}},500)}
+  if(SRV){try{const x=new XMLHttpRequest();x.open('GET','/api/state',false);x.send();if(x.status===200){const o=JSON.parse(x.responseText);for(const k in o)localStorage.setItem(k,o[k])}}catch(e){}}
+  function store(key,val){try{if(val===undefined)return localStorage.getItem(key);localStorage.setItem(key,val);if(SRV)srvPush()}catch(e){return null}}
+
+  const EX=[
+   {t:'Variablen und print',task:'Lege <code>name</code> (Text) und <code>alter</code> (ganze Zahl) an und gib mit <code>print</code> einen Satz aus, der beides enthält.',
+    start:`name = None   # TODO: ein Text in Anführungszeichen
+alter = None  # TODO: eine ganze Zahl
+print()       # TODO: Satz mit name und alter`,
+    check:`assert isinstance(name, str) and name != "", "name muss ein Text sein (in Anführungszeichen)"
+assert isinstance(alter, int), "alter muss eine ganze Zahl sein"`,
+    sol:`name = "Ana"
+alter = 30
+print("Ich bin", name, "und", alter, "Jahre alt")`},
+   {t:'Slicing',task:'Schneide mit Slicing die Buchstaben <code>c, d, e</code> heraus (<code>mitte</code>) und jeden zweiten Buchstaben ab dem ersten (<code>jeder_zweite</code>). Denk daran: Gezählt wird ab 0 und das Ende ist nicht dabei.',
+    start:`buchstaben = ["a", "b", "c", "d", "e", "f"]
+mitte = None         # ["c", "d", "e"]
+jeder_zweite = None  # ["a", "c", "e"]
+print(mitte, jeder_zweite)`,
+    check:`assert mitte == ["c", "d", "e"], "mitte: Index 2 bis 4, das Ende beim Slicing ist nicht dabei"
+assert jeder_zweite == ["a", "c", "e"], "jeder_zweite: Schrittweite 2 mit [::2]"`,
+    sol:`buchstaben = ["a", "b", "c", "d", "e", "f"]
+mitte = buchstaben[2:5]
+jeder_zweite = buchstaben[::2]
+print(mitte, jeder_zweite)`},
+   {t:'Dict aus zwei Listen',task:'Baue aus den beiden Listen mit <code>zip</code> ein Dictionary, das jeder Stadt ihre Einwohnerzahl zuordnet.',
+    start:`staedte = ["Luzern", "Zug", "Bern"]
+einwohner = [82000, 30000, 134000]
+lexikon = None   # TODO: dict(zip(...))
+print(lexikon)`,
+    check:`assert isinstance(lexikon, dict), "lexikon muss ein dict sein"
+assert lexikon == {"Luzern": 82000, "Zug": 30000, "Bern": 134000}, "Die Paare stimmen noch nicht"`,
+    sol:`staedte = ["Luzern", "Zug", "Bern"]
+einwohner = [82000, 30000, 134000]
+lexikon = dict(zip(staedte, einwohner))
+print(lexikon)`},
+   {t:'Funktion mit Standardwert',task:'Schreibe die Funktion <code>flaeche_rechteck(breite, hoehe=1)</code>, die die Fläche zurückgibt. Wenn keine Höhe angegeben wird, gilt 1.',
+    start:`def flaeche_rechteck(breite, hoehe=1):
+    pass  # TODO: return ...
+
+
+print(flaeche_rechteck(3, 4))`,
+    check:`assert flaeche_rechteck(3, 4) == 12, "flaeche_rechteck(3, 4) soll 12 ergeben (return nicht vergessen)"
+assert flaeche_rechteck(5) == 5, "Ohne Höhe soll hoehe = 1 gelten"`,
+    sol:`def flaeche_rechteck(breite, hoehe=1):
+    return breite * hoehe
+
+
+print(flaeche_rechteck(3, 4))`},
+   {t:'Schleife und Bedingung',task:'Addiere alle Zahlen von 1 bis 100, die durch 3 teilbar sind. Hinweis: <code>zahl % 3</code> liefert den Rest der Division.',
+    start:`summe = 0
+for zahl in range(1, 101):
+    # TODO: zahl zur summe addieren, wenn sie durch 3 teilbar ist
+    pass
+print(summe)`,
+    check:`assert summe == 1683, "Erwartet wird 1683, also 3 + 6 + 9 + ... + 99"`,
+    sol:`summe = 0
+for zahl in range(1, 101):
+    if zahl % 3 == 0:
+        summe = summe + zahl
+print(summe)`},
+   {t:'List Comprehension',task:'Erzeuge mit einer List Comprehension die Quadrate aller <b>ungeraden</b> Zahlen von 0 bis 9. Form: <code>[Ausdruck for x in ... if Bedingung]</code>.',
+    start:`quadrate_ungerade = None   # [1, 9, 25, 49, 81]
+print(quadrate_ungerade)`,
+    check:`assert quadrate_ungerade == [1, 9, 25, 49, 81], "Erwartet: [1, 9, 25, 49, 81]"`,
+    sol:`quadrate_ungerade = [x * x for x in range(10) if x % 2 == 1]
+print(quadrate_ungerade)`},
+   {t:'map, filter und lambda',task:'Behalte aus <code>zahlen</code> mit <code>filter</code> nur die geraden Zahlen und verdopple sie dann mit <code>map</code>. Verpacke das Ergebnis in <code>list(...)</code>.',
+    start:`zahlen = [1, 2, 3, 4, 5, 6]
+ergebnis = None   # [4, 8, 12]
+print(ergebnis)`,
+    check:`assert ergebnis == [4, 8, 12], "Erwartet: [4, 8, 12]. Ist alles in list(...) verpackt?"`,
+    sol:`zahlen = [1, 2, 3, 4, 5, 6]
+ergebnis = list(map(lambda x: x * 2, filter(lambda x: x % 2 == 0, zahlen)))
+print(ergebnis)`},
+   {t:'Dictionary Comprehension',task:'Behalte aus <code>preise</code> nur die Produkte, die mehr als 3 kosten. Form: <code>{schluessel: wert for schluessel, wert in d.items() if ...}</code>.',
+    start:`preise = {"brot": 4, "kaese": 12, "milch": 2}
+teuer = None   # TODO
+print(teuer)`,
+    check:`assert teuer == {"brot": 4, "kaese": 12}, "Erwartet: {'brot': 4, 'kaese': 12}"`,
+    sol:`preise = {"brot": 4, "kaese": 12, "milch": 2}
+teuer = {name: preis for name, preis in preise.items() if preis > 3}
+print(teuer)`},
+   {t:'Fehler suchen',task:'Diese Funktion soll den Durchschnitt der Noten berechnen (erwartet: 4.5), liefert aber etwas anderes. Finde den Fehler und behebe ihn. Hinweis: Welche Elemente durchläuft die Schleife?',
+    start:`def durchschnitt(werte):
+    summe = 0
+    for w in werte[1:]:
+        summe = summe + w
+    return summe / len(werte)
+
+
+noten = [4, 5, 6, 3]
+print(durchschnitt(noten))`,
+    check:`assert durchschnitt([4, 5, 6, 3]) == 4.5, "durchschnitt([4, 5, 6, 3]) soll 4.5 ergeben"`,
+    sol:`def durchschnitt(werte):
+    summe = 0
+    for w in werte:
+        summe = summe + w
+    return summe / len(werte)
+
+
+noten = [4, 5, 6, 3]
+print(durchschnitt(noten))`}
+  ];
+
+  const list=$('exList');
+  EX.forEach((ex,i)=>{
+    const id='ex'+(i+1),key='cas-ml-'+id;
+    const card=document.createElement('div');card.className='ex';
+    card.innerHTML='<h4>'+(i+1)+' · '+ex.t+'</h4><div class="task">'+ex.task+'</div>'+
+      '<label for="'+id+'" style="display:block;font-size:13px;color:var(--muted)">Dein Code</label>'+
+      '<textarea id="'+id+'" class="code" rows="'+(ex.start.split('\n').length+1)+'" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>'+
+      '<div class="btnrow"><button class="pri" data-a="run">Ausführen</button><button data-a="chk">Prüfen</button><button data-a="rst">Zurücksetzen</button><button data-a="sol">Lösung zeigen</button></div>'+
+      '<pre class="out" hidden></pre><div class="verdict" aria-live="polite"></div><div class="solbox" hidden><pre><code></code></pre></div>';
+    const ta=card.querySelector('textarea'),out=card.querySelector('.out'),vd=card.querySelector('.verdict'),sb=card.querySelector('.solbox');
+    ta.value=store(key)||ex.start;sb.querySelector('code').textContent=ex.sol;
+    ta.addEventListener('input',()=>store(key,ta.value));
+    function exec(withCheck){
+      vd.className='verdict info';vd.textContent='Läuft …';out.hidden=true;
+      const user=ta.value,lines=user.split('\n').length;
+      runPy(withCheck?user+'\n\n'+ex.check+'\n':user+'\n',lines).then(r=>{
+        out.hidden=!r.out;out.textContent=r.out.replace(/\n$/,'');
+        if(r.ok){if(withCheck){vd.className='verdict good';vd.textContent='✅ Richtig!'}
+          else{vd.className='verdict info';vd.textContent=r.out?'Fertig. Mit «Prüfen» kontrollierst du die Lösung.':'Fertig, aber es wurde nichts ausgegeben. Mit «Prüfen» kontrollierst du die Lösung.'}}
+        else{vd.className='verdict bad';vd.textContent='❌ '+r.err}})}
+    card.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+      const a=b.dataset.a;
+      if(a==='run')exec(false);
+      else if(a==='chk')exec(true);
+      else if(a==='rst'){ta.value=ex.start;store(key,ex.start);out.hidden=true;vd.textContent='';vd.className='verdict'}
+      else{sb.hidden=!sb.hidden;b.textContent=sb.hidden?'Lösung zeigen':'Lösung verbergen'}}));
+    list.appendChild(card)});
+
+  $('freeRun').addEventListener('click',()=>{
+    const o=$('freeOut'),code=$('freeCode').value;o.hidden=false;o.textContent='Läuft …';
+    runPy(code+'\n',code.split('\n').length).then(r=>{o.textContent=(r.out.replace(/\n$/,'')+(r.ok?'':(r.out?'\n':'')+'❌ '+r.err))||'(keine Ausgabe)'})})})();
+</script>
+
+</body>
+</html>
