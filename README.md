@@ -13,7 +13,7 @@ lernapp/
     style.css       Design (hell und dunkel)
     core.js         Navigation, Übungen, Selbsttest, Python-Ausführung
   modules/          ein Kapitel pro Datei
-    ds.js git.js python.js pandas.js viz.js hood.js ml.js
+    ds.js git.js python.js pandas.js viz.js hood.js ml.js klass.js unsup.js
     _vorlage.js     Vorlage für ein neues Kapitel
   notebooks/        Übungs-Notebooks (Jupyter / VS Code)
 ```
@@ -31,6 +31,39 @@ Die Kapitel sind JavaScript-Dateien (mit dem HTML als Text), weil Browser beim �
 ## Notebooks
 
 Die Übungs-Notebooks liegen in `notebooks/`. Sie brauchen `pandas`, `numpy`, `matplotlib` und `scikit-learn`. Die Kursunterlagen in den Modulordnern werden nicht verändert.
+
+### Lokale Jupyter-Umgebung unter Windows
+
+Im gemeinsamen HSLU-Ordner liegt eine isolierte Python-3.11-Umgebung
+für JupyterLab und die grundlegenden Python-, Pandas- und ML-Übungen.
+Die folgenden Befehle werden im übergeordneten HSLU-Ordner ausgeführt:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\Setup-Jupyter.ps1
+powershell -ExecutionPolicy Bypass -File .\Start-Jupyter.ps1
+.\.venv\Scripts\python.exe .\check_sources.py
+```
+
+Die lokalen Hilfsdateien liegen neben den beiden Repositories, nicht im
+Lernapp-Repository; sie sind daher nicht Teil eines eigenständigen Lernapp-Klons.
+Die benötigten Pakete stehen in `..\requirements-jupyter.txt`.
+In Jupyter den Kernel **HSLU CAS ML (Python 3.11)** auswählen; in VS Code
+den Interpreter `..\.venv\Scripts\python.exe`.
+Der Server hört nur auf `127.0.0.1` und behält die Token-Anmeldung bei.
+Beenden mit `Ctrl+C` im Serverterminal oder aus dem HSLU-Ordner mit
+`.\.venv\Scripts\python.exe -m jupyter server stop 8888`.
+
+Die Prüfung kompiliert Python-Dateien und Python-Codezellen (einschliesslich
+IPython-Magics), validiert Notebook-Strukturen und prüft JavaScript mit Node.js.
+Sie führt keine Kurszellen, Trainingsläufe oder Downloads aus. Ergebnisse und
+Python-Bytecode liegen unter `..\.build`; Fehler führen zu einem Exitcode ungleich null.
+PDFs, Bilder und andere Unterlagen benötigen keinen Compiler.
+
+Die Basisumgebung deckt nicht sämtliche Spezialmodule ab. Computer Vision,
+Deep Learning und Timeseries benötigen zusätzliche, teilweise inkompatible
+Abhängigkeiten aus ihren Modulordnern (z. B. NumPy 2 für Computer Vision,
+NumPy 1.26 für Timeseries). Diese in getrennten Umgebungen installieren,
+nicht sämtliche Requirements in die Jupyter-Basisumgebung mischen.
 
 ## Eigene Seiten (Sub Pages)
 

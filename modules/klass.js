@@ -1,0 +1,293 @@
+/* Module: Supervised Learning Tag 2: Klassifikation. Content lives in the html field; demos are wired in init(). */
+(function () {
+  const { $, fmt } = LernApp;
+
+  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+  function gauss(r){let u=0,v=0;while(u===0)u=r();while(v===0)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+  const sigmoid=z=>1/(1+Math.exp(-z));
+
+  LernApp.register({
+    id: 'klass',
+    order: 80,
+    nav: 'Klassifikation',
+    title: `Supervised Learning: Klassifikation`,
+    kicker: `Modul 2 · Supervised Learning, Tag 2 (Fr 30.10.)`,
+    summary: `Logistische Regression, Metriken, Ungleichgewicht, Bäume, Ensembles, Leakage`,
+    html: `  <p>Gleiche Idee wie am Tag 1 (Beispiele mit bekannter Antwort), aber die Antwort ist jetzt eine <b>Klasse</b> statt einer Zahl: Betrug ja/nein, Spam ja/nein, Katze/Hund/Vogel. Alles von Tag 1 gilt weiter: Train/Test, Cross-Validation, Skalieren, Regularisierung, Hyperparameter-Suche.</p>
+  <div class="grid2">
+    <div><h4>Regression</h4><p>Vorhersage einer Zahl (Preis, Temperatur). Fehler: MSE, MAE.</p></div>
+    <div><h4>Klassifikation</h4><p>Vorhersage einer Klasse (ja/nein, A/B/C). Fehler: Cross-Entropy, Metriken wie Precision und Recall.</p></div>
+  </div>
+  <p class="note">Jedes Regressionsproblem lässt sich in Klassen umbauen, indem man das Ziel in Bereiche («Bins») einteilt, zum Beispiel Blutdruck in normal / erhöht / hoch. Das vereinfacht und macht Ergebnisse leichter erklärbar, kostet aber Information.</p>
+
+  <h3>1 · Logistische Regression</h3>
+  <p>Trotz des Namens ein Klassifikator. Die Idee: Rechne wie bei der linearen Regression <code>z = w·x + b</code>. Dieses z kann beliebig gross oder klein sein. Die <b>Sigmoid-Funktion</b> presst es in den Bereich 0 bis 1 und macht daraus eine <b>Wahrscheinlichkeit</b>:</p>
+  <pre><code>p = 1 / (1 + e^(-z))      z = w1*x1 + w2*x2 + ... + b</code></pre>
+  <p>Aus der Wahrscheinlichkeit wird eine Klasse über eine <b>Schwelle</b> (Standard 0,5): p über der Schwelle heisst «positiv», sonst «negativ». Die Stelle, wo p genau 0,5 ist (z = 0), ist die <b>Entscheidungsgrenze</b>.</p>
+  <div class="demo" id="sgDemo">
+    <div class="tag">Demo</div><h4>Sigmoid und Entscheidungsgrenze</h4>
+    <svg class="plot" id="sgSvg" viewBox="0 0 320 190" role="img" aria-label="Sigmoid-Kurve mit Datenpunkten der Klassen 0 und 1"></svg>
+    <div class="ctl"><label for="sgW">Steilheit w</label><input type="range" id="sgW" min="0.2" max="4" step="0.1" value="1"><output id="sgWO"></output></div>
+    <div class="ctl"><label for="sgB">Verschiebung b</label><input type="range" id="sgB" min="-4" max="4" step="0.1" value="0"><output id="sgBO"></output></div>
+    <div class="stats"><span>Grenze bei x = <b id="sgBd"></b></span><span>richtig klassifiziert <b id="sgAcc"></b></span></div>
+    <p class="hint">Gefüllte Punkte sind Klasse 1, leere Klasse 0. Die Kurve ist die vorhergesagte Wahrscheinlichkeit für Klasse 1. Eine grosse Steilheit macht das Modell «sicherer», aber auch härter bei den zwei durchmischten Punkten um x = 0. Trainiert wird nicht mit MSE, sondern mit der <b>Cross-Entropy</b> (bestraft sichere falsche Antworten sehr stark) und Gradient Descent wie am Tag 1.</p>
+  </div>
+  <pre><code>from sklearn.linear_model import LogisticRegression
+clf = LogisticRegression().fit(X_train, y_train)
+clf.predict(X_test)          # Klassen (0/1)
+clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
+  <div class="merk"><b>Merksatz</b><p>Logistische Regression = lineare Regression + Sigmoid. Das Modell liefert zuerst eine Wahrscheinlichkeit, die Klasse entsteht erst durch die Schwelle. Die Schwelle ist deine Entscheidung, nicht die des Modells.</p></div>
+
+  <h3>2 · Wie gut ist ein Klassifikator? Confusion Matrix und Metriken</h3>
+  <p>Jede Vorhersage fällt in eines von vier Fächern. Eselsbrücke: Der zweite Buchstabe ist, was das Modell sagt (positiv/negativ), der erste, ob es stimmt (True/False).</p>
+  <div class="tablewrap"><table>
+    <tr><th></th><th>Modell sagt positiv</th><th>Modell sagt negativ</th></tr>
+    <tr><td><b>wirklich positiv</b></td><td class="b">TP (richtig erkannt)</td><td class="r">FN (übersehen)</td></tr>
+    <tr><td><b>wirklich negativ</b></td><td class="r">FP (falscher Alarm)</td><td class="b">TN (richtig verneint)</td></tr>
+  </table></div>
+  <div class="tablewrap"><table>
+    <tr><th>Mass</th><th>Formel</th><th>Frage dahinter</th></tr>
+    <tr><td>Accuracy</td><td><code>(TP+TN) / alle</code></td><td>Wie oft liege ich insgesamt richtig?</td></tr>
+    <tr><td>Precision</td><td><code>TP / (TP+FP)</code></td><td>Wenn ich «positiv» sage: wie oft stimmt das?</td></tr>
+    <tr><td>Recall (Sensitivität)</td><td><code>TP / (TP+FN)</code></td><td>Wie viele der echten Positiven finde ich?</td></tr>
+    <tr><td>F1</td><td><code>2·TP / (2·TP+FP+FN)</code></td><td>Ein Mittelwert aus Precision und Recall</td></tr>
+  </table></div>
+  <div class="falle"><b>Falle (Accuracy)</b><p>Bei seltenen Klassen ist Accuracy irreführend. Ein Modell, das immer «kein Betrug» sagt, hat bei 1 Betrug auf 100 Fällen 99 % Accuracy, findet aber nie einen Betrug (Recall 0, F1 0). Schau bei unausgewogenen Daten auf Precision, Recall, F1 und AUC.</p></div>
+
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Die Schwelle verschieben: Precision gegen Recall</h4>
+  <p>Senkst du die Schwelle, sagt das Modell öfter «positiv»: mehr TP, aber auch mehr FP. Recall steigt, Precision sinkt. Es ist ein <b>Kompromiss</b>, und welche Seite wichtiger ist, hängt vom Problem ab. Bei einer Krebs-Früherkennung willst du kaum etwas übersehen (hoher Recall), bei einer Spam-Sperre willst du keine echte Mail löschen (hohe Precision).</p>
+  <p>Die <b>ROC-Kurve</b> trägt für alle Schwellen die Trefferquote (TPR = Recall) gegen die Rate falscher Alarme (FPR) auf. Ein perfektes Modell liegt oben links, Raten liegt auf der Diagonalen. Die <b>AUC</b> ist die Fläche unter der Kurve: 1 ist perfekt, 0,5 ist Zufall.</p>
+  <div class="demo" id="thDemo">
+    <div class="tag">Demo</div><h4>Schwelle, Confusion Matrix und ROC</h4>
+    <p class="hint">20 Fälle, 10 echt positiv, 10 echt negativ, mit festen Modell-Wahrscheinlichkeiten.</p>
+    <svg class="plot" id="thSvg" viewBox="0 0 320 170" role="img" aria-label="Wahrscheinlichkeiten der 20 Fälle auf einer Achse mit Schwelle"></svg>
+    <div class="ctl"><label for="thT">Schwelle</label><input type="range" id="thT" min="0.02" max="0.98" step="0.01" value="0.5"><output id="thTO"></output></div>
+    <div class="tablewrap"><table style="min-width:0">
+      <tr><th></th><th class="num">sagt positiv</th><th class="num">sagt negativ</th></tr>
+      <tr><td>wirklich positiv</td><td class="num b" id="thTP"></td><td class="num r" id="thFN"></td></tr>
+      <tr><td>wirklich negativ</td><td class="num r" id="thFP"></td><td class="num b" id="thTN"></td></tr>
+    </table></div>
+    <div class="stats"><span>Accuracy <b id="thAcc"></b></span><span>Precision <b id="thPre"></b></span><span>Recall <b id="thRec"></b></span><span>F1 <b id="thF1"></b></span><span>AUC <b id="thAuc"></b></span></div>
+    <svg class="plot" id="thRoc" viewBox="0 0 320 210" role="img" aria-label="ROC-Kurve mit aktuellem Schwellenpunkt" style="margin-top:12px"></svg>
+    <p class="hint">Oben: Kreis = echt positiv, Quadrat = echt negativ. Alles rechts der Linie wird als positiv vorhergesagt. Unten: Der orange Punkt wandert beim Schieben der Schwelle auf der ROC-Kurve.</p>
+  </div>
+
+  <h3>3 · Mehr als zwei Klassen</h3>
+  <ul>
+    <li><b>One-vs-All</b>: Pro Klasse ein Zweiklassen-Modell («diese Klasse gegen alle anderen»). Die Klasse mit der höchsten Wahrscheinlichkeit gewinnt.</li>
+    <li><b>Softmax</b>: Die Verallgemeinerung der Sigmoid-Funktion auf mehrere Klassen. Alle Wahrscheinlichkeiten sind positiv und summieren sich zu 1.</li>
+  </ul>
+  <p>Bewertet wird pro Klasse: Du betrachtest jede Klasse der Reihe nach als «positiv» und alle anderen als «negativ» und bekommst so TP, FP, FN, TN und Precision/Recall/F1 je Klasse. Zusammenfassen kannst du das auf zwei Arten:</p>
+  <ul>
+    <li><b>Micro</b>: Zuerst alle TP, FP, FN über alle Klassen addieren, dann die Masse berechnen. Bei Einzelklassen-Problemen ist micro-Precision = micro-Recall = Accuracy.</li>
+    <li><b>Macro</b>: Die Masse pro Klasse berechnen und mitteln (ungewichtet), oder <b>gewichtet</b> nach Klassengrösse, damit grosse Klassen mehr zählen.</li>
+  </ul>
+  <pre><code>from sklearn.metrics import classification_report, confusion_matrix
+print(confusion_matrix(y_test, pred))
+print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse + Mittel</code></pre>
+
+  <h3>4 · Unausgewogene Klassen</h3>
+  <p>Oft ist das Interessante selten: Betrug, Defekte, Krankheiten. Ein Modell kann dann die Minderheit ignorieren und trotzdem «gut» aussehen. Zwei Dinge sind zu tun: richtig messen (nicht Accuracy) und die Daten oder das Training anpassen.</p>
+  <div class="demo" id="imDemo">
+    <div class="tag">Demo</div><h4>Warum Accuracy täuscht</h4>
+    <div class="ctl"><label for="imP">Anteil Positive</label><input type="range" id="imP" min="0.5" max="50" step="0.5" value="1"><output id="imPO"></output></div>
+    <p class="hint">1000 Fälle. Vergleich: «Immer negativ» gegen ein echtes Modell mit 80 % Recall und 10 % falschem Alarm bei den Negativen.</p>
+    <div class="tablewrap"><table style="min-width:0">
+      <tr><th></th><th class="num">Accuracy</th><th class="num">Precision</th><th class="num">Recall</th><th class="num">F1</th></tr>
+      <tr><td>Immer negativ</td><td class="num" id="imA1"></td><td class="num" id="imP1"></td><td class="num" id="imR1"></td><td class="num" id="imF1"></td></tr>
+      <tr><td>Echtes Modell</td><td class="num" id="imA2"></td><td class="num" id="imP2"></td><td class="num" id="imR2"></td><td class="num" id="imF2"></td></tr>
+    </table></div>
+    <p class="hint" id="imMsg"></p>
+  </div>
+  <div class="tablewrap"><table>
+    <tr><th>Strategie</th><th>Idee</th><th>Risiko</th></tr>
+    <tr><td>Downsampling</td><td>Von der Mehrheitsklasse zufällig nur so viele nehmen wie die Minderheit hat</td><td>Wirft Information weg</td></tr>
+    <tr><td>Upsampling</td><td>Minderheits-Fälle zufällig duplizieren (mit Zurücklegen)</td><td>Overfitting auf die Duplikate</td></tr>
+    <tr><td>SMOTE</td><td>Neue künstliche Minderheits-Fälle zwischen echten Nachbarn erzeugen: <code>s = x + (x' − x) · Zufall</code></td><td>Kann Rauschen erzeugen; braucht <code>imblearn</code></td></tr>
+    <tr><td>Kostengewichtung</td><td>Fehler bei der Minderheit zählen mehr (<code>class_weight="balanced"</code>)</td><td>Wenig, oft die einfachste Wahl</td></tr>
+  </table></div>
+  <div class="falle"><b>Falle</b><p>Resampling (Up/Downsampling, SMOTE) gehört <b>nur auf die Trainingsdaten</b>, nie auf das Test-Set. Sonst bewertest du auf künstlichen Daten und bekommst zu schöne Zahlen.</p></div>
+
+  <h3>5 · Nicht-lineare Klassifikatoren</h3>
+  <p>Logistische Regression zieht eine <b>gerade</b> Grenze. Wenn die Klassen nicht so sauber trennbar sind, brauchst du flexiblere Modelle.</p>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">k-nächste Nachbarn (kNN)</h4>
+  <p>Für einen neuen Punkt suchst du die k nächsten Trainingspunkte und nimmst die Mehrheitsklasse (bei Regression den Durchschnitt). Es gibt kein Training, dafür ist die Vorhersage bei vielen Daten langsam. k steuert Bias und Variance: <b>k = 1</b> folgt jedem Punkt (Overfitting), <b>k = N</b> sagt für alle die Mehrheitsklasse (Underfitting).</p>
+  <div class="demo" id="knDemo">
+    <div class="tag">Demo</div><h4>kNN: Wirkung von k</h4>
+    <svg class="plot" id="knSvg" viewBox="0 0 320 220" role="img" aria-label="Entscheidungsflächen von kNN mit Trainingspunkten"></svg>
+    <div class="ctl"><label for="knK">k</label><input type="range" id="knK" min="1" max="59" step="2" value="1"><output id="knKO"></output></div>
+    <div class="stats"><span>Trainings-Accuracy <b id="knTr"></b></span><span>Test-Accuracy (neue Punkte) <b id="knTe"></b></span></div>
+    <p class="hint" id="knMsg"></p>
+  </div>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Naive Bayes</h4>
+  <p>Berechnet mit dem Satz von Bayes, wie wahrscheinlich eine Klasse bei den beobachteten Merkmalen ist, und tut «naiv» so, als wären die Merkmale voneinander unabhängig. Beispiel aus den Folien: Spielen wir bei Sonne? Von 14 Tagen waren 9 Spieltage und 5 sonnig; an 3 der 9 Spieltage schien die Sonne.</p>
+  <pre><code>P(Ja | sonnig) = P(sonnig | Ja) * P(Ja) / P(sonnig)
+               = (3/9) * (9/14) / (5/14) = 0.60</code></pre>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Support Vector Machine (SVM)</h4>
+  <p>Sucht die Trennlinie mit dem <b>breitesten Abstand</b> zu beiden Klassen. Nur die Punkte am Rand (Support Vectors) bestimmen sie. Mit <b>Kernels</b> werden die Daten gedanklich in einen höheren Raum gehoben, wo sie sich gerade trennen lassen. Stark bei vielen Merkmalen.</p>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Entscheidungsbaum</h4>
+  <p>Eine Kette von Ja/Nein-Fragen. An jedem Knoten wird die Frage gewählt, die die Klassen am besten trennt (Mass: Gini oder Informationsgewinn), bis die Blätter «rein» sind oder die maximale Tiefe erreicht ist. Gut lesbar, aber ein tiefer Baum lernt die Trainingsdaten auswendig. Gegenmittel: <code>max_depth</code> begrenzen oder zurückschneiden.</p>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Neuronale Netze</h4>
+  <p>Schichten aus künstlichen Neuronen mit gewichteten Verbindungen, die per Backpropagation trainiert werden (Gradient Descent über alle Schichten). Mit sehr vielen Schichten spricht man von Deep Learning, das kommt im nächsten Modul.</p>
+
+  <h3>6 · Ensembles: viele schwache Modelle ergeben ein starkes</h3>
+  <p>Ein einzelnes Modell macht Fehler. Mehrere Modelle, die unterschiedlich irren, gleichen sich im Mittel aus.</p>
+  <div class="grid2">
+    <div><h4>Bagging (Random Forest)</h4><p>Viele Bäume, jeder auf einer zufälligen Stichprobe der Daten und einer zufälligen Auswahl an Merkmalen, <b>parallel</b> trainiert. Mehrheitsentscheid (oder Mittelwert). Senkt die Varianz.</p></div>
+    <div><h4>Boosting (Gradient Boosting)</h4><p>Bäume werden <b>nacheinander</b> trainiert, jeder korrigiert die Restfehler des vorherigen. Oft genauer, aber empfindlicher für Rauschen und bei zu hoher Lernrate überangepasst.</p></div>
+  </div>
+  <pre><code>from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+rf = RandomForestClassifier(n_estimators=200, random_state=0).fit(X_train, y_train)
+gb = GradientBoostingClassifier(learning_rate=0.1).fit(X_train, y_train)</code></pre>
+
+  <h3>7 · Data Leakage</h3>
+  <p>Leakage heisst: Das Modell sieht beim Training Information, die es bei der echten Vorhersage nicht hätte. Folge: wunderbare Testwerte und ein Modell, das im Einsatz versagt.</p>
+  <ul>
+    <li><b>Target Leakage</b>: Ein Merkmal enthält die Antwort schon. Beispiel aus der Vorlesung: Ein Kündigungsmodell mit 100 % Treffer, weil Anrufe beim Kundendienst («ich möchte kündigen») erst <i>nach</i> der Kündigung entstehen.</li>
+    <li><b>Zufälliger Schlüssel</b>: Die Kontonummer sagt etwas voraus, weil sie von der Reihenfolge der Kunden abhängt (z. B. Neukunden haben höhere Nummern).</li>
+    <li><b>Vorverarbeitung vor dem Split</b>: Skalieren, Imputieren oder Feature-Auswahl auf allen Daten, bevor getrennt wird. Lösung: <code>Pipeline</code>.</li>
+    <li><b>Zeitreihen</b>: Zukunft im Training. Immer nach Zeit trennen.</li>
+  </ul>
+  <div class="merk"><b>Merksatz</b><p>Misstraue zu guten Zahlen. Frage bei jedem Merkmal: «Hätte ich diesen Wert zum Zeitpunkt der Vorhersage wirklich?» Verdächtig sind ein riesiger Unterschied Training zu Validation und ein einzelnes Merkmal mit enormem Gewicht.</p></div>
+
+  <h3>8 · Der ganze Ablauf (Titanic-Aufgabe)</h3>
+  <p>Am Nachmittag baut ihr in Gruppen ein Modell, das vorhersagt, wer die Titanic überlebt hat (Spalten: <code>Pclass</code>, <code>Sex</code>, <code>Age</code>, <code>SibSp</code>, <code>Parch</code>, <code>Fare</code>, <code>Embarked</code>; Ziel <code>Survived</code>). Der Ablauf passt auf jedes Klassifikationsproblem:</p>
+  <ol>
+    <li>Daten ansehen (Struktur, Verteilungen, Anteil der Klassen).</li>
+    <li>Aufräumen und Kategorien in Zahlen umwandeln (One-Hot).</li>
+    <li>Neue Merkmale bauen (z. B. Familiengrösse = <code>SibSp + Parch + 1</code>).</li>
+    <li>Fehlende Werte füllen (z. B. Alter mit dem Median).</li>
+    <li>Merkmale auswählen.</li>
+    <li>Klassenverhältnis prüfen, bei Bedarf Resampling oder <code>class_weight</code>.</li>
+    <li>Train/Test trennen, Cross-Validation auf dem Training.</li>
+    <li>Mit passenden Metriken bewerten (F1, AUC, nicht nur Accuracy).</li>
+    <li>Auf Leakage prüfen.</li>
+    <li>Regularisierung und Hyperparameter-Suche.</li>
+    <li>Bestes Modell <b>einmal</b> auf dem Test-Set prüfen.</li>
+  </ol>
+  <pre><code>from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score, train_test_split
+
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, stratify=y, random_state=0)
+num = Pipeline([("imp", SimpleImputer(strategy="median")), ("sc", StandardScaler())])
+cat = OneHotEncoder(handle_unknown="ignore")
+prep = ColumnTransformer([("num", num, ["Age", "Fare"]), ("cat", cat, ["Sex", "Pclass"])])
+model = Pipeline([("prep", prep), ("clf", RandomForestClassifier(random_state=0))])
+cross_val_score(model, X_tr, y_tr, cv=5, scoring="f1").mean()</code></pre>
+  <p class="note"><code>stratify=y</code> sorgt dafür, dass Train und Test das gleiche Klassenverhältnis haben. Die Pipeline lernt Imputer und Scaler in jedem Fold nur auf dem Trainingsteil und verhindert so Leakage. Die Vorlage des Dozenten liegt im Kursordner unter <code>02 - SUPERVISED-ML/code/CAS_ML_Supervised_Learning_2.ipynb</code>.</p>
+`,
+    exercises: [
+      {
+        t: 'Metriken aus der Confusion Matrix',
+        task: `Ein Betrugsmodell hat auf 1000 Fällen: TP=40, FP=10, FN=20, TN=930. Berechne <code>precision</code>, <code>recall</code>, <code>f1</code> und <code>accuracy</code> (als Zahlen zwischen 0 und 1).`,
+        start: `tp, fp, fn, tn = 40, 10, 20, 930\nprecision = None  # TODO\nrecall = None  # TODO\nf1 = None  # TODO\naccuracy = None  # TODO\nprint(precision, recall, f1, accuracy)`,
+        check: `assert abs(precision - 0.8) < 1e-6, "precision = tp / (tp + fp)"\nassert abs(recall - 40/60) < 1e-6, "recall = tp / (tp + fn)"\nassert abs(f1 - 80/110) < 1e-6, "f1 = 2*tp / (2*tp + fp + fn)"\nassert abs(accuracy - 0.97) < 1e-6, "accuracy = (tp + tn) / alle"`,
+        sol: `precision = tp / (tp + fp)\nrecall = tp / (tp + fn)\nf1 = 2 * tp / (2 * tp + fp + fn)\naccuracy = (tp + tn) / (tp + fp + fn + tn)`,
+      },
+      {
+        t: 'Sigmoid selbst schreiben',
+        task: `Schreibe die Funktion <code>sigmoid(z)</code> mit <code>math.exp</code>: <code>1 / (1 + e^(-z))</code>. Bei z = 0 muss 0.5 herauskommen.`,
+        start: `import math\n\ndef sigmoid(z):\n    return None  # TODO\n\nprint(sigmoid(0), sigmoid(4), sigmoid(-4))`,
+        check: `assert abs(sigmoid(0) - 0.5) < 1e-9, "sigmoid(0) muss 0.5 sein"\nassert sigmoid(4) > 0.98 and sigmoid(-4) < 0.02`,
+        sol: `import math\n\ndef sigmoid(z):\n    return 1 / (1 + math.exp(-z))`,
+      },
+      {
+        t: 'Schwelle anwenden',
+        task: `Das Modell liefert Wahrscheinlichkeiten. Mach daraus eine Liste <code>labels</code> aus 0 und 1: 1, wenn die Wahrscheinlichkeit <b>mindestens</b> <code>schwelle</code> ist. Zähle dann mit <code>tp</code>, wie viele Positive du richtig erkannt hast.`,
+        start: `probs = [0.9, 0.4, 0.65, 0.2, 0.55, 0.1]\nechte = [1, 1, 1, 0, 0, 0]\nschwelle = 0.5\nlabels = []  # TODO: Liste mit 0/1\ntp = 0  # TODO\nprint(labels, tp)`,
+        check: `assert labels == [1, 0, 1, 0, 1, 0], "labels stimmt nicht"\nassert tp == 2, "tp: Positive, die richtig als 1 vorhergesagt wurden"`,
+        sol: `labels = [1 if p >= schwelle else 0 for p in probs]\ntp = sum(1 for l, e in zip(labels, echte) if l == 1 and e == 1)`,
+      },
+    ],
+    quiz: [
+      { q: `Warum ist Accuracy bei 1 % Betrugsfällen ein schlechtes Mass?`, a: `Ein Modell, das nie Betrug meldet, hat 99 % Accuracy und ist trotzdem nutzlos. Precision, Recall, F1 und AUC zeigen, wie gut die seltene Klasse erkannt wird.` },
+      { q: `Du senkst die Schwelle von 0,5 auf 0,2. Was passiert mit Recall und Precision?`, a: `Mehr Fälle werden positiv: Recall steigt (oder bleibt gleich), Precision sinkt meist, weil mehr falsche Alarme dazukommen.` },
+      { q: `Was bedeutet eine AUC von 0,5, was von 1?`, a: `0,5 ist Zufall (ROC-Kurve auf der Diagonalen), 1 ist ein perfekter Klassifikator (alle Positiven vor allen Negativen).` },
+      { q: `Was passiert bei kNN mit k = 1 und mit k = N?`, a: `k = 1 folgt jedem Trainingspunkt (Overfitting, trainings-perfekt). k = N sagt immer die Mehrheitsklasse (Underfitting).` },
+      { q: `Worin unterscheiden sich Bagging und Boosting?`, a: `Bagging trainiert viele Modelle parallel auf Zufallsstichproben und mittelt (senkt Varianz). Boosting trainiert nacheinander, jedes Modell korrigiert die Fehler des vorherigen (senkt Bias, anfälliger für Rauschen).` },
+      { q: `Wie entsteht Data Leakage, und wie verhinderst du es bei Skalierung und Imputation?`, a: `Information aus Test- oder Zukunftsdaten fliesst ins Training. Alle lernenden Vorverarbeitungsschritte nur auf den Trainingsdaten fitten, am einfachsten mit einer Pipeline in der Cross-Validation.` },
+      { q: `Wann darfst du ein Resampling (z. B. SMOTE) anwenden?`, a: `Nur auf die Trainingsdaten, nie auf Validation oder Test. Sonst wird auf künstlichen Daten bewertet.` },
+    ],
+    init() {
+      const MU='−';
+      // Demo 1: sigmoid
+      (function(){
+        const xs=[-4,-3,-2.5,-1.5,-0.5,0.5,1,2,3,4.5],ys=[0,0,0,0,1,0,1,1,1,1];
+        const W=320,H=190,PX=30,PY=20,sx=x=>PX+((x+6)/12)*(W-PX-10),sy=p=>H-PY-p*(H-PY-12);
+        function draw(){const w=+$('sgW').value,b=+$('sgB').value;$('sgWO').textContent=fmt(w,1);$('sgBO').textContent=fmt(b,1);
+          let s='<line class="ax" x1="'+PX+'" y1="'+sy(0)+'" x2="'+(W-10)+'" y2="'+sy(0)+'"/><line class="ax" x1="'+PX+'" y1="'+sy(1)+'" x2="'+(W-10)+'" y2="'+sy(1)+'"/>';
+          s+='<line class="dash" x1="'+PX+'" y1="'+sy(0.5)+'" x2="'+(W-10)+'" y2="'+sy(0.5)+'"/>';
+          for(const t of[0,0.5,1])s+='<text class="lbl" x="2" y="'+(sy(t)+3)+'">'+t+'</text>';
+          for(let t=-6;t<=6;t+=3)s+='<text class="lbl" x="'+(sx(t)-4)+'" y="'+(H-4)+'">'+t+'</text>';
+          let p='';for(let i=0;i<=120;i++){const x=-6+i*0.1;p+=(i?'L':'M')+sx(x).toFixed(1)+' '+sy(sigmoid(w*x+b)).toFixed(1)}
+          s+='<path class="ln" d="'+p+'"/>';
+          const bd=-b/w;if(bd>-6&&bd<6)s+='<line class="res" x1="'+sx(bd)+'" y1="12" x2="'+sx(bd)+'" y2="'+sy(0)+'"/>';
+          let ok=0;xs.forEach((x,i)=>{const pr=sigmoid(w*x+b);if((pr>=0.5?1:0)===ys[i])ok++;
+            s+='<circle cx="'+sx(x)+'" cy="'+sy(ys[i])+'" r="5" style="fill:'+(ys[i]?'var(--accent)':'var(--surface)')+';stroke:var(--accent);stroke-width:2"/>'});
+          $('sgSvg').innerHTML=s;$('sgBd').textContent=fmt(bd,2).replace('-',MU);$('sgAcc').textContent=ok+' von '+xs.length}
+        $('sgW').addEventListener('input',draw);$('sgB').addEventListener('input',draw);draw()})();
+
+      // Demo 2: threshold, confusion matrix, ROC
+      (function(){
+        const pos=[0.95,0.9,0.85,0.8,0.72,0.65,0.55,0.45,0.35,0.2],neg=[0.7,0.6,0.5,0.4,0.3,0.25,0.2,0.15,0.1,0.05];
+        function counts(t){let tp=0,fn=0,fp=0,tn=0;pos.forEach(p=>p>=t?tp++:fn++);neg.forEach(p=>p>=t?fp++:tn++);return{tp:tp,fn:fn,fp:fp,tn:tn}}
+        const ths=[1.01].concat(pos.concat(neg).sort((a,b)=>b-a)).concat([0]);
+        const roc=ths.map(t=>{const c=counts(t);return[c.fp/neg.length,c.tp/pos.length]});
+        let auc=0;for(let i=1;i<roc.length;i++)auc+=(roc[i][0]-roc[i-1][0])*(roc[i][1]+roc[i-1][1])/2;
+        $('thAuc').textContent=fmt(auc,2);
+        const W=320,H=170,PX=10,sx=p=>PX+p*(W-2*PX);
+        const RW=320,RH=210,RX=34,RY=14,rx=v=>RX+v*(RW-RX-14),ry=v=>RH-24-v*(RH-24-RY);
+        function draw(){const t=+$('thT').value;$('thTO').textContent=fmt(t,2);const c=counts(t);
+          let s='<line class="ax" x1="'+PX+'" y1="85" x2="'+(W-PX)+'" y2="85"/>';
+          for(const v of[0,0.5,1])s+='<text class="lbl" x="'+(sx(v)-6)+'" y="165">'+v+'</text>';
+          pos.forEach((p,i)=>{const col=p>=t?'var(--ok)':'var(--bad)';s+='<circle cx="'+sx(p)+'" cy="'+(40+(i%3)*10)+'" r="5" style="fill:'+col+';stroke:var(--fg);stroke-width:1"/>'});
+          neg.forEach((p,i)=>{const col=p>=t?'var(--bad)':'var(--ok)';s+='<rect x="'+(sx(p)-5)+'" y="'+(112+(i%3)*10-5)+'" width="10" height="10" style="fill:'+col+';stroke:var(--fg);stroke-width:1"/>'});
+          s+='<text class="lbl" x="'+PX+'" y="18">echt positiv (Kreis)</text><text class="lbl" x="'+PX+'" y="150">echt negativ (Quadrat)</text>';
+          s+='<line class="ln2" x1="'+sx(t)+'" y1="24" x2="'+sx(t)+'" y2="148"/>';
+          $('thSvg').innerHTML=s;
+          $('thTP').textContent=c.tp;$('thFN').textContent=c.fn;$('thFP').textContent=c.fp;$('thTN').textContent=c.tn;
+          const pre=c.tp+c.fp?c.tp/(c.tp+c.fp):0,rec=c.tp/(c.tp+c.fn),f1=(2*c.tp+c.fp+c.fn)?2*c.tp/(2*c.tp+c.fp+c.fn):0;
+          $('thAcc').textContent=fmt((c.tp+c.tn)/20,2);$('thPre').textContent=c.tp+c.fp?fmt(pre,2):'–';$('thRec').textContent=fmt(rec,2);$('thF1').textContent=fmt(f1,2);
+          let g='<line class="ax" x1="'+RX+'" y1="'+ry(0)+'" x2="'+rx(1)+'" y2="'+ry(0)+'"/><line class="ax" x1="'+RX+'" y1="'+ry(0)+'" x2="'+RX+'" y2="'+ry(1)+'"/>';
+          g+='<line class="dash" x1="'+rx(0)+'" y1="'+ry(0)+'" x2="'+rx(1)+'" y2="'+ry(1)+'"/>';
+          g+='<path class="ln" d="'+roc.map((p,i)=>(i?'L':'M')+rx(p[0]).toFixed(1)+' '+ry(p[1]).toFixed(1)).join('')+'"/>';
+          g+='<text class="lbl" x="'+(RX+60)+'" y="'+(RH-6)+'">Rate falscher Alarme (FPR)</text><text class="lbl" x="2" y="10">Recall (TPR)</text>';
+          g+='<circle cx="'+rx(c.fp/10)+'" cy="'+ry(c.tp/10)+'" r="6" style="fill:var(--warn)"/>';
+          $('thRoc').innerHTML=g}
+        $('thT').addEventListener('input',draw);draw()})();
+
+      // Demo 3: imbalance
+      (function(){
+        function draw(){const pp=+$('imP').value;$('imPO').textContent=fmt(pp,1)+' %';
+          const P=1000*pp/100,N=1000-P;
+          const a1=N/1000;
+          const tp=0.8*P,fn=P-tp,fp=0.1*N,tn=N-fp;
+          const pre=tp/(tp+fp),f2=2*tp/(2*tp+fp+fn);
+          $('imA1').textContent=fmt(a1,3);$('imP1').textContent='–';$('imR1').textContent='0.000';$('imF1').textContent='0.000';
+          $('imA2').textContent=fmt((tp+tn)/1000,3);$('imP2').textContent=fmt(pre,3);$('imR2').textContent=fmt(0.8,3);$('imF2').textContent=fmt(f2,3);
+          $('imMsg').textContent='Bei '+fmt(pp,1)+' % Positiven hat «Immer negativ» '+fmt(a1*100,1)+' % Accuracy und findet nichts. '+((tp+tn)/1000<a1?'Das echte Modell hat eine tiefere Accuracy, ist aber das nützliche. ':'Hier sind die Klassen ausgeglichen genug, dass Accuracy das bessere Modell auch zeigt. ')+'Beachte auch: Bei seltener Klasse sinkt die Precision des echten Modells, weil die vielen Negativen auch bei 10 % falschem Alarm viele FP liefern.'}
+        $('imP').addEventListener('input',draw);draw()})();
+
+      // Demo 4: kNN
+      (function(){
+        const r=mulberry32(11);
+        function make(n){const a=[];for(let i=0;i<n;i++){const c=i%2;const cx=c?0.6:0.4,cy=c?0.55:0.45;a.push({x:cx+0.2*gauss(r),y:cy+0.2*gauss(r),c:c})}return a}
+        const tr=make(60),te=make(200);
+        const W=320,H=220,sx=x=>x*W,sy=y=>H-y*H,G=32,GY=22;
+        function pred(x,y,k){const d=tr.map(p=>({d:(p.x-x)*(p.x-x)+(p.y-y)*(p.y-y),c:p.c})).sort((a,b)=>a.d-b.d);let s=0;for(let i=0;i<k;i++)s+=d[i].c;return s*2>k?1:0}
+        function draw(){const k=+$('knK').value;$('knKO').textContent=k;
+          let s='';const cw=W/G,ch=H/GY;
+          for(let i=0;i<G;i++)for(let j=0;j<GY;j++){const x=(i+0.5)/G,y=1-(j+0.5)/GY;s+='<rect x="'+(i*cw)+'" y="'+(j*ch)+'" width="'+(cw+0.5)+'" height="'+(ch+0.5)+'" style="fill:'+(pred(x,y,k)?'var(--accent)':'var(--warn)')+';opacity:.25"/>'}
+          tr.forEach(p=>{s+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="3.5" style="fill:'+(p.c?'var(--accent)':'var(--warn)')+';stroke:var(--fg);stroke-width:1"/>'});
+          $('knSvg').innerHTML=s;
+          const acc=set=>set.filter(p=>pred(p.x,p.y,k)===p.c).length/set.length;
+          const a=acc(tr),b=acc(te);$('knTr').textContent=fmt(a,2);$('knTe').textContent=fmt(b,2);
+          $('knMsg').textContent=k===1?'k = 1: Jeder Punkt zieht seine eigene Insel. Trainings-Accuracy ist perfekt, aber auf neuen Punkten schlechter (Overfitting).':k>=55?'Sehr grosses k: Die Fläche wird fast einfarbig, das Modell ignoriert die Struktur (Underfitting).':'Mittleres k: Eine glatte Grenze, Training und Test liegen nahe beieinander.'}
+        $('knK').addEventListener('input',draw);draw()})();
+    },
+  });
+})();
