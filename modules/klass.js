@@ -151,7 +151,7 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
     <div class="ctl"><label for="knK">k</label><input type="range" id="knK" min="1" max="59" step="2" value="1"><output id="knKO"></output></div>
     <div class="stats"><span>Trainings-Accuracy <b id="knTr"></b></span><span>Test-Accuracy (neue Punkte) <b id="knTe"></b></span></div>
     <p class="hint" id="knMsg"></p>
-    <p class="hint">Raute «Start» = der neue Punkt, dessen Klasse gesucht ist (Klick ins Bild verschiebt ihn). Die Linien führen zu seinen k nächsten Nachbarn, der gestrichelte Kreis zeigt die Reichweite.</p>
+    <p class="hint">Die Raute «Startpunkt» = der neue Punkt, dessen Klasse gesucht ist (Klick ins Bild verschiebt ihn). Die Linien führen zu seinen k nächsten Nachbarn, der gestrichelte Kreis zeigt die Reichweite.</p>
   </div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Naive Bayes</h4>
   <p>Berechnet mit dem Satz von Bayes, wie wahrscheinlich eine Klasse bei den beobachteten Merkmalen ist, und tut «naiv» so, als wären die Merkmale voneinander unabhängig. Beispiel aus den Folien: Spielen wir bei Sonne? Von 14 Tagen waren 9 Spieltage und 5 sonnig; an 3 der 9 Spieltage schien die Sonne.</p>
@@ -382,8 +382,8 @@ cross_val_score(model, X_tr, y_tr, cv=5, scoring="f1").mean()</code></pre>
           const dk=nb[nb.length-1].d;
           s+='<ellipse cx="'+sx(q.x)+'" cy="'+sy(q.y)+'" rx="'+dk*W+'" ry="'+dk*H+'" style="fill:none;stroke:var(--fg);stroke-width:1;stroke-dasharray:4 3"/>';
           nb.forEach(n=>{s+='<line x1="'+sx(q.x)+'" y1="'+sy(q.y)+'" x2="'+sx(n.p.x)+'" y2="'+sy(n.p.y)+'" style="stroke:var(--fg);stroke-width:1;opacity:.5"/>'});
-          s+='<path d="M'+sx(q.x)+' '+(sy(q.y)-9)+' L'+(sx(q.x)+9)+' '+sy(q.y)+' L'+sx(q.x)+' '+(sy(q.y)+9)+' L'+(sx(q.x)-9)+' '+sy(q.y)+' Z" style="fill:var(--bg);stroke:var(--fg);stroke-width:2"/>';
-          s+='<text x="'+(sx(q.x)+12)+'" y="'+(sy(q.y)-8)+'" style="fill:var(--fg);font-size:11px;font-weight:700">Start</text>';
+          s+='<path d="M'+sx(q.x)+' '+(sy(q.y)-9)+' L'+(sx(q.x)+9)+' '+sy(q.y)+' L'+sx(q.x)+' '+(sy(q.y)+9)+' L'+(sx(q.x)-9)+' '+sy(q.y)+' Z" style="fill:var(--fg);stroke:var(--bg);stroke-width:2"/>';
+          s+='<text x="'+(sx(q.x)+12)+'" y="'+(sy(q.y)-12)+'" style="fill:var(--fg);font-size:13px;font-weight:700;paint-order:stroke;stroke:var(--bg);stroke-width:3px">Startpunkt</text>';
           $('knSvg').innerHTML=s;
           const acc=set=>set.filter(p=>pred(p.x,p.y,k)===p.c).length/set.length;
           const a=acc(tr),b=acc(te);$('knTr').textContent=fmt(a,2);$('knTe').textContent=fmt(b,2);
