@@ -136,6 +136,20 @@ from sklearn.model_selection import cross_val_score
 pipe = Pipeline([("scaler", StandardScaler()), ("model", LinearRegression())])
 scores = cross_val_score(pipe, X, y, cv=10)   # 10 Folds
 scores.mean(), scores.std()</code></pre>
+  <div class="demo" id="cvDemo">
+    <div class="tag">Demo</div><h4>Cross-Validation Schritt für Schritt</h4>
+    <p class="hint">30 Punkte (Sinuskurve plus Rauschen). Wähle k und den Polynomgrad, dann steppe durch die Läufe. In jedem Lauf wird ein <b>neues</b> Modell (Scaler und Polynom) nur auf den ausgefüllten Punkten gelernt und auf den hohlen Punkten (Test-Fold) geprüft.</p>
+    <svg class="plot" id="cvStrip" viewBox="0 0 320 44" role="img" aria-label="Aufteilung der Daten in k Folds, der Test-Fold ist markiert"></svg>
+    <svg class="plot" id="cvSvg" viewBox="0 0 320 220" role="img" aria-label="Trainingspunkte, Testpunkte und das in diesem Lauf gelernte Polynom" style="margin-top:10px"></svg>
+    <div class="ctl"><label for="cvK">k (Folds)</label><input type="range" id="cvK" min="0" max="2" step="1" value="1"><output id="cvKO"></output></div>
+    <div class="ctl"><label for="cvDeg">Grad</label><input type="range" id="cvDeg" min="1" max="9" step="1" value="3"><output id="cvDegO"></output></div>
+    <div class="ctl"><label for="cvRun">Lauf</label><input type="range" id="cvRun" min="1" max="5" step="1" value="1"><output id="cvRunO"></output></div>
+    <div class="stats"><span>Scaler (nur Train): Mittelwert <b id="cvMu"></b>, Std <b id="cvSd"></b></span><span>Fehler dieses Laufs (MSE) <b id="cvMse"></b></span></div>
+    <svg class="plot" id="cvBars" viewBox="0 0 320 150" role="img" aria-label="Fehler pro Lauf und Mittelwert" style="margin-top:12px"></svg>
+    <div class="stats"><span>CV-Fehler (Mittelwert) <b id="cvMean"></b></span><span>Streuung (Std) <b id="cvStd"></b></span></div>
+    <p class="hint" id="cvMsg"></p>
+    <p class="hint">Balken: Fehler je Lauf, der gewählte Lauf ist blau. Gestrichelt: der Mittelwert, das ist die CV-Schätzung. Jeder Lauf hat einen anderen Scaler-Mittelwert und eine andere Kurve, weil er andere Trainingspunkte sieht. Die Balken zeigen, wie stark ein einzelner Split vom Zufall abhängt.</p>
+  </div>
   <div class="merk"><b>Merksatz</b><p>Pipeline = Schritte (Skalieren, Modell) werden zusammen behandelt, bei jedem Fold nur mit dessen Trainingsteil gelernt. Das verhindert Leakage und macht den Code sauber.</p></div>
 
   <h3>5 · Feature Selection</h3>
@@ -382,6 +396,44 @@ search.best_params_, search.best_estimator_</code></pre>
           g+='<line class="dash" x1="'+ex2(d-1)+'" y1="14" x2="'+ex2(d-1)+'" y2="'+(EH-22)+'"/>';
           $('bvErr').innerHTML=g}
         $('bvDeg').addEventListener('input',draw);draw()})();
+      (function(){
+        const r=mulberry32(11),f=x=>Math.sin(Math.PI*(x+1)),N=30,KS=[3,5,10];
+        const px=[],py=[];for(let i=0;i<N;i++){const x=r()*2-1;px.push(x);py.push(f(x)+0.3*gauss(r))}
+        const perm=[...Array(N).keys()];for(let i=N-1;i>0;i--){const j=Math.floor(r()*(i+1));[perm[i],perm[j]]=[perm[j],perm[i]]}
+        const fold=new Array(N);perm.forEach((idx,pos)=>{fold[idx]=pos});
+        const W=320,H=220,YMIN=-2,YMAX=2,sx=x=>8+((x+1)/2)*(W-16),sy=y=>H-8-((Math.max(YMIN,Math.min(YMAX,y))-YMIN)/(YMAX-YMIN))*(H-16);
+        const avg=a=>a.reduce((p,c)=>p+c,0)/a.length;
+        // One CV run: new scaler and new polynomial, learned on the training points only
+        function run(k,deg,i){const tr=[],te=[];for(let j=0;j<N;j++)((fold[j]%k)===i?te:tr).push(j);
+          const m=avg(tr.map(j=>px[j])),sd=Math.sqrt(avg(tr.map(j=>(px[j]-m)**2))),z=x=>(x-m)/sd;
+          const c=polyFit(tr.map(j=>z(px[j])),tr.map(j=>py[j]),deg);
+          const err=te.reduce((t,j)=>t+(polyEval(c,z(px[j]))-py[j])**2,0)/te.length;
+          return{tr:tr,te:te,m:m,sd:sd,c:c,z:z,err:err}}
+        function draw(){const k=KS[+$('cvK').value],deg=+$('cvDeg').value;
+          $('cvRun').max=k;if(+$('cvRun').value>k)$('cvRun').value=k;const sel=+$('cvRun').value-1;
+          $('cvKO').textContent=k;$('cvDegO').textContent=deg;$('cvRunO').textContent=(sel+1)+' / '+k;
+          const runs=[];for(let i=0;i<k;i++)runs.push(run(k,deg,i));const R=runs[sel];
+          let a='';const bw=(W-16)/k;
+          for(let i=0;i<k;i++){a+='<rect x="'+(8+i*bw).toFixed(1)+'" y="6" width="'+(bw-2).toFixed(1)+'" height="24" rx="3" style="fill:'+(i===sel?'var(--warn-soft)':'var(--accent-soft)')+';stroke:'+(i===sel?'var(--warn)':'var(--accent)')+'"/>';
+            if(k<=5)a+='<text class="lbl" x="'+(8+i*bw+bw/2-10).toFixed(1)+'" y="22">'+(i===sel?'Test':'Train')+'</text>'}
+          a+='<text class="lbl" x="8" y="40">Fold '+(sel+1)+' von '+k+' ist der Test-Fold (orange), alle anderen trainieren.</text>';
+          $('cvStrip').innerHTML=a;
+          let g='<line class="ax" x1="0" y1="'+sy(0)+'" x2="'+W+'" y2="'+sy(0)+'"/>';
+          let tp='',cp='';for(let i=0;i<=100;i++){const x=-1+i*0.02;tp+=(i?'L':'M')+sx(x).toFixed(1)+' '+sy(f(x)).toFixed(1);cp+=(i?'L':'M')+sx(x).toFixed(1)+' '+sy(polyEval(R.c,R.z(x))).toFixed(1)}
+          g+='<path class="dash" d="'+tp+'"/><path class="ln" d="'+cp+'"/>';
+          R.tr.forEach(j=>{g+='<circle class="pt" cx="'+sx(px[j])+'" cy="'+sy(py[j])+'" r="4"/>'});
+          R.te.forEach(j=>{g+='<circle cx="'+sx(px[j])+'" cy="'+sy(py[j])+'" r="5" style="fill:var(--bg);stroke:var(--warn);stroke-width:2"/>'});
+          $('cvSvg').innerHTML=g;
+          $('cvMu').textContent=fmt(R.m,2);$('cvSd').textContent=fmt(R.sd,2);$('cvMse').textContent=fmt(R.err,3);
+          const errs=runs.map(q=>q.err),mean=avg(errs),sdv=Math.sqrt(avg(errs.map(v=>(v-mean)**2)));
+          const EH=150,top=Math.max.apply(null,errs.concat([mean*1.2,0.1])),by=v=>EH-24-(v/top)*(EH-44),bw2=(W-30)/k;
+          let b='<line class="ax" x1="20" y1="'+(EH-24)+'" x2="'+(W-8)+'" y2="'+(EH-24)+'"/><text class="lbl" x="20" y="10">Fehler (MSE) je Lauf, max '+fmt(top,2)+'</text>';
+          errs.forEach((v,i)=>{b+='<rect x="'+(22+i*bw2).toFixed(1)+'" y="'+by(v).toFixed(1)+'" width="'+(bw2-3).toFixed(1)+'" height="'+(EH-24-by(v)).toFixed(1)+'" style="fill:'+(i===sel?'var(--accent)':'var(--accent-soft)')+';stroke:var(--accent)"/>';
+            if(k<=5)b+='<text class="lbl" x="'+(22+i*bw2+bw2/2-3).toFixed(1)+'" y="'+(EH-10)+'">'+(i+1)+'</text>'});
+          b+='<line class="dash" x1="20" y1="'+by(mean)+'" x2="'+(W-8)+'" y2="'+by(mean)+'"/>';
+          $('cvBars').innerHTML=b;$('cvMean').textContent=fmt(mean,3);$('cvStd').textContent=fmt(sdv,3);
+          $('cvMsg').textContent='Bester Lauf: Fehler '+fmt(Math.min.apply(null,errs),3)+', schlechtester: '+fmt(Math.max.apply(null,errs),3)+'. Mit nur einem Split hättest du je nach Glück irgendeinen dieser Werte erhalten. Der Mittelwert '+fmt(mean,3)+' ist die stabilere Aussage. Probiere Grad 1, 3 und 9: Bei hohem Grad wird der CV-Fehler gross und die Läufe streuen stark (Overfitting).'}
+        ['cvK','cvDeg','cvRun'].forEach(id=>$(id).addEventListener('input',draw));draw()})();
     },
   });
 })();

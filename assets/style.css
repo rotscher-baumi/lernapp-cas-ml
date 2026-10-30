@@ -38,6 +38,10 @@ nav.chips{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background
   margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px));
   border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap;display:flex;gap:8px;scrollbar-width:none}
 nav.chips::-webkit-scrollbar{display:none}
+@media (min-width:700px){
+  nav.chips{flex-wrap:wrap;white-space:normal;overflow-x:visible}
+  html{scroll-padding-top:calc(110px + env(safe-area-inset-top,0px))}
+}
 nav.chips a{flex:none;font-size:14px;font-weight:500;color:var(--fg);text-decoration:none;padding:6px 12px;border-radius:999px;border:1px solid var(--line)}
 nav.chips a.on{background:var(--accent);border-color:var(--accent);color:#fff}
 section{padding-top:44px}

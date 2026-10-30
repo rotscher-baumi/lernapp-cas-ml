@@ -1,15 +1,13 @@
 """Static server for the Lernapp with a small JSON persistence endpoint (stdlib only)."""
 import json
 import logging
-import os
 import sys
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 ROOT = Path(__file__).parent
-STATE_FILE = Path(os.environ.get("STATE_FILE", ROOT / "data" / "state.json"))
-PORT = int(sys.argv[1]) if len(sys.argv) > 1 else int(os.environ.get("PORT", 8765))
-HOST = os.environ.get("HOST", "127.0.0.1")  # set HOST=0.0.0.0 when deploying
+STATE_FILE = ROOT / "data" / "state.json"
+PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8765
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -52,5 +50,5 @@ class Handler(SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    logging.info("Lernapp on http://%s:%d", HOST, PORT)
-    ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()
+    logging.info("Lernapp on http://localhost:%d", PORT)
+    ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
