@@ -99,6 +99,11 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
     <svg class="plot" id="thRoc" viewBox="0 0 320 210" role="img" aria-label="ROC-Kurve mit aktuellem Schwellenpunkt" style="margin-top:12px"></svg>
     <p class="hint">Oben: Kreis = echt positiv, Quadrat = echt negativ. Alles rechts der Linie wird als positiv vorhergesagt. Unten: Der orange Punkt wandert beim Schieben der Schwelle auf der ROC-Kurve.</p>
   </div>
+  <div class="merk"><b>Zusammenfassung: Schwelle, ROC, AUC</b><ul>
+    <li><b>Schwelle:</b> Das Modell liefert Wahrscheinlichkeiten, erst die Schwelle macht daraus Klassen. Tiefere Schwelle = mehr Recall, mehr falsche Alarme.</li>
+    <li><b>ROC:</b> Jede Schwelle ergibt einen Punkt (FPR, TPR). Die ROC-Kurve verbindet alle Punkte.</li>
+    <li><b>AUC:</b> Fläche unter der ROC-Kurve, unabhängig von der Schwelle. 1 = perfekt, 0,5 = Zufall. Die Schwelle wählst du danach nach den Kosten der Fehler.</li>
+  </ul></div>
 
   <h3>3 · Mehr als zwei Klassen</h3>
   <ul>
@@ -146,6 +151,7 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
     <div class="ctl"><label for="knK">k</label><input type="range" id="knK" min="1" max="59" step="2" value="1"><output id="knKO"></output></div>
     <div class="stats"><span>Trainings-Accuracy <b id="knTr"></b></span><span>Test-Accuracy (neue Punkte) <b id="knTe"></b></span></div>
     <p class="hint" id="knMsg"></p>
+    <p class="hint">Raute «Start» = der neue Punkt, dessen Klasse gesucht ist (Klick ins Bild verschiebt ihn). Die Linien führen zu seinen k nächsten Nachbarn, der gestrichelte Kreis zeigt die Reichweite.</p>
   </div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Naive Bayes</h4>
   <p>Berechnet mit dem Satz von Bayes, wie wahrscheinlich eine Klasse bei den beobachteten Merkmalen ist, und tut «naiv» so, als wären die Merkmale voneinander unabhängig. Beispiel aus den Folien: Spielen wir bei Sonne? Von 14 Tagen waren 9 Spieltage und 5 sonnig; an 3 der 9 Spieltage schien die Sonne.</p>
@@ -365,18 +371,26 @@ cross_val_score(model, X_tr, y_tr, cv=5, scoring="f1").mean()</code></pre>
       (function(){
         const r=mulberry32(11);
         function make(n){const a=[];for(let i=0;i<n;i++){const c=i%2;const cx=c?0.6:0.4,cy=c?0.55:0.45;a.push({x:cx+0.2*gauss(r),y:cy+0.2*gauss(r),c:c})}return a}
-        const tr=make(60),te=make(200);
+        const tr=make(60),te=make(200),q={x:0.5,y:0.5};
         const W=320,H=220,sx=x=>x*W,sy=y=>H-y*H,G=32,GY=22;
         function pred(x,y,k){const d=tr.map(p=>({d:(p.x-x)*(p.x-x)+(p.y-y)*(p.y-y),c:p.c})).sort((a,b)=>a.d-b.d);let s=0;for(let i=0;i<k;i++)s+=d[i].c;return s*2>k?1:0}
         function draw(){const k=+$('knK').value;$('knKO').textContent=k;
           let s='';const cw=W/G,ch=H/GY;
           for(let i=0;i<G;i++)for(let j=0;j<GY;j++){const x=(i+0.5)/G,y=1-(j+0.5)/GY;s+='<rect x="'+(i*cw)+'" y="'+(j*ch)+'" width="'+(cw+0.5)+'" height="'+(ch+0.5)+'" style="fill:'+(pred(x,y,k)?'var(--accent)':'var(--warn)')+';opacity:.25"/>'}
           tr.forEach(p=>{s+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="3.5" style="fill:'+(p.c?'var(--accent)':'var(--warn)')+';stroke:var(--fg);stroke-width:1"/>'});
+          const nb=tr.map(p=>({p:p,d:Math.hypot(p.x-q.x,p.y-q.y)})).sort((u,v)=>u.d-v.d).slice(0,k);
+          const dk=nb[nb.length-1].d;
+          s+='<ellipse cx="'+sx(q.x)+'" cy="'+sy(q.y)+'" rx="'+dk*W+'" ry="'+dk*H+'" style="fill:none;stroke:var(--fg);stroke-width:1;stroke-dasharray:4 3"/>';
+          nb.forEach(n=>{s+='<line x1="'+sx(q.x)+'" y1="'+sy(q.y)+'" x2="'+sx(n.p.x)+'" y2="'+sy(n.p.y)+'" style="stroke:var(--fg);stroke-width:1;opacity:.5"/>'});
+          s+='<path d="M'+sx(q.x)+' '+(sy(q.y)-9)+' L'+(sx(q.x)+9)+' '+sy(q.y)+' L'+sx(q.x)+' '+(sy(q.y)+9)+' L'+(sx(q.x)-9)+' '+sy(q.y)+' Z" style="fill:var(--bg);stroke:var(--fg);stroke-width:2"/>';
+          s+='<text x="'+(sx(q.x)+12)+'" y="'+(sy(q.y)-8)+'" style="fill:var(--fg);font-size:11px;font-weight:700">Start</text>';
           $('knSvg').innerHTML=s;
           const acc=set=>set.filter(p=>pred(p.x,p.y,k)===p.c).length/set.length;
           const a=acc(tr),b=acc(te);$('knTr').textContent=fmt(a,2);$('knTe').textContent=fmt(b,2);
           $('knMsg').textContent=k===1?'k = 1: Jeder Punkt zieht seine eigene Insel. Trainings-Accuracy ist perfekt, aber auf neuen Punkten schlechter (Overfitting).':k>=55?'Sehr grosses k: Die Fläche wird fast einfarbig, das Modell ignoriert die Struktur (Underfitting).':'Mittleres k: Eine glatte Grenze, Training und Test liegen nahe beieinander.'}
-        $('knK').addEventListener('input',draw);draw()})();
+        $('knK').addEventListener('input',draw);
+        $('knSvg').addEventListener('click',e=>{const b=e.currentTarget.getBoundingClientRect();q.x=Math.min(1,Math.max(0,(e.clientX-b.left)/b.width));q.y=Math.min(1,Math.max(0,1-(e.clientY-b.top)/b.height));draw()});
+        draw()})();
     },
   });
 })();
