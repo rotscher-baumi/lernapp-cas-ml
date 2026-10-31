@@ -58,10 +58,13 @@
   <p>Das Ziel dahinter: die Summe der quadrierten Abstände innerhalb der Cluster (<b>WSS</b>, within-cluster sum of squares) möglichst klein machen. Der Start ist zufällig, deshalb kann ein anderer Start ein anderes Ergebnis geben.</p>
   <div class="demo" id="kmDemo">
     <div class="tag">Demo</div><h4>k-Means Schritt für Schritt</h4>
-    <svg class="plot" id="kmSvg" viewBox="0 0 320 240" role="img" aria-label="90 Punkte mit k-Means-Zentren"></svg>
-    <div class="ctl"><label for="kmK">k</label><input type="range" id="kmK" min="1" max="6" step="1" value="3"><output id="kmKO"></output></div>
-    <div class="btnrow"><button class="pri" id="kmStep">1 Schritt</button><button id="kmRun">Bis fertig</button><button id="kmNew">Neuer Start</button></div>
-    <div class="stats"><span>Schritt <b id="kmN"></b></span><span>WSS <b id="kmW"></b></span></div>
+    <p class="hint">Wähle die Form der Daten, k und wie die Startzentren gesetzt werden. «Bis fertig» lässt den Algorithmus laufen, bis sich nichts mehr ändert.</p>
+    <div class="btnrow" id="kmShape" role="group" aria-label="Datenform"><span style="align-self:center;font-size:14px;min-width:5.5em">Daten</span><button data-v="gauss">3 Haufen</button><button data-v="circles">Gepackte Kreise</button><button data-v="smiley">Smiley</button><button data-v="moons">Monde</button><button data-v="rings">Ringe</button><button data-v="uniform">Gleichverteilt</button><button data-v="draw">Selber zeichnen</button></div>
+    <div class="btnrow" id="kmKs" role="group" aria-label="Anzahl Cluster k"><span style="align-self:center;font-size:14px;min-width:5.5em">k</span><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button><button data-v="6">6</button></div>
+    <div class="btnrow" id="kmInit" role="group" aria-label="Startmethode"><span style="align-self:center;font-size:14px;min-width:5.5em">Start</span><button data-v="random">Zufällig</button><button data-v="far">Am weitesten weg</button><button data-v="pick">Selber setzen</button></div>
+    <svg class="plot" id="kmSvg" viewBox="0 0 320 240" role="img" aria-label="Datenpunkte mit k-Means-Zentren; Hintergrund zeigt das nächste Zentrum"></svg>
+    <div class="btnrow"><button id="kmStep">1 Schritt</button><button class="pri" id="kmRun">Bis fertig</button><button id="kmNew">Neuer Start</button></div>
+    <div class="stats"><span>Schritt <b id="kmN"></b></span><span>Als Nächstes <b id="kmNx"></b></span><span>WSS <b id="kmW"></b></span></div>
     <p class="hint" id="kmMsg"></p>
   </div>
   <div class="falle"><b>Falle (Skalierung)</b><p>k-Means rechnet mit Abständen. Hat ein Merkmal grosse Zahlen (Preis in Franken) und ein anderes kleine (Bewertung 1 bis 5), entscheidet fast nur das grosse. Darum <b>vorher skalieren</b> (<code>StandardScaler</code>).</p></div>
@@ -213,21 +216,83 @@ plt.scatter(Z[:, 0], Z[:, 1], c=labels)</code></pre>
       { q: `Was darfst du aus einem t-SNE-Bild nicht ablesen?`, a: `Die Abstände zwischen Gruppen und die Gruppengrössen. Aussagekräftig ist nur, welche Punkte benachbart sind. Zudem hängt das Bild von Perplexity und Zufallsstart ab.` },
     ],
     init() {
-      // Demo 1: k-means step by step
+      // Demo 1: k-means with selectable data shape and start method; one half-step per click or animated to convergence
       (function(){
-        const pts=blobs(mulberry32(5)),W=320,H=240,sx=p=>14+p[0]*(W-28),sy=p=>H-14-p[1]*(H-28);
-        let cent,lab,n,seed=1,done;
-        function start(){const k=+$('kmK').value,r=mulberry32(seed*7919+k);const idx=[];while(idx.length<k){const i=Math.floor(r()*pts.length);if(idx.indexOf(i)<0)idx.push(i)}
-          cent=idx.map(i=>pts[i].slice());lab=new Array(pts.length).fill(0);assign(pts,cent,lab);n=0;done=false;draw()}
-        function step(){if(done)return;const ch=assign(pts,cent,lab);update(pts,cent,lab);n++;if(!ch&&n>1)done=true;draw()}
-        function draw(){const k=+$('kmK').value;$('kmKO').textContent=k;let s='';
-          pts.forEach((p,i)=>{s+=dot(sx(p),sy(p),COL[lab[i]%COL.length],3.5)});
-          cent.forEach((c,j)=>{const x=sx(c),y=sy(c);s+='<path d="M'+(x-7)+' '+y+'H'+(x+7)+'M'+x+' '+(y-7)+'V'+(y+7)+'" style="stroke:'+COL[j%COL.length]+';stroke-width:4;fill:none"/><path d="M'+(x-7)+' '+y+'H'+(x+7)+'M'+x+' '+(y-7)+'V'+(y+7)+'" style="stroke:var(--fg);stroke-width:1.2;fill:none"/>'});
-          $('kmSvg').innerHTML=s;$('kmN').textContent=n;$('kmW').textContent=fmt(wss(pts,cent,lab),2);
-          $('kmMsg').textContent=done?'Fertig: Die Zuordnung ändert sich nicht mehr. Probiere «Neuer Start» und ein anderes k. Bei k = 3 landet der Algorithmus nicht immer in der besten Lösung.':n===0?'Zufällige Startzentren (Kreuze), Punkte noch dem nächsten Zentrum zugeordnet. Mit «1 Schritt» wandern die Zentren in die Mitte ihrer Punkte.':'Zentren wandern in die Mitte ihrer Punkte, dann werden die Punkte neu zugeordnet.'}
-        $('kmStep').addEventListener('click',step);
-        $('kmRun').addEventListener('click',()=>{for(let i=0;i<50&&!done;i++)step()});
-        $('kmNew').addEventListener('click',()=>{seed++;start()});$('kmK').addEventListener('input',start);start()})();
+        const W=320,H=240,sx=p=>160+100*p[0],sy=p=>120-100*p[1];
+        const DONE={gauss:'Klar getrennte, runde Haufen sind der Idealfall. Probiere «Neuer Start» mit «Zufällig»: Manchmal landen zwei Zentren im selben Haufen.',
+          circles:'Die Kreise sind verschieden gross. k-Means bevorzugt ähnlich grosse Cluster und schneidet darum oft durch den grossen Kreis.',
+          smiley:'Gesicht, Augen und Mund sind für dich klare Gruppen. k-Means zieht aber nur gerade Grenzen und zerschneidet den Ring.',
+          moons:'k-Means sucht runde Gruppen und trennt mit geraden Linien. Die Monde werden darum zerschnitten. Hier hilft DBSCAN.',
+          rings:'Beide Ringe haben dasselbe Zentrum. k-Means kann sie nicht trennen und schneidet sie wie eine Torte.',
+          uniform:'Es gibt keine echten Gruppen, trotzdem liefert k-Means k Cluster. Das Ergebnis allein beweist nicht, dass Gruppen existieren.',
+          draw:'Probiere «Neuer Start» oder eine andere Startmethode: Kommt dasselbe heraus?'};
+        let shape='gauss',k=3,init='random',seed=1,pts=[],cent=[],lab=[],ready=false,picking=false,n=0,next='assign',done=false,timer=null,note='';
+        // Data lives in x ∈ [-1.4, 1.4], y ∈ [-1, 1] so distances look the same as on screen.
+        function gen(s,r){const p=[],g=(cx,cy,sd,m)=>{for(let i=0;i<m;i++)p.push([cx+sd*gauss(r),cy+sd*gauss(r)])},
+            ring=(cx,cy,R,m,a0,a1,nz)=>{for(let i=0;i<m;i++){const a=a0+(a1-a0)*r(),rr=R+nz*gauss(r);p.push([cx+rr*Math.cos(a),cy+rr*Math.sin(a)])}};
+          if(s==='gauss'){g(-0.8,0.45,0.18,50);g(0.75,0.4,0.18,50);g(0,-0.55,0.18,50)}
+          else if(s==='circles'){[[-0.7,0.3,0.55],[0.6,0.45,0.42],[0.15,-0.55,0.38],[-0.95,-0.65,0.25],[1.05,-0.55,0.28]].forEach(c=>{const m=Math.round(260*c[2]*c[2]);for(let i=0;i<m;i++){const a=2*Math.PI*r(),rr=c[2]*Math.sqrt(r());p.push([c[0]+rr*Math.cos(a),c[1]+rr*Math.sin(a)])}})}
+          else if(s==='smiley'){ring(0,0,0.92,130,0,2*Math.PI,0.03);g(-0.33,0.32,0.07,25);g(0.33,0.32,0.07,25);ring(0,0.05,0.52,50,Math.PI*1.15,Math.PI*1.85,0.03)}
+          else if(s==='moons'){for(let i=0;i<150;i++){const t=Math.PI*r(),up=i%2===0,x=up?Math.cos(t):1-Math.cos(t),y=up?Math.sin(t):0.5-Math.sin(t);p.push([(x-0.5)*0.85+0.05*gauss(r),(y-0.25)*0.85+0.05*gauss(r)])}}
+          else if(s==='rings'){ring(0,0,0.35,60,0,2*Math.PI,0.05);ring(0,0,0.9,120,0,2*Math.PI,0.05)}
+          else if(s==='uniform'){for(let i=0;i<200;i++)p.push([2.6*r()-1.3,1.9*r()-0.95])}
+          return p}
+        function newData(){pts=shape==='draw'?[]:gen(shape,mulberry32(seed*104729+7));restart()}
+        function restart(){stop();note='';cent=[];lab=new Array(pts.length).fill(-1);n=0;next='assign';done=false;ready=false;picking=false;
+          if(pts.length>=k)placeCentres();draw()}
+        function placeCentres(){
+          if(init==='pick'){picking=true;return}
+          const r=mulberry32(seed*7919+k);
+          if(init==='random'){const idx=[];while(idx.length<k){const i=Math.floor(r()*pts.length);if(idx.indexOf(i)<0)idx.push(i)}cent=idx.map(i=>pts[i].slice())}
+          else{cent=[pts[Math.floor(r()*pts.length)].slice()];
+            while(cent.length<k){let bi=0,bd=-1;pts.forEach((p,i)=>{const d=Math.min.apply(null,cent.map(c=>d2(p,c)));if(d>bd){bd=d;bi=i}});cent.push(pts[bi].slice())}}
+          ready=true}
+        // One half-step (assign or move centres). Returns false when there is nothing more to run.
+        function step(){note='';
+          if(done){draw();return false}
+          if(!ready){
+            if(picking)note='Setze zuerst die Startzentren: Klicke noch '+(k-cent.length)+'-mal ins Feld.';
+            else if(pts.length<k)note='Zeichne zuerst Punkte: mindestens '+k+'.';
+            else placeCentres();
+            draw();return ready}
+          if(next==='assign'){const ch=assign(pts,cent,lab);if(!ch&&n>0)done=true;else next='update'}
+          else{update(pts,cent,lab);next='assign'}
+          n++;draw();return !done}
+        function stop(){if(timer){clearInterval(timer);timer=null}$('kmRun').textContent='Bis fertig'}
+        function run(){if(timer){stop();return}
+          if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches){for(let i=0;i<500&&step();i++);return}
+          if(!step())return;timer=setInterval(()=>{if(!step())stop()},400);$('kmRun').textContent='Stopp'}
+        function cross(c,col){const x=sx(c),y=sy(c),d='M'+(x-8)+' '+y+'H'+(x+8)+'M'+x+' '+(y-8)+'V'+(y+8);
+          return '<path d="'+d+'" style="stroke:'+col+';stroke-width:5;fill:none"/><path d="'+d+'" style="stroke:var(--fg);stroke-width:1.4;fill:none"/>'}
+        function draw(){let s='';
+          if(cent.length){const g=5;s+='<g shape-rendering="crispEdges">';
+            for(let y=0;y<H;y+=g)for(let x=0;x<W;x+=g){const q=[(x+g/2-160)/100,(120-y-g/2)/100];let b=0,bd=Infinity;cent.forEach((c,j)=>{const d=d2(q,c);if(d<bd){bd=d;b=j}});
+              s+='<rect x="'+x+'" y="'+y+'" width="'+g+'" height="'+g+'" style="fill:'+COL[b%COL.length]+';fill-opacity:.13"/>'}
+            s+='</g>'}
+          pts.forEach((p,i)=>{s+=dot(sx(p),sy(p),lab[i]<0?'var(--muted)':COL[lab[i]%COL.length],2.6)});
+          cent.forEach((c,j)=>{s+=cross(c,COL[j%COL.length])});
+          $('kmSvg').innerHTML=s;$('kmSvg').style.cursor=picking||(shape==='draw'&&n===0)?'crosshair':'';
+          $('kmN').textContent=n;$('kmNx').textContent=!ready||done?'–':next==='assign'?'Zuordnen':'Zentren verschieben';
+          $('kmW').textContent=lab.length&&lab.every(l=>l>=0)?fmt(wss(pts,cent,lab),2):'–';
+          $('kmMsg').textContent=note?note
+            :picking?'Klicke ins Feld, um die Startzentren zu setzen. Noch '+(k-cent.length)+'.'
+            :!ready?(pts.length?'Klicke weiter, um mehr Punkte zu sprühen. Dann «1 Schritt» oder «Bis fertig».':'Klicke ins Feld: Jeder Klick sprüht ein paar Punkte. Dann «1 Schritt» oder «Bis fertig».')
+            :done?'Fertig nach '+n+' Schritten: Die Zuordnung ändert sich nicht mehr. '+DONE[shape]
+            :n===0?'Startzentren gesetzt (Kreuze). Die Hintergrundfarbe zeigt, welches Zentrum am nächsten ist. Als Nächstes wird jeder Punkt dem nächsten Zentrum zugeordnet.'+(shape==='draw'?' Du kannst noch Punkte dazuklicken.':'')
+            :next==='update'?'Zugeordnet: Jeder Punkt hat die Farbe seines nächsten Zentrums. Als Nächstes wandert jedes Zentrum in die Mitte seiner Punkte.'
+            :'Verschoben: Jedes Zentrum sitzt jetzt im Mittelwert seiner Punkte. Als Nächstes werden die Punkte neu zugeordnet.'}
+        $('kmSvg').addEventListener('click',e=>{const b=$('kmSvg').getBoundingClientRect(),p=[((e.clientX-b.left)/b.width*W-160)/100,(120-(e.clientY-b.top)/b.height*H)/100];note='';
+          if(picking){cent.push(p);if(cent.length>=k){picking=false;ready=true}draw()}
+          else if(shape==='draw'&&n===0){for(let i=0;i<8;i++){pts.push([p[0]+0.07*gauss(Math.random),p[1]+0.07*gauss(Math.random)]);lab.push(-1)}draw()}});
+        function seg(id,cur,fn){const grp=$(id),mark=v=>grp.querySelectorAll('button').forEach(b=>{const on=b.dataset.v===String(v);b.className=on?'pri':'';b.setAttribute('aria-pressed',on)});
+          grp.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mark(b.dataset.v);fn(b.dataset.v)});mark(cur)}
+        seg('kmShape',shape,v=>{shape=v;seed++;newData()});
+        seg('kmKs',k,v=>{k=+v;restart()});
+        seg('kmInit',init,v=>{init=v;restart()});
+        $('kmStep').addEventListener('click',()=>{stop();step()});
+        $('kmRun').addEventListener('click',run);
+        $('kmNew').addEventListener('click',()=>{seed++;restart()});
+        newData()})();
 
       // Demo 2: effect of scaling
       (function(){
