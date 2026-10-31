@@ -14,6 +14,9 @@
  *   exercises optional [{ t, task, start, check, sol }] Python exercises
  *   quiz      optional [{ q, a }] self-test questions (HTML allowed)
  *   notebooks optional [{ file, desc }] files in lernapp/notebooks
+ *   nbExercises optional notebook file name; its exercises (assets/notebook-data.js,
+ *             generated from the notebook) are shown at the end of the chapter and run
+ *             with Pyodide (real pandas / scikit-learn)
  *   init()    optional, called once after the chapter is in the page
  */
 (function () {
@@ -23,6 +26,7 @@
   const fmt = (v, d) => Number(v).toFixed(d);
   const modules = [];
   const SKULPT = 'https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/';
+  const PYODIDE = 'https://cdn.jsdelivr.net/pyodide/v0.27.7/full/';
 
   window.LernApp = {
     $: $,
@@ -186,6 +190,103 @@
       );
   }
 
+  /* ---------- Pyodide runner for notebook exercises (real pandas / scikit-learn) ---------- */
+  let pyPromise = null;
+  let pyQueue = Promise.resolve();
+  let pyOut = '';
+
+  const PY_HELPER = [
+    'import ast, base64, io',
+    'import matplotlib',
+    'matplotlib.use("agg")',
+    '_nb_shown = []',
+    'def _nb_display(*objs):',
+    '    for o in objs:',
+    '        if hasattr(o, "_repr_html_") and o._repr_html_():',
+    '            _nb_shown.append(("html", o._repr_html_()))',
+    '        else:',
+    '            _nb_shown.append(("text", repr(o)))',
+    'def _nb_run(src, ns):',
+    '    del _nb_shown[:]',
+    '    ns["display"] = _nb_display',
+    '    tree = ast.parse(src)',
+    '    last = None',
+    '    if tree.body and isinstance(tree.body[-1], ast.Expr):',
+    '        last = ast.Expression(tree.body.pop().value)',
+    '    exec(compile(tree, "<cell>", "exec"), ns)',
+    '    if last is not None:',
+    '        val = eval(compile(last, "<cell>", "eval"), ns)',
+    '        if val is not None:',
+    '            _nb_display(val)',
+    'def _nb_figs():',
+    '    import matplotlib.pyplot as plt',
+    '    res = []',
+    '    for num in plt.get_fignums():',
+    '        buf = io.BytesIO()',
+    '        plt.figure(num).savefig(buf, format="png", dpi=100, bbox_inches="tight")',
+    '        res.append(base64.b64encode(buf.getvalue()).decode())',
+    '    plt.close("all")',
+    '    return res',
+  ].join('\n');
+
+  function loadPy() {
+    if (!pyPromise) {
+      pyPromise = loadScript(PYODIDE + 'pyodide.js')
+        .then(function () { return window.loadPyodide({ indexURL: PYODIDE }); })
+        .then(function (py) {
+          py.setStdout({ batched: function (t) { pyOut += t + '\n'; } });
+          py.setStderr({ batched: function (t) { pyOut += t + '\n'; } });
+          return py;
+        });
+      pyPromise.catch(function () { pyPromise = null; });
+    }
+    return pyPromise;
+  }
+
+  function pyErr(e) {
+    const lines = String(e && e.message ? e.message : e).trim().split('\n');
+    return lines[lines.length - 1].replace(/^AssertionError:\s*/, '') || 'Unbekannter Fehler';
+  }
+
+  // One shared namespace per notebook (like a kernel); runs are queued one after the other.
+  function runNb(nbKey, setup, code, status) {
+    const job = pyQueue.then(function () {
+      status('Python wird geladen (beim ersten Mal rund 1 Minute, danach schnell) …');
+      return loadPy().then(function (py) {
+        const nb = (runNb.spaces = runNb.spaces || {});
+        let ready = Promise.resolve();
+        if (!nb[nbKey]) {
+          status('Pakete werden geladen …');
+          ready = py.loadPackagesFromImports(setup).then(function () {
+            py.runPython(PY_HELPER);
+            nb[nbKey] = py.globals.get('dict')();
+            pyOut = '';
+            py.globals.get('_nb_run')(setup, nb[nbKey]);
+          });
+        }
+        return ready.then(function () {
+          status('Läuft …');
+          pyOut = '';
+          const res = { ok: true, out: '', shown: [], figs: [] };
+          try {
+            py.globals.get('_nb_run')(code, nb[nbKey]);
+            res.shown = py.globals.get('_nb_shown').toJs().map(function (t) { return { kind: t[0], val: t[1] }; });
+          } catch (e) {
+            res.ok = false;
+            res.err = pyErr(e);
+          }
+          res.figs = py.globals.get('_nb_figs')().toJs();
+          res.out = pyOut;
+          return res;
+        });
+      });
+    });
+    pyQueue = job.catch(function () {});
+    return job.catch(function (e) {
+      return { ok: false, out: '', shown: [], figs: [], err: pyErr(e) };
+    });
+  }
+
   /* ---------- Rendering ---------- */
   function buildSection(m) {
     const sec = document.createElement('section');
@@ -199,6 +300,12 @@
       html += '<h3>Python-Übungen <span class="prog" id="prog-' + m.id + '"></span></h3>' +
         '<p class="note">Code ändern, «Ausführen» drücken, mit «Prüfen» kontrollieren. Beim ersten Ausführen lädt die Seite einmalig den Python-Interpreter (Skulpt, rund 1 MB). Er versteht die Grundlagen aus dem Kurs, aber nicht jede neue Python-Funktion.</p>' +
         '<div class="exlist" id="ex-' + m.id + '"></div>';
+    }
+    if (m.nbExercises && window.NbData && window.NbData[m.nbExercises]) {
+      const nbd = window.NbData[m.nbExercises];
+      html += '<h3>Übungen <span class="prog" id="prog-nb-' + m.id + '"></span></h3>' +
+        '<p class="note">Dieselben ' + nbd.exercises.length + ' Aufgaben wie im Notebook <code class="nbfile">lernapp/notebooks/' + m.nbExercises + '</code>: Code ändern (ersetze <code>...</code>), «Ausführen», dann «Prüfen». Die Aufgaben bauen aufeinander auf, am besten der Reihe nach lösen. Läuft im Browser mit echtem Python (Pyodide, einmalig grosser Download). <button data-a="reset-env" id="env-' + m.id + '">Umgebung neu starten</button></p>' +
+        '<div class="exlist" id="nbex-' + m.id + '"></div>';
     }
     if (m.quiz && m.quiz.length) {
       html += '<h3>Selbsttest</h3><p class="note">Antworte zuerst im Kopf, dann klappe auf.</p>' +
@@ -294,6 +401,109 @@
     updateProgress();
   }
 
+  function renderNbExercises(m) {
+    const list = $('nbex-' + m.id);
+    if (!list) return;
+    const nbd = window.NbData[m.nbExercises];
+    const nbKey = m.nbExercises;
+    const total = nbd.exercises.length;
+
+    function updateProgress() {
+      let n = 0;
+      for (let i = 0; i < total; i++) if (store('cas-ml-' + m.id + '-nb-' + (i + 1) + '-ok') === '1') n++;
+      const el = $('prog-nb-' + m.id);
+      if (el) el.textContent = n + ' von ' + total + ' gelöst';
+    }
+
+    $('env-' + m.id).addEventListener('click', function () {
+      if (runNb.spaces) delete runNb.spaces[nbKey];
+      this.textContent = 'Umgebung neu gestartet ✓';
+    });
+
+    nbd.exercises.forEach(function (ex, i) {
+      const id = 'nbex-' + m.id + '-' + (i + 1);
+      const key = 'cas-ml-' + m.id + '-nb-' + (i + 1);
+      const card = document.createElement('div');
+      card.className = 'ex';
+      card.innerHTML =
+        '<h4>Aufgabe ' + (i + 1) + ' · ' + ex.t + '<span class="done"></span></h4><div class="task">' + ex.task + '</div>' +
+        '<label for="' + id + '" style="display:block;font-size:13px;color:var(--muted)">Dein Code</label>' +
+        '<textarea id="' + id + '" class="code" rows="' + (ex.start.split('\n').length + 1) + '" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>' +
+        '<div class="btnrow"><button class="pri" data-a="run">Ausführen</button><button data-a="chk">Prüfen</button><button data-a="rst">Zurücksetzen</button><button data-a="sol">Lösung zeigen</button></div>' +
+        '<pre class="out" hidden></pre><div class="rich"></div><div class="verdict" aria-live="polite"></div><div class="solbox" hidden><pre><code></code></pre></div>';
+      const ta = card.querySelector('textarea');
+      const out = card.querySelector('.out');
+      const rich = card.querySelector('.rich');
+      const vd = card.querySelector('.verdict');
+      const sb = card.querySelector('.solbox');
+      const done = card.querySelector('.done');
+      ta.value = store(key) || ex.start;
+      sb.querySelector('code').textContent = ex.sol;
+      if (store(key + '-ok') === '1') done.textContent = ' ✓';
+      ta.addEventListener('input', function () { store(key, ta.value); });
+
+      function exec(withCheck) {
+        vd.className = 'verdict info';
+        out.hidden = true;
+        rich.innerHTML = '';
+        const code = withCheck ? ta.value + '\n\n' + ex.check + '\n' : ta.value + '\n';
+        runNb(nbKey, nbd.setup, code, function (t) { vd.textContent = t; }).then(function (r) {
+          out.hidden = !r.out;
+          out.textContent = r.out.replace(/\n$/, '');
+          r.shown.forEach(function (s) {
+            const d = document.createElement(s.kind === 'html' ? 'div' : 'pre');
+            if (s.kind === 'html') { d.className = 'tablewrap'; d.innerHTML = s.val; }
+            else { d.className = 'out'; d.textContent = s.val; }
+            rich.appendChild(d);
+          });
+          r.figs.forEach(function (b64) {
+            const img = document.createElement('img');
+            img.className = 'plot';
+            img.alt = 'Diagramm';
+            img.src = 'data:image/png;base64,' + b64;
+            rich.appendChild(img);
+          });
+          if (r.ok) {
+            if (withCheck) {
+              vd.className = 'verdict good';
+              vd.textContent = '✅ Richtig!';
+              store(key + '-ok', '1');
+              done.textContent = ' ✓';
+              updateProgress();
+            } else {
+              vd.className = 'verdict info';
+              vd.textContent = 'Fertig. Mit «Prüfen» kontrollierst du die Lösung.';
+            }
+          } else {
+            vd.className = 'verdict bad';
+            vd.textContent = '❌ ' + r.err;
+          }
+        });
+      }
+
+      card.querySelectorAll('button').forEach(function (b) {
+        b.addEventListener('click', function () {
+          const a = b.dataset.a;
+          if (a === 'run') exec(false);
+          else if (a === 'chk') exec(true);
+          else if (a === 'rst') {
+            ta.value = ex.start;
+            store(key, ex.start);
+            out.hidden = true;
+            rich.innerHTML = '';
+            vd.textContent = '';
+            vd.className = 'verdict';
+          } else {
+            sb.hidden = !sb.hidden;
+            b.textContent = sb.hidden ? 'Lösung zeigen' : 'Lösung verbergen';
+          }
+        });
+      });
+      list.appendChild(card);
+    });
+    updateProgress();
+  }
+
   function wirePlayground() {
     const btn = $('freeRun');
     if (!btn) return;
@@ -355,6 +565,7 @@
     mods.forEach(function (m) {
       try {
         if (m.exercises && m.exercises.length) renderExercises(m);
+        if (m.nbExercises) renderNbExercises(m);
         if (typeof m.init === 'function') m.init();
       } catch (e) {
         console.error('Module "' + m.id + '" failed to start', e);
