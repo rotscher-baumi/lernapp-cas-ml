@@ -13,7 +13,7 @@ lernapp/
     style.css       Design (hell und dunkel)
     core.js         Navigation, Übungen, Selbsttest, Python-Ausführung
   modules/          ein Kapitel pro Datei
-    ds.js git.js python.js pandas.js viz.js hood.js ml.js klass.js unsup.js
+    ds.js git.js python.js pandas.js viz.js hood.js ml.js ablauf.js klass.js unsup.js
     _vorlage.js     Vorlage für ein neues Kapitel
   notebooks/        Übungs-Notebooks (Jupyter / VS Code)
 ```
