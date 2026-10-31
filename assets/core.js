@@ -112,16 +112,66 @@
     return Sk.builtinFiles['files'][x];
   }
 
-  function formatErr(err, userLines) {
-    let m = String(err && err.toString ? err.toString() : err);
-    m = m.replace(/^AssertionError:\s*/, '');
-    m = m.replace(/\s+on line (\d+)(\s+of\s+\S+)?\.?$/, function (all, n) {
-      return Number(n) <= userLines ? ' (Zeile ' + n + ')' : '';
+  const ERR_HINTS = [
+    [/^SyntaxError|^IndentationError|^ParseError/, 'Der Code ist grammatisch nicht korrekt. Prüfe Doppelpunkte nach if/for/def, Klammern, Anführungszeichen und die Einrückung.'],
+    [/^NameError/, 'Ein Name ist unbekannt. Tippfehler? Variable vor der Verwendung zuweisen? Modul mit import geladen?'],
+    [/^TypeError/, 'Ein Wert hat nicht den passenden Typ, zum Beispiel Text plus Zahl, oder eine Funktion bekommt falsche Argumente.'],
+    [/^IndexError/, 'Der Index liegt ausserhalb der Liste. Der erste Eintrag hat Index 0, der letzte len(liste) - 1.'],
+    [/^KeyError/, 'Dieser Schlüssel existiert nicht im Dictionary oder DataFrame. Gross-/Kleinschreibung prüfen.'],
+    [/^ValueError/, 'Der Typ des Werts stimmt, der Inhalt aber nicht, zum Beispiel int("abc").'],
+    [/^ZeroDivisionError/, 'Division durch 0. Prüfe den Nenner.'],
+    [/^AttributeError/, 'Dieses Objekt hat diese Methode oder dieses Attribut nicht. Tippfehler oder falscher Typ?'],
+    [/^ImportError|^ModuleNotFoundError/, 'Dieses Modul gibt es im Browser-Interpreter nicht. Die Übungen laufen nur mit den Grundlagen von Python.'],
+    [/^TimeLimitError|execution/i, 'Das Programm läuft zu lange, vermutlich eine Endlosschleife.']
+  ];
+
+  /* Returns {title, msg, line, src, hint, check} for a Skulpt exception. `check` is true when the
+     failure comes from the appended check code (the task is not solved yet), not from the user's code. */
+  function formatErr(err, userLines, userCode) {
+    const raw = String(err && err.toString ? err.toString() : err);
+    let type = (err && err.tp$name) || '';
+    let msg = raw;
+    const head = raw.match(/^([A-Za-z]+(?:Error|Exception|Exit)):\s*([\s\S]*)$/);
+    if (head) { type = type || head[1]; msg = head[2]; }
+    let line = null;
+    const tb = err && err.traceback;
+    if (tb && tb.length) {
+      for (let i = tb.length - 1; i >= 0; i--) {
+        if (tb[i] && tb[i].lineno && /stdin/.test(String(tb[i].filename || '<stdin>'))) { line = Number(tb[i].lineno); break; }
+      }
+    }
+    msg = msg.replace(/\s+on line (\d+)(\s+of\s+\S+)?\.?$/, function (all, n) {
+      if (line === null) line = Number(n);
+      return '';
     });
-    return m || 'Unbekannter Fehler';
+    if (type === 'AssertionError' && (line === null || line > userLines)) {
+      return { check: true, title: 'Noch nicht richtig', msg: msg || 'Das Ergebnis stimmt noch nicht mit der Aufgabe überein.' };
+    }
+    const inUser = line !== null && line <= userLines;
+    const lines = (userCode || '').split('\n');
+    const full = (type ? type : 'Fehler') + (msg ? ': ' + msg : '');
+    let hint = '';
+    for (let i = 0; i < ERR_HINTS.length; i++) if (ERR_HINTS[i][0].test(full)) { hint = ERR_HINTS[i][1]; break; }
+    return {
+      check: false,
+      title: type || 'Fehler',
+      msg: msg || 'Unbekannter Fehler',
+      line: inUser ? line : null,
+      src: inUser ? lines[line - 1] : null,
+      hint: hint
+    };
   }
 
-  function runPy(code, userLines) {
+  function renderErr(e) {
+    const esc = function (t) { return String(t).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
+    if (e.check) return '<b>❌ ' + esc(e.title) + '</b><div class="errmsg">' + esc(e.msg) + '</div>';
+    return '<b>❌ ' + esc(e.title) + (e.line ? ' in Zeile ' + e.line : '') + '</b>' +
+      '<div class="errmsg">' + esc(e.msg) + '</div>' +
+      (e.src !== null && e.src !== undefined ? '<pre class="errsrc">' + e.line + ' │ ' + esc(e.src) + '</pre>' : '') +
+      (e.hint ? '<div class="errhint">💡 ' + esc(e.hint) + '</div>' : '');
+  }
+
+  function runPy(code, userLines, userCode) {
     let buf = '';
     return loadSk()
       .then(function () {
@@ -132,7 +182,7 @@
       })
       .then(
         function () { return { ok: true, out: buf }; },
-        function (err) { return { ok: false, out: buf, err: formatErr(err, userLines) }; }
+        function (err) { return { ok: false, out: buf, err: formatErr(err, userLines, userCode) }; }
       );
   }
 
@@ -199,7 +249,7 @@
         out.hidden = true;
         const user = ta.value;
         const lines = user.split('\n').length;
-        runPy(withCheck ? user + '\n\n' + ex.check + '\n' : user + '\n', lines).then(function (r) {
+        runPy(withCheck ? user + '\n\n' + ex.check + '\n' : user + '\n', lines, user).then(function (r) {
           out.hidden = !r.out;
           out.textContent = r.out.replace(/\n$/, '');
           if (r.ok) {
@@ -217,7 +267,7 @@
             }
           } else {
             vd.className = 'verdict bad';
-            vd.textContent = '❌ ' + r.err;
+            vd.innerHTML = renderErr(r.err);
           }
         });
       }
@@ -252,8 +302,14 @@
       const code = $('freeCode').value;
       o.hidden = false;
       o.textContent = 'Läuft …';
-      runPy(code + '\n', code.split('\n').length).then(function (r) {
-        o.textContent = (r.out.replace(/\n$/, '') + (r.ok ? '' : (r.out ? '\n' : '') + '❌ ' + r.err)) || '(keine Ausgabe)';
+      runPy(code + '\n', code.split('\n').length, code).then(function (r) {
+        o.textContent = r.out.replace(/\n$/, '');
+        if (!r.ok) {
+          const e = r.err;
+          o.textContent += (r.out ? '\n' : '') + '❌ ' + e.title + (e.line ? ' in Zeile ' + e.line : '') + ': ' + e.msg +
+            (e.src !== null && e.src !== undefined ? '\n  ' + e.line + ' │ ' + e.src : '') + (e.hint ? '\n💡 ' + e.hint : '');
+        }
+        if (!o.textContent) o.textContent = '(keine Ausgabe)';
       });
     });
   }
