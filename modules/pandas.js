@@ -103,6 +103,7 @@ df["kategorie"] = pd.cut(df["preis_pro_sqft"], bins=bins, labels=labels)</code><
     <li><b>Fairer Vergleich:</b> 2017 «gewann», weil es 8 Monate in den Daten hatte, 2016 nur 4. Pro Monat gerechnet dreht das Bild.</li>
   </ol>
   <div class="merk"><b>Merksatz</b><p>Zuerst die Frage, dann die Daten prüfen (<code>info</code>, <code>describe</code>, <code>isna</code>), dann rechnen. Ein sauberer Code mit falscher Annahme liefert trotzdem ein falsches Resultat.</p></div>`,
+    nbExercises: 'Python_Pandas_Uebungen_own.ipynb',
     notebooks: [{ file: 'Python_Pandas_Uebungen_own.ipynb', desc: `12 Aufgaben mit echtem Pandas: Listen, Comprehensions, Filter, groupby, merge, Datum, pd.cut und eine Grafik.` }],
     quiz: [
       { q: `Was ist der Unterschied zwischen <code>loc</code> und <code>iloc</code>?`, a: `<code>loc</code> wählt nach Labels (Index- und Spaltennamen), <code>iloc</code> nach Positionen (0, 1, 2 …).` },
