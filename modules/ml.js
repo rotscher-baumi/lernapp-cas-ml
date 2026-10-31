@@ -106,6 +106,11 @@
     <li><b>Auffüllen (Imputation)</b>: Mittelwert/Median (schnell, ignoriert Zusammenhänge), Modus oder Konstante (auch für Kategorien, kann verzerren), k-nächste-Nachbarn (genauer, teuer), Regression oder Interpolation.</li>
   </ul>
   <p class="note"><b>Mit den 10 Wohnungen:</b> Fehlt bei der grössten Wohnung (130 qm, 5,5 Zimmer) die qm-Angabe, ergibt der Mittelwert der übrigen neun 71 qm: weit daneben, weil er die Zimmer ignoriert. Eine Regression von qm auf Zimmer schätzt 131 qm, und k-nächste-Nachbarn (die Wohnung mit den ähnlichsten Zimmern, 4,5 Zimmer) liefert 110 qm. Beide nutzen den Zusammenhang der Merkmale.</p>
+  <div class="falle"><b>Falle (Imputation nur auf Trainingsdaten lernen)</b><p>Den Mittelwert (oder Median, Modus, kNN) zum Auffüllen berechnest du <b>nur aus den Trainingsdaten</b>, nicht aus dem ganzen Datensatz am Anfang. Dieser Wert wird gelernt wie ein Gewicht. Dieselben Zahlen füllen danach die Lücken in Validation und Test, es wird dort <b>nichts neu berechnet</b>. Sonst fliesst Information aus den Testdaten ins Modell (Data Leakage), und die Testergebnisse sind zu gut.</p></div>
+  <pre><code>from sklearn.impute import SimpleImputer
+imp = SimpleImputer(strategy="mean")
+X_train = imp.fit_transform(X_train)   # Mittelwerte aus dem Training lernen
+X_test  = imp.transform(X_test)        # dieselben Mittelwerte einsetzen</code></pre>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Skalieren</h4>
   <p>Merkmale haben ganz verschiedene Grössenordnungen (Verbrauch 8 l/100km, Hubraum 3600 cc). Ohne Skalieren dominieren die grossen Zahlen. Darum bringt man alle auf eine vergleichbare Skala.</p>
   <div class="tablewrap"><table>
