@@ -58,11 +58,7 @@
   <p>Das Ziel dahinter: die Summe der quadrierten Abstände innerhalb der Cluster (<b>WSS</b>, within-cluster sum of squares) möglichst klein machen. Der Start ist zufällig, deshalb kann ein anderer Start ein anderes Ergebnis geben.</p>
   <div class="demo" id="kmDemo">
     <div class="tag">Demo</div><h4>k-Means Schritt für Schritt</h4>
-    <svg class="plot" id="kmSvg" viewBox="0 0 320 240" role="img" aria-label="90 Punkte mit k-Means-Zentren"></svg>
-    <div class="ctl"><label for="kmK">k</label><input type="range" id="kmK" min="1" max="6" step="1" value="3"><output id="kmKO"></output></div>
-    <div class="btnrow"><button class="pri" id="kmStep">1 Schritt</button><button id="kmRun">Bis fertig</button><button id="kmNew">Neuer Start</button></div>
-    <div class="stats"><span>Schritt <b id="kmN"></b></span><span>WSS <b id="kmW"></b></span></div>
-    <p class="hint" id="kmMsg"></p>
+    ${KMeansDemo.html('km')}
   </div>
   <div class="falle"><b>Falle (Skalierung)</b><p>k-Means rechnet mit Abständen. Hat ein Merkmal grosse Zahlen (Preis in Franken) und ein anderes kleine (Bewertung 1 bis 5), entscheidet fast nur das grosse. Darum <b>vorher skalieren</b> (<code>StandardScaler</code>).</p></div>
   <div class="demo" id="scDemo">
@@ -84,15 +80,15 @@ km.inertia_                    # WSS</code></pre>
   <h3>3 · Wie viele Cluster?</h3>
   <p>Die Methoden aus dem Supervised Learning (Test-Set, Accuracy) gehen nicht, es gibt ja keine richtige Antwort. Drei übliche Hilfen:</p>
   <ul>
-    <li><b>Elbow-Methode</b>: WSS für k = 1, 2, 3 … zeichnen. WSS sinkt immer, aber ab dem «Ellbogen» nur noch wenig. Dort wählst du k.</li>
+    <li><b>Elbow-Methode</b>: WSS für k = 1, 2, 3 … zeichnen. WSS sinkt mit wachsendem k (bei guter Lösung), aber ab dem «Ellbogen» nur noch wenig. Dort wählst du k.</li>
     <li><b>Silhouette</b>: Pro Punkt: <code>s = (b − a) / max(a, b)</code>, mit a = mittlerer Abstand zu den Punkten im <i>eigenen</i> Cluster, b = mittlerer Abstand zum <i>nächsten fremden</i> Cluster. Nahe 1 passt gut, nahe 0 liegt zwischen zwei Clustern, negativ ist falsch zugeordnet. Du nimmst das k mit dem höchsten Durchschnitt.</li>
-    <li><b>Gap-Statistik</b>: Vergleicht deine WSS mit der WSS von Zufallsdaten im gleichen Wertebereich. Gewählt wird das k mit dem grössten Abstand («Gap»).</li>
+    <li><b>Gap-Statistik</b>: Vergleicht log(WSS) deiner Daten mit log(WSS) von Zufallsdaten im gleichen Wertebereich. Der Abstand heisst «Gap». Gewählt wird das kleinste k, ab dem der Gap kaum mehr wächst (vereinfacht: das k mit dem grössten Gap).</li>
   </ul>
   <div class="demo" id="elDemo">
     <div class="tag">Demo</div><h4>Ellbogen und Silhouette für die Punkte oben</h4>
     <svg class="plot" id="elSvg" viewBox="0 0 320 200" role="img" aria-label="WSS und Silhouette für k gleich 1 bis 8"></svg>
     <div class="stats"><span>bestes k nach Silhouette <b id="elBest"></b></span></div>
-    <p class="hint">Blau: WSS (links, sinkt immer). Orange: Silhouette (je höher, desto besser, ab k = 2). Die Daten haben drei Gruppen: Der Ellbogen und das Silhouette-Maximum zeigen auf k = 3.</p>
+    <p class="hint">Blau: WSS (links, sinkt mit k). Orange: Silhouette (je höher, desto besser, ab k = 2). Die Daten haben drei Gruppen: Der Ellbogen und das Silhouette-Maximum zeigen auf k = 3.</p>
   </div>
   <div class="merk"><b>Merksatz</b><p>Die Methoden liefern Vorschläge, keine Wahrheit. Entscheidend ist am Ende, ob die Cluster fachlich Sinn ergeben und sich beschreiben lassen.</p></div>
 
@@ -213,21 +209,8 @@ plt.scatter(Z[:, 0], Z[:, 1], c=labels)</code></pre>
       { q: `Was darfst du aus einem t-SNE-Bild nicht ablesen?`, a: `Die Abstände zwischen Gruppen und die Gruppengrössen. Aussagekräftig ist nur, welche Punkte benachbart sind. Zudem hängt das Bild von Perplexity und Zufallsstart ab.` },
     ],
     init() {
-      // Demo 1: k-means step by step
-      (function(){
-        const pts=blobs(mulberry32(5)),W=320,H=240,sx=p=>14+p[0]*(W-28),sy=p=>H-14-p[1]*(H-28);
-        let cent,lab,n,seed=1,done;
-        function start(){const k=+$('kmK').value,r=mulberry32(seed*7919+k);const idx=[];while(idx.length<k){const i=Math.floor(r()*pts.length);if(idx.indexOf(i)<0)idx.push(i)}
-          cent=idx.map(i=>pts[i].slice());lab=new Array(pts.length).fill(0);assign(pts,cent,lab);n=0;done=false;draw()}
-        function step(){if(done)return;const ch=assign(pts,cent,lab);update(pts,cent,lab);n++;if(!ch&&n>1)done=true;draw()}
-        function draw(){const k=+$('kmK').value;$('kmKO').textContent=k;let s='';
-          pts.forEach((p,i)=>{s+=dot(sx(p),sy(p),COL[lab[i]%COL.length],3.5)});
-          cent.forEach((c,j)=>{const x=sx(c),y=sy(c);s+='<path d="M'+(x-7)+' '+y+'H'+(x+7)+'M'+x+' '+(y-7)+'V'+(y+7)+'" style="stroke:'+COL[j%COL.length]+';stroke-width:4;fill:none"/><path d="M'+(x-7)+' '+y+'H'+(x+7)+'M'+x+' '+(y-7)+'V'+(y+7)+'" style="stroke:var(--fg);stroke-width:1.2;fill:none"/>'});
-          $('kmSvg').innerHTML=s;$('kmN').textContent=n;$('kmW').textContent=fmt(wss(pts,cent,lab),2);
-          $('kmMsg').textContent=done?'Fertig: Die Zuordnung ändert sich nicht mehr. Probiere «Neuer Start» und ein anderes k. Bei k = 3 landet der Algorithmus nicht immer in der besten Lösung.':n===0?'Zufällige Startzentren (Kreuze), Punkte noch dem nächsten Zentrum zugeordnet. Mit «1 Schritt» wandern die Zentren in die Mitte ihrer Punkte.':'Zentren wandern in die Mitte ihrer Punkte, dann werden die Punkte neu zugeordnet.'}
-        $('kmStep').addEventListener('click',step);
-        $('kmRun').addEventListener('click',()=>{for(let i=0;i<50&&!done;i++)step()});
-        $('kmNew').addEventListener('click',()=>{seed++;start()});$('kmK').addEventListener('input',start);start()})();
+      // Demo 1: k-means step by step (shared code in assets/demos-kmeans.js)
+      KMeansDemo.init('km');
 
       // Demo 2: effect of scaling
       (function(){
