@@ -153,16 +153,22 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
     <p class="hint" id="knMsg"></p>
     <p class="hint">Die Raute «Startpunkt» = der neue Punkt, dessen Klasse gesucht ist (Klick ins Bild verschiebt ihn). Die Linien führen zu seinen k nächsten Nachbarn, der gestrichelte Kreis zeigt die Reichweite.</p>
   </div>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Eine neue Wohnung mit 76 qm. Die nächsten Nachbarn auf der qm-Achse sind 78 qm (teuer), 70 qm (nicht teuer) und 85 qm (teuer). Mit <b>k = 1</b> entscheidet allein die 78er: teuer. Mit <b>k = 3</b> stimmen 2 von 3 für teuer. Mit <b>k = 10</b> (alle) steht es 5 zu 5, es gibt keinen Mehrheitsentscheid mehr.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Naive Bayes</h4>
   <p>Berechnet mit dem Satz von Bayes, wie wahrscheinlich eine Klasse bei den beobachteten Merkmalen ist, und tut «naiv» so, als wären die Merkmale voneinander unabhängig. Beispiel aus den Folien: Spielen wir bei Sonne? Von 14 Tagen waren 9 Spieltage und 5 sonnig; an 3 der 9 Spieltage schien die Sonne.</p>
   <pre><code>P(Ja | sonnig) = P(sonnig | Ja) * P(Ja) / P(sonnig)
                = (3/9) * (9/14) / (5/14) = 0.60</code></pre>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Merkmal «gross» = mehr als 74 qm. 5 von 10 Wohnungen sind teuer, und alle 5 sind gross, keine der 5 anderen. Also <code>P(gross | teuer) = 5/5 = 1</code> und <code>P(gross | nicht teuer) = 0/5 = 0</code>. Das ergibt <code>P(teuer | gross) = 1</code>: sicher, nur weil wir eine Kombination nie gesehen haben. Das ist das <b>Nullfrequenz-Problem</b>. Die Abhilfe ist Glättung (Laplace: überall +1 zählen): <code>P(gross | teuer) = 6/7</code>, <code>P(gross | nicht teuer) = 1/7</code>, also <code>P(teuer | gross) = 6/7 ≈ 0,86</code>.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Support Vector Machine (SVM)</h4>
   <p>Sucht die Trennlinie mit dem <b>breitesten Abstand</b> zu beiden Klassen. Nur die Punkte am Rand (Support Vectors) bestimmen sie. Mit <b>Kernels</b> werden die Daten gedanklich in einen höheren Raum gehoben, wo sie sich gerade trennen lassen. Stark bei vielen Merkmalen.</p>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Die grösste nicht teure Wohnung hat 70 qm, die kleinste teure 78 qm. Diese zwei sind die <b>Support Vectors</b>. Die Trennlinie mit dem breitesten Abstand liegt in der Mitte bei <b>74 qm</b>, je 4 qm von beiden Seiten entfernt. Die anderen acht Wohnungen könntest du löschen, die Grenze bliebe gleich.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Entscheidungsbaum</h4>
   <p>Eine Kette von Ja/Nein-Fragen. An jedem Knoten wird die Frage gewählt, die die Klassen am besten trennt (Mass: Gini oder Informationsgewinn), bis die Blätter «rein» sind oder die maximale Tiefe erreicht ist. Gut lesbar, aber ein tiefer Baum lernt die Trainingsdaten auswendig. Gegenmittel: <code>max_depth</code> begrenzen oder zurückschneiden.</p>
+  <p>Ein Entscheidungsbaum braucht <b>keine lineare Regression</b> und keine Sigmoid-Funktion: Er schätzt keine Gewichte, sondern teilt die Daten mit Schwellen auf einzelne Merkmale auf. Er ist damit eine <b>Alternative</b> zur logistischen Regression, kein Ersatz. Vorteile: nicht lineare Zusammenhänge, kein Skalieren der Merkmale nötig. Nachteile: Die Grenzen verlaufen achsenparallel (treppenförmig), tiefe Bäume overfitten schnell, und die Wahrscheinlichkeiten aus den Blättern sind grob.</p>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Am Anfang sind 5 teure und 5 nicht teure Wohnungen gemischt (Gini = 0,5, maximal unrein). Die beste Frage ist «Mehr als 74 qm?»: Links landen 5 nicht teure, rechts 5 teure, beide Blätter sind sofort rein (Gini = 0). Ein einziger Schnitt genügt, der Baum hat Tiefe 1. Das ist dieselbe Grenze wie bei der SVM und der logistischen Regression, nur mit anderem Weg dorthin.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Neuronale Netze</h4>
   <p>Schichten aus künstlichen Neuronen mit gewichteten Verbindungen, die per Backpropagation trainiert werden (Gradient Descent über alle Schichten). Mit sehr vielen Schichten spricht man von Deep Learning, das kommt im nächsten Modul.</p>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Ein einzelnes Neuron mit Sigmoid, <code>P(teuer) = sigmoid(w·qm + b)</code>, <i>ist</i> die logistische Regression von oben. Weitere Schichten brauchst du hier nicht, denn die Klassen sind mit einem Schnitt bei 74 qm trennbar. Mehr Schichten lohnen sich erst bei Mustern, die keine einzelne Grenze beschreiben kann.</p>
 
   <h3>6 · Ensembles: viele schwache Modelle ergeben ein starkes</h3>
   <p>Ein einzelnes Modell macht Fehler. Mehrere Modelle, die unterschiedlich irren, gleichen sich im Mittel aus.</p>
@@ -170,9 +176,29 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
     <div><h4>Bagging (Random Forest)</h4><p>Viele Bäume, jeder auf einer zufälligen Stichprobe der Daten und einer zufälligen Auswahl an Merkmalen, <b>parallel</b> trainiert. Mehrheitsentscheid (oder Mittelwert). Senkt die Varianz.</p></div>
     <div><h4>Boosting (Gradient Boosting)</h4><p>Bäume werden <b>nacheinander</b> trainiert, jeder korrigiert die Restfehler des vorherigen. Oft genauer, aber empfindlicher für Rauschen und bei zu hoher Lernrate überangepasst.</p></div>
   </div>
-  <pre><code>from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-rf = RandomForestClassifier(n_estimators=200, random_state=0).fit(X_train, y_train)
-gb = GradientBoostingClassifier(learning_rate=0.1).fit(X_train, y_train)</code></pre>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Beispiel: die 10 Wohnungen</h4>
+  <p>Bei der Klasse «teuer» reicht der eine Schnitt bei 74 qm, da gibt es für ein Ensemble nichts zu verbessern. Deshalb gehen wir hier zurück zur Frage von Tag 1, dem <b>Preis</b> (Ensembles gibt es genauso für Regression). Der Preis steigt nicht sauber mit den qm: die 70-qm-Wohnung (1620) ist billiger als die 62-qm-Wohnung (1770), die 85-qm-Wohnung (1850) billiger als die 78-qm-Wohnung (1890). Ein tiefer Baum lernt diese Ausreisser auswendig.</p>
+  <ul>
+    <li><b>Einzelbaum:</b> Mit Tiefe 3 hat fast jede Wohnung ihr eigenes Blatt. Auf den bekannten Wohnungen ist der Fehler klein (etwa 35 CHF), lässt du eine Wohnung weg, ist er viel grösser (etwa 240 CHF). Dieser Abstand ist das Overfitting.</li>
+    <li><b>Bagging:</b> Jeder Baum bekommt 10 Wohnungen, die <i>mit Zurücklegen</i> gezogen werden. Manche kommen doppelt vor, andere gar nicht (im Schnitt sind etwa 63 % verschiedene dabei). Jeder Baum irrt anders, der Mittelwert ist glatter und merkt sich weniger auswendig. Bei nur 10 Wohnungen bleibt der Fehler bei einer fehlenden Wohnung trotzdem ähnlich, der Vorteil zeigt sich erst bei mehr Daten.</li>
+    <li><b>Boosting:</b> Start ist der Durchschnittspreis (1841 CHF). Dann passt ein flacher Baum (Tiefe 1) die <i>Restfehler</i> an, ein Bruchteil davon (Lernrate) wird addiert, und das wiederholt sich Runde für Runde.</li>
+  </ul>
+  <div class="demo" id="enDemo">
+    <div class="tag">Demo</div><h4>Einzelbaum, Bagging und Boosting auf den 10 Wohnungen</h4>
+    <svg class="plot" id="enSvg" viewBox="0 0 320 230" role="img" aria-label="10 Wohnungen: qm gegen Preis mit der Vorhersage eines Einzelbaums, von Bagging oder von Boosting"></svg>
+    <div class="btnrow"><button class="pri" id="enM1">Einzelbaum</button><button id="enM2">Bagging</button><button id="enM3">Boosting</button></div>
+    <div class="ctl"><label for="enD">Tiefe der Bäume</label><input type="range" id="enD" min="1" max="4" step="1" value="3"><output id="enDO"></output></div>
+    <div class="ctl" id="enNW"><label for="enN">Anzahl Bäume</label><input type="range" id="enN" min="1" max="50" step="1" value="20"><output id="enNO"></output></div>
+    <div class="ctl" id="enLW"><label for="enL">Lernrate</label><input type="range" id="enL" min="0.05" max="1" step="0.05" value="0.3"><output id="enLO"></output></div>
+    <div class="stats"><span>Fehler auf den bekannten Wohnungen <b id="enTr"></b> CHF</span><span>Fehler, wenn die Wohnung fehlt <b id="enLo"></b> CHF</span></div>
+    <p class="hint" id="enMsg"></p>
+  </div>
+  <p class="hint">Der zweite Fehler ist «Leave-one-out»: Für jede Wohnung wird das Modell ohne sie neu trainiert und dann auf sie angewendet. Er zeigt, wie gut das Modell auf eine <i>neue</i> Wohnung passt (RMSE). Er bleibt überall hoch, weil kein Baum über die Randwohnungen (35 und 130 qm) hinaus extrapolieren kann: ausserhalb der bekannten qm ist die Vorhersage einfach der letzte Stufenwert. Zum Vergleich: Die einfache Gerade von Tag 1 hat bei fehlender Wohnung nur etwa 123 CHF Fehler. Sind die Daten fast linear, gewinnt das einfachere Modell, Ensembles lohnen sich erst bei komplizierteren Mustern und mehr Daten.</p>
+  <pre><code>from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+# X = qm der 10 Wohnungen (Spalte), y = Preis
+rf = RandomForestRegressor(n_estimators=200, random_state=0).fit(X, y)
+gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).fit(X, y)
+# Für «teuer ja/nein»: RandomForestClassifier / GradientBoostingClassifier</code></pre>
 
   <h3>7 · Data Leakage</h3>
   <p>Leakage heisst: Das Modell sieht beim Training Information, die es bei der echten Vorhersage nicht hätte. Folge: wunderbare Testwerte und ein Modell, das im Einsatz versagt.</p>
@@ -391,6 +417,57 @@ cross_val_score(model, X_tr, y_tr, cv=5, scoring="f1").mean()</code></pre>
         $('knK').addEventListener('input',draw);
         $('knSvg').addEventListener('click',e=>{const b=e.currentTarget.getBoundingClientRect();q.x=Math.min(1,Math.max(0,(e.clientX-b.left)/b.width));q.y=Math.min(1,Math.max(0,1-(e.clientY-b.top)/b.height));draw()});
         draw()})();
+
+      // Demo 6: 10 apartments, single tree vs bagging vs boosting (price regression on qm)
+      (function(){
+        const qm=[35,48,55,62,70,78,85,95,110,130],pr=[1200,1510,1540,1770,1620,1890,1850,2280,2170,2580];
+        const W=320,H=230,PX=40,PY=22,XA=25,XB=140,YA=1000,YB=2800;
+        const sx=x=>PX+((x-XA)/(XB-XA))*(W-PX-12),sy=v=>H-PY-((v-YA)/(YB-YA))*(H-PY-12);
+        const mean=a=>a.reduce((p,c)=>p+c,0)/a.length;
+        function fit(xs,ys,d){
+          if(d===0||xs.length<2)return{v:mean(ys)};
+          const o=xs.map((x,i)=>i).sort((a,b)=>xs[a]-xs[b]);let best=null;
+          for(let k=1;k<o.length;k++){const a=xs[o[k-1]],b=xs[o[k]];if(a===b)continue;
+            const L=o.slice(0,k).map(i=>ys[i]),R=o.slice(k).map(i=>ys[i]),ml=mean(L),mr=mean(R);
+            const e=L.reduce((p,c)=>p+(c-ml)*(c-ml),0)+R.reduce((p,c)=>p+(c-mr)*(c-mr),0);
+            if(!best||e<best.e)best={e:e,t:(a+b)/2}}
+          if(!best)return{v:mean(ys)};
+          const li=xs.map((x,i)=>i).filter(i=>xs[i]<=best.t),ri=xs.map((x,i)=>i).filter(i=>xs[i]>best.t);
+          return{t:best.t,l:fit(li.map(i=>xs[i]),li.map(i=>ys[i]),d-1),r:fit(ri.map(i=>xs[i]),ri.map(i=>ys[i]),d-1)}}
+        const pt=(nd,x)=>nd.t===undefined?nd.v:pt(x<=nd.t?nd.l:nd.r,x);
+        function boot(xs,ys,b){const r=mulberry32(100+b),ix=[];for(let i=0;i<xs.length;i++)ix.push(Math.floor(r()*xs.length));return[ix.map(i=>xs[i]),ix.map(i=>ys[i])]}
+        function model(xs,ys,mode,d,n,lr){
+          if(mode===1){const t=fit(xs,ys,d);return{f:x=>pt(t,x),parts:[]}}
+          if(mode===2){const ts=[];for(let b=0;b<n;b++){const bs=boot(xs,ys,b);ts.push(fit(bs[0],bs[1],d))}
+            return{f:x=>mean(ts.map(t=>pt(t,x))),parts:ts}}
+          const base=mean(ys),ts=[];let res=ys.map(y=>y-base);
+          for(let m=0;m<n;m++){const t=fit(xs,res,d);ts.push(t);res=res.map((r,i)=>r-lr*pt(t,xs[i]))}
+          return{f:x=>base+lr*ts.reduce((p,t)=>p+pt(t,x),0),parts:[]}}
+        let mode=1;
+        function rmse(e){return Math.sqrt(mean(e.map(v=>v*v)))}
+        function draw(){
+          const d=+$('enD').value,n=+$('enN').value,lr=+$('enL').value;
+          $('enDO').textContent=d;$('enNO').textContent=n;$('enLO').textContent=fmt(lr,2);
+          [1,2,3].forEach(k=>{$('enM'+k).className=k===mode?'pri':''});
+          $('enNW').style.display=mode===1?'none':'';$('enLW').style.display=mode===3?'':'none';
+          const m=model(qm,pr,mode,d,n,lr);
+          let s='<line class="ax" x1="'+PX+'" y1="'+(H-PY)+'" x2="'+(W-8)+'" y2="'+(H-PY)+'"/>';
+          for(let t=40;t<=140;t+=20)s+='<text class="lbl" x="'+(sx(t)-8)+'" y="'+(H-6)+'">'+t+'</text>';
+          for(const t of[1000,1500,2000,2500])s+='<text class="lbl" x="2" y="'+(sy(t)+3)+'">'+t+'</text>';
+          s+='<text class="lbl" x="'+(W-24)+'" y="'+(H-PY-4)+'">qm</text>';
+          const path=f=>{let q='';for(let x=XA;x<=XB;x+=0.5)q+=(x===XA?'M':'L')+sx(x).toFixed(1)+' '+sy(f(x)).toFixed(1);return q};
+          m.parts.slice(0,20).forEach(t=>{s+='<path d="'+path(x=>pt(t,x))+'" style="fill:none;stroke:var(--warn);stroke-width:1;opacity:.3"/>'});
+          s+='<path class="ln" d="'+path(m.f)+'"/>';
+          qm.forEach((x,i)=>{s+='<circle cx="'+sx(x)+'" cy="'+sy(pr[i])+'" r="4" style="fill:var(--fg)"/>'});
+          $('enSvg').innerHTML=s;
+          const tr=qm.map((x,i)=>m.f(x)-pr[i]);
+          const lo=qm.map((x,i)=>{const xs=qm.filter((v,j)=>j!==i),ys=pr.filter((v,j)=>j!==i);return model(xs,ys,mode,d,n,lr).f(x)-pr[i]});
+          $('enTr').textContent=fmt(rmse(tr),0);$('enLo').textContent=fmt(rmse(lo),0);
+          $('enMsg').textContent=mode===1?(d>=3?'Tiefer Einzelbaum: Fast jede Wohnung hat ihr eigenes Blatt, die Stufen folgen den Ausreissern. Der Fehler auf bekannten Wohnungen ist klein, der Fehler bei fehlender Wohnung viel grösser (Overfitting).':'Flacher Einzelbaum: Wenige grobe Stufen. Der Fehler ist schon auf den bekannten Wohnungen hoch (Underfitting).')
+            :mode===2?'Bagging: Die orangen Linien sind einzelne Bäume (je auf einer anderen Stichprobe der 10 Wohnungen), die blaue Linie ist ihr Mittelwert. Mit mehr Bäumen wird sie glatter. Der Fehler auf bekannten Wohnungen steigt gegenüber dem Einzelbaum (weniger Auswendiglernen), der Fehler bei fehlender Wohnung bleibt bei nur 10 Wohnungen etwa gleich.'
+            :'Boosting: Die Linie startet beim Durchschnitt (1841 CHF) und nähert sich pro Runde den Preisen. Mit Tiefe 1 und wenigen Runden ist sie grob. Mit mehr Runden oder höherer Lernrate liegt sie näher an den Preisen (Fehler auf bekannten Wohnungen sinkt), lernt aber irgendwann nur noch die Ausreisser, der Fehler bei fehlender Wohnung bleibt gleich.'}
+        [1,2,3].forEach(k=>{$('enM'+k).addEventListener('click',()=>{mode=k;$('enD').value=k===3?1:3;$('enN').value=k===3?30:20;draw()})});
+        ['enD','enN','enL'].forEach(id=>$(id).addEventListener('input',draw));draw()})();
     },
   });
 })();
