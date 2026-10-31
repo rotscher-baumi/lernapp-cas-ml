@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Übungs-Notebook · CAS ML</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .nbbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:12px 0}
+  .nbbar a{min-height:44px;display:inline-flex;align-items:center}
+  #nbframe{width:100%;height:calc(100vh - 150px);min-height:480px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+  #nbmiss{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="nbbar"><a href="index.html">← Zurück zur Lernhilfe</a><a id="nbopen" target="_blank" rel="noopener">In eigenem Tab öffnen</a></div>
+<iframe id="nbframe" title="Jupyter-Notebook mit den Python-Übungen"></iframe>
+<div id="nbmiss" class="merk"><b>Jupyter läuft nicht</b><p>Starte im Ordner der Lernapp:<br><code>jupyter-lab --no-browser --ip=127.0.0.1 --port=8899 --ServerApp.base_url=/jupyter/ --ServerApp.token=lernapp-local</code></p></div>
+</div>
+<script>
+(function () {
+  var url = '/jupyter/lab/tree/notebooks/Lernapp_Lernhilfe.ipynb?token=lernapp-local';
+  var frame = document.getElementById('nbframe');
+  frame.src = url;
+  document.getElementById('nbopen').href = url;
+  fetch('/jupyter/api/status?token=lernapp-local').then(function (r) {
+    if (!r.ok) throw new Error(r.status);
+  }).catch(function () {
+    frame.style.display = 'none';
+    document.getElementById('nbmiss').style.display = 'block';
+  });
+})();
+</script>
+</body>
+</html>
