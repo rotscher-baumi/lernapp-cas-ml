@@ -61,7 +61,7 @@
     <p class="hint">Die Wohnung ist wirklich teuer (y = 1). Sagt das Modell nur 1 % Wahrscheinlichkeit, ist es sicher und falsch. Die Cross-Entropy (−ln p, durchgezogen) schiesst dann steil nach oben und zwingt das Modell zur Korrektur. Der quadratische Fehler ((1−p)², gestrichelt) bleibt bei maximal 1. Zusammen mit der Sigmoid wird sein Gradient bei sicher falschen Vorhersagen fast 0, das Modell korrigiert kaum.</p>
   </div>
   <pre><code>from sklearn.linear_model import LogisticRegression
-clf =LogisticRegression().fit(X_train, y_train)
+clf = LogisticRegression().fit(X_train, y_train)
 clf.predict(X_test)          # Klassen (0/1)
 clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
   <div class="merk"><b>Merksatz</b><p>Logistische Regression = lineare Regression + Sigmoid. Das Modell liefert zuerst eine Wahrscheinlichkeit, die Klasse entsteht erst durch die Schwelle. Die Schwelle ist deine Entscheidung, nicht die des Modells.</p></div>

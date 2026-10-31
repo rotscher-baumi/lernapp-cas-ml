@@ -105,12 +105,15 @@
     <li><b>Löschen</b>: einfach, aber du verlierst Daten.</li>
     <li><b>Auffüllen (Imputation)</b>: Mittelwert/Median (schnell, ignoriert Zusammenhänge), Modus oder Konstante (auch für Kategorien, kann verzerren), k-nächste-Nachbarn (genauer, teuer), Regression oder Interpolation.</li>
   </ul>
-  <p class="note"><b>Mit den 10 Wohnungen:</b> Fehlt bei der grössten Wohnung (130 qm, 5,5 Zimmer) die qm-Angabe, ergibt der Mittelwert der übrigen neun 71 qm: weit daneben, weil er die Zimmer ignoriert. Eine Regression von qm auf Zimmer schätzt 132 qm, und k-nächste-Nachbarn (die Wohnung mit den ähnlichsten Zimmern, 4,5 Zimmer) liefert 110 qm. Beide nutzen den Zusammenhang der Merkmale.</p>
-  <div class="falle"><b>Falle (Imputation nur auf Trainingsdaten lernen)</b><p>Den Mittelwert (oder Median, Modus, kNN) zum Auffüllen berechnest du <b>nur aus den Trainingsdaten</b>, nicht aus dem ganzen Datensatz am Anfang. Dieser Wert wird gelernt wie ein Gewicht. Dieselben Zahlen füllen danach die Lücken in Validation und Test, es wird dort <b>nichts neu berechnet</b>. Sonst fliesst Information aus den Testdaten ins Modell (Data Leakage), und die Testergebnisse sind zu gut.</p></div>
+  <p>Fehlende Werte in Training, Validation und Test dürfen vorkommen. Wichtig: Eine Imputationsregel, die aus Daten berechnet wird, wird <b>nur mit dem Training gelernt</b>. Zum Beispiel berechnet der Imputer dort den Median und verwendet genau diesen Median anschliessend auch für Validation und Test:</p>
   <pre><code>from sklearn.impute import SimpleImputer
-imp = SimpleImputer(strategy="mean")
-X_train = imp.fit_transform(X_train)   # Mittelwerte aus dem Training lernen
-X_test  = imp.transform(X_test)        # dieselben Mittelwerte einsetzen</code></pre>
+
+imputer = SimpleImputer(strategy="median")
+X_train_clean = imputer.fit_transform(X_train)  # lernt Mediane und füllt Training
+X_val_clean = imputer.transform(X_val)          # verwendet dieselben Mediane
+X_test_clean = imputer.transform(X_test)        # verwendet dieselben Mediane</code></pre>
+  <div class="merk"><b>Merksatz</b><p><code>fit</code> nur auf Trainingsdaten, <code>transform</code> auf allen Datensätzen. So wird zum Beispiel nicht der Testmedian verwendet und Data Leakage vermieden. Das separate Notebook zeigt das mit 10 Zeilen und 4 Merkmalen.</p></div>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Fehlt bei der grössten Wohnung (130 qm, 5,5 Zimmer) die qm-Angabe, ergibt der Mittelwert der übrigen neun 71 qm: weit daneben, weil er die Zimmer ignoriert. Eine Regression von qm auf Zimmer schätzt 132 qm, und k-nächste-Nachbarn (die Wohnung mit den ähnlichsten Zimmern, 4,5 Zimmer) liefert 110 qm. Beide nutzen den Zusammenhang der Merkmale.</p>
   <h4 id="ml-scaling" style="margin:12px 0 4px;font-family:var(--f-display)">Skalieren</h4>
   <p>Merkmale haben ganz verschiedene Grössenordnungen (Verbrauch 8 l/100km, Hubraum 3600 cc). Ohne Skalieren dominieren die grossen Zahlen. Darum bringt man alle auf eine vergleichbare Skala.</p>
   <div class="tablewrap"><table>
@@ -150,6 +153,7 @@ pipe = Pipeline([("scaler", StandardScaler()), ("model", LinearRegression())])
 scores = cross_val_score(pipe, X, y, cv=10,    # 10 Folds
                          scoring="neg_root_mean_squared_error")   # ohne scoring: R²
 -scores.mean(), scores.std()                   # RMSE (sklearn liefert negativ)</code></pre>
+  <p><b>Wie viele Durchläufe?</b> Bei k Folds gibt es k Durchläufe, jede Zeile ist genau einmal Validierung und k−1 Mal Training. Pro Durchlauf wird ein <b>neues</b> Modell (und bei einer Pipeline auch ein neuer Imputer/Scaler) von Grund auf trainiert, bewertet und verworfen. Nichts wird «4 Mal weiter optimiert». Der Mittelwert der k Scores bewertet das <b>Setup</b> (Modelltyp, Hyperparameter, Vorverarbeitung), die Streuung zeigt die Stabilität. Das Testset ist nicht Teil der CV. Das endgültige Modell trainierst du danach einmal auf allen Entwicklungsdaten (Training + Validation) und testest es einmal. Bei einer Suche über n Kandidaten sind es n × k Trainings (<code>GridSearchCV</code> trainiert mit <code>refit=True</code> am Ende selbst nach).</p>
   <div class="demo" id="cvDemo">
     <div class="tag">Demo</div><h4>Cross-Validation Schritt für Schritt</h4>
     <p class="hint">30 Punkte (Sinuskurve plus Rauschen). Wähle k und den Polynomgrad, dann steppe durch die Läufe. In jedem Lauf wird ein <b>neues</b> Modell (Scaler und Polynom) nur auf den ausgefüllten Punkten gelernt und auf den hohlen Punkten (Test-Fold) geprüft.</p>
@@ -391,11 +395,17 @@ search.best_params_, search.best_estimator_</code></pre>
   </figure>
   <div class="merk"><b>Erst Daten anschauen</b><p>Ohne EDA weiss man nicht, ob Werte fehlen, ob Ausreisser Median oder Mittelwert verzerren, ob skaliert werden muss oder ob die Klassen ungleich verteilt sind. Die EDA bestimmt Schritt 4 bis 7.</p></div>
   <div class="falle"><b>Data Leakage</b><p>Auch die EDA nur auf den 80 % machen. Merkmalsauswahl, Median und Skaler werden wie das Modell nur mit den Trainingsdaten berechnet, am sichersten innerhalb jedes Cross-Validation-Durchgangs. Sonst fliesst Testwissen ein und die Validierung ist zu optimistisch.</p></div>`,
-    notebooks: [{ file: 'Supervised_Learning_1_Uebungen_own.ipynb', desc: `10 Aufgaben mit scikit-learn: Gradient Descent, Fehlermasse, Cross-Validation, Imputation, Overfitting, Lasso und Ridge, GridSearch, Feature Selection.` }],
+    nbExercises: 'Supervised_Learning_1_Uebungen_own.ipynb',
+    notebooks: [
+      { file: 'Fehlende_Werte_Imputation.ipynb', desc: `Mit Cross-Validation-Beispiel (4 Folds, Imputer pro Fold neu, finales Modell). Schritt-für-Schritt-Beispiel mit 10 Datensätzen, 4 Features und SimpleImputer: Median nur am Training lernen und dann auf Validation und Test anwenden.` },
+      { file: 'Workflow_Train_Val_Test_CV.ipynb', desc: `Der ganze Ablauf mit 25 Wohnungen: Split 60/20/20 von Hand (Imputer, Scaler, Modell, Validation, finales Modell, Test), danach dasselbe mit Cross-Validation und GridSearchCV, Vorverarbeitungen vergleichen (inklusive Leakage-Fehler), StratifiedKFold und TimeSeriesSplit.` },
+      { file: 'Supervised_Learning_1_Uebungen_own.ipynb', desc: `10 Aufgaben mit scikit-learn: Gradient Descent, Fehlermasse, Train/Test, Cross-Validation, Imputation, Overfitting, Lasso und Ridge, GridSearch, Feature Selection.` }
+    ],
     quiz: [
       { q: `Dein Modell hat Trainingsfehler 1 und Testfehler 20. Was ist los und was tust du?`, a: `Overfitting. Weniger oder einfachere Merkmale, Regularisierung (Ridge/Lasso), mehr Daten.` },
       { q: `Warum braucht man neben dem Test-Set auch ein Validation-Set?`, a: `Die Validation wird beim Feintunen mehrfach benutzt und lernt indirekt mit. Das Test-Set bleibt ungesehen und gibt am Schluss die ehrliche Schätzung.` },
       { q: `Wann nimmst du Lasso statt Ridge?`, a: `Wenn du viele Merkmale hast und vermutest, dass einige unwichtig sind: Lasso setzt deren Koeffizienten auf exakt 0.` },
+      { q: `Bei 4-fold Cross-Validation: Wie oft wird trainiert, und wird das Modell dabei weiter optimiert?`, a: `4 Mal, jeweils ein neues Modell (mit neuem Imputer/Scaler) von Grund auf auf 3 Folds, bewertet auf dem 4. Fold und verworfen. Die 4 Scores bewerten das Setup. Danach wird das gewählte Setup einmal auf allen Entwicklungsdaten trainiert und einmal auf dem Test-Set geprüft.` },
       { q: `Wozu dient <code>Pipeline</code>?`, a: `Sie verkettet Schritte wie Skalieren und Modell. In der Cross-Validation wird so jeder Schritt nur mit den Trainingsdaten des jeweiligen Folds gelernt, das verhindert Leakage.` },
       { q: `Was ist der Unterschied zwischen Grid und Random Search?`, a: `Grid probiert alle Kombinationen, Random eine zufällige Auswahl. Random ist oft ähnlich gut und deutlich schneller.` },
     ],
