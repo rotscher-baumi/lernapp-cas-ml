@@ -43,6 +43,8 @@
   </div>
   <p>Probiere 0.1, 0.5, 1.0 und 1.05. Bei 1.0 springt er nur hin und her, darüber entfernt er sich immer weiter. Bei echten Problemen gibt es zusätzlich viele Täler (lokale Minima). Eine Strategie ist, die Lernrate mit der Zeit zu verkleinern.</p>
 
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Gesucht ist hier nicht x, sondern die Steigung <code>w</code> der Preisgeraden <code>Preis = b + w·qm</code>. Der Fehler (MSE) hängt von <code>w</code> ab wie <code>y = x²</code> von x: ein Tal. Startest du bei <code>w = 0</code> (waagrechte Gerade auf dem Durchschnittspreis 1841 CHF), ist der MSE etwa 151 000. Gradient Descent schiebt <code>w</code> Schritt für Schritt bergab, bis der MSE bei <code>w ≈ 13,6</code> CHF pro qm nur noch etwa 10 600 beträgt.</p>
+
   <h3>2 · Lineare Regression: die beste Gerade</h3>
   <p>Gesucht ist die Gerade <code>y = a·x + b</code>, die möglichst nahe an allen Punkten liegt. Wie nah, misst die <b>Fehlerfunktion</b> (Loss). Die Abweichung eines Punktes von der Geraden heisst <b>Residuum</b>.</p>
   <div class="tablewrap"><table>
@@ -51,6 +53,7 @@
     <tr><td><b>MSE</b></td><td>mittlerer quadrierter Fehler: bestraft grosse Ausreisser viel stärker (RMSE = Wurzel daraus, wieder in der Einheit von y)</td></tr>
     <tr><td><b>R²</b></td><td>wie viel Prozent des Fehlers die Regression gegenüber «immer den Mittelwert raten» beseitigt. 0 = nicht besser als Mittelwert, 1 = perfekt</td></tr>
   </table></div>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Die beste Gerade durch alle 10 Wohnungen ist <code>Preis = 799 + 13,6·qm</code>. Jeder Quadratmeter mehr kostet im Schnitt 13,6 CHF. Die Fehler: <b>R² = 0,93</b>, <b>MAE ≈ 86 CHF</b>, <b>RMSE ≈ 103 CHF</b> (die Wurzel aus dem MSE von 10 600). Ohne Modell, mit dem Durchschnittspreis 1841 CHF für alle, wäre R² = 0.</p>
   <div class="demo" id="lrDemo">
     <div class="tag">Demo</div><h4>Gerade selbst anpassen</h4>
     <svg class="plot" id="lrSvg" viewBox="0 0 320 220" role="img" aria-label="Punkte mit Regressionsgerade und roten Residuen"></svg>
@@ -102,6 +105,7 @@
     <li><b>Löschen</b>: einfach, aber du verlierst Daten.</li>
     <li><b>Auffüllen (Imputation)</b>: Mittelwert/Median (schnell, ignoriert Zusammenhänge), Modus oder Konstante (auch für Kategorien, kann verzerren), k-nächste-Nachbarn (genauer, teuer), Regression oder Interpolation.</li>
   </ul>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Fehlt bei der grössten Wohnung (130 qm, 5,5 Zimmer) die qm-Angabe, ergibt der Mittelwert der übrigen neun 71 qm: weit daneben, weil er die Zimmer ignoriert. Eine Regression von qm auf Zimmer schätzt 131 qm, und k-nächste-Nachbarn (die Wohnung mit den ähnlichsten Zimmern, 4,5 Zimmer) liefert 110 qm. Beide nutzen den Zusammenhang der Merkmale.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Skalieren</h4>
   <p>Merkmale haben ganz verschiedene Grössenordnungen (Verbrauch 8 l/100km, Hubraum 3600 cc). Ohne Skalieren dominieren die grossen Zahlen. Darum bringt man alle auf eine vergleichbare Skala.</p>
   <div class="tablewrap"><table>
@@ -110,8 +114,10 @@
     <tr><td>Min-Max Scaling</td><td>Werte zwischen 0 und 1</td></tr>
     <tr><td>Mean Normalization</td><td>Mittelwert 0, Werte zwischen -1 und 1</td></tr>
   </table></div>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> <code>qm</code> liegt zwischen 35 und 130, <code>Zimmer</code> zwischen 1,5 und 5,5, <code>Lage</code> zwischen 2 und 5. Ohne Skalieren würden die qm-Zahlen jedes abstandsbasierte Modell (kNN, SVM) und Gradient Descent dominieren. Mit Standard Scaling (Mittelwert 76,8 qm, Streuung 27,7 qm) wird die 130-qm-Wohnung zu <code>(130 − 76,8) / 27,7 ≈ 1,9</code>. Mit Min-Max wird sie zu 1, die 35-qm-Wohnung zu 0 und die 70-qm-Wohnung zu 0,37.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Kategorien in Zahlen</h4>
   <p>Wochentage nie einfach als 1, 2, 3 codieren: Das würde «Mittwoch ist grösser als Montag» behaupten. Stattdessen <b>One-Hot-Encoding</b>: pro Kategorie eine Spalte mit 0 oder 1.</p>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> <code>Lage</code> ist hier eine Note von 1 bis 5 und damit schon eine Zahl mit Reihenfolge, das ist in Ordnung. Wäre die Lage ein Quartier (Altstadt, Seefeld, Hardau), gäbe es keine Reihenfolge: Dann bekommt jedes Quartier eine eigene 0/1-Spalte (One-Hot), und nicht 1, 2, 3.</p>
   <pre><code>from sklearn.preprocessing import StandardScaler
 X = pd.DataFrame(StandardScaler().fit_transform(data), columns=data.columns)
 
@@ -129,6 +135,7 @@ data = pd.get_dummies(data, columns=["einkommen_klasse"])   # One-Hot</code></pr
   </div>
   <p>Warum nicht gleich den Test benutzen? Weil du die Validation beim Feintunen oft ansiehst und sie dadurch indirekt mitlernt. Der Test ist die Prüfung, die du erst am Schluss schreibst. Danach trainierst du das beste Modell nochmals mit Training und Validation zusammen (mehr Daten helfen).</p>
   <p><b>Cross-Validation (k-Fold)</b>: Die Daten werden in k gleich grosse Teile geteilt. k-mal trainierst du auf k−1 Teilen und prüfst auf dem übrigen, dann bildest du den Durchschnitt. Das nutzt die Daten besser, kostet aber k-mal mehr Rechenzeit. Varianten: Stratified (gleiche Klassenanteile pro Teil) und Leave-One-Out.</p>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Bei 10 Wohnungen ist 10-Fold gleich <b>Leave-One-Out</b>: Zehnmal trainierst du auf 9 Wohnungen und prüfst auf der zehnten. Die Gerade von oben hat auf den bekannten Wohnungen einen RMSE von 103 CHF, bei der jeweils fehlenden Wohnung <b>123 CHF</b>. Dieser zweite Wert ist die ehrlichere Zahl.</p>
   <pre><code>from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_val_score
@@ -161,6 +168,7 @@ scores.mean(), scores.std()</code></pre>
   </ul>
   <pre><code>import seaborn as sns
 sns.heatmap(data.corr(), annot=True, cmap="Reds")</code></pre>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Die Korrelation mit dem Preis ist bei <code>qm</code> 0,96, bei <code>Zimmer</code> 0,96 und bei <code>Lage</code> nur 0,52. Zugleich korrelieren <code>qm</code> und <code>Zimmer</code> untereinander mit 0,996: Sie sind praktisch dasselbe Merkmal (grosse Wohnungen haben mehr Zimmer). Eines davon wegzulassen kostet fast keine Information.</p>
   <div class="falle"><b>Falle</b><p>Korrelation ist keine Ursache. Der Folienwitz mit Piraten und Erderwärmung zeigt es: Zwei Dinge können zusammen laufen, ohne dass das eine das andere verursacht.</p></div>
 
   <h3>6 · Bias und Variance: Under- und Overfitting</h3>
@@ -170,6 +178,15 @@ sns.heatmap(data.corr(), annot=True, cmap="Reds")</code></pre>
   </ul>
   <p>Komplexere Modelle haben weniger Bias, aber mehr Variance. Gesucht ist der Mittelweg. Hier ein Polynom verschiedenen Grades, das Punkte einer Sinuskurve mit Rauschen anpasst:</p>
 
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Polynome verschiedenen Grades für den Preis über den qm. Jeweils RMSE auf den bekannten Wohnungen und bei fehlender Wohnung (Leave-One-Out):</p>
+  <div class="tablewrap"><table>
+    <tr><th>Grad</th><th class="num">bekannte Wohnungen</th><th class="num">fehlende Wohnung</th></tr>
+    <tr><td>1 (Gerade)</td><td class="num">103</td><td class="num">123</td></tr>
+    <tr><td>3</td><td class="num">100</td><td class="num">174</td></tr>
+    <tr><td>5</td><td class="num">86</td><td class="num">2 652</td></tr>
+    <tr><td>9</td><td class="num">0</td><td class="num">über 600 000</td></tr>
+  </table></div>
+  <p>Grad 9 geht exakt durch alle 10 Punkte, der Fehler auf den bekannten Wohnungen ist 0, aber für eine neue Wohnung ist die Vorhersage unbrauchbar. Das ist Overfitting in Reinform. Grad 1 ist hier mit Abstand am besten, weil die Daten fast linear sind.</p>
   <div class="demo" id="bvDemo">
     <div class="tag">Demo</div><h4>Modellkomplexität: Polynomgrad</h4>
     <svg class="plot" id="bvSvg" viewBox="0 0 320 220" role="img" aria-label="Datenpunkte, wahre Kurve und angepasstes Polynom"></svg>
@@ -193,6 +210,7 @@ sns.heatmap(data.corr(), annot=True, cmap="Reds")</code></pre>
     <tr><td><b>Lasso</b> (L1)</td><td>Summe der Beträge der Koeffizienten</td><td>setzt unwichtige Koeffizienten auf <b>exakt 0</b> (automatische Feature Selection)</td></tr>
     <tr><td><b>ElasticNet</b></td><td>L1 und L2 gemischt</td><td>Kompromiss, robuster als jedes allein</td></tr>
   </table></div>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Alle drei Merkmale (qm, Zimmer, Lage) skaliert, Gewichte in CHF pro Standardabweichung. Ohne Regularisierung: <code>190 / 157 / 103</code>. Mit <b>Ridge</b> (alpha = 10) schrumpfen alle: <code>119 / 119 / 67</code>, qm und Zimmer teilen sich den Einfluss, weil sie fast dasselbe sind. Mit <b>Lasso</b> (alpha = 150) bleibt nur ein Merkmal: <code>225 / 0 / 0</code>. Zimmer und Lage fliegen raus, Lasso hat die Feature Selection von oben gleich miterledigt.</p>
   <div class="merk"><b>Merksatz</b><p>Ridge schrumpft, Lasso streicht. Je grösser alpha, desto stärker die Bremse (bei sehr grossem alpha droht Underfitting).</p></div>
 
   <h3>8 · Hyperparameter und Modellwahl</h3>
@@ -210,6 +228,8 @@ search = GridSearchCV(pipe, grid, cv=5, n_jobs=-1)
 search.fit(X_trainval, y_trainval)
 search.best_params_, search.best_estimator_</code></pre>
   <p>Der Name vor dem doppelten Unterstrich (<code>lasso__alpha</code>) ist der Name des Schritts in der Pipeline.</p>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Hyperparameter sind hier der Polynomgrad (1 bis 9) und bei Ridge/Lasso das alpha. Du probierst jede Einstellung aus, misst jeweils den Fehler bei fehlender Wohnung (Cross-Validation) und nimmst die beste. Beim Polynomgrad gewinnt Grad 1 (123 CHF), nicht Grad 9 (Training 0 CHF, aber über 600 000 bei fehlender Wohnung). Die Testdaten bleiben bis zum Schluss unberührt.</p>
+
 
   <h3>Der ganze Ablauf auf einen Blick</h3>
   <ol>
