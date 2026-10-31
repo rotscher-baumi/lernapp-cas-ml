@@ -58,7 +58,7 @@
     <svg class="plot" id="lsSvg" viewBox="0 0 320 190" role="img" aria-label="Fehler in Abhängigkeit der vorhergesagten Wahrscheinlichkeit für eine Wohnung, die wirklich teuer ist"></svg>
     <div class="ctl"><label for="lsP">Vorhergesagte P(teuer)</label><input type="range" id="lsP" min="1" max="99" step="1" value="10"><output id="lsPO"></output></div>
     <div class="stats"><span>Cross-Entropy <b id="lsCE"></b></span><span>MSE <b id="lsMS"></b></span></div>
-    <p class="hint">Die Wohnung ist wirklich teuer (y = 1). Sagt das Modell nur 1 % Wahrscheinlichkeit, ist es sicher und falsch. Die Cross-Entropy (−ln p, durchgezogen) schiesst dann steil nach oben und zwingt das Modell zur Korrektur. Der quadratische Fehler ((1−p)², gestrichelt) bleibt bei maximal 1 und lässt kaum Druck übrig.</p>
+    <p class="hint">Die Wohnung ist wirklich teuer (y = 1). Sagt das Modell nur 1 % Wahrscheinlichkeit, ist es sicher und falsch. Die Cross-Entropy (−ln p, durchgezogen) schiesst dann steil nach oben und zwingt das Modell zur Korrektur. Der quadratische Fehler ((1−p)², gestrichelt) bleibt bei maximal 1. Zusammen mit der Sigmoid wird sein Gradient bei sicher falschen Vorhersagen fast 0, das Modell korrigiert kaum.</p>
   </div>
   <pre><code>from sklearn.linear_model import LogisticRegression
 clf =LogisticRegression().fit(X_train, y_train)
@@ -66,7 +66,7 @@ clf.predict(X_test)          # Klassen (0/1)
 clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
   <div class="merk"><b>Merksatz</b><p>Logistische Regression = lineare Regression + Sigmoid. Das Modell liefert zuerst eine Wahrscheinlichkeit, die Klasse entsteht erst durch die Schwelle. Die Schwelle ist deine Entscheidung, nicht die des Modells.</p></div>
 
-  <h3>2 · Wie gut ist ein Klassifikator? Confusion Matrix und Metriken</h3>
+  <h3 id="klass-metriken">2 · Wie gut ist ein Klassifikator? Confusion Matrix und Metriken</h3>
   <p>Jede Vorhersage fällt in eines von vier Fächern. Eselsbrücke: Der zweite Buchstabe ist, was das Modell sagt (positiv/negativ), der erste, ob es stimmt (True/False).</p>
   <div class="tablewrap"><table>
     <tr><th></th><th>Modell sagt positiv</th><th>Modell sagt negativ</th></tr>
@@ -83,7 +83,7 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
   <div class="falle"><b>Falle (Accuracy)</b><p>Bei seltenen Klassen ist Accuracy irreführend. Ein Modell, das immer «kein Betrug» sagt, hat bei 1 Betrug auf 100 Fällen 99 % Accuracy, findet aber nie einen Betrug (Recall 0, F1 0). Schau bei unausgewogenen Daten auf Precision, Recall, F1 und AUC.</p></div>
 
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Die Schwelle verschieben: Precision gegen Recall</h4>
-  <p>Senkst du die Schwelle, sagt das Modell öfter «positiv»: mehr TP, aber auch mehr FP. Recall steigt, Precision sinkt. Es ist ein <b>Kompromiss</b>, und welche Seite wichtiger ist, hängt vom Problem ab. Bei einer Krebs-Früherkennung willst du kaum etwas übersehen (hoher Recall), bei einer Spam-Sperre willst du keine echte Mail löschen (hohe Precision).</p>
+  <p>Senkst du die Schwelle, sagt das Modell öfter «positiv»: mehr TP, aber auch mehr FP. Recall steigt (oder bleibt gleich), Precision sinkt meist. Es ist ein <b>Kompromiss</b>, und welche Seite wichtiger ist, hängt vom Problem ab. Bei einer Krebs-Früherkennung willst du kaum etwas übersehen (hoher Recall), bei einer Spam-Sperre willst du keine echte Mail löschen (hohe Precision).</p>
   <p>Die <b>ROC-Kurve</b> trägt für alle Schwellen die Trefferquote (TPR = Recall) gegen die Rate falscher Alarme (FPR) auf. Ein perfektes Modell liegt oben links, Raten liegt auf der Diagonalen. Die <b>AUC</b> ist die Fläche unter der Kurve: 1 ist perfekt, 0,5 ist Zufall.</p>
   <div class="demo" id="thDemo">
     <div class="tag">Demo</div><h4>Schwelle, Confusion Matrix und ROC</h4>
@@ -112,8 +112,9 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
   </ul>
   <p>Bewertet wird pro Klasse: Du betrachtest jede Klasse der Reihe nach als «positiv» und alle anderen als «negativ» und bekommst so TP, FP, FN, TN und Precision/Recall/F1 je Klasse. Zusammenfassen kannst du das auf zwei Arten:</p>
   <ul>
-    <li><b>Micro</b>: Zuerst alle TP, FP, FN über alle Klassen addieren, dann die Masse berechnen. Bei Einzelklassen-Problemen ist micro-Precision = micro-Recall = Accuracy.</li>
-    <li><b>Macro</b>: Die Masse pro Klasse berechnen und mitteln (ungewichtet), oder <b>gewichtet</b> nach Klassengrösse, damit grosse Klassen mehr zählen.</li>
+    <li><b>Micro</b>: Zuerst alle TP, FP, FN über alle Klassen addieren, dann die Masse berechnen. Hat jeder Fall genau ein Label (normales Multiclass), ist micro-Precision = micro-Recall = micro-F1 = Accuracy.</li>
+    <li><b>Macro</b>: Die Masse pro Klasse berechnen und ungewichtet mitteln, jede Klasse zählt gleich.</li>
+    <li><b>Weighted</b>: Wie macro, aber gewichtet nach Klassengrösse, damit grosse Klassen mehr zählen.</li>
   </ul>
   <pre><code>from sklearn.metrics import classification_report, confusion_matrix
 print(confusion_matrix(y_test, pred))
@@ -141,7 +142,7 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
   </table></div>
   <div class="falle"><b>Falle</b><p>Resampling (Up/Downsampling, SMOTE) gehört <b>nur auf die Trainingsdaten</b>, nie auf das Test-Set. Sonst bewertest du auf künstlichen Daten und bekommst zu schöne Zahlen.</p></div>
 
-  <h3>5 · Nicht-lineare Klassifikatoren</h3>
+  <h3 id="klass-modelle">5 · Nicht-lineare Klassifikatoren</h3>
   <p>Logistische Regression zieht eine <b>gerade</b> Grenze. Wenn die Klassen nicht so sauber trennbar sind, brauchst du flexiblere Modelle.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">k-nächste Nachbarn (kNN)</h4>
   <p>Für einen neuen Punkt suchst du die k nächsten Trainingspunkte und nimmst die Mehrheitsklasse (bei Regression den Durchschnitt). Es gibt kein Training, dafür ist die Vorhersage bei vielen Daten langsam. k steuert Bias und Variance: <b>k = 1</b> folgt jedem Punkt (Overfitting), <b>k = N</b> sagt für alle die Mehrheitsklasse (Underfitting).</p>
@@ -165,7 +166,7 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Entscheidungsbaum</h4>
   <p>Eine Kette von Ja/Nein-Fragen. An jedem Knoten wird die Frage gewählt, die die Klassen am besten trennt (Mass: Gini oder Informationsgewinn), bis die Blätter «rein» sind oder die maximale Tiefe erreicht ist. Gut lesbar, aber ein tiefer Baum lernt die Trainingsdaten auswendig. Gegenmittel: <code>max_depth</code> begrenzen oder zurückschneiden.</p>
   <p>Ein Entscheidungsbaum braucht <b>keine lineare Regression</b> und keine Sigmoid-Funktion: Er schätzt keine Gewichte, sondern teilt die Daten mit Schwellen auf einzelne Merkmale auf. Er ist damit eine <b>Alternative</b> zur logistischen Regression, kein Ersatz. Vorteile: nicht lineare Zusammenhänge, kein Skalieren der Merkmale nötig. Nachteile: Die Grenzen verlaufen achsenparallel (treppenförmig), tiefe Bäume overfitten schnell, und die Wahrscheinlichkeiten aus den Blättern sind grob.</p>
-  <p class="note"><b>Mit den 10 Wohnungen:</b> Am Anfang sind 5 teure und 5 nicht teure Wohnungen gemischt (Gini = 0,5, maximal unrein). Die beste Frage ist «Mehr als 74 qm?»: Links landen 5 nicht teure, rechts 5 teure, beide Blätter sind sofort rein (Gini = 0). Ein einziger Schnitt genügt, der Baum hat Tiefe 1. Das ist dieselbe Grenze wie bei der SVM und der logistischen Regression, nur mit anderem Weg dorthin.</p>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Am Anfang sind 5 teure und 5 nicht teure Wohnungen gemischt (Gini = 0,5, maximal unrein). Die beste Frage ist «Mehr als 74 qm?»: Links landen 5 nicht teure, rechts 5 teure, beide Blätter sind sofort rein (Gini = 0). Ein einziger Schnitt genügt, der Baum hat Tiefe 1. Die SVM legt ihre Grenze ebenfalls genau in die Mitte (74 qm), die logistische Regression etwa dorthin (zwischen 70 und 78 qm), nur mit anderem Weg.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Neuronale Netze</h4>
   <p>Schichten aus künstlichen Neuronen mit gewichteten Verbindungen, die per Backpropagation trainiert werden (Gradient Descent über alle Schichten). Mit sehr vielen Schichten spricht man von Deep Learning, das kommt im nächsten Modul.</p>
   <p class="note"><b>Mit den 10 Wohnungen:</b> Ein einzelnes Neuron mit Sigmoid, <code>P(teuer) = sigmoid(w·qm + b)</code>, <i>ist</i> die logistische Regression von oben. Weitere Schichten brauchst du hier nicht, denn die Klassen sind mit einem Schnitt bei 74 qm trennbar. Mehr Schichten lohnen sich erst bei Mustern, die keine einzelne Grenze beschreiben kann.</p>
@@ -173,14 +174,14 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
   <h3>6 · Ensembles: viele schwache Modelle ergeben ein starkes</h3>
   <p>Ein einzelnes Modell macht Fehler. Mehrere Modelle, die unterschiedlich irren, gleichen sich im Mittel aus.</p>
   <div class="grid2">
-    <div><h4>Bagging (Random Forest)</h4><p>Viele Bäume, jeder auf einer zufälligen Stichprobe der Daten und einer zufälligen Auswahl an Merkmalen, <b>parallel</b> trainiert. Mehrheitsentscheid (oder Mittelwert). Senkt die Varianz.</p></div>
-    <div><h4>Boosting (Gradient Boosting)</h4><p>Bäume werden <b>nacheinander</b> trainiert, jeder korrigiert die Restfehler des vorherigen. Oft genauer, aber empfindlicher für Rauschen und bei zu hoher Lernrate überangepasst.</p></div>
+    <div><h4>Bagging (Random Forest)</h4><p>Viele Bäume, jeder auf einer zufälligen Stichprobe der Daten, bei jedem Split mit einer zufälligen Auswahl an Merkmalen, <b>parallel</b> trainiert. Mehrheitsentscheid (oder Mittelwert). Senkt die Varianz.</p></div>
+    <div><h4>Boosting (Gradient Boosting)</h4><p>Bäume werden <b>nacheinander</b> trainiert, jeder korrigiert die Restfehler aller bisherigen Bäume zusammen. Oft genauer, aber empfindlicher für Rauschen und bei zu hoher Lernrate überangepasst.</p></div>
   </div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Beispiel: die 10 Wohnungen</h4>
   <p>Bei der Klasse «teuer» reicht der eine Schnitt bei 74 qm, da gibt es für ein Ensemble nichts zu verbessern. Deshalb gehen wir hier zurück zur Frage von Tag 1, dem <b>Preis</b> (Ensembles gibt es genauso für Regression). Der Preis steigt nicht sauber mit den qm: die 70-qm-Wohnung (1620) ist billiger als die 62-qm-Wohnung (1770), die 85-qm-Wohnung (1850) billiger als die 78-qm-Wohnung (1890). Ein tiefer Baum lernt diese Ausreisser auswendig.</p>
   <ul>
     <li><b>Einzelbaum:</b> Mit Tiefe 3 hat fast jede Wohnung ihr eigenes Blatt. Auf den bekannten Wohnungen ist der Fehler klein (etwa 35 CHF), lässt du eine Wohnung weg, ist er viel grösser (etwa 240 CHF). Dieser Abstand ist das Overfitting.</li>
-    <li><b>Bagging:</b> Jeder Baum bekommt 10 Wohnungen, die <i>mit Zurücklegen</i> gezogen werden. Manche kommen doppelt vor, andere gar nicht (im Schnitt sind etwa 63 % verschiedene dabei). Jeder Baum irrt anders, der Mittelwert ist glatter und merkt sich weniger auswendig. Bei nur 10 Wohnungen bleibt der Fehler bei einer fehlenden Wohnung trotzdem ähnlich, der Vorteil zeigt sich erst bei mehr Daten.</li>
+    <li><b>Bagging:</b> Jeder Baum bekommt 10 Wohnungen, die <i>mit Zurücklegen</i> gezogen werden. Manche kommen doppelt vor, andere gar nicht (im Schnitt sind etwa 65 % verschiedene dabei, bei vielen Daten 63 %). Jeder Baum irrt anders, der Mittelwert ist glatter und merkt sich weniger auswendig. Bei nur 10 Wohnungen bleibt der Fehler bei einer fehlenden Wohnung trotzdem ähnlich, der Vorteil zeigt sich erst bei mehr Daten.</li>
     <li><b>Boosting:</b> Start ist der Durchschnittspreis (1841 CHF). Dann passt ein flacher Baum (Tiefe 1) die <i>Restfehler</i> an, ein Bruchteil davon (Lernrate) wird addiert, und das wiederholt sich Runde für Runde.</li>
   </ul>
   <div class="demo" id="enDemo">
@@ -200,7 +201,7 @@ rf = RandomForestRegressor(n_estimators=200, random_state=0).fit(X, y)
 gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).fit(X, y)
 # Für «teuer ja/nein»: RandomForestClassifier / GradientBoostingClassifier</code></pre>
 
-  <h3>7 · Data Leakage</h3>
+  <h3 id="klass-leakage">7 · Data Leakage</h3>
   <p>Leakage heisst: Das Modell sieht beim Training Information, die es bei der echten Vorhersage nicht hätte. Folge: wunderbare Testwerte und ein Modell, das im Einsatz versagt.</p>
   <ul>
     <li><b>Target Leakage</b>: Ein Merkmal enthält die Antwort schon. Beispiel aus der Vorlesung: Ein Kündigungsmodell mit 100 % Treffer, weil Anrufe beim Kundendienst («ich möchte kündigen») erst <i>nach</i> der Kündigung entstehen.</li>
@@ -210,7 +211,7 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
   </ul>
   <div class="merk"><b>Merksatz</b><p>Misstraue zu guten Zahlen. Frage bei jedem Merkmal: «Hätte ich diesen Wert zum Zeitpunkt der Vorhersage wirklich?» Verdächtig sind ein riesiger Unterschied Training zu Validation und ein einzelnes Merkmal mit enormem Gewicht.</p></div>
 
-  <h3>8 · Der ganze Ablauf (Titanic-Aufgabe)</h3>
+  <h3 id="klass-ablauf">8 · Der ganze Ablauf (Titanic-Aufgabe)</h3>
   <p>Am Nachmittag baut ihr in Gruppen ein Modell, das vorhersagt, wer die Titanic überlebt hat (Spalten: <code>Pclass</code>, <code>Sex</code>, <code>Age</code>, <code>SibSp</code>, <code>Parch</code>, <code>Fare</code>, <code>Embarked</code>; Ziel <code>Survived</code>). Der Ablauf passt auf jedes Klassifikationsproblem:</p>
   <ol>
     <li>Daten ansehen (Struktur, Verteilungen, Anteil der Klassen).</li>
@@ -268,7 +269,7 @@ cross_val_score(model, X_tr, y_tr, cv=5, scoring="f1").mean()</code></pre>
       { q: `Du senkst die Schwelle von 0,5 auf 0,2. Was passiert mit Recall und Precision?`, a: `Mehr Fälle werden positiv: Recall steigt (oder bleibt gleich), Precision sinkt meist, weil mehr falsche Alarme dazukommen.` },
       { q: `Was bedeutet eine AUC von 0,5, was von 1?`, a: `0,5 ist Zufall (ROC-Kurve auf der Diagonalen), 1 ist ein perfekter Klassifikator (alle Positiven vor allen Negativen).` },
       { q: `Was passiert bei kNN mit k = 1 und mit k = N?`, a: `k = 1 folgt jedem Trainingspunkt (Overfitting, trainings-perfekt). k = N sagt immer die Mehrheitsklasse (Underfitting).` },
-      { q: `Worin unterscheiden sich Bagging und Boosting?`, a: `Bagging trainiert viele Modelle parallel auf Zufallsstichproben und mittelt (senkt Varianz). Boosting trainiert nacheinander, jedes Modell korrigiert die Fehler des vorherigen (senkt Bias, anfälliger für Rauschen).` },
+      { q: `Worin unterscheiden sich Bagging und Boosting?`, a: `Bagging trainiert viele Modelle parallel auf Zufallsstichproben und mittelt (senkt Varianz). Boosting trainiert nacheinander, jedes Modell korrigiert die Restfehler des bisherigen Gesamtmodells (senkt Bias, anfälliger für Rauschen).` },
       { q: `Wie entsteht Data Leakage, und wie verhinderst du es bei Skalierung und Imputation?`, a: `Information aus Test- oder Zukunftsdaten fliesst ins Training. Alle lernenden Vorverarbeitungsschritte nur auf den Trainingsdaten fitten, am einfachsten mit einer Pipeline in der Cross-Validation.` },
       { q: `Wann darfst du ein Resampling (z. B. SMOTE) anwenden?`, a: `Nur auf die Trainingsdaten, nie auf Validation oder Test. Sonst wird auf künstlichen Daten bewertet.` },
     ],
@@ -413,7 +414,7 @@ cross_val_score(model, X_tr, y_tr, cv=5, scoring="f1").mean()</code></pre>
           $('knSvg').innerHTML=s;
           const acc=set=>set.filter(p=>pred(p.x,p.y,k)===p.c).length/set.length;
           const a=acc(tr),b=acc(te);$('knTr').textContent=fmt(a,2);$('knTe').textContent=fmt(b,2);
-          $('knMsg').textContent=k===1?'k = 1: Jeder Punkt zieht seine eigene Insel. Trainings-Accuracy ist perfekt, aber auf neuen Punkten schlechter (Overfitting).':k>=55?'Sehr grosses k: Die Fläche wird fast einfarbig, das Modell ignoriert die Struktur (Underfitting).':'Mittleres k: Eine glatte Grenze, Training und Test liegen nahe beieinander.'}
+          $('knMsg').textContent=k===1?'k = 1: Jeder Punkt zieht seine eigene Insel. Trainings-Accuracy ist perfekt, aber auf neuen Punkten schlechter (Overfitting).':k>=55?'Sehr grosses k: Die Fläche wird fast einfarbig, das Modell ignoriert die Struktur (Underfitting).':k<15?'Kleines k: Die Grenze ist noch zackig, Training ist deutlich besser als Test (noch etwas Overfitting).':'Mittleres k: Eine glatte Grenze, Training und Test liegen nahe beieinander.'}
         $('knK').addEventListener('input',draw);
         $('knSvg').addEventListener('click',e=>{const b=e.currentTarget.getBoundingClientRect();q.x=Math.min(1,Math.max(0,(e.clientX-b.left)/b.width));q.y=Math.min(1,Math.max(0,1-(e.clientY-b.top)/b.height));draw()});
         draw()})();
@@ -464,7 +465,7 @@ cross_val_score(model, X_tr, y_tr, cv=5, scoring="f1").mean()</code></pre>
           const lo=qm.map((x,i)=>{const xs=qm.filter((v,j)=>j!==i),ys=pr.filter((v,j)=>j!==i);return model(xs,ys,mode,d,n,lr).f(x)-pr[i]});
           $('enTr').textContent=fmt(rmse(tr),0);$('enLo').textContent=fmt(rmse(lo),0);
           $('enMsg').textContent=mode===1?(d>=3?'Tiefer Einzelbaum: Fast jede Wohnung hat ihr eigenes Blatt, die Stufen folgen den Ausreissern. Der Fehler auf bekannten Wohnungen ist klein, der Fehler bei fehlender Wohnung viel grösser (Overfitting).':'Flacher Einzelbaum: Wenige grobe Stufen. Der Fehler ist schon auf den bekannten Wohnungen hoch (Underfitting).')
-            :mode===2?'Bagging: Die orangen Linien sind einzelne Bäume (je auf einer anderen Stichprobe der 10 Wohnungen), die blaue Linie ist ihr Mittelwert. Mit mehr Bäumen wird sie glatter. Der Fehler auf bekannten Wohnungen steigt gegenüber dem Einzelbaum (weniger Auswendiglernen), der Fehler bei fehlender Wohnung bleibt bei nur 10 Wohnungen etwa gleich.'
+            :mode===2?'Bagging: Die orangen Linien sind einzelne Bäume (je auf einer anderen Stichprobe der 10 Wohnungen), die blaue Linie ist ihr Mittelwert. Mit mehr Bäumen wird sie glatter. Der Fehler auf bekannten Wohnungen steigt (ab Tiefe 2) gegenüber dem Einzelbaum (weniger Auswendiglernen), der Fehler bei fehlender Wohnung bleibt bei nur 10 Wohnungen etwa gleich.'
             :'Boosting: Die Linie startet beim Durchschnitt (1841 CHF) und nähert sich pro Runde den Preisen. Mit Tiefe 1 und wenigen Runden ist sie grob. Mit mehr Runden oder höherer Lernrate liegt sie näher an den Preisen (Fehler auf bekannten Wohnungen sinkt), lernt aber irgendwann nur noch die Ausreisser, der Fehler bei fehlender Wohnung bleibt gleich.'}
         [1,2,3].forEach(k=>{$('enM'+k).addEventListener('click',()=>{mode=k;$('enD').value=k===3?1:3;$('enN').value=k===3?30:20;draw()})});
         ['enD','enN','enL'].forEach(id=>$(id).addEventListener('input',draw));draw()})();
