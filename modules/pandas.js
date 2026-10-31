@@ -55,8 +55,8 @@ df["stadt"].value_counts()                           # wie oft kommt jeder Wert 
 
   <h3>Fehlende Werte</h3>
   <pre><code>df.isna().sum()                     # leere Werte pro Spalte
-df.dropna(subset=["preis"])         # Zeilen löschen, wo "preis" fehlt
-df["alter"].fillna(df["alter"].median())   # auffüllen</code></pre>
+df = df.dropna(subset=["preis"])    # Zeilen löschen, wo "preis" fehlt
+df["alter"] = df["alter"].fillna(df["alter"].median())   # auffüllen (Ergebnis zuweisen!)</code></pre>
   <div class="falle"><b>Falle aus dem NYC-Notebook</b><p>In jeder Spalte fehlen nur etwa 5 Prozent. Aber in <i>verschiedenen</i> Zeilen. Ein pauschales <code>dropna()</code> wirft dadurch rund 43 Prozent aller Zeilen weg. Besser: nur dort löschen, wo die Spalte wirklich nötig ist.</p></div>
 
   <h3>groupby: Gruppieren und Zusammenfassen</h3>

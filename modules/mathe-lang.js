@@ -29,7 +29,7 @@ mse = summe / n</code></pre>
   <p>Eine Gerade hat überall dieselbe Steigung: <code>Höhenänderung / Schrittweite</code>, kurz <code>Δy / Δx</code>. Steigt eine Strasse auf 100 m um 8 m, sind das 8 Prozent. Egal, wo du misst.</p>
 
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Bei einer Kurve ändert sich die Steigung</h4>
-  <p>Eine Parabel fällt links steil ab, ist unten flach und steigt rechts steil an. Für einen einzelnen Punkt gibt es kein «Δ» zwischen zwei Punkten. Der Trick: Nimm zwei Punkte, bei <code>x</code> und bei <code>x + h</code>, und rechne die Steigung der Verbindungslinie (<b>Sekante</b>). Dann machst du <code>h</code> immer kleiner. Wenn <code>h</code> gegen 0 geht, wird aus der Sekante die <b>Tangente</b>, eine Gerade, die die Kurve nur in diesem einen Punkt berührt. Ihre Steigung ist die Ableitung.</p>
+  <p>Eine Parabel fällt links steil ab, ist unten flach und steigt rechts steil an. Für einen einzelnen Punkt gibt es kein «Δ» zwischen zwei Punkten. Der Trick: Nimm zwei Punkte, bei <code>x</code> und bei <code>x + h</code>, und rechne die Steigung der Verbindungslinie (<b>Sekante</b>). Dann machst du <code>h</code> immer kleiner. Wenn <code>h</code> gegen 0 geht, wird aus der Sekante die <b>Tangente</b>, eine Gerade, die die Kurve in diesem Punkt berührt und dort dieselbe Steigung hat. Ihre Steigung ist die Ableitung.</p>
   <pre><code>f'(x) = (f(x + h) - f(x)) / h      # für sehr kleines h</code></pre>
 
   <div class="demo" id="dvDemo">
@@ -121,7 +121,7 @@ X_test_s  = scaler.transform(X_test)       # nutzt dieselben Zahlen</code></pre>
   <div class="falle"><b>Falle</b><p>Mittelwert und Std des Scalers lernst du nur auf den <b>Trainingsdaten</b> (<code>fit</code>). Auf Validierungs- und Testdaten wendest du sie bloss an (<code>transform</code>). Sonst fliessen Testinformationen ins Training: Data Leakage.</p></div>
 
   <h3>Korrelation</h3>
-  <p>Die <b>Korrelation</b> r misst, wie stark zwei Variablen <i>linear</i> zusammen laufen, auf einer Skala von −1 bis +1: +1 heisst perfekt gemeinsam steigend, −1 perfekt gegenläufig, 0 kein linearer Zusammenhang. In Pandas: <code>df.corr()</code>. Bei der Feature Selection wählt man Merkmale mit hoher Korrelation zum Ziel.</p>
+  <p>Die <b>Korrelation</b> r misst, wie stark zwei Variablen <i>linear</i> zusammen laufen, auf einer Skala von −1 bis +1: +1 heisst perfekt gemeinsam steigend, −1 perfekt gegenläufig, 0 kein linearer Zusammenhang. In Pandas: <code>df.corr()</code>. Bei der Feature Selection wählt man Merkmale mit hoher Korrelation zum Ziel, positiv oder negativ (hoher Betrag |r|).</p>
   <div class="falle"><b>Falle</b><p>Korrelation ist keine Ursache (Piraten und Erderwärmung!), und r misst nur <i>lineare</i> Zusammenhänge: Eine perfekte U-Kurve kann r ≈ 0 haben.</p></div>
 `,
     exercises: [
