@@ -30,7 +30,19 @@ Die Kapitel sind JavaScript-Dateien (mit dem HTML als Text), weil Browser beim �
 
 ## Notebooks
 
-Die Übungs-Notebooks liegen in `notebooks/`. Sie brauchen `pandas`, `numpy`, `matplotlib` und `scikit-learn`. Die Kursunterlagen in den Modulordnern werden nicht verändert.
+Die Übungs-Notebooks liegen in `notebooks/`. Sie brauchen `pandas`, `numpy`, `matplotlib` und `scikit-learn`. Das Notebook `Fehlende_Werte_Imputation.ipynb` zeigt separat, wie fehlende Werte ohne Data Leakage anhand der Trainingsmediane ergänzt werden. Die Kursunterlagen in den Modulordnern werden nicht verändert.
+
+### Übungen in der App und im Notebook
+
+Die Übungen gibt es zweimal, bewusst identisch: im Notebook und am Ende des Kapitels in der Webseite. Die Notebooks sind die Quelle. `assets/notebook-data.js` wird daraus erzeugt (nicht von Hand ändern):
+
+```
+python tools/build_notebook_exercises.py            # neu erzeugen
+python tools/build_notebook_exercises.py --check    # prüft, ob die Datei aktuell ist
+python tools/build_notebook_exercises.py --verify   # alle Lösungen gegen ihre Prüfung laufen lassen
+```
+
+Ein Kapitel zeigt die Übungen mit `nbExercises: '<datei>.ipynb'` im Modul. Die Webseite führt den Code mit Pyodide aus (echtes pandas und scikit-learn im Browser, der erste Start lädt einige zehn MB).
 
 ### Lokale Jupyter-Umgebung unter Windows
 
