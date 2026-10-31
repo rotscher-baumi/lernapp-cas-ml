@@ -32,24 +32,54 @@
     nav: 'Unsupervised',
     title: `Unsupervised Learning`,
     kicker: `Modul 3 · Unsupervised Learning (Sa 31.10.)`,
-    summary: `Clustering, Anomalien, PCA und t-SNE`,
-    html: `  <p>Bisher hatten alle Daten eine Antwort (Preis, Klasse). Beim <b>Unsupervised Learning</b> gibt es keine. Das Modell soll selbst Struktur in den Daten finden. Zwei Hauptaufgaben:</p>
+    summary: `Supervised oder Unsupervised, Clustering, Anomalien, PCA, t-SNE und UMAP`,
+    html: `  <p>Bisher hatten alle Daten eine Antwort (Preis, Klasse). Beim <b>Unsupervised Learning</b> gibt es keine. Das Modell soll selbst Struktur in den Daten finden. Drei Hauptaufgaben:</p>
   <div class="grid2">
     <div><h4>Clustering</h4><p>Ähnliche Datenpunkte in Gruppen einteilen. Beispiel: Kundensegmente, Dokumentgruppen.</p></div>
+    <div><h4>Anomalien finden</h4><p>Punkte finden, die nicht zum Rest passen. Beispiel: auffällige Zahlungen.</p></div>
     <div><h4>Dimensionsreduktion</h4><p>Viele Merkmale auf wenige zusammenfassen, zum Beispiel um Daten in 2D zu zeichnen.</p></div>
   </div>
-  <p>Der Tag arbeitet mit einem Lego-Datensatz (von der Spielwarenseite gescrapt). Es gibt kein «richtig», nur nützlich oder nicht. Darum gehört die <b>Interpretation</b> zum Ergebnis dazu.</p>
+  <p>Der Tag arbeitet mit einem Lego-Datensatz (von der Spielwarenseite gescrapt), die Labs mit Wein-Messwerten, simulierten Zahlungen und handgeschriebenen Ziffern. Es gibt kein «richtig», nur nützlich oder nicht. Darum gehört die <b>Interpretation</b> zum Ergebnis dazu.</p>
+  <p class="hint">Der ganze Ablauf als klickbare Grafik steht am Ende des Kapitels: <a href="#unsup-ablauf">Der ganze Ablauf auf einen Blick</a>.</p>
 
-  <h3>1 · Clustering und Anomalien</h3>
+  <h3 id="unsup-vs">1 · Supervised oder Unsupervised?</h3>
+  <p>Die Problemart hängt nicht vom Verfahren ab, sondern von den <b>Daten und der Frage</b>. Entscheidend ist: Gibt es eine Spalte mit der gesuchten Antwort (Zielspalte <code>y</code>, Label)?</p>
+  <div class="tablewrap"><table>
+    <tr><th></th><th>Supervised</th><th>Unsupervised</th></tr>
+    <tr><td>Daten</td><td>Merkmale <code>X</code> <b>und</b> Zielspalte <code>y</code></td><td>nur Merkmale <code>X</code></td></tr>
+    <tr><td>Frage</td><td>«Was ist <code>y</code> für einen neuen Fall?»</td><td>«Welche Struktur steckt in <code>X</code>?»</td></tr>
+    <tr><td>Aufgaben</td><td>Regression (Zahl), Klassifikation (Klasse)</td><td>Clustering, Anomalien, Dimensionsreduktion</td></tr>
+    <tr><td>Beispiele</td><td>Wohnungspreis, Spam ja/nein, überlebt auf der Titanic</td><td>Kundensegmente, auffällige Zahlungen, 13 Messwerte in 2D zeichnen</td></tr>
+    <tr><td>Bewertung</td><td>Vergleich mit der richtigen Antwort (MSE, Accuracy, ROC)</td><td>keine richtige Antwort: Silhouette, Stabilität, Fachwissen</td></tr>
+    <tr><td>Aufteilen</td><td>Train, Validation, Test zwingend</td><td>meist alle Daten; ein Testset nur, wenn das Modell später neue Daten einordnet</td></tr>
+    <tr><td>Ergebnis</td><td>Modell, das Vorhersagen macht</td><td>Gruppen, Scores oder neue Koordinaten, die du deuten musst</td></tr>
+    <tr><td>Verfahren</td><td>Lineare und logistische Regression, kNN, Bäume</td><td>k-Means, hierarchisch, DBSCAN, GMM, Isolation Forest, PCA, t-SNE, UMAP</td></tr>
+  </table></div>
+  <p><b>Woran erkennst du die Problemart?</b></p>
+  <ol>
+    <li>Gibt es eine Zielspalte, und ist sie für genug Zeilen bekannt? Dann <b>Supervised</b>: Zahl → Regression, Kategorie → Klassifikation.</li>
+    <li>Gibt es keine Zielspalte, und du suchst Gruppen, Ausreisser oder eine Übersicht? Dann <b>Unsupervised</b>.</li>
+    <li>Nur wenige Zeilen haben ein Label, viele nicht? Dann <b>Semi-supervised</b>: zum Beispiel clustern, die Gruppen von Hand benennen und danach supervised weiterlernen.</li>
+  </ol>
+  <div class="demo" id="pvDemo">
+    <div class="tag">Selbsttest</div><h4>Welche Problemart ist das?</h4>
+    <p class="hint">Wähle eine Aufgabe und überlege zuerst selbst.</p>
+    <div class="btnrow" id="pvBtns"></div>
+    <p id="pvMsg"></p>
+  </div>
+  <div class="merk"><b>Gleiche Daten, andere Frage</b><p>Kundendaten mit einer Spalte «hat gekündigt»: «Wer kündigt als Nächstes?» ist Klassifikation (supervised). «Welche Kundentypen gibt es?» ist Clustering (unsupervised), die Spalte «hat gekündigt» bleibt dabei draussen.</p></div>
+  <div class="falle"><b>Falle</b><p>Sind Labels vorhanden (zum Beispiel die Weinsorten im Lab), dürfen sie beim Unsupervised Learning <b>nicht ins Modell</b>. Du kannst sie erst danach zur Kontrolle neben die Cluster legen (ARI, siehe <a href="#unsup-profil">Cluster prüfen</a>).</p></div>
+
+  <h3 id="unsup-dist">2 · Clustering und Anomalien</h3>
   <p>Ziel: Punkte im gleichen Cluster sind einander ähnlicher als Punkten in anderen Clustern. «Ähnlich» wird über einen <b>Abstand</b> gemessen:</p>
   <ul>
     <li><b>Euklidische Distanz</b>: die Luftlinie, <code>√(Σ (a<sub>i</sub> − b<sub>i</sub>)²)</code>. Für Zahlen.</li>
     <li><b>Simple Matching</b>: zählt, bei wie vielen Kategorien zwei Punkte <i>nicht</i> übereinstimmen. Für Kategorien.</li>
     <li><b>Dynamic Time Warping</b>: Abstand zwischen Zeitreihen, die leicht verschoben oder gedehnt sind.</li>
   </ul>
-  <p><b>Anomalieerkennung</b> ist die Kehrseite: Nach dem Clustering gelten Punkte, die zu keinem Cluster gut passen oder weit von ihrem Zentrum liegen, als auffällig (z. B. ein Betrugsverdacht).</p>
+  <p><b>Anomalieerkennung</b> ist die Kehrseite: Nach dem Clustering gelten Punkte, die zu keinem Cluster gut passen oder weit von ihrem Zentrum liegen, als auffällig (z. B. ein Betrugsverdacht). Ein eigenes Verfahren dafür ist der <a href="#unsup-anomalie">Isolation Forest</a>.</p>
 
-  <h3>2 · k-Means</h3>
+  <h3 id="unsup-kmeans">3 · k-Means</h3>
   <p>Du legst die Anzahl Cluster <b>k</b> selbst fest. Dann wiederholt der Algorithmus zwei Schritte, bis sich nichts mehr ändert:</p>
   <ol>
     <li>Jeden Punkt dem <b>nächsten Zentrum</b> zuordnen.</li>
@@ -77,7 +107,7 @@ labels = km.labels_            # Cluster pro Zeile
 km.cluster_centers_            # Zentren (im skalierten Raum)
 km.inertia_                    # WSS</code></pre>
 
-  <h3>3 · Wie viele Cluster?</h3>
+  <h3 id="unsup-k">4 · Wie viele Cluster?</h3>
   <p>Die Methoden aus dem Supervised Learning (Test-Set, Accuracy) gehen nicht, es gibt ja keine richtige Antwort. Drei übliche Hilfen:</p>
   <ul>
     <li><b>Elbow-Methode</b>: WSS für k = 1, 2, 3 … zeichnen. WSS sinkt mit wachsendem k (bei guter Lösung), aber ab dem «Ellbogen» nur noch wenig. Dort wählst du k.</li>
@@ -92,7 +122,7 @@ km.inertia_                    # WSS</code></pre>
   </div>
   <div class="merk"><b>Merksatz</b><p>Die Methoden liefern Vorschläge, keine Wahrheit. Entscheidend ist am Ende, ob die Cluster fachlich Sinn ergeben und sich beschreiben lassen.</p></div>
 
-  <h3>4 · Hierarchisches Clustering</h3>
+  <h3 id="unsup-hier">5 · Hierarchisches Clustering</h3>
   <p>Hier musst du k nicht vorher wählen. Jeder Punkt startet als eigenes Cluster, dann werden immer die zwei <b>ähnlichsten</b> Cluster verschmolzen, bis alles ein Baum ist, das <b>Dendrogramm</b>. Wo du den Baum waagrecht «durchschneidest», bestimmt die Clusterzahl: Je höher der Schnitt, desto weniger Cluster. Die Höhe einer Verbindung zeigt, wie unähnlich die verschmolzenen Gruppen waren.</p>
   <p>Wie der Abstand zwischen <i>Gruppen</i> gemessen wird, bestimmt die <b>Linkage</b>:</p>
   <div class="tablewrap"><table>
@@ -108,14 +138,64 @@ dendrogram(Z)
 labels = fcluster(Z, t=3, criterion="maxclust")   # 3 Cluster</code></pre>
   <p class="note">Kleine Entscheide mit grossen Folgen: Standardisieren, Distanzmass, Linkage und Clusterzahl. Ändere jeweils nur eines und vergleiche.</p>
 
-  <h3>5 · Cluster verstehen und erklären</h3>
+  <h3 id="unsup-dbscan">6 · Andere Clusterformen: DBSCAN und GMM</h3>
+  <p>k-Means und Ward suchen runde, ähnlich grosse Gruppen. Sind die Gruppen gekrümmt (Monde in der Demo oben), verschieden dicht oder gibt es Rauschen, helfen andere Verfahren.</p>
+  <h4>DBSCAN: Gruppen über die Dichte</h4>
+  <p>Ein Punkt mit mindestens <code>min_samples</code> Nachbarn im Umkreis <code>eps</code> ist ein <b>Kernpunkt</b>. Kernpunkte, die nahe beieinander liegen, bilden zusammen einen Cluster, Punkte am Rand gehören dazu. Alles andere ist <b>Rauschen</b> (Label <code>-1</code>).</p>
+  <ul>
+    <li>k musst du nicht vorgeben, und die Cluster dürfen jede Form haben.</li>
+    <li>Ausreisser werden als Rauschen markiert, statt ein Zentrum zu verziehen.</li>
+    <li>Schwierig: <code>eps</code> passend wählen. Zu klein gibt viel Rauschen, zu gross verschmilzt alles. Bei Gruppen mit unterschiedlicher Dichte passt kein einzelnes <code>eps</code>. Dann hilft <b>HDBSCAN</b>, das mit verschiedenen Dichten umgehen kann.</li>
+    <li>Auch DBSCAN rechnet mit Abständen: vorher skalieren.</li>
+  </ul>
+  <pre><code>from sklearn.cluster import DBSCAN, HDBSCAN
+labels = DBSCAN(eps=0.2, min_samples=5).fit_predict(X_s)   # -1 = Rauschen
+(labels == -1).mean()                                        # Anteil Rauschen
+labels = HDBSCAN(min_cluster_size=15, min_samples=5).fit_predict(X_s)</code></pre>
+  <p class="note">Die Silhouette lässt Rauschpunkte weg. Gib darum immer auch an, wie viele Punkte überhaupt einem Cluster zugeordnet wurden.</p>
+  <h4 id="unsup-gmm">Gaussian Mixture Model (GMM): Wahrscheinlichkeiten statt fester Zuordnung</h4>
+  <p>Ein GMM beschreibt jeden Cluster als Glockenkurve, im 2D-Bild als Ellipse. Jeder Punkt bekommt eine <b>Wahrscheinlichkeit pro Cluster</b>, die Werte einer Zeile ergeben zusammen 1. Eine Zeile wie 0,60 / 0,35 / 0,05 zeigt: Der Punkt liegt zwischen zwei Gruppen, die Zuordnung ist unsicher. Die Anzahl Komponenten wählst du zum Beispiel mit dem <b>BIC</b> (tiefer ist besser).</p>
+  <pre><code>from sklearn.mixture import GaussianMixture
+gmm = GaussianMixture(n_components=3, covariance_type="full", n_init=5, random_state=0).fit(X_s)
+gmm.predict_proba(X_s)     # Wahrscheinlichkeit je Cluster, Zeilensumme 1
+gmm.bic(X_s)               # für mehrere n_components vergleichen</code></pre>
+  <div class="tablewrap"><table>
+    <tr><th>Verfahren</th><th>k vorgeben?</th><th>Clusterform</th><th>Rauschen</th><th>Gut für</th></tr>
+    <tr><td>k-Means</td><td>ja</td><td>rund, ähnlich gross</td><td>nein</td><td>schneller Start, grosse Daten</td></tr>
+    <tr><td>Hierarchisch (Ward)</td><td>später, im Dendrogramm</td><td>kompakt</td><td>nein</td><td>kleinere Daten, Baum ansehen</td></tr>
+    <tr><td>DBSCAN / HDBSCAN</td><td>nein</td><td>beliebig</td><td>ja (<code>-1</code>)</td><td>gekrümmte Gruppen, Ausreisser</td></tr>
+    <tr><td>GMM</td><td>ja (BIC hilft)</td><td>Ellipsen</td><td>nein</td><td>unsichere Zuordnung sichtbar machen</td></tr>
+  </table></div>
+
+  <h3 id="unsup-profil">7 · Cluster prüfen und erklären</h3>
+  <h4 id="unsup-stabil">Ist das Ergebnis stabil?</h4>
+  <p>Ein gutes Clustering bleibt ähnlich, wenn du kleine Dinge änderst: anderer <code>random_state</code>, mehr <code>n_init</code>, eine Teilstichprobe von 80 % der Zeilen oder ein anderes Skalieren. Zwei Einteilungen vergleichst du mit dem <b>Adjusted Rand Index (ARI)</b>: 1 heisst gleiche Einteilung, um 0 heisst nicht besser als Zufall. Die Nummern der Cluster spielen dabei keine Rolle.</p>
+  <pre><code>from sklearn.metrics import adjusted_rand_score
+a = KMeans(n_clusters=3, n_init=10, random_state=0).fit_predict(X_s)
+b = KMeans(n_clusters=3, n_init=10, random_state=1).fit_predict(X_s)
+adjusted_rand_score(a, b)      # nahe 1 = stabil</code></pre>
+  <p class="note">Gibt es bekannte Labels (die Weinsorten im Lab 1), kannst du sie <b>nach</b> der Wahl mit dem ARI neben die Cluster legen. Weicht das Ergebnis ab, ist es nicht automatisch falsch: Die Cluster können eine andere, ebenfalls sinnvolle Struktur zeigen.</p>
+  <h4>Cluster beschreiben</h4>
   <p>Die Cluster entstehen auf skalierten Daten, erklären willst du sie aber in den Originaleinheiten. Darum die Clusternummer wieder an die ursprüngliche Tabelle hängen und beschreiben:</p>
   <pre><code>df["cluster"] = labels
 df.groupby("cluster").agg(["mean", "median", "count"])   # Profil je Cluster
 sns.boxplot(data=df, x="cluster", y="preis")             # Verteilung je Cluster</code></pre>
-  <p>Frage dich: Wodurch unterscheiden sich die Gruppen? Welches Merkmal trennt am besten? Kannst du jedem Cluster einen verständlichen Namen geben («günstige Sets für Kinder»)?</p>
+  <p>Frage dich: Wodurch unterscheiden sich die Gruppen? Welches Merkmal trennt am besten? Kannst du jedem Cluster einen verständlichen Namen geben («günstige Sets für Kinder»)? Ein sehr kleiner Cluster besteht oft nur aus Ausreissern.</p>
 
-  <h3>6 · Dimensionsreduktion</h3>
+  <h3 id="unsup-anomalie">8 · Anomalien finden: Isolation Forest</h3>
+  <p>Idee: Ungewöhnliche Punkte lassen sich schnell <b>isolieren</b>. Der Isolation Forest teilt die Daten immer wieder mit zufälligen Fragen («Betrag grösser als das Doppelte des Üblichen?»). Ein normaler Punkt steckt mitten in der Menge und braucht viele solche Splits, bis er allein ist. Ein auffälliger Punkt ist schon nach wenigen Splits allein. Viele zufällige Bäume zusammen ergeben einen <b>Anomalie-Score</b>.</p>
+  <pre><code>from sklearn.ensemble import IsolationForest
+model = IsolationForest(n_estimators=200, contamination="auto", random_state=42).fit(X)
+score = -model.score_samples(X)          # grösser = ungewöhnlicher
+top20 = score.argsort()[::-1][:20]       # so viele, wie geprüft werden können</code></pre>
+  <ul>
+    <li><b>Merkmale mit Kontext</b> schlagen Rohwerte: «Betrag im Vergleich zum Üblichen dieses Kontos» findet mehr als «grösster Betrag».</li>
+    <li>Das Ergebnis ist eine <b>Rangliste für Menschen</b>, kein automatisches Urteil. Wer prüft, braucht Betrag, Verlauf und den Grund, warum der Fall auffällt.</li>
+    <li>Werden später echte Befunde bekannt, misst du die <b>Precision</b> bei deinem Prüf-Budget (von 20 geprüften Fällen, wie viele waren echt?).</li>
+  </ul>
+  <div class="falle"><b>Falle</b><p>Die «Top 20» liefern immer 20 Fälle, auch an einem Tag ohne echte Auffälligkeit. Und wenn sich das normale Verhalten ändert (alle Zahlungen werden grösser oder später), meldet das alte Modell plötzlich viele Fehlalarme. Referenzwerte und Modell regelmässig neu anpassen.</p></div>
+
+  <h3 id="unsup-dimred">9 · Dimensionsreduktion</h3>
   <p>Echte Datensätze haben oft Hunderte Merkmale. Das macht Training langsam, Interpretation schwer und führt zum <b>Fluch der Dimensionen</b>: In vielen Dimensionen liegen alle Punkte weit auseinander, der Raum ist «leer», und Vorhersagen für neue Punkte werden unzuverlässig.</p>
   <div class="tablewrap"><table>
     <tr><th>Zwei Zufallspunkte im Einheits-…</th><th class="num">mittlerer Abstand</th></tr>
@@ -130,7 +210,7 @@ sns.boxplot(data=df, x="cluster", y="preis")             # Verteilung je Cluster
   </ul>
   <div class="falle"><b>Falle</b><p>Jede Reduktion verliert Information. Probiere zuerst mit den Originaldaten, und reduziere nur, wenn es Tempo, Visualisierung oder Rauschen rechtfertigt.</p></div>
 
-  <h3>7 · PCA (Hauptkomponentenanalyse)</h3>
+  <h3 id="unsup-pca">10 · PCA (Hauptkomponentenanalyse)</h3>
   <p>PCA sucht die Richtung, in der die Daten am <b>stärksten streuen</b> (die erste Hauptkomponente), dann die nächste Richtung, die darauf senkrecht steht und die restliche Streuung am besten erfasst, usw. Behältst du nur die ersten paar Komponenten, behältst du den grössten Teil der Information in weniger Dimensionen.</p>
   <div class="demo" id="pcDemo">
     <div class="tag">Demo</div><h4>Die beste Achse finden</h4>
@@ -144,9 +224,21 @@ sns.boxplot(data=df, x="cluster", y="preis")             # Verteilung je Cluster
 pca = PCA(n_components=2).fit(X_s)       # vorher skalieren
 Z = pca.transform(X_s)                    # neue 2D-Koordinaten
 pca.explained_variance_ratio_             # Anteil Varianz je Komponente</code></pre>
-  <p>Mit <code>explained_variance_ratio_</code> siehst du, wie viel Information 2 Komponenten behalten. Die Komponenten sind Mischungen der Originalmerkmale und damit schwerer zu deuten.</p>
+  <p>Mit <code>explained_variance_ratio_</code> siehst du, wie viel Information 2 Komponenten behalten. Die Komponenten sind Mischungen der Originalmerkmale und damit schwerer zu deuten: <code>pca.components_</code> zeigt, wie stark jedes skalierte Merkmal in eine Komponente eingeht.</p>
+  <div class="falle"><b>Falle (Skalierung)</b><p>PCA zieht den Mittelwert ab, gleicht die Streuung aber nicht an. Ohne Skalieren gewinnt das Merkmal mit den grössten Zahlen (beim Wein: Prolin in Hunderten gegen Alkohol um 13), und PC1 ist fast nur dieses Merkmal.</p></div>
+  <h4 id="unsup-pca-k">Wie viele Komponenten?</h4>
+  <ul>
+    <li><b>Für ein Bild</b>: 2 Komponenten. Schreib dazu, wie viel Varianz fehlt.</li>
+    <li><b>Zum Weiterrechnen</b>: so viele, dass die <b>kumulierte</b> erklärte Varianz eine Schwelle erreicht, zum Beispiel 90 %. Oder dort, wo die Kurve abflacht (wie beim Ellbogen).</li>
+  </ul>
+  <p><b>Rekonstruktion</b>: Mit <code>inverse_transform</code> baust du aus den behaltenen Komponenten eine Näherung der Originaldaten. Je weniger Komponenten, desto grösser der Unterschied zum Original. So siehst du direkt, was verloren geht (im Lab: Ziffernbilder mit 2, 10 und 30 Komponenten).</p>
+  <pre><code>import numpy as np
+pca = PCA().fit(X_s)
+np.cumsum(pca.explained_variance_ratio_)    # kumulierte Varianz
+pca90 = PCA(n_components=0.90).fit(X_s)     # so viele Komponenten wie für 90 % nötig
+X_back = pca90.inverse_transform(pca90.transform(X_s))   # Näherung im skalierten Raum</code></pre>
 
-  <h3>8 · t-SNE</h3>
+  <h3 id="unsup-tsne">11 · t-SNE und UMAP</h3>
   <p>t-SNE ist ein Verfahren fürs <b>Zeichnen</b> in 2D. Es versucht, Nachbarschaften zu erhalten: Punkte, die im hohen Raum nah beieinander liegen, sollen auch im 2D-Bild nah liegen. Dazu werden Ähnlichkeiten als Wahrscheinlichkeiten ausgedrückt und die 2D-Punkte per Gradient Descent so verschoben, dass sie dazu passen.</p>
   <ul>
     <li><b>Perplexity</b>: grob die Zahl der Nachbarn, auf die jeder Punkt achtet (typisch 5 bis 50). Der wichtigste Regler, probiere mehrere Werte.</li>
@@ -156,25 +248,155 @@ pca.explained_variance_ratio_             # Anteil Varianz je Komponente</code><
   <pre><code>from sklearn.manifold import TSNE
 Z = TSNE(n_components=2, perplexity=30, random_state=0).fit_transform(X_s)
 plt.scatter(Z[:, 0], Z[:, 1], c=labels)</code></pre>
+  <p><b>UMAP</b> macht ebenfalls eine Karte der Nachbarschaften, ist meist schneller und behält etwas mehr von der groben Gesamtstruktur. Zwei Regler:</p>
+  <ul>
+    <li><code>n_neighbors</code> (Standard 15): klein betont die lokale Nachbarschaft, gross mehr das Gesamtbild.</li>
+    <li><code>min_dist</code> (Standard 0,1): wie eng die Punkte in der Karte zusammenrücken dürfen.</li>
+  </ul>
+  <pre><code>import umap                              # Paket umap-learn, separat installieren
+Z = umap.UMAP(n_neighbors=15, min_dist=0.1, random_state=0).fit_transform(X_s)
+
+from sklearn.manifold import trustworthiness
+trustworthiness(X_s, Z, n_neighbors=10)  # 1 = Nachbarn gut erhalten</code></pre>
+  <p>Ob eine Karte taugt, prüfst du an den Nachbarn: Liegen die Punkte, die im Original am nächsten sind, auch auf der Karte nahe? Das misst die <b>Trustworthiness</b>. Am besten schaust du für einzelne Punkte auch die Originale an (im Lab: die Ziffernbilder neben einem Punkt).</p>
+  <div class="falle"><b>Falle</b><p>Nicht auf der t-SNE- oder UMAP-Karte clustern und dann die hohe Silhouette als Beweis nehmen. Die Karte zieht Gruppen künstlich auseinander. Die Silhouette auf der Karte sagt wenig über die Originaldaten.</p></div>
   <div class="tablewrap"><table>
-    <tr><th></th><th>PCA</th><th>t-SNE</th></tr>
-    <tr><td>Art</td><td>linear, Projektion</td><td>nicht linear, Nachbarschaften</td></tr>
-    <tr><td>Tempo</td><td>schnell</td><td>langsam</td></tr>
-    <tr><td>Ergebnis</td><td>immer gleich, auf neue Daten anwendbar</td><td>zufallsabhängig, nur für die gegebenen Daten</td></tr>
-    <tr><td>Nutzen</td><td>Vorverarbeitung, Rauschen, 2D-Bild</td><td>2D-Bild von Gruppen</td></tr>
+    <tr><th></th><th>PCA</th><th>t-SNE</th><th>UMAP</th></tr>
+    <tr><td>Art</td><td>linear, Projektion</td><td>nicht linear, Nachbarschaften</td><td>nicht linear, Nachbarschaften</td></tr>
+    <tr><td>Tempo</td><td>schnell</td><td>langsam</td><td>mittel</td></tr>
+    <tr><td>Wichtigste Regler</td><td><code>n_components</code></td><td><code>perplexity</code></td><td><code>n_neighbors</code>, <code>min_dist</code></td></tr>
+    <tr><td>Ergebnis</td><td>immer gleich, auf neue Daten anwendbar</td><td>zufallsabhängig, nur für die gegebenen Daten</td><td>zufallsabhängig, neue Daten mit <code>transform</code> möglich</td></tr>
+    <tr><td>Nutzen</td><td>Vorverarbeitung, Rauschen, 2D-Bild</td><td>2D-Bild von Gruppen</td><td>2D-Bild, auch grössere Daten</td></tr>
   </table></div>
 
-  <h3>9 · Deep Clustering (Ausblick)</h3>
+  <h3 id="unsup-deep">12 · Deep Clustering (Ausblick)</h3>
   <p>Klassisches Clustering wird bei sehr vielen Merkmalen (Bilder, Text) schlecht. Beim Deep Clustering lernt ein <b>Autoencoder</b> (ein neuronales Netz, das seine Eingabe durch einen engen Flaschenhals hindurch rekonstruiert) eine kompakte Darstellung. In dieser «latenten» Darstellung wird dann geclustert. Fortgeschrittene Varianten trainieren Darstellung und Clustering gemeinsam. Du musst das hier nur einordnen können.</p>
 
-  <h3>Alles zusammen</h3>
-  <div class="steps">
-    <div class="st"><b>1 · Skalieren</b><span>StandardScaler</span></div><div class="ar">→</div>
-    <div class="st"><b>2 · Clustern</b><span>k-Means oder hierarchisch, k wählen</span></div><div class="ar">→</div>
-    <div class="st"><b>3 · Reduzieren</b><span>PCA oder t-SNE zum Zeichnen</span></div><div class="ar">→</div>
-    <div class="st"><b>4 · Beschreiben</b><span>Profil je Cluster, benennen</span></div>
-  </div>
-  <p class="note">Notebooks des Dozenten (Kursordner <code>07 - UNSUPERVISED-LEARNING/code</code>): <code>clustering_k_means</code>, <code>clustering_k_means optimizing</code>, <code>hierarchical_clustering</code>, <code>dimension_reduction_pca</code>, <code>dimension_reduction_tsne</code>, jeweils mit <code>_exercise</code>-Version. Daten: <code>lego_daten_one_hot_encoded_cleaned.csv</code>.</p>
+  <h3 id="unsup-ablauf">Der ganze Ablauf auf einen Blick</h3>
+  <p>Beim Unsupervised Learning gibt es keine richtige Antwort zum Vergleichen. Darum ist der Ablauf eine Schleife aus Ausprobieren, Prüfen und Deuten, nicht ein gerader Weg zum Testergebnis wie beim <a href="#ml-ablauf">Supervised Learning</a>.</p>
+  <p class="hint">Klicke auf einen Schritt in der Grafik: Darunter klappt die Erklärung auf, mit Links zu den passenden Stellen im Kapitel.</p>
+  <figure class="fig ab-fig">
+    <div class="ab-scroll">
+    <svg viewBox="-60 0 790 850" role="img" aria-label="Ablauf eines Unsupervised-Projekts: Frage klären, Daten ansehen, vorverarbeiten, skalieren, optional Dimensionen reduzieren, Verfahren wählen, Parameter wählen mit Schleife, Stabilität prüfen, visualisieren, interpretieren und bei Bedarf zurück zur Vorverarbeitung. Es gibt kein Testset.">
+      <defs>
+        <marker id="ub-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" style="fill:var(--line)"/>
+        </marker>
+        <marker id="ub-al" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" style="fill:var(--warn)"/>
+        </marker>
+      </defs>
+
+      <g class="ab-step" data-s="1" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 1: Erklärung aufklappen">
+      <rect x="60" y="20" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="42" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">1 · Frage klären</text>
+      <text x="210" y="60" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Gruppen, Ausreisser oder ein 2D-Bild?</text>
+      </g>
+      <line x1="210" y1="72" x2="210" y2="104" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <line x1="360" y1="46" x2="440" y2="46" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <g class="ab-step" data-s="y" tabindex="0" role="button" aria-expanded="false" aria-label="Zielspalte y vorhanden?: Erklärung aufklappen">
+      <rect x="440" y="20" width="270" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="575" y="42" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">Zielspalte y vorhanden?</text>
+      <text x="575" y="60" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">ja → Supervised · nein → hier weiter</text>
+      </g>
+
+      <g class="ab-step" data-s="2" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 2: Erklärung aufklappen">
+      <rect x="60" y="104" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="126" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">2 · Daten laden und ansehen</text>
+      <text x="210" y="144" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Typen, fehlende Werte, Ausreisser (EDA)</text>
+      </g>
+      <line x1="210" y1="156" x2="210" y2="188" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <line x1="360" y1="130" x2="440" y2="130" marker-end="url(#ub-al)" style="stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4;fill:none"/>
+      <g class="ab-step" data-s="t" tabindex="0" role="button" aria-expanded="false" aria-label="Kein Testset: Erklärung aufklappen">
+      <rect x="440" y="104" width="270" height="52" rx="6" style="fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4"/>
+      <text x="575" y="126" text-anchor="middle" style="fill:var(--warn);font-size:14px;font-weight:600;font-family:var(--f-body)">Kein Testset</text>
+      <text x="575" y="144" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">keine richtige Antwort zum Vergleichen</text>
+      </g>
+
+      <g class="ab-step" data-s="3" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 3: Erklärung aufklappen">
+      <rect x="60" y="188" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="210" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">3 · Vorverarbeiten</text>
+      <text x="210" y="228" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">One-Hot, fehlende Werte, Merkmale wählen</text>
+      </g>
+      <line x1="210" y1="240" x2="210" y2="272" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+
+      <g class="ab-step" data-s="4" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 4: Erklärung aufklappen">
+      <rect x="60" y="272" width="300" height="52" rx="6" style="fill:var(--accent-soft);stroke:var(--accent);stroke-width:2.5"/>
+      <text x="210" y="294" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">4 · Skalieren</text>
+      <text x="210" y="312" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">StandardScaler, bei Ausreissern RobustScaler</text>
+      </g>
+      <line x1="210" y1="324" x2="210" y2="356" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+
+      <g class="ab-step" data-s="5" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 5: Erklärung aufklappen">
+      <rect x="60" y="356" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="378" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">5 · Dimensionen reduzieren</text>
+      <text x="210" y="396" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">optional: PCA, z. B. 90 % Varianz behalten</text>
+      </g>
+      <line x1="210" y1="408" x2="210" y2="440" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+
+      <g class="ab-step" data-s="6" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 6: Erklärung aufklappen">
+      <rect x="60" y="440" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="462" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">6 · Verfahren wählen</text>
+      <text x="210" y="480" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">passend zu Frage und Form der Daten</text>
+      </g>
+      <line x1="210" y1="492" x2="210" y2="524" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <line x1="360" y1="466" x2="410" y2="466" marker-end="url(#ub-a)" style="stroke:var(--accent);stroke-width:1.5;fill:none"/>
+      <rect x="410" y="414" width="300" height="146" rx="8" style="fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 4"/>
+      <text x="424" y="434" style="fill:var(--accent);font-size:12px;font-weight:600;font-family:var(--f-body)">Welches Verfahren wofür?</text>
+      <text x="424" y="458" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">k-Means</text><text x="534" y="458" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">rund, ähnlich gross</text>
+      <text x="424" y="480" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Hierarchisch</text><text x="534" y="480" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Baum, k danach wählen</text>
+      <text x="424" y="502" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">DBSCAN</text><text x="534" y="502" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">beliebige Form, Rauschen</text>
+      <text x="424" y="524" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">GMM</text><text x="534" y="524" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Wahrscheinlichkeiten</text>
+      <text x="424" y="546" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Isolation Forest</text><text x="534" y="546" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Ausreisser-Rangliste</text>
+
+      <g class="ab-step" data-s="7" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 7: Erklärung aufklappen">
+      <rect x="60" y="524" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="546" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">7 · Parameter wählen</text>
+      <text x="210" y="564" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">k, eps, Linkage: Elbow, Silhouette, BIC</text>
+      </g>
+      <line x1="210" y1="576" x2="210" y2="608" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <path d="M60,564 H34 V538 H60" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <text x="26" y="548" text-anchor="end" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">anders</text>
+      <text x="26" y="562" text-anchor="end" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">probieren</text>
+
+      <g class="ab-step" data-s="8" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 8: Erklärung aufklappen">
+      <rect x="60" y="608" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="630" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">8 · Stabilität prüfen</text>
+      <text x="210" y="648" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">anderer Seed, Teilstichprobe, ARI</text>
+      </g>
+      <line x1="210" y1="660" x2="210" y2="692" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+
+      <g class="ab-step" data-s="9" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 9: Erklärung aufklappen">
+      <rect x="60" y="692" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="714" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">9 · Visualisieren</text>
+      <text x="210" y="732" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">PCA, t-SNE oder UMAP in 2D</text>
+      </g>
+      <line x1="210" y1="744" x2="210" y2="776" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <line x1="360" y1="718" x2="410" y2="718" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <rect x="410" y="682" width="300" height="72" rx="8" style="fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:3 4"/>
+      <text x="424" y="702" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Karte richtig lesen</text>
+      <text x="424" y="722" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">PCA: linear, erklärte Varianz angeben</text>
+      <text x="424" y="740" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">t-SNE/UMAP: nur Nachbarschaften zählen</text>
+
+      <g class="ab-step" data-s="10" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 10: Erklärung aufklappen">
+      <rect x="60" y="776" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="798" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">10 · Interpretieren und benennen</text>
+      <text x="210" y="816" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Profil in Originaleinheiten, fachlich ok?</text>
+      </g>
+
+      <path d="M60,808 H-38 V220 H60" marker-end="url(#ub-al)" style="stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4;fill:none"/>
+      <text x="-44" y="514" text-anchor="middle" transform="rotate(-90 -44 514)" style="fill:var(--warn);font-size:11.5px;font-family:var(--f-mono)">passt fachlich nicht: zurück zu Schritt 3</text>
+    </svg>
+    </div>
+    <div class="ab-detail" id="ubDetail" role="region" aria-live="polite" hidden>
+      <div class="ab-dh"><b></b><button type="button" class="ab-x" aria-label="Schliessen">✕</button></div>
+      <div class="ab-db"></div>
+      <div class="ab-dl"></div>
+    </div>
+    <figcaption>Skalieren (blau) ist Pflicht, weil fast alle Verfahren mit Abständen rechnen. Es gibt kein Testset (orange): Statt mit der richtigen Antwort prüfst du mit Silhouette, Stabilität und Fachwissen. Die Schleifen zeigen, dass du Einstellungen und Vorverarbeitung mehrmals anpasst.</figcaption>
+  </figure>
+  <div class="merk"><b>Merksatz</b><p>Skalieren, mehrere Einstellungen vergleichen, Stabilität prüfen und die Cluster in Originaleinheiten erklären. Ein Ergebnis ist gut, wenn es stabil ist und fachlich Sinn ergibt.</p></div>
+  <p class="note">Notebooks des Dozenten (Kursordner <code>07 - UNSUPERVISED-LEARNING/code</code>): <code>clustering_k_means</code>, <code>clustering_k_means optimizing</code>, <code>hierarchical_clustering</code>, <code>dimension_reduction_pca</code>, <code>dimension_reduction_tsne</code>, jeweils mit <code>_exercise</code>-Version. Daten: <code>lego_daten_one_hot_encoded_cleaned.csv</code>. Labs (Ordner <code>notebooks</code>): <code>01_clustering_lab</code> (Wein: Skalierung, k, DBSCAN, GMM, ARI), <code>02_anomaly_detection_lab</code> (Isolation Forest), <code>03_pca_lab</code> (Komponenten, Rekonstruktion), <code>04_embeddings_lab</code> (t-SNE und UMAP).</p>
 `,
     exercises: [
       {
@@ -207,8 +429,72 @@ plt.scatter(Z[:, 0], Z[:, 1], c=labels)</code></pre>
       { q: `Was ist der Vorteil des hierarchischen Clusterings gegenüber k-Means?`, a: `k muss nicht vorher feststehen: Das Dendrogramm zeigt alle Stufen, und du schneidest auf der gewünschten Höhe. Dafür ist es bei sehr vielen Punkten langsamer.` },
       { q: `Wofür steht die erste Hauptkomponente in PCA?`, a: `Für die Richtung mit der grössten Streuung der Daten. Sie behält am meisten Information, wenn du auf eine Achse reduzierst.` },
       { q: `Was darfst du aus einem t-SNE-Bild nicht ablesen?`, a: `Die Abstände zwischen Gruppen und die Gruppengrössen. Aussagekräftig ist nur, welche Punkte benachbart sind. Zudem hängt das Bild von Perplexity und Zufallsstart ab.` },
+      { q: `Woran erkennst du, ob ein Problem supervised oder unsupervised ist?`, a: `An der Zielspalte: Gibt es eine bekannte Antwort (Label) für genug Zeilen, ist es supervised (Zahl → Regression, Kategorie → Klassifikation). Ohne Zielspalte, wenn du Gruppen, Ausreisser oder eine Übersicht suchst, ist es unsupervised.` },
+      { q: `Warum gibt es beim Clustering meist kein Testset?`, a: `Es gibt keine richtige Antwort, mit der man vergleichen könnte. Geprüft wird mit Silhouette, Stabilität (ARI zwischen Läufen) und Fachwissen. Ein Testset braucht es nur, wenn das Modell später neue Daten einordnen soll.` },
+      { q: `Wann ist DBSCAN besser als k-Means?`, a: `Bei gekrümmten oder unregelmässigen Gruppen und wenn es Rauschen gibt. DBSCAN braucht kein k und markiert Ausreisser mit -1. Dafür muss eps passen, und bei sehr unterschiedlicher Dichte hilft eher HDBSCAN.` },
+      { q: `Was liefert ein GMM, was k-Means nicht liefert?`, a: `Eine Wahrscheinlichkeit pro Cluster für jeden Punkt (Zeilensumme 1). So sieht man, welche Zuordnungen unsicher sind. Die Cluster dürfen zudem elliptisch sein.` },
+      { q: `Wie findet der Isolation Forest Ausreisser?`, a: `Er teilt die Daten mit zufälligen Splits. Auffällige Punkte sind schon nach wenigen Splits allein, normale brauchen viele. Kurzer Weg heisst hoher Anomalie-Score. Das Ergebnis ist eine Rangliste zum Prüfen, kein Urteil.` },
+      { q: `Wie wählst du die Anzahl PCA-Komponenten?`, a: `Für ein Bild 2. Zum Weiterrechnen so viele, bis die kumulierte erklärte Varianz eine Schwelle wie 90 % erreicht (PCA(n_components=0.90)) oder die Kurve abflacht.` },
     ],
     init() {
+      // Workflow figure: click a step to open its explanation (same pattern as the ml chapter)
+      (function(){
+        const fig=document.querySelector('#unsup .ab-fig');
+        if(!fig)return;
+        const panel=fig.querySelector('.ab-detail'),steps=fig.querySelectorAll('.ab-step');
+        const S={
+          '1':['1 · Frage klären','Bevor du rechnest: Was willst du am Ende in der Hand haben? <b>Gruppen</b> (Clustering), eine <b>Rangliste auffälliger Fälle</b> (Anomalien) oder ein <b>Bild</b> der Daten (Dimensionsreduktion)? Und wer braucht das Ergebnis wofür? Die Frage bestimmt Verfahren, Merkmale und wie du das Ergebnis prüfst.',[['Supervised oder Unsupervised?','#unsup-vs'],['Clustering und Anomalien','#unsup-dist']]],
+          'y':['Zielspalte y vorhanden?','Gibt es eine Spalte mit der gesuchten Antwort, und ist sie für genug Zeilen bekannt? Dann ist es ein Supervised-Problem (Regression oder Klassifikation) mit eigenem Ablauf. Ohne Zielspalte geht es hier weiter. Vorhandene Labels kommen nicht ins Modell, du kannst sie erst am Schluss zum Vergleich nutzen.',[['Supervised oder Unsupervised?','#unsup-vs'],['Ablauf Supervised','#ml-ablauf']]],
+          '2':['2 · Daten laden und ansehen','Zeilen, Spalten und Datentypen prüfen (<code>df.info()</code>, <code>df.describe()</code>), fehlende Werte zählen, Verteilungen und Ausreisser ansehen, Korrelationen suchen. Stark korrelierte Merkmale zählen beim Abstand doppelt. Die EDA zeigt, was in Schritt 3 und 4 nötig ist.',[['Pandas-Grundlagen','#pandas'],['Visualisieren','#viz']]],
+          't':['Kein Testset','Es gibt keine richtige Antwort, mit der du vergleichen könntest. Darum fällt das Aufteilen in Train und Test meist weg, und du arbeitest mit allen Daten. Bewertet wird mit Silhouette, Stabilität und Fachwissen. Ausnahme: Soll das Modell später <b>neue</b> Daten einordnen (z. B. neue Kunden einem Segment zuweisen), lernst du Scaler und Modell auf einem Teil und prüfst auf dem Rest.',[['Wie viele Cluster?','#unsup-k'],['Cluster prüfen','#unsup-profil']]],
+          '3':['3 · Vorverarbeiten','Abstände brauchen Zahlen: Kategorien in 0/1-Spalten umwandeln (One-Hot, wie beim Lego-Datensatz), fehlende Werte füllen oder Zeilen entfernen. Merkmale bewusst auswählen: Jedes Merkmal bestimmt mit, was «ähnlich» heisst. IDs oder Spalten wie «hat gekündigt» gehören nicht hinein.',[['Fehlende Werte','#ml-missing'],['Kategorien in Zahlen','#ml-cat'],['Abstandsmasse','#unsup-dist']]],
+          '4':['4 · Skalieren','Fast alle Verfahren hier rechnen mit Abständen (k-Means, hierarchisch, DBSCAN, PCA, t-SNE). Ohne Skalieren entscheidet das Merkmal mit den grössten Zahlen. <code>StandardScaler</code> ist der Normalfall, <code>RobustScaler</code> bei vielen Ausreissern.',[['Ohne und mit Skalierung (Demo)','#scDemo'],['Skalieren','#ml-scaling']]],
+          '5':['5 · Dimensionen reduzieren (optional)','Bei sehr vielen Merkmalen werden Abstände unzuverlässig (Fluch der Dimensionen). PCA vor dem Clustern fasst korrelierte Merkmale zusammen und entfernt Rauschen. Wähle so viele Komponenten, dass zum Beispiel 90 % der Varianz bleiben. Bei wenigen Merkmalen kannst du den Schritt weglassen.',[['Dimensionsreduktion','#unsup-dimred'],['PCA','#unsup-pca'],['Wie viele Komponenten?','#unsup-pca-k']]],
+          '6':['6 · Verfahren wählen','<b>k-Means</b> für runde, ähnlich grosse Gruppen und als schneller Start. <b>Hierarchisch</b>, wenn du den Baum sehen und k später wählen willst. <b>DBSCAN/HDBSCAN</b> bei gekrümmten Gruppen und Rauschen. <b>GMM</b>, wenn unsichere Zuordnungen sichtbar sein sollen. <b>Isolation Forest</b>, wenn du Ausreisser suchst statt Gruppen.',[['k-Means','#unsup-kmeans'],['Hierarchisch','#unsup-hier'],['DBSCAN und GMM','#unsup-dbscan'],['Isolation Forest','#unsup-anomalie']]],
+          '7':['7 · Parameter wählen','Jedes Verfahren hat Regler: k bei k-Means und GMM, <code>eps</code> und <code>min_samples</code> bei DBSCAN, Linkage und Schnitthöhe beim Dendrogramm. Mehrere Werte durchprobieren und vergleichen: Elbow (WSS), Silhouette, Gap, BIC. Die Masse liefern Vorschläge, keine Wahrheit. Ändere jeweils nur eine Einstellung.',[['Wie viele Cluster?','#unsup-k'],['Dendrogramm','#unsup-hier'],['DBSCAN','#unsup-dbscan']]],
+          '8':['8 · Stabilität prüfen','Kommt mit anderem <code>random_state</code>, mehr <code>n_init</code> oder 80 % der Zeilen dasselbe heraus? Vergleiche die Einteilungen mit dem ARI (1 = gleich). Instabile Cluster sind oft Zufall oder ein falsches k. Gibt es bekannte Labels, kannst du sie hier zur Kontrolle danebenlegen.',[['Ist das Ergebnis stabil?','#unsup-stabil']]],
+          '9':['9 · Visualisieren','Die Daten mit PCA, t-SNE oder UMAP auf 2D bringen und nach Cluster einfärben. Bei PCA die erklärte Varianz dazuschreiben. Bei t-SNE und UMAP zählen nur die Nachbarschaften, nicht Abstände oder Grössen der Gruppen. Mehrere Einstellungen (Perplexity, <code>n_neighbors</code>) ausprobieren.',[['PCA','#unsup-pca'],['t-SNE und UMAP','#unsup-tsne']]],
+          '10':['10 · Interpretieren und benennen','Clusternummer an die Originaltabelle hängen und je Cluster Mittelwert, Median und Anzahl ansehen, in Originaleinheiten. Jedem Cluster einen verständlichen Namen geben. Passt etwas fachlich nicht, zurück zur Vorverarbeitung (Schritt 3): andere Merkmale, anderes Skalieren, anderes Verfahren.',[['Cluster beschreiben','#unsup-profil'],['Visualisieren','#viz']]]
+        };
+        let cur=null;
+        function close(){
+          panel.hidden=true;cur=null;
+          steps.forEach(function(g){g.classList.remove('on');g.setAttribute('aria-expanded','false')});
+        }
+        function open(k){
+          if(cur===k){close();return}
+          const d=S[k];if(!d)return;
+          cur=k;
+          panel.querySelector('.ab-dh b').textContent=d[0];
+          panel.querySelector('.ab-db').innerHTML=d[1];
+          panel.querySelector('.ab-dl').innerHTML=d[2].map(function(l){return '<a href="'+l[1]+'">'+l[0]+' →</a>'}).join('');
+          panel.hidden=false;
+          steps.forEach(function(g){const on=g.getAttribute('data-s')===k;g.classList.toggle('on',on);g.setAttribute('aria-expanded',on?'true':'false')});
+        }
+        steps.forEach(function(g){
+          g.addEventListener('click',function(){open(g.getAttribute('data-s'))});
+          g.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open(g.getAttribute('data-s'))}});
+        });
+        panel.querySelector('.ab-x').addEventListener('click',close);
+      })();
+
+      // Self-test: supervised or unsupervised?
+      (function(){
+        const C=[
+          ['Hauspreis schätzen','Supervised, Regression: Die Zielspalte «Preis» ist bekannt und eine Zahl.'],
+          ['Kundentypen finden','Unsupervised, Clustering: Es gibt keine Zielspalte, gesucht sind Gruppen ähnlicher Kunden.'],
+          ['Spam erkennen','Supervised, Klassifikation: Für alte Mails ist bekannt, ob sie Spam waren (Label ja/nein).'],
+          ['Auffällige Zahlungen','Unsupervised, Anomalieerkennung: Betrugsfälle sind meist nicht markiert, gesucht ist das Ungewöhnliche (Isolation Forest).'],
+          ['13 Messwerte in 2D','Unsupervised, Dimensionsreduktion: PCA, t-SNE oder UMAP machen aus vielen Merkmalen ein Bild.'],
+          ['Kündigung vorhersagen','Supervised, Klassifikation: Die Spalte «hat gekündigt» ist für frühere Kunden bekannt.'],
+          ['Wenige Bilder beschriftet','Semi-supervised: Erst clustern oder Labels übertragen, dann mit den beschrifteten Beispielen supervised weiterlernen.']
+        ];
+        const box=$('pvBtns'),msg=$('pvMsg');
+        box.innerHTML=C.map((c,i)=>'<button data-i="'+i+'">'+c[0]+'</button>').join('');
+        box.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+          box.querySelectorAll('button').forEach(x=>x.className=x===b?'pri':'');msg.textContent=C[+b.dataset.i][1]});
+      })();
+
       // Demo 1: k-means step by step (shared code in assets/demos-kmeans.js)
       KMeansDemo.init('km');
 
