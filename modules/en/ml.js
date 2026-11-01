@@ -213,7 +213,7 @@ LernApp.translate('ml', {
     <div class="btnrow"><button class="pri" id="whOne">m² only</button><button id="whAll">m², rooms, location</button></div>
     <div class="stats"><span>R² <b id="whR2"></b></span><span>Error (MAE) <b id="whMae"></b> CHF</span></div>
     <div class="tablewrap"><table id="whTab"></table></div>
-    <p class="hint">With one feature this is a line in 2D. With three features there is no longer a line you can draw: the model predicts a price for each apartment (empty circles), and the red lines are the deviations. The table shows the weights after the StandardScaler: the larger the absolute value, the more strongly the feature drives the price. Note: R² is measured on the training data here; with 10 apartments and 4 numbers in the model, this is only a demo.</p>
+    <p class="hint">With one feature this is a line in 2D. With three features there is no longer a line you can draw: the model predicts a price for each apartment (empty circles), and the red lines are the deviations. The table shows the weights after the StandardScaler: the larger the absolute value, the more strongly the feature drives the price, as long as the features are not strongly correlated. For m² and rooms (r = 0.996) the split between the two is almost arbitrary, see regularisation. Note: R² is measured on the training data here; with 10 apartments and 4 numbers in the model, this is only a demo.</p>
   </div>
 
   <p>Take two features (m² and rooms), and each apartment becomes a point in a <b>3D space</b>: one axis per feature, the third axis is the price. The model is no longer a line but a <b>plane</b>.</p>
@@ -293,6 +293,7 @@ pipe = Pipeline([("scaler", StandardScaler()), ("model", LinearRegression())])
 scores = cross_val_score(pipe, X, y, cv=10,    # 10 folds
                          scoring="neg_root_mean_squared_error")   # without scoring: R²
 -scores.mean(), scores.std()                   # RMSE (sklearn returns it negative)</code></pre>
+  <p class="hint"><code>-scores.mean()</code> averages the RMSE of the individual folds. With leave-one-out each fold has only one apartment, so the average is the mean absolute error (here 105 CHF). The 123 CHF above is the root of the mean squared error over all 10 predictions (<code>cross_val_predict</code>, then RMSE).</p>
   <p><b>How many runs?</b> With k folds there are k runs; each row is validation exactly once and training k−1 times. In each run a <b>new</b> model (and with a pipeline also a new imputer/scaler) is trained from scratch, evaluated and discarded. Nothing is «optimised further 4 times». The mean of the k scores rates the <b>setup</b> (model type, hyperparameters, preprocessing), the spread shows its stability. The test set is not part of the CV. You then train the final model once on all development data (training + validation) and test it once. A search over n candidates means n × k trainings (<code>GridSearchCV</code> with <code>refit=True</code> retrains by itself at the end).</p>
   <div class="demo" id="cvDemo">
     <div class="tag">Demo</div><h4>Cross-validation step by step</h4>
@@ -420,7 +421,7 @@ search = GridSearchCV(model, {&quot;logisticregression__C&quot;: [0.01, 0.1, 1, 
 # 10 · Exactly once on the test set
 print(&quot;CV-Accuracy:&quot;, round(search.best_score_, 3), &quot;| Test-Accuracy:&quot;, round(search.score(X_te[num + cat], y_te), 3))</code></pre>
     <pre class="out">CV-Accuracy: 0.803 | Test-Accuracy: 0.793</pre>
-    <p class="hint">The test accuracy is close to the CV estimate: the model is not overfitted. Every step with explanations, EDA charts, outputs and a second, more detailed version with Random Forest: <a href="titanic.html">Titanic in detail</a>.</p>
+    <p class="hint">The test accuracy is close to the CV estimate: the CV was reliable, no test knowledge leaked in. That the model is not overfitted is shown by the comparison with training (accuracy 0.805 versus CV 0.803). Every step with explanations, EDA charts, outputs and a second, more detailed version with Random Forest: <a href="titanic.html">Titanic in detail</a>.</p>
   </div>
   <p class="note"><b>With the 10 apartments:</b> The hyperparameters here are the polynomial degree (1 to 9) and, for Ridge/Lasso, the alpha. You try out each setting, measure the error on the left-out apartment each time (cross-validation) and take the best. For the polynomial degree, degree 1 wins (123 CHF), not degree 9 (training 0 CHF, but several 100,000 on the left-out apartment). With real data you would also keep a test set untouched until the end; with only 10 apartments we do without it.</p>`,
   notebooks: [

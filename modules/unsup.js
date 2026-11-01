@@ -90,7 +90,7 @@
       <line x1="210" y1="240" x2="210" y2="272" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
 
       <g class="ab-step" data-s="4" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 4: Erklärung aufklappen">
-      <rect x="60" y="272" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <rect x="60" y="272" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--accent);stroke-width:1.5"/>
       <text x="210" y="294" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">4 · Skalieren</text>
       <text x="210" y="312" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">StandardScaler, bei Ausreissern RobustScaler</text>
       </g>
@@ -202,7 +202,7 @@ pca = PCA(2).fit(X_s)
 Z = pca.transform(X_s)
 plt.figure(figsize=(4.5, 3.5)); plt.scatter(Z[:, 0], Z[:, 1], c=labels, s=8, cmap=&quot;tab10&quot;)
 plt.title(f&quot;PCA, {pca.explained_variance_ratio_.sum():.0%} der Varianz&quot;); plt.show()</code></pre>
-    <figure class="fig"><img style="max-width:400px;margin:0 auto" src="assets/img/titanic-unsup-2.png" alt="PCA-Streudiagramm der Passagiere, nach sechs Clustern eingefärbt" loading="lazy"><figcaption>Die PCA-Karte zeigt 67 % der Varianz. Die Cluster überlappen in 2D teilweise, getrennt sind sie in allen 5 Merkmalen.</figcaption></figure>
+    <figure class="fig"><img style="max-width:400px;margin:0 auto" src="assets/img/titanic-unsup-2.png" alt="PCA-Streudiagramm der Passagiere, nach sechs Clustern eingefärbt" loading="lazy"><figcaption>Die PCA-Karte zeigt 67 % der Varianz. Die Cluster überlappen in 2D teilweise; im vollen 5-dimensionalen Raum sind sie besser getrennt, aber nicht scharf (Silhouette 0,41: mässig deutliche Struktur).</figcaption></figure>
     <pre><code># 10 · Interpretieren in Originaleinheiten; Survived erst jetzt zum Vergleich
 print(X.assign(Cluster=labels, Survived=df[&quot;Survived&quot;]).groupby(&quot;Cluster&quot;).mean().round(2).assign(n=np.bincount(labels)))</code></pre>
     <pre class="out">         Klasse  Frau  Alter  Familie  logFare  Survived    n
@@ -317,7 +317,7 @@ labels = fcluster(Z, t=3, criterion="maxclust")   # 3 Cluster</code></pre>
   <h3 id="unsup-dbscan">6 · Andere Clusterformen: DBSCAN und GMM</h3>
   <p>k-Means und Ward suchen runde, ähnlich grosse Gruppen. Sind die Gruppen gekrümmt (Monde in der Demo oben), verschieden dicht oder gibt es Rauschen, helfen andere Verfahren.</p>
   <h4>DBSCAN: Gruppen über die Dichte</h4>
-  <p>Ein Punkt mit mindestens <code>min_samples</code> Nachbarn im Umkreis <code>eps</code> ist ein <b>Kernpunkt</b>. Kernpunkte, die nahe beieinander liegen, bilden zusammen einen Cluster, Punkte am Rand gehören dazu. Alles andere ist <b>Rauschen</b> (Label <code>-1</code>).</p>
+  <p>Ein Punkt, in dessen Umkreis <code>eps</code> mindestens <code>min_samples</code> Punkte liegen (er selbst mitgezählt), ist ein <b>Kernpunkt</b>. Kernpunkte, die nahe beieinander liegen, bilden zusammen einen Cluster, Punkte am Rand gehören dazu. Alles andere ist <b>Rauschen</b> (Label <code>-1</code>).</p>
   <ul>
     <li>k musst du nicht vorgeben, und die Cluster dürfen jede Form haben.</li>
     <li>Ausreisser werden als Rauschen markiert, statt ein Zentrum zu verziehen.</li>
@@ -328,7 +328,7 @@ labels = fcluster(Z, t=3, criterion="maxclust")   # 3 Cluster</code></pre>
 labels = DBSCAN(eps=0.2, min_samples=5).fit_predict(X_s)   # -1 = Rauschen
 (labels == -1).mean()                                        # Anteil Rauschen
 labels = HDBSCAN(min_cluster_size=15, min_samples=5).fit_predict(X_s)</code></pre>
-  <p class="note">Die Silhouette lässt Rauschpunkte weg. Gib darum immer auch an, wie viele Punkte überhaupt einem Cluster zugeordnet wurden.</p>
+  <p class="note">Achtung: <code>silhouette_score</code> behandelt Rauschpunkte (Label −1) wie einen eigenen Cluster. Lass sie vorher weg (<code>m = labels != -1; silhouette_score(X_s[m], labels[m])</code>) und gib immer auch an, wie viele Punkte überhaupt einem Cluster zugeordnet wurden.</p>
   <h4 id="unsup-gmm">Gaussian Mixture Model (GMM): Wahrscheinlichkeiten statt fester Zuordnung</h4>
   <p>Ein GMM beschreibt jeden Cluster als Glockenkurve, im 2D-Bild als Ellipse. Jeder Punkt bekommt eine <b>Wahrscheinlichkeit pro Cluster</b>, die Werte einer Zeile ergeben zusammen 1. Eine Zeile wie 0,60 / 0,35 / 0,05 zeigt: Der Punkt liegt zwischen zwei Gruppen, die Zuordnung ist unsicher. Die Anzahl Komponenten wählst du zum Beispiel mit dem <b>BIC</b> (tiefer ist besser).</p>
   <pre><code>from sklearn.mixture import GaussianMixture

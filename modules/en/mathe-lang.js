@@ -75,7 +75,7 @@ mse = summe / n</code></pre>
     <tr><td><b>Variance</b></td><td>mean squared deviation from the mean</td><td>(9+4+1+0+36)/5 = <b>10</b></td></tr>
     <tr><td><b>Standard deviation</b></td><td>square root of the variance, back in the unit of the data</td><td>√10 ≈ <b>3.16</b></td></tr>
   </table></div>
-  <p>The std tells you how widely the values spread around the mean. The <code>StandardScaler</code> uses exactly these two numbers, and <code>df.describe()</code> shows them for every column.</p>
+  <p>The std tells you how widely the values spread around the mean. The <code>StandardScaler</code> uses exactly these two numbers (std divided by n). <code>df.describe()</code> shows them for every column, but computes the std with n − 1 (sample std): for [1, 2, 3, 4, 10] it therefore shows 3.54 instead of 3.16.</p>
 
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">What the StandardScaler does</h4>
   <ul>

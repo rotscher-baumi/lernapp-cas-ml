@@ -177,7 +177,7 @@ print(&quot;Test-Accuracy:&quot;, round(accuracy_score(y_te, pred), 3))
 ConfusionMatrixDisplay.from_predictions(y_te, pred, display_labels=[&quot;gestorben&quot;, &quot;überlebt&quot;])
 plt.show()</code></pre>
     <pre class="out">Test-Accuracy: 0.793</pre>
-    <figure class="fig"><img style="max-width:400px;margin:0 auto" src="assets/img/titanic-sup-2.png" alt="Confusion Matrix auf dem Testset" loading="lazy"><figcaption>Confusion Matrix auf den 179 Testpassagieren. Die Test-Accuracy (0,79) liegt nahe an der CV-Schätzung (0,80): Das Modell ist nicht überangepasst.</figcaption></figure>
+    <figure class="fig"><img style="max-width:400px;margin:0 auto" src="assets/img/titanic-sup-2.png" alt="Confusion Matrix auf dem Testset" loading="lazy"><figcaption>Confusion Matrix auf den 179 Testpassagieren. Die Test-Accuracy (0,79) liegt nahe an der CV-Schätzung (0,80): Die CV war verlässlich, es ist kein Testwissen eingeflossen. Dass das Modell nicht überangepasst ist, zeigt der Vergleich mit dem Training (Accuracy 0,805 gegenüber CV 0,803).</figcaption></figure>
     <p class="note">Bewusst weggelassen: Feature Engineering (Familiengrösse, Titel aus dem Namen), andere Modelle und Metriken neben der Accuracy. Das alles zeigt Teil 2.</p>
   </div>
 
@@ -337,7 +337,7 @@ weighted avg       0.80      0.80      0.80       179
 
 Test-AUC: 0.844</pre>
     <figure class="fig"><img style="max-width:400px;margin:0 auto" src="assets/img/titanic-klass-2.png" alt="ROC-Kurve auf dem Testset" loading="lazy"><figcaption>ROC-Kurve auf den 179 Testpassagieren. Je näher die Kurve an der linken oberen Ecke, desto besser; die Diagonale wäre Zufall.</figcaption></figure>
-    <p>Die Test-AUC (0,844) liegt etwas unter der CV-AUC (0,88), die Accuracy (0,80) genau auf der CV-Schätzung. Der Recall für «überlebt» ist 0,72: Gut ein Viertel der Überlebenden sagt das Modell falsch als gestorben voraus. Im Vergleich zu Teil 1 (Test-Accuracy 0,79) bringt der aufwendigere Random Forest hier kaum mehr Accuracy. Bei so wenigen Merkmalen ist das einfache Modell eine gute Wahl.</p>
+    <p>Die Test-AUC (0,844) liegt etwas unter der CV-AUC (0,88). Die Test-Accuracy (0,80) liegt auf dem CV-Wert des ungetunten Waldes (0,80); das getunte Modell erreichte in der CV rund 0,82 Accuracy, der Test liegt also leicht darunter. Der Recall für «überlebt» ist 0,72: Gut ein Viertel der Überlebenden sagt das Modell falsch als gestorben voraus. Im Vergleich zu Teil 1 (Test-Accuracy 0,79) bringt der aufwendigere Random Forest hier kaum mehr Accuracy. Bei so wenigen Merkmalen ist das einfache Modell eine gute Wahl.</p>
   </div>
   <p class="note"><code>stratify=y</code> sorgt dafür, dass Train und Test das gleiche Klassenverhältnis haben. Die Pipeline lernt Imputer und Scaler in jedem Fold nur auf dem Trainingsteil und verhindert so Leakage. Die Vorlage des Dozenten liegt im Kursordner unter <code>02 - SUPERVISED-ML/code/CAS_ML_Supervised_Learning_2.ipynb</code>.</p>
 `,

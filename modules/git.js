@@ -9,7 +9,7 @@
     title: `Git: Versionen deiner Arbeit`,
     kicker: `Modul 1 · Freitag 16.10`,
     summary: `3 Zustände, 5 Befehle`,
-    html: `  <p>Git speichert jede Änderung als <b>Schnappschuss</b>. Du kannst zu einer älteren Version zurück, mit mehreren Leuten parallel arbeiten und siehst, wer wann was warum geändert hat. GitHub und GitLab sind nur Webseiten, die Git-Repositories hosten (HSLU nutzt GitLab, dein Studium-Repo liegt auf GitHub).</p>
+    html: `  <p>Git speichert bei jedem Commit einen <b>Schnappschuss</b> deiner Dateien. Du kannst zu einer älteren Version zurück, mit mehreren Leuten parallel arbeiten und siehst, wer wann was warum geändert hat. GitHub und GitLab sind nur Webseiten, die Git-Repositories hosten (HSLU nutzt GitLab, dein Studium-Repo liegt auf GitHub).</p>
 
   <h3>Die drei Zustände</h3>
   <div class="steps">
