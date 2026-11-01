@@ -201,23 +201,6 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
     <li><b>Time series</b>: Future in the training. Always split by time.</li>
   </ul>
   <div class="merk"><b>Key takeaway</b><p>Distrust numbers that are too good. Ask for every feature: «Would I really have this value at the time of the prediction?» Suspicious signs are a huge gap between training and validation and a single feature with an enormous weight.</p></div>
-
-  <h3 id="klass-ablauf">8 · The whole process (Titanic task)</h3>
-  <p>In the afternoon you build, in groups, a model that predicts who survived the Titanic (columns: <code>Pclass</code>, <code>Sex</code>, <code>Age</code>, <code>SibSp</code>, <code>Parch</code>, <code>Fare</code>, <code>Embarked</code>; target <code>Survived</code>). The process fits any classification problem:</p>
-  <ol>
-    <li>Look at the data (structure, distributions, share of the classes).</li>
-    <li>Clean up and turn categories into numbers (one-hot).</li>
-    <li>Build new features (e.g. family size = <code>SibSp + Parch + 1</code>).</li>
-    <li>Fill missing values (e.g. age with the median).</li>
-    <li>Select features.</li>
-    <li>Check the class ratio; if needed, resampling or <code>class_weight</code>.</li>
-    <li>Split train/test, cross-validation on the training data.</li>
-    <li>Evaluate with suitable metrics (F1, AUC, not only accuracy).</li>
-    <li>Check for leakage.</li>
-    <li>Regularisation and hyperparameter search.</li>
-    <li>Check the best model <b>once</b> on the test set.</li>
-  </ol>
-  <p class="note"><b>Complete example with code:</b> All 11 steps with Random Forest, each with explanation, output and chart, are on their own page <a href="titanic.html#tit-rf">Titanic in detail</a>. A short version with logistic regression is <a href="#ml-titanic">at the end of Supervised ML</a>.</p>
 `,
   quiz: [
     { q: `Why is accuracy a bad measure with 1 % fraud cases?`, a: `A model that never reports fraud has 99 % accuracy and is still useless. Precision, Recall, F1 and AUC show how well the rare class is detected.` },
