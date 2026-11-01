@@ -99,7 +99,7 @@ Ein Thema kann zusätzlich eigene Seiten haben, z. B. `mathe-kompakt.html` (Spic
 
 `python server.py` startet die App auf http://localhost:8765. Eingaben (Übungscode) werden zusätzlich in `data/state.json` gespeichert (nicht in git). Ohne Server speichert die App nur im Browser (localStorage).
 
-Das Übungs-Notebook (`notebook.html`) braucht JupyterLab hinter `/jupyter/` auf Port 8899. Läuft es nicht, startet der Knopf «Jupyter starten» es über den Server (`POST /api/jupyter/start`, nur von 127.0.0.1). Der Server nimmt dafür das Python aus `.venv` im Lernapp-Ordner (sonst sein eigenes) und den Lernapp-Ordner als Startordner; das Log landet in `data/jupyter.log`. Jupyter läuft danach unabhängig weiter, auch wenn der Server neu startet. Beenden mit `jupyter server stop 8899`.
+Das Übungs-Notebook (`notebook.html`) braucht JupyterLab hinter `/jupyter/` auf Port 8899. Läuft es nicht, startet der Knopf «Jupyter starten» es über den Server (`POST /api/jupyter/start`, nur von 127.0.0.1). Der Server nimmt dafür das Python aus `.venv` im Lernapp-Ordner (sonst sein eigenes) und den Lernapp-Ordner als Startordner; das Log landet in `data/jupyter.log`. Jupyter läuft danach unabhängig weiter, auch wenn der Server neu startet. Beenden mit `jupyter server stop 8899`. Der Proxy weist Anfragen anderer Webseiten ab (403): Origin und Host müssen zusammenpassen, und bei Bindung an localhost muss der Host-Name `localhost`, `127.0.0.1` oder `::1` sein. Weitere Namen, etwa hinter einem Reverse-Proxy, trägt man mit `ALLOWED_HOSTS=name1,name2` ein. Mit `HOST=0.0.0.0` ist JupyterLab für jeden erreichbar, der den Port erreicht (fester Token); der Server warnt dann beim Start.
 
 ## Entwicklung und Prüfung
 

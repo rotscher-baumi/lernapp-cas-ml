@@ -11,6 +11,7 @@ import sys
 import threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).parent
 STATE_FILE = Path(os.environ.get("STATE_FILE", ROOT / "data" / "state.json"))
@@ -20,6 +21,12 @@ JUPYTER_PREFIX = "/jupyter/"  # JupyterLab is started with --ServerApp.base_url=
 JUPYTER_ADDR = (os.environ.get("JUPYTER_HOST", "127.0.0.1"), int(os.environ.get("JUPYTER_PORT", 8899)))
 HOP_HEADERS = {"host", "origin", "connection", "keep-alive", "proxy-connection", "transfer-encoding"}
 JUPYTER_TOKEN = "lernapp-local"
+LOOPBACK_NAMES = {"localhost", "127.0.0.1", "::1"}
+# Host names the Jupyter proxy accepts while we listen on loopback (DNS rebinding protection); add more with
+# ALLOWED_HOSTS=name1,name2. Not checked when HOST is a network address, because the names are not known then.
+ALLOWED_HOSTS = LOOPBACK_NAMES | {
+    h.strip().lower() for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h.strip()
+}
 JUPYTER_LOG = ROOT / "data" / "jupyter.log"
 _jupyter_lock = threading.Lock()
 
@@ -84,8 +91,30 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _from_own_page(self) -> bool:
+        """Tell whether a request can only come from this app's own pages and not from another web site.
+
+        JupyterLab sees the proxy's rewritten Origin and Host, so its own cross-site protection never fires and
+        the proxy has to enforce it: the Origin must match the Host (blocks CSRF and WebSocket hijacking), the
+        Sec-Fetch-Site metadata must not say another site (covers GET requests without Origin) and, while we
+        listen on loopback, the Host name must be a known one (blocks DNS rebinding).
+
+        :return: True if the request may pass.
+        """
+        host = self.headers.get("Host", "")
+        if HOST in LOOPBACK_NAMES and (urlsplit(f"//{host}").hostname or "") not in ALLOWED_HOSTS:
+            return False
+        origin = self.headers.get("Origin")
+        if origin is not None and urlsplit(origin).netloc.lower() != host.lower():
+            return False
+        return self.headers.get("Sec-Fetch-Site", "same-origin") in {"same-origin", "none"}
+
     def _proxy_jupyter(self) -> None:
         """Tunnel the request (HTTP or WebSocket upgrade) to JupyterLab so only one port needs forwarding."""
+        if not self._from_own_page():
+            self.close_connection = True  # the request body is not read
+            self.send_error(403, "Request from another site blocked")
+            return
         length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(length) if length else b""
         upgrade = self.headers.get("Upgrade")
@@ -144,9 +173,10 @@ class Handler(SimpleHTTPRequestHandler):
         if self.path != "/api/jupyter/start":
             self._proxy_only()
             return
-        # Starting a process is only allowed from this machine, even when HOST=0.0.0.0. The custom
-        # header forces a CORS preflight, which this server never grants, so other sites cannot trigger it.
-        if self.client_address[0] not in ("127.0.0.1", "::1") or self.headers.get("X-Lernapp") != "1":
+        # Starting a process is only allowed from this machine, even when HOST=0.0.0.0, and only from our own
+        # pages. The custom header also forces a CORS preflight that this server never grants.
+        local = self.client_address[0] in ("127.0.0.1", "::1")
+        if not (local and self.headers.get("X-Lernapp") == "1" and self._from_own_page()):
             self._json(403, b'{"status": "forbidden"}')
             return
         status = start_jupyter()
@@ -186,4 +216,8 @@ class Handler(SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     logging.info("Lernapp on http://%s:%d", HOST, PORT)
+    if HOST not in LOOPBACK_NAMES:
+        logging.warning(
+            "Listening on %s: anyone who can reach this port can open JupyterLab through /jupyter/ (fixed token)", HOST
+        )
     ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()
