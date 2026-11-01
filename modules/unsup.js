@@ -40,7 +40,131 @@
     <div><h4>Dimensionsreduktion</h4><p>Viele Merkmale auf wenige zusammenfassen, zum Beispiel um Daten in 2D zu zeichnen.</p></div>
   </div>
   <p>Der Tag arbeitet mit einem Lego-Datensatz (von der Spielwarenseite gescrapt), die Labs mit Wein-Messwerten, simulierten Zahlungen und handgeschriebenen Ziffern. Es gibt kein «richtig», nur nützlich oder nicht. Darum gehört die <b>Interpretation</b> zum Ergebnis dazu.</p>
-  <p class="hint">Der ganze Ablauf als klickbare Grafik steht am Ende des Kapitels: <a href="#unsup-ablauf">Der ganze Ablauf auf einen Blick</a>.</p>
+
+  <h3 id="unsup-ablauf">Der ganze Ablauf auf einen Blick</h3>
+  <p>Beim Unsupervised Learning gibt es keine richtige Antwort zum Vergleichen. Darum ist der Ablauf eine Schleife aus Ausprobieren, Prüfen und Deuten, nicht ein gerader Weg zum Testergebnis wie beim <a href="#ml-ablauf">Supervised Learning</a>.</p>
+  <p class="hint">Klicke auf einen Schritt in der Grafik: Darunter klappt die Erklärung auf, mit Links zu den passenden Stellen im Kapitel.</p>
+  <figure class="fig ab-fig">
+    <div class="ab-scroll">
+    <svg viewBox="-60 0 790 850" role="img" aria-label="Ablauf eines Unsupervised-Projekts: Frage klären, Daten ansehen, vorverarbeiten, skalieren, optional Dimensionen reduzieren, Verfahren wählen, Parameter wählen mit Schleife, Stabilität prüfen, visualisieren, interpretieren und bei Bedarf zurück zur Vorverarbeitung. Es gibt kein Testset.">
+      <defs>
+        <marker id="ub-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" style="fill:var(--line)"/>
+        </marker>
+        <marker id="ub-al" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" style="fill:var(--warn)"/>
+        </marker>
+      </defs>
+
+      <g class="ab-step" data-s="1" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 1: Erklärung aufklappen">
+      <rect x="60" y="20" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="42" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">1 · Frage klären</text>
+      <text x="210" y="60" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Gruppen, Ausreisser oder ein 2D-Bild?</text>
+      </g>
+      <line x1="210" y1="72" x2="210" y2="104" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <line x1="360" y1="46" x2="440" y2="46" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <g class="ab-step" data-s="y" tabindex="0" role="button" aria-expanded="false" aria-label="Zielspalte y vorhanden?: Erklärung aufklappen">
+      <rect x="440" y="20" width="270" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="575" y="42" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">Zielspalte y vorhanden?</text>
+      <text x="575" y="60" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">ja → Supervised · nein → hier weiter</text>
+      </g>
+
+      <g class="ab-step" data-s="2" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 2: Erklärung aufklappen">
+      <rect x="60" y="104" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="126" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">2 · Daten laden und ansehen</text>
+      <text x="210" y="144" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Typen, fehlende Werte, Ausreisser (EDA)</text>
+      </g>
+      <line x1="210" y1="156" x2="210" y2="188" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <line x1="360" y1="130" x2="440" y2="130" marker-end="url(#ub-al)" style="stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4;fill:none"/>
+      <g class="ab-step" data-s="t" tabindex="0" role="button" aria-expanded="false" aria-label="Kein Testset: Erklärung aufklappen">
+      <rect x="440" y="104" width="270" height="52" rx="6" style="fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4"/>
+      <text x="575" y="126" text-anchor="middle" style="fill:var(--warn);font-size:14px;font-weight:600;font-family:var(--f-body)">Kein Testset</text>
+      <text x="575" y="144" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">keine richtige Antwort zum Vergleichen</text>
+      </g>
+
+      <g class="ab-step" data-s="3" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 3: Erklärung aufklappen">
+      <rect x="60" y="188" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="210" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">3 · Vorverarbeiten</text>
+      <text x="210" y="228" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">One-Hot, fehlende Werte, Merkmale wählen</text>
+      </g>
+      <line x1="210" y1="240" x2="210" y2="272" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+
+      <g class="ab-step" data-s="4" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 4: Erklärung aufklappen">
+      <rect x="60" y="272" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="294" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">4 · Skalieren</text>
+      <text x="210" y="312" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">StandardScaler, bei Ausreissern RobustScaler</text>
+      </g>
+      <line x1="210" y1="324" x2="210" y2="356" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+
+      <g class="ab-step" data-s="5" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 5: Erklärung aufklappen">
+      <rect x="60" y="356" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="378" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">5 · Dimensionen reduzieren</text>
+      <text x="210" y="396" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">optional: PCA, z. B. 90 % Varianz behalten</text>
+      </g>
+      <line x1="210" y1="408" x2="210" y2="440" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+
+      <g class="ab-step" data-s="6" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 6: Erklärung aufklappen">
+      <rect x="60" y="440" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="462" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">6 · Verfahren wählen</text>
+      <text x="210" y="480" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">passend zu Frage und Form der Daten</text>
+      </g>
+      <line x1="210" y1="492" x2="210" y2="524" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <line x1="360" y1="466" x2="410" y2="466" marker-end="url(#ub-a)" style="stroke:var(--accent);stroke-width:1.5;fill:none"/>
+      <rect x="410" y="414" width="300" height="146" rx="8" style="fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 4"/>
+      <text x="424" y="434" style="fill:var(--accent);font-size:12px;font-weight:600;font-family:var(--f-body)">Welches Verfahren wofür?</text>
+      <text x="424" y="458" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">k-Means</text><text x="534" y="458" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">rund, ähnlich gross</text>
+      <text x="424" y="480" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Hierarchisch</text><text x="534" y="480" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Baum, k danach wählen</text>
+      <text x="424" y="502" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">DBSCAN</text><text x="534" y="502" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">beliebige Form, Rauschen</text>
+      <text x="424" y="524" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">GMM</text><text x="534" y="524" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Wahrscheinlichkeiten</text>
+      <text x="424" y="546" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Isolation Forest</text><text x="534" y="546" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Ausreisser-Rangliste</text>
+
+      <g class="ab-step" data-s="7" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 7: Erklärung aufklappen">
+      <rect x="60" y="524" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="546" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">7 · Parameter wählen</text>
+      <text x="210" y="564" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">k, eps, Linkage: Elbow, Silhouette, BIC</text>
+      </g>
+      <line x1="210" y1="576" x2="210" y2="608" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <path d="M60,564 H34 V538 H60" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <text x="26" y="548" text-anchor="end" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">anders</text>
+      <text x="26" y="562" text-anchor="end" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">probieren</text>
+
+      <g class="ab-step" data-s="8" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 8: Erklärung aufklappen">
+      <rect x="60" y="608" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="630" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">8 · Stabilität prüfen</text>
+      <text x="210" y="648" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">anderer Seed, Teilstichprobe, ARI</text>
+      </g>
+      <line x1="210" y1="660" x2="210" y2="692" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+
+      <g class="ab-step" data-s="9" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 9: Erklärung aufklappen">
+      <rect x="60" y="692" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="714" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">9 · Visualisieren</text>
+      <text x="210" y="732" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">PCA, t-SNE oder UMAP in 2D</text>
+      </g>
+      <line x1="210" y1="744" x2="210" y2="776" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <line x1="360" y1="718" x2="410" y2="718" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <rect x="410" y="682" width="300" height="72" rx="8" style="fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:3 4"/>
+      <text x="424" y="702" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Karte richtig lesen</text>
+      <text x="424" y="722" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">PCA: linear, erklärte Varianz angeben</text>
+      <text x="424" y="740" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">t-SNE/UMAP: nur Nachbarschaften zählen</text>
+
+      <g class="ab-step" data-s="10" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 10: Erklärung aufklappen">
+      <rect x="60" y="776" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="798" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">10 · Interpretieren und benennen</text>
+      <text x="210" y="816" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Profil in Originaleinheiten, fachlich ok?</text>
+      </g>
+
+      <path d="M60,808 H-38 V220 H60" marker-end="url(#ub-al)" style="stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4;fill:none"/>
+      <text x="-44" y="514" text-anchor="middle" transform="rotate(-90 -44 514)" style="fill:var(--warn);font-size:11.5px;font-family:var(--f-mono)">passt fachlich nicht: zurück zu Schritt 3</text>
+    </svg>
+    </div>
+    <div class="ab-detail" id="ubDetail" role="region" aria-live="polite" hidden>
+      <div class="ab-dh"><b></b><button type="button" class="ab-x" aria-label="Schliessen">✕</button></div>
+      <div class="ab-db"></div>
+      <div class="ab-dl"></div>
+    </div>
+    <figcaption>Skalieren (blau) ist Pflicht, weil fast alle Verfahren mit Abständen rechnen. Es gibt kein Testset (orange): Statt mit der richtigen Antwort prüfst du mit Silhouette, Stabilität und Fachwissen. Die Schleifen zeigen, dass du Einstellungen und Vorverarbeitung mehrmals anpasst.</figcaption>
+  </figure>
+  <div class="merk"><b>Merksatz</b><p>Skalieren, mehrere Einstellungen vergleichen, Stabilität prüfen und die Cluster in Originaleinheiten erklären. Ein Ergebnis ist gut, wenn es stabil ist und fachlich Sinn ergibt.</p></div>
 
   <h3 id="unsup-vs">1 · Supervised oder Unsupervised?</h3>
   <p>Die Problemart hängt nicht vom Verfahren ab, sondern von den <b>Daten und der Frage</b>. Entscheidend ist: Gibt es eine Spalte mit der gesuchten Antwort (Zielspalte <code>y</code>, Label)?</p>
@@ -226,6 +350,15 @@ Z = pca.transform(X_s)                    # neue 2D-Koordinaten
 pca.explained_variance_ratio_             # Anteil Varianz je Komponente</code></pre>
   <p>Mit <code>explained_variance_ratio_</code> siehst du, wie viel Information 2 Komponenten behalten. Die Komponenten sind Mischungen der Originalmerkmale und damit schwerer zu deuten: <code>pca.components_</code> zeigt, wie stark jedes skalierte Merkmal in eine Komponente eingeht.</p>
   <div class="falle"><b>Falle (Skalierung)</b><p>PCA zieht den Mittelwert ab, gleicht die Streuung aber nicht an. Ohne Skalieren gewinnt das Merkmal mit den grössten Zahlen (beim Wein: Prolin in Hunderten gegen Alkohol um 13), und PC1 ist fast nur dieses Merkmal.</p></div>
+  <div class="demo" id="rsDemo">
+    <div class="tag">Demo</div><h4>Nach der PCA nochmals skalieren?</h4>
+    <p class="hint">Zwei Gruppen, zwei standardisierte Merkmale. Klick dich durch die drei Stufen.</p>
+    <div class="btnrow" id="rsStage" role="group" aria-label="Stufe"><button data-v="0">1 · Start (skaliert)</button><button data-v="1">2 · Nach PCA</button><button data-v="2">3 · PCA-Ausgabe neu skaliert</button></div>
+    <svg class="plot" id="rsSvg" viewBox="0 0 320 240" role="img" aria-label="Punktwolke zweier Gruppen in der gewählten Stufe"></svg>
+    <svg class="plot" id="rsCurve" viewBox="0 0 320 130" role="img" aria-label="Streuung der Punkte je Richtung, 0 bis 180 Grad" style="margin-top:8px"></svg>
+    <div class="stats"><span>Varianz PC1 <b id="rsV1"></b></span><span>Varianz PC2 <b id="rsV2"></b></span><span>Anteil PC1 <b id="rsP"></b></span></div>
+    <p class="hint" id="rsMsg"></p>
+  </div>
   <h4 id="unsup-pca-k">Wie viele Komponenten?</h4>
   <ul>
     <li><b>Für ein Bild</b>: 2 Komponenten. Schreib dazu, wie viel Varianz fehlt.</li>
@@ -248,6 +381,23 @@ X_back = pca90.inverse_transform(pca90.transform(X_s))   # Näherung im skaliert
   <pre><code>from sklearn.manifold import TSNE
 Z = TSNE(n_components=2, perplexity=30, random_state=0).fit_transform(X_s)
 plt.scatter(Z[:, 0], Z[:, 1], c=labels)</code></pre>
+  <div class="demo" id="tsDemo">
+    <div class="tag">Demo</div><h4>PCA, t-SNE und UMAP bei einfachen und schwierigen Daten</h4>
+    <p class="hint">300 Punkte mit einstellbar vielen Merkmalen (Dimensionen). Die Farbe zeigt die wahre Gruppe; keines der drei Verfahren sieht sie.</p>
+    <div class="btnrow" id="tsData" role="group" aria-label="Datensatz"><button data-v="0">Einfach: 3 Gruppen</button><button data-v="1">Mittel: 6 Gruppen, paarweise nah</button><button data-v="2">Schwer: Swiss Roll</button><button data-v="3">Keine Struktur</button></div>
+    <div class="ctl"><label for="tsD">Dimensionen</label><input type="range" id="tsD" min="2" max="50" step="1" value="10"><output id="tsDO"></output></div>
+    <div class="ctl"><label for="tsP">Perplexity (t-SNE)</label><input type="range" id="tsP" min="2" max="50" step="1" value="20"><output id="tsPO"></output></div>
+    <div class="ctl"><label for="tsK">n_neighbors (UMAP)</label><input type="range" id="tsK" min="2" max="50" step="1" value="15"><output id="tsKO"></output></div>
+    <div class="grid2">
+      <div><h4>PCA (linear, 2 Komponenten)</h4><svg class="plot" id="tsPca" viewBox="0 0 240 240" role="img" aria-label="PCA-Karte der Punkte"></svg></div>
+      <div><h4>t-SNE</h4><svg class="plot" id="tsTsne" viewBox="0 0 240 240" role="img" aria-label="t-SNE-Karte der Punkte"></svg></div>
+      <div><h4>UMAP</h4><svg class="plot" id="tsUmap" viewBox="0 0 240 240" role="img" aria-label="UMAP-Karte der Punkte"></svg></div>
+    </div>
+    <div class="stats"><span>Nachbarn mit gleicher Farbe: Original <b id="tsNO"></b></span><span>PCA <b id="tsNP"></b></span><span>t-SNE <b id="tsNT"></b></span><span>UMAP <b id="tsNU"></b></span></div>
+    <div class="btnrow"><button id="tsRun">t-SNE und UMAP neu starten (anderer Zufall)</button></div>
+    <p class="hint" id="tsMsg"></p>
+    <p class="hint">«Nachbarn mit gleicher Farbe» zählt bei den 10 nächsten Nachbarn jedes Punktes, wie viele zur selben Gruppe gehören. Zufall wäre etwa 33 % (3 Gruppen) oder 17 % (6 Gruppen). Eine Karte kann die Gruppen kaum besser zeigen, als sie im Original getrennt sind.</p>
+  </div>
   <p><b>UMAP</b> macht ebenfalls eine Karte der Nachbarschaften, ist meist schneller und behält etwas mehr von der groben Gesamtstruktur. Zwei Regler:</p>
   <ul>
     <li><code>n_neighbors</code> (Standard 15): klein betont die lokale Nachbarschaft, gross mehr das Gesamtbild.</li>
@@ -272,130 +422,6 @@ trustworthiness(X_s, Z, n_neighbors=10)  # 1 = Nachbarn gut erhalten</code></pre
   <h3 id="unsup-deep">12 · Deep Clustering (Ausblick)</h3>
   <p>Klassisches Clustering wird bei sehr vielen Merkmalen (Bilder, Text) schlecht. Beim Deep Clustering lernt ein <b>Autoencoder</b> (ein neuronales Netz, das seine Eingabe durch einen engen Flaschenhals hindurch rekonstruiert) eine kompakte Darstellung. In dieser «latenten» Darstellung wird dann geclustert. Fortgeschrittene Varianten trainieren Darstellung und Clustering gemeinsam. Du musst das hier nur einordnen können.</p>
 
-  <h3 id="unsup-ablauf">Der ganze Ablauf auf einen Blick</h3>
-  <p>Beim Unsupervised Learning gibt es keine richtige Antwort zum Vergleichen. Darum ist der Ablauf eine Schleife aus Ausprobieren, Prüfen und Deuten, nicht ein gerader Weg zum Testergebnis wie beim <a href="#ml-ablauf">Supervised Learning</a>.</p>
-  <p class="hint">Klicke auf einen Schritt in der Grafik: Darunter klappt die Erklärung auf, mit Links zu den passenden Stellen im Kapitel.</p>
-  <figure class="fig ab-fig">
-    <div class="ab-scroll">
-    <svg viewBox="-60 0 790 850" role="img" aria-label="Ablauf eines Unsupervised-Projekts: Frage klären, Daten ansehen, vorverarbeiten, skalieren, optional Dimensionen reduzieren, Verfahren wählen, Parameter wählen mit Schleife, Stabilität prüfen, visualisieren, interpretieren und bei Bedarf zurück zur Vorverarbeitung. Es gibt kein Testset.">
-      <defs>
-        <marker id="ub-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-          <path d="M0,0 L10,5 L0,10 z" style="fill:var(--line)"/>
-        </marker>
-        <marker id="ub-al" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-          <path d="M0,0 L10,5 L0,10 z" style="fill:var(--warn)"/>
-        </marker>
-      </defs>
-
-      <g class="ab-step" data-s="1" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 1: Erklärung aufklappen">
-      <rect x="60" y="20" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="42" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">1 · Frage klären</text>
-      <text x="210" y="60" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Gruppen, Ausreisser oder ein 2D-Bild?</text>
-      </g>
-      <line x1="210" y1="72" x2="210" y2="104" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-      <line x1="360" y1="46" x2="440" y2="46" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-      <g class="ab-step" data-s="y" tabindex="0" role="button" aria-expanded="false" aria-label="Zielspalte y vorhanden?: Erklärung aufklappen">
-      <rect x="440" y="20" width="270" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="575" y="42" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">Zielspalte y vorhanden?</text>
-      <text x="575" y="60" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">ja → Supervised · nein → hier weiter</text>
-      </g>
-
-      <g class="ab-step" data-s="2" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 2: Erklärung aufklappen">
-      <rect x="60" y="104" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="126" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">2 · Daten laden und ansehen</text>
-      <text x="210" y="144" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Typen, fehlende Werte, Ausreisser (EDA)</text>
-      </g>
-      <line x1="210" y1="156" x2="210" y2="188" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-      <line x1="360" y1="130" x2="440" y2="130" marker-end="url(#ub-al)" style="stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4;fill:none"/>
-      <g class="ab-step" data-s="t" tabindex="0" role="button" aria-expanded="false" aria-label="Kein Testset: Erklärung aufklappen">
-      <rect x="440" y="104" width="270" height="52" rx="6" style="fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4"/>
-      <text x="575" y="126" text-anchor="middle" style="fill:var(--warn);font-size:14px;font-weight:600;font-family:var(--f-body)">Kein Testset</text>
-      <text x="575" y="144" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">keine richtige Antwort zum Vergleichen</text>
-      </g>
-
-      <g class="ab-step" data-s="3" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 3: Erklärung aufklappen">
-      <rect x="60" y="188" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="210" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">3 · Vorverarbeiten</text>
-      <text x="210" y="228" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">One-Hot, fehlende Werte, Merkmale wählen</text>
-      </g>
-      <line x1="210" y1="240" x2="210" y2="272" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-
-      <g class="ab-step" data-s="4" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 4: Erklärung aufklappen">
-      <rect x="60" y="272" width="300" height="52" rx="6" style="fill:var(--accent-soft);stroke:var(--accent);stroke-width:2.5"/>
-      <text x="210" y="294" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">4 · Skalieren</text>
-      <text x="210" y="312" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">StandardScaler, bei Ausreissern RobustScaler</text>
-      </g>
-      <line x1="210" y1="324" x2="210" y2="356" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-
-      <g class="ab-step" data-s="5" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 5: Erklärung aufklappen">
-      <rect x="60" y="356" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="378" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">5 · Dimensionen reduzieren</text>
-      <text x="210" y="396" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">optional: PCA, z. B. 90 % Varianz behalten</text>
-      </g>
-      <line x1="210" y1="408" x2="210" y2="440" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-
-      <g class="ab-step" data-s="6" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 6: Erklärung aufklappen">
-      <rect x="60" y="440" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="462" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">6 · Verfahren wählen</text>
-      <text x="210" y="480" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">passend zu Frage und Form der Daten</text>
-      </g>
-      <line x1="210" y1="492" x2="210" y2="524" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-      <line x1="360" y1="466" x2="410" y2="466" marker-end="url(#ub-a)" style="stroke:var(--accent);stroke-width:1.5;fill:none"/>
-      <rect x="410" y="414" width="300" height="146" rx="8" style="fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 4"/>
-      <text x="424" y="434" style="fill:var(--accent);font-size:12px;font-weight:600;font-family:var(--f-body)">Welches Verfahren wofür?</text>
-      <text x="424" y="458" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">k-Means</text><text x="534" y="458" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">rund, ähnlich gross</text>
-      <text x="424" y="480" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Hierarchisch</text><text x="534" y="480" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Baum, k danach wählen</text>
-      <text x="424" y="502" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">DBSCAN</text><text x="534" y="502" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">beliebige Form, Rauschen</text>
-      <text x="424" y="524" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">GMM</text><text x="534" y="524" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Wahrscheinlichkeiten</text>
-      <text x="424" y="546" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Isolation Forest</text><text x="534" y="546" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Ausreisser-Rangliste</text>
-
-      <g class="ab-step" data-s="7" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 7: Erklärung aufklappen">
-      <rect x="60" y="524" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="546" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">7 · Parameter wählen</text>
-      <text x="210" y="564" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">k, eps, Linkage: Elbow, Silhouette, BIC</text>
-      </g>
-      <line x1="210" y1="576" x2="210" y2="608" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-      <path d="M60,564 H34 V538 H60" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-      <text x="26" y="548" text-anchor="end" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">anders</text>
-      <text x="26" y="562" text-anchor="end" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">probieren</text>
-
-      <g class="ab-step" data-s="8" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 8: Erklärung aufklappen">
-      <rect x="60" y="608" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="630" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">8 · Stabilität prüfen</text>
-      <text x="210" y="648" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">anderer Seed, Teilstichprobe, ARI</text>
-      </g>
-      <line x1="210" y1="660" x2="210" y2="692" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-
-      <g class="ab-step" data-s="9" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 9: Erklärung aufklappen">
-      <rect x="60" y="692" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="714" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">9 · Visualisieren</text>
-      <text x="210" y="732" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">PCA, t-SNE oder UMAP in 2D</text>
-      </g>
-      <line x1="210" y1="744" x2="210" y2="776" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-      <line x1="360" y1="718" x2="410" y2="718" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-      <rect x="410" y="682" width="300" height="72" rx="8" style="fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:3 4"/>
-      <text x="424" y="702" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Karte richtig lesen</text>
-      <text x="424" y="722" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">PCA: linear, erklärte Varianz angeben</text>
-      <text x="424" y="740" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">t-SNE/UMAP: nur Nachbarschaften zählen</text>
-
-      <g class="ab-step" data-s="10" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 10: Erklärung aufklappen">
-      <rect x="60" y="776" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="798" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">10 · Interpretieren und benennen</text>
-      <text x="210" y="816" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Profil in Originaleinheiten, fachlich ok?</text>
-      </g>
-
-      <path d="M60,808 H-38 V220 H60" marker-end="url(#ub-al)" style="stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4;fill:none"/>
-      <text x="-44" y="514" text-anchor="middle" transform="rotate(-90 -44 514)" style="fill:var(--warn);font-size:11.5px;font-family:var(--f-mono)">passt fachlich nicht: zurück zu Schritt 3</text>
-    </svg>
-    </div>
-    <div class="ab-detail" id="ubDetail" role="region" aria-live="polite" hidden>
-      <div class="ab-dh"><b></b><button type="button" class="ab-x" aria-label="Schliessen">✕</button></div>
-      <div class="ab-db"></div>
-      <div class="ab-dl"></div>
-    </div>
-    <figcaption>Skalieren (blau) ist Pflicht, weil fast alle Verfahren mit Abständen rechnen. Es gibt kein Testset (orange): Statt mit der richtigen Antwort prüfst du mit Silhouette, Stabilität und Fachwissen. Die Schleifen zeigen, dass du Einstellungen und Vorverarbeitung mehrmals anpasst.</figcaption>
-  </figure>
-  <div class="merk"><b>Merksatz</b><p>Skalieren, mehrere Einstellungen vergleichen, Stabilität prüfen und die Cluster in Originaleinheiten erklären. Ein Ergebnis ist gut, wenn es stabil ist und fachlich Sinn ergibt.</p></div>
   <p class="note">Notebooks des Dozenten (Kursordner <code>07 - UNSUPERVISED-LEARNING/code</code>): <code>clustering_k_means</code>, <code>clustering_k_means optimizing</code>, <code>hierarchical_clustering</code>, <code>dimension_reduction_pca</code>, <code>dimension_reduction_tsne</code>, jeweils mit <code>_exercise</code>-Version. Daten: <code>lego_daten_one_hot_encoded_cleaned.csv</code>. Labs (Ordner <code>notebooks</code>): <code>01_clustering_lab</code> (Wein: Skalierung, k, DBSCAN, GMM, ARI), <code>02_anomaly_detection_lab</code> (Isolation Forest), <code>03_pca_lab</code> (Komponenten, Rekonstruktion), <code>04_embeddings_lab</code> (t-SNE und UMAP).</p>
 `,
     exercises: [
@@ -546,6 +572,150 @@ trustworthiness(X_s, Z, n_neighbors=10)  # 1 = Nachbarn gut erhalten</code></pre
           $('pcSvg').innerHTML=s;
           const v=ux*ux*sxx+2*ux*uy*sxy+uy*uy*syy;$('pcV').textContent=fmt(v/total*100,0)+' %';$('pcL').textContent=fmt((1-v/total)*100,0)+' %'}
         $('pcA').addEventListener('input',draw);$('pcBest').addEventListener('click',()=>{$('pcA').value=bestDeg;draw()});draw()})();
+
+      // Demo 5: why the PCA output is not rescaled (whitening flattens the variance per direction)
+      (function(){
+        const r=mulberry32(12),grp=[],raw=[],rot=35*Math.PI/180;
+        for(let i=0;i<80;i++){const g=i%2,a=(g?1.2:-1.2)+0.35*gauss(r),b=0.25*gauss(r);grp.push(g);raw.push([a*Math.cos(rot)-b*Math.sin(rot),a*Math.sin(rot)+b*Math.cos(rot)])}
+        const cov=P=>{let a=0,b=0,c=0;P.forEach(p=>{a+=p[0]*p[0];b+=p[1]*p[1];c+=p[0]*p[1]});return[a/P.length,b/P.length,c/P.length]};
+        const m=[0,1].map(j=>raw.reduce((s,p)=>s+p[j],0)/raw.length);
+        // Stage 0: standardised features; stage 1: PCA scores; stage 2: PCA scores divided by their sd (whitening).
+        const sd=[0,1].map(j=>Math.sqrt(raw.reduce((s,p)=>s+(p[j]-m[j])*(p[j]-m[j]),0)/raw.length));
+        const S0=raw.map(p=>[(p[0]-m[0])/sd[0],(p[1]-m[1])/sd[1]]);
+        const C0=cov(S0),th=0.5*Math.atan2(2*C0[2],C0[0]-C0[1]),u1=[Math.cos(th),Math.sin(th)],u2=[-Math.sin(th),Math.cos(th)];
+        const S1=S0.map(p=>[p[0]*u1[0]+p[1]*u1[1],p[0]*u2[0]+p[1]*u2[1]]),C1=cov(S1);
+        const S2=S1.map(p=>[p[0]/Math.sqrt(C1[0]),p[1]/Math.sqrt(C1[1])]);
+        const stages=[S0,S1,S2],W=320,H=240,sc=40,sx=x=>W/2+x*sc,sy=y=>H/2-y*sc;
+        const vAt=(C,deg)=>{const a=deg*Math.PI/180,c=Math.cos(a),s=Math.sin(a);return c*c*C[0]+2*c*s*C[2]+s*s*C[1]};
+        const vmax=Math.max.apply(null,stages.map(S=>{const C=cov(S);let v=0;for(let d=0;d<180;d++)v=Math.max(v,vAt(C,d));return v}))*1.1;
+        const MSG=['Start: Beide Merkmale haben Varianz 1. Die Wolke streut stark entlang der Diagonale (PC1, Linie) und kaum quer dazu (PC2, gestrichelt). Unten: Die Streuung je Richtung hat einen klaren Gipfel.',
+          'Nach der PCA: dieselben Punkte, nur gedreht. PC1 liegt waagrecht und trägt fast die ganze Streuung, auch den Abstand der zwei Gruppen. PC2 ist fast nur Rauschen. Lässt du PC2 weg, verlierst du wenig.',
+          'Neu skaliert: Das Rauschen in PC2 wurde auf Varianz 1 aufgeblasen und zählt jetzt gleich viel wie PC1. Die Gruppen wirken weniger getrennt. Unten ist die Kurve flach: Jede Richtung streut gleich, eine zweite PCA fände keine beste Richtung mehr.'];
+        function draw(st){const S=stages[st],C=cov(S);let s='';
+          s+='<line class="dash" x1="0" y1="'+sy(0)+'" x2="'+W+'" y2="'+sy(0)+'" style="opacity:.4"/><line class="dash" x1="'+sx(0)+'" y1="0" x2="'+sx(0)+'" y2="'+H+'" style="opacity:.4"/>';
+          if(st===0){s+='<line x1="'+sx(-3.6*u1[0])+'" y1="'+sy(-3.6*u1[1])+'" x2="'+sx(3.6*u1[0])+'" y2="'+sy(3.6*u1[1])+'" style="stroke:var(--accent);stroke-width:2"/>';
+            s+='<line class="dash" x1="'+sx(-2*u2[0])+'" y1="'+sy(-2*u2[1])+'" x2="'+sx(2*u2[0])+'" y2="'+sy(2*u2[1])+'" style="stroke:var(--accent);stroke-width:2"/>';
+            s+='<text class="lbl" x="'+(W-110)+'" y="'+(H-4)+'">Merkmal 1 →</text><text class="lbl" x="4" y="12">↑ Merkmal 2</text>'}
+          else s+='<text class="lbl" x="'+(W-60)+'" y="'+(sy(0)-5)+'">PC1 →</text><text class="lbl" x="'+(sx(0)+5)+'" y="12">↑ PC2</text>';
+          S.forEach((p,i)=>{s+=dot(sx(p[0]),sy(p[1]),COL[grp[i]],3)});
+          $('rsSvg').innerHTML=s;
+          // Variance per direction: what a (second) PCA looks at.
+          const cw=320,ch=130,l=34,b=ch-22,cx=d=>l+d/180*(cw-l-8),cy=v=>b-v/vmax*(b-10);let c='',path='',best=0,bv=-1,lo=Infinity;
+          for(let d=0;d<=180;d+=2){const v=vAt(C,d);path+=(d?'L':'M')+cx(d).toFixed(1)+' '+cy(v).toFixed(1);if(v>bv){bv=v;best=d}lo=Math.min(lo,v)}
+          c+='<line x1="'+l+'" y1="'+b+'" x2="'+(cw-8)+'" y2="'+b+'" style="stroke:var(--line)"/><line x1="'+l+'" y1="10" x2="'+l+'" y2="'+b+'" style="stroke:var(--line)"/>';
+          c+='<text class="lbl" x="'+(cw-142)+'" y="'+(ch-4)+'">Richtung 0° bis 180° →</text><text class="lbl" x="2" y="10">Varianz</text>';
+          c+='<path d="'+path+'" style="fill:none;stroke:var(--accent);stroke-width:2"/>';
+          c+=bv/lo<1.1?'<text class="lbl" x="'+(cx(60))+'" y="'+(cy(bv)-6)+'">überall gleich, kein Gipfel</text>'
+            :dot(cx(best),cy(bv),'var(--warn)',4)+'<text class="lbl" x="'+Math.min(cx(best)+6,cw-120)+'" y="'+(cy(bv)+4)+'">Gipfel = PC1</text>';
+          $('rsCurve').innerHTML=c;
+          const V=st===0?C1:C;   // stage 0 has the same component variances as the PCA scores
+          $('rsV1').textContent=fmt(V[0],2);$('rsV2').textContent=fmt(V[1],2);$('rsP').textContent=fmt(V[0]/(V[0]+V[1])*100,0)+' %';
+          $('rsMsg').textContent=MSG[st];
+          $('rsStage').querySelectorAll('button').forEach(bt=>{const on=+bt.dataset.v===st;bt.className=on?'pri':'';bt.setAttribute('aria-pressed',on)})}
+        $('rsStage').addEventListener('click',e=>{const bt=e.target.closest('button');if(bt)draw(+bt.dataset.v)});draw(0)})();
+      // Demo 6: PCA, t-SNE and UMAP on data of different difficulty, with adjustable number of features
+      (function(){
+        const N=300,DMAX=50;
+        const MSG=['Einfach: drei weit getrennte Gruppen. Alle drei Verfahren zeigen sie, egal wie viele Dimensionen. Bei so einfachen Daten reicht PCA.',
+          'Mittel: sechs Gruppen, je zwei liegen nah beieinander. Die Struktur braucht 4 Richtungen. Mit 2 oder 3 Dimensionen fehlt eine davon, und die Paare liegen schon im Original übereinander. Ab 4 Dimensionen trennen t-SNE und UMAP alle sechs Gruppen. PCA zeigt nur 2 Richtungen und legt die Paare übereinander.',
+          'Schwer: eine aufgerollte Fläche (Swiss Roll), die Farbe ist die Position entlang der Rolle. Bei 2 Dimensionen ist es eine flache Spirale. Ab 3 Dimensionen schaut PCA von der Seite auf die Rolle: Die Lagen liegen übereinander, die Farben mischen sich. t-SNE und UMAP folgen den Nachbarn entlang der Fläche und halten die Farben in ihrer Reihenfolge, wickeln die Rolle aber nicht immer sauber ab.',
+          'Keine Struktur: reines Rauschen, die Farben sind zufällig verteilt. Es gibt nichts zu finden. Trotzdem zeichnen t-SNE (kleine Perplexity) und UMAP (wenige Nachbarn) oft Grüppchen. Nicht jedes Muster in einer solchen Karte ist echt.'];
+        // Low-dimensional structure; lab is the true group and is never used by PCA or t-SNE
+        function latent(ds,D,r){const Z=[],lab=[];
+          for(let i=0;i<N;i++){
+            if(ds===0){const g=i%3,a=g*2*Math.PI/3;Z.push([4*Math.cos(a)+0.6*gauss(r),4*Math.sin(a)+0.6*gauss(r)]);lab.push(g)}
+            else if(ds===1){const g=i%6,p=Math.floor(g/2),a=p*2*Math.PI/3,s=g%2?1:-1;
+              Z.push([4.5*Math.cos(a)+0.5*gauss(r),4.5*Math.sin(a)+0.5*gauss(r),(p===0?s:0)*1.1+0.5*gauss(r),(p>0?s*(p===1?1:-1):0)*1.1+0.5*gauss(r)]);lab.push(g)}
+            else if(ds===2){const u=r(),t=1.5*Math.PI*(1+2*u);lab.push(Math.min(5,Math.floor(u*6)));
+              Z.push(D<3?[0.4*t*Math.cos(t),0.4*t*Math.sin(t)]:[0.4*t*Math.cos(t),0.4*t*Math.sin(t),12*(r()-0.5)])}
+            else{Z.push([]);lab.push(Math.floor(r()*3))}}
+          return{Z:Z,lab:lab}}
+        // Spread the structure over all features with random orthonormal directions, then add noise in every feature
+        function makeData(ds,D){const r=mulberry32(31+ds),L=latent(ds,D,r),k=Math.min(L.Z[0].length,D),Q=[];
+          for(let j=0;j<k;j++){let q=[];for(let d=0;d<D;d++)q.push(gauss(r));
+            Q.forEach(p=>{const c=p.reduce((s,v,d)=>s+v*q[d],0);q=q.map((v,d)=>v-c*p[d])});
+            const n=Math.sqrt(q.reduce((s,v)=>s+v*v,0));Q.push(q.map(v=>v/n))}
+          const sd=ds===3?1:0.35,rn=mulberry32(77+ds);
+          const X=L.Z.map(z=>{const x=new Array(D).fill(0);for(let j=0;j<k;j++)for(let d=0;d<D;d++)x[d]+=z[j]*Q[j][d];
+            for(let d=0;d<DMAX;d++){const e=gauss(rn);if(d<D)x[d]+=sd*e}return x});
+          return{X:X,lab:L.lab}}
+        function dist2(X){const n=X.length,M=new Float64Array(n*n);
+          for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){let s=0;for(let d=0;d<X[i].length;d++){const v=X[i][d]-X[j][d];s+=v*v}M[i*n+j]=M[j*n+i]=s}return M}
+        function pca2(X){const n=X.length,D=X[0].length,m=new Array(D).fill(0);X.forEach(x=>x.forEach((v,d)=>m[d]+=v/n));
+          const C=X.map(x=>x.map((v,d)=>v-m[d])),S=[];for(let a=0;a<D;a++){S.push([]);for(let b=0;b<D;b++){let s=0;C.forEach(c=>s+=c[a]*c[b]);S[a].push(s/n)}}
+          const V=[];for(let k=0;k<2;k++){let v=S.map((_,d)=>Math.cos(d+k));   // power iteration, second vector orthogonal to the first
+            for(let it=0;it<200;it++){let w=S.map(row=>row.reduce((s,x,d)=>s+x*v[d],0));V.forEach(p=>{const c=p.reduce((s,x,d)=>s+x*w[d],0);w=w.map((x,d)=>x-c*p[d])});
+              const nn=Math.sqrt(w.reduce((s,x)=>s+x*x,0))||1;v=w.map(x=>x/nn)}V.push(v)}
+          return C.map(c=>V.map(v=>c.reduce((s,x,d)=>s+x*v[d],0)))}
+        // Share of the 10 nearest neighbours that belong to the same group
+        function same(M,lab){const n=lab.length;let s=0;
+          for(let i=0;i<n;i++){const o=[];for(let j=0;j<n;j++)if(j!==i)o.push(j);o.sort((a,b)=>M[i*n+a]-M[i*n+b]);for(let k=0;k<10;k++)if(lab[o[k]]===lab[i])s++}
+          return s/(n*10)}
+        // Exact t-SNE (as in tsne.js): P calibrated to the perplexity, gains, momentum, early exaggeration
+        function tsneInit(Dh,perp,seed){const n=N,P=new Float64Array(n*n),H=Math.log(perp),row=new Float64Array(n);
+          for(let i=0;i<n;i++){let lo=-Infinity,hi=Infinity,beta=1;
+            for(let t=0;t<50;t++){let s=0;for(let j=0;j<n;j++){row[j]=j===i?0:Math.exp(-Dh[i*n+j]*beta);s+=row[j]}
+              let h=0;for(let j=0;j<n;j++){const p=s?row[j]/s:0;row[j]=p;if(p>1e-7)h-=p*Math.log(p)}
+              if(Math.abs(h-H)<1e-5)break;if(h>H){lo=beta;beta=hi===Infinity?beta*2:(beta+hi)/2}else{hi=beta;beta=lo===-Infinity?beta/2:(beta+lo)/2}}
+            for(let j=0;j<n;j++)P[i*n+j]=row[j]}
+          for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){const v=Math.max((P[i*n+j]+P[j*n+i])/(2*n),1e-100);P[i*n+j]=P[j*n+i]=v}
+          const r=mulberry32(seed),Y=[],st=[],g=[];for(let i=0;i<n;i++){Y.push([1e-4*gauss(r),1e-4*gauss(r)]);st.push([0,0]);g.push([1,1])}
+          return{P:P,Y:Y,st:st,g:g,it:0,W:new Float64Array(n*n)}}
+        function tsneStep(T){const n=N,Y=T.Y,W=T.W,ex=T.it<100?4:1,mom=T.it<250?0.5:0.8;let Z=0;
+          for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){const dx=Y[i][0]-Y[j][0],dy=Y[i][1]-Y[j][1],q=1/(1+dx*dx+dy*dy);W[i*n+j]=W[j*n+i]=q;Z+=2*q}
+          for(let i=0;i<n;i++){let gx=0,gy=0;
+            for(let j=0;j<n;j++){if(j===i)continue;const q=W[i*n+j],f=4*(ex*T.P[i*n+j]-q/Z)*q;gx+=f*(Y[i][0]-Y[j][0]);gy+=f*(Y[i][1]-Y[j][1])}
+            [gx,gy].forEach((gd,d)=>{const s=T.st[i][d];let ga=Math.sign(gd)===Math.sign(s)?T.g[i][d]*0.8:T.g[i][d]+0.2;if(ga<0.01)ga=0.01;
+              T.g[i][d]=ga;T.st[i][d]=mom*s-10*ga*gd})}
+          const my=[0,0];for(let i=0;i<n;i++){Y[i][0]+=T.st[i][0];Y[i][1]+=T.st[i][1];my[0]+=Y[i][0]/n;my[1]+=Y[i][1]/n}
+          Y.forEach(y=>{y[0]-=my[0];y[1]-=my[1]});T.it++}
+        // Simplified UMAP (as in umap-learn): fuzzy kNN graph, then attract along edges and push random pairs apart (min_dist 0.1)
+        function umapInit(Dh,k,Y0,seed){const n=N,E=[],w=new Map(),A=1.577,B=0.895;
+          for(let i=0;i<n;i++){const o=[];for(let j=0;j<n;j++)if(j!==i)o.push(j);o.sort((a,b)=>Dh[i*n+a]-Dh[i*n+b]);
+            const nb=o.slice(0,k),d=nb.map(j=>Math.sqrt(Dh[i*n+j])),rho=d[0],target=Math.log2(k);let lo=0,hi=Infinity,sig=1;
+            for(let t=0;t<64;t++){let s=0;d.forEach(x=>{s+=Math.exp(-Math.max(0,x-rho)/sig)});
+              if(Math.abs(s-target)<1e-5)break;if(s>target){hi=sig;sig=(lo+hi)/2}else{lo=sig;sig=hi===Infinity?sig*2:(lo+hi)/2}}
+            nb.forEach((j,m)=>{const key=Math.min(i,j)*n+Math.max(i,j),v=Math.exp(-Math.max(0,d[m]-rho)/sig),old=w.get(key);
+              w.set(key,old===undefined?v:old+v-old*v)})}   // fuzzy union of both directions
+          let wmax=0;w.forEach(v=>{wmax=Math.max(wmax,v)});w.forEach((v,key)=>E.push([Math.floor(key/n),key%n,v/wmax]));
+          let x0=Infinity,x1=-Infinity;Y0.forEach(p=>{x0=Math.min(x0,p[0],p[1]);x1=Math.max(x1,p[0],p[1])});
+          const sc=20/Math.max(x1-x0,1e-9);   // start from the PCA map, scaled to about 20 units
+          return{E:E,Y:Y0.map(p=>[p[0]*sc,p[1]*sc]),r:mulberry32(seed),it:0,A:A,B:B}}
+        function umapStep(U,epochs){const Y=U.Y,A=U.A,B=U.B,clip=v=>Math.max(-4,Math.min(4,v));
+          const alpha=1-U.it/epochs;
+          U.E.forEach(e=>{if(U.r()>e[2])return;const i=e[0],j=e[1];
+            let dx=Y[i][0]-Y[j][0],dy=Y[i][1]-Y[j][1],d2=dx*dx+dy*dy;
+            if(d2>0){const c=-2*A*B*Math.pow(d2,B-1)/(1+A*Math.pow(d2,B)),gx=clip(c*dx)*alpha,gy=clip(c*dy)*alpha;
+              Y[i][0]+=gx;Y[i][1]+=gy;Y[j][0]-=gx;Y[j][1]-=gy}
+            for(let s=0;s<5;s++){const m=Math.floor(U.r()*N);if(m===i)continue;
+              dx=Y[i][0]-Y[m][0];dy=Y[i][1]-Y[m][1];d2=dx*dx+dy*dy;
+              const c=2*B/((0.001+d2)*(1+A*Math.pow(d2,B)));
+              Y[i][0]+=(d2>0?clip(c*dx):4)*alpha;Y[i][1]+=(d2>0?clip(c*dy):4)*alpha}});
+          U.it++}
+        function plot(id,Y,lab){let x0=Infinity,x1=-Infinity,y0=Infinity,y1=-Infinity;
+          Y.forEach(p=>{x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);y0=Math.min(y0,p[1]);y1=Math.max(y1,p[1])});
+          const sc=216/Math.max(x1-x0,y1-y0,1e-9),ox=120-sc*(x0+x1)/2,oy=120+sc*(y0+y1)/2;let s='';
+          Y.forEach((p,i)=>{s+='<circle cx="'+(ox+sc*p[0]).toFixed(1)+'" cy="'+(oy-sc*p[1]).toFixed(1)+'" r="2.6" style="fill:'+COL[lab[i]]+';stroke:var(--fg);stroke-width:.3"/>'});
+          $(id).innerHTML=s}
+        const pct=v=>fmt(v*100,0)+' %';
+        let ds=0,data=null,Dh=null,P2=null,runT=0,runU=0,seed=1;
+        function startT(){const perp=+$('tsP').value;$('tsPO').textContent=perp;$('tsNT').textContent='…';
+          const T=tsneInit(Dh,perp,seed),my=++runT;
+          (function frame(){if(my!==runT)return;for(let k=0;k<10;k++)tsneStep(T);plot('tsTsne',T.Y,data.lab);
+            if(T.it<500)requestAnimationFrame(frame);else $('tsNT').textContent=pct(same(dist2(T.Y),data.lab))})()}
+        function startU(){const k=+$('tsK').value;$('tsKO').textContent=k;$('tsNU').textContent='…';
+          const U=umapInit(Dh,k,P2,seed),my=++runU;
+          (function frame(){if(my!==runU)return;for(let e=0;e<10;e++)umapStep(U,300);plot('tsUmap',U.Y,data.lab);
+            if(U.it<300)requestAnimationFrame(frame);else $('tsNU').textContent=pct(same(dist2(U.Y),data.lab))})()}
+        function start(){const D=+$('tsD').value;$('tsDO').textContent=D;
+          data=makeData(ds,D);Dh=dist2(data.X);P2=pca2(data.X);plot('tsPca',P2,data.lab);
+          $('tsNO').textContent=pct(same(Dh,data.lab));$('tsNP').textContent=pct(same(dist2(P2),data.lab));startT();startU()}
+        function setDs(v){ds=v;$('tsMsg').textContent=MSG[v];
+          $('tsData').querySelectorAll('button').forEach(bt=>{const on=+bt.dataset.v===v;bt.className=on?'pri':'';bt.setAttribute('aria-pressed',on)});start()}
+        $('tsData').addEventListener('click',e=>{const bt=e.target.closest('button');if(bt)setDs(+bt.dataset.v)});
+        $('tsD').addEventListener('input',start);$('tsP').addEventListener('input',startT);$('tsK').addEventListener('input',startU);
+        $('tsRun').addEventListener('click',()=>{seed++;startT();startU()});
+        setDs(0)})();
     },
   });
 })();
