@@ -174,7 +174,7 @@ print(&quot;Test-Accuracy:&quot;, round(accuracy_score(y_te, pred), 3))
 ConfusionMatrixDisplay.from_predictions(y_te, pred, display_labels=[&quot;gestorben&quot;, &quot;überlebt&quot;])
 plt.show()</code></pre>
     <pre class="out">Test-Accuracy: 0.793</pre>
-    <figure class="fig"><img style="max-width:400px;margin:0 auto" src="assets/img/titanic-sup-2.png" alt="Confusion matrix on the test set" loading="lazy"><figcaption>Confusion matrix on the 179 test passengers. The test accuracy (0.79) is close to the CV estimate (0.80): the model is not overfitted.</figcaption></figure>
+    <figure class="fig"><img style="max-width:400px;margin:0 auto" src="assets/img/titanic-sup-2.png" alt="Confusion matrix on the test set" loading="lazy"><figcaption>Confusion matrix on the 179 test passengers. The test accuracy (0.79) is close to the CV estimate (0.80): the CV was reliable, no test knowledge leaked in. That the model is not overfitted is shown by the comparison with training (accuracy 0.805 versus CV 0.803).</figcaption></figure>
     <p class="note">Deliberately left out: feature engineering (family size, title from the name), other models, and metrics besides accuracy. Part 2 shows all of this.</p>
   </div>
 
@@ -334,7 +334,7 @@ weighted avg       0.80      0.80      0.80       179
 
 Test-AUC: 0.844</pre>
     <figure class="fig"><img style="max-width:400px;margin:0 auto" src="assets/img/titanic-klass-2.png" alt="ROC curve on the test set" loading="lazy"><figcaption>ROC curve on the 179 test passengers. The closer the curve is to the top left corner, the better; the diagonal would be chance.</figcaption></figure>
-    <p>The test AUC (0.844) is somewhat below the CV AUC (0.88), the accuracy (0.80) exactly at the CV estimate. The recall for «überlebt» (survived) is 0.72: the model wrongly predicts just over a quarter of the survivors as died. Compared with part 1 (test accuracy 0.79), the more elaborate Random Forest brings hardly any extra accuracy here. With so few features, the simple model is a good choice.</p>
+    <p>The test AUC (0.844) is somewhat below the CV AUC (0.88). The test accuracy (0.80) matches the CV value of the untuned forest (0.80); the tuned model reached about 0.82 accuracy in CV, so the test is slightly below that. The recall for «überlebt» (survived) is 0.72: the model wrongly predicts just over a quarter of the survivors as died. Compared with part 1 (test accuracy 0.79), the more elaborate Random Forest brings hardly any extra accuracy here. With so few features, the simple model is a good choice.</p>
   </div>
   <p class="note"><code>stratify=y</code> makes sure that train and test have the same class ratio. The pipeline learns the imputer and scaler in each fold on the training part only and so prevents leakage. The lecturer's template is in the course folder under <code>02 - SUPERVISED-ML/code/CAS_ML_Supervised_Learning_2.ipynb</code>.</p>
 `,
