@@ -17,14 +17,20 @@
   const REGR = 'Regression';
   const KLASS = t('Klassifikation', 'Classification');
   const MEHR = t('ausführlich →', 'in detail →');
+  /* Link to the runnable example notebook of a topic (notebooks/beispiele/<file>.ipynb). */
+  function bsp(file) {
+    return '<a href="notebook.html?nb=beispiele/' + file + '.ipynb">' + t('Beispiele →', 'Examples →') + '</a>';
+  }
+  let NB = '';
 
-  /* One model card. rows = [label, text] pairs; sk = sklearn class; href = chapter link. */
+  /* One model card. rows = [label, text] pairs; sk = sklearn class; href = chapter link; NB = example notebook. */
   function card(name, idea, rows, sk, href) {
     return '<div class="sb"><h4>' + name + '</h4><p>' + idea + '</p><dl>' +
       rows.map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>'; }).join('') +
-      '</dl><div class="sb-f"><code>' + sk + '</code><a href="' + href + '">' + MEHR + '</a></div></div>';
+      '</dl><div class="sb-f"><code>' + sk + '</code><span><a href="' + href + '">' + MEHR + '</a> ' + bsp(NB) + '</span></div></div>';
   }
 
+  NB = '01_Regression';
   const reg = [
     card(t('Lineare Regression', 'Linear regression'), t('Legt eine Gerade (bei mehreren Merkmalen eine Ebene) so durch die Punkte, dass der mittlere quadrierte Fehler (MSE) am kleinsten ist.', 'Fits a straight line (a plane with several features) through the points so that the mean squared error (MSE) is as small as possible.'), [
       [WANN, t('Zahl vorhersagen, Zusammenhang etwa linear. Gute erste Baseline.', 'Predict a number, relationship roughly linear. Good first baseline.')],
@@ -63,6 +69,7 @@
     ], 'ElasticNet', '#ml-reg'),
   ];
 
+  NB = '02_Klassifikation';
   const klass = [
     card(t('Logistische Regression', 'Logistic regression'), t('Gewichtete Summe der Merkmale, durch die Sigmoid-Funktion in eine Wahrscheinlichkeit zwischen 0 und 1 umgerechnet. Ab einer Schwelle (Standard 0,5) gilt «Klasse 1».', 'Weighted sum of the features, converted by the sigmoid function into a probability between 0 and 1. Above a threshold (default 0.5) it counts as “class 1”.'), [
       [WANN, t('Ja/Nein-Fragen, erste Baseline für Klassifikation', 'yes/no questions, first baseline for classification')],
@@ -101,6 +108,7 @@
     ], 'DecisionTreeClassifier', '#klass-modelle'),
   ];
 
+  NB = '03_Ensembles';
   const ens = [
     card('Random Forest (Bagging)', t('Viele Bäume parallel, jeder auf einer Zufallsstichprobe mit Zurücklegen und mit zufälliger Merkmalsauswahl pro Split. Mehrheit oder Mittelwert entscheidet. Senkt die <b>Variance</b>.', 'Many trees in parallel, each on a random sample with replacement and with a random choice of features per split. Majority or mean decides. Lowers the <b>variance</b>.'), [
       [WANN, t('Tabellendaten, gute Leistung ohne viel Tuning', 'tabular data, good performance without much tuning')],
@@ -118,6 +126,7 @@
     ], 'GradientBoostingClassifier / …Regressor', '#klass-modelle'),
   ];
 
+  NB = '04_Clustering_Anomalien';
   const clu = [
     card('k-Means', t('Setzt k Zentren, ordnet jeden Punkt dem nächsten Zentrum zu, verschiebt die Zentren in den Mittelwert ihrer Punkte und wiederholt das, bis sich nichts mehr ändert.', 'Places k centres, assigns each point to the nearest centre, moves the centres to the mean of their points and repeats until nothing changes any more.'), [
       [WANN, t('kompakte, etwa runde und ähnlich grosse Gruppen', 'compact, roughly round groups of similar size')],
@@ -150,6 +159,7 @@
     ], 'GaussianMixture', '#unsup-dbscan'),
   ];
 
+  NB = '04_Clustering_Anomalien';
   const ano = [
     card('Isolation Forest', t('Teilt die Daten mit zufälligen Schnitten. Ausreisser sind nach wenigen Schnitten allein, normale Punkte brauchen viele. Kurzer Weg = verdächtig.', 'Splits the data with random cuts. Outliers are isolated after a few cuts, normal points need many. Short path = suspicious.'), [
       [WANN, t('auffällige Fälle finden (Betrug, Defekte), viele Merkmale', 'finding unusual cases (fraud, defects), many features')],
@@ -160,6 +170,7 @@
     ], 'IsolationForest', '#unsup-anomalie'),
   ];
 
+  NB = '05_Dimensionsreduktion';
   const dim = [
     card('PCA', t('Dreht das Koordinatensystem so, dass die erste neue Achse die meiste Streuung erklärt, die zweite die meiste vom Rest usw. Man behält nur die ersten Achsen.', 'Rotates the coordinate system so that the first new axis explains the most spread, the second the most of the rest, and so on. You keep only the first axes.'), [
       [WANN, t('viele korrelierte Merkmale verdichten, als Vorverarbeitung oder für ein 2D-Bild', 'compress many correlated features, as preprocessing or for a 2D picture')],
@@ -194,7 +205,7 @@
     kicker: t('Zum Lernen · Module 2 und 3', 'For revision · Modules 2 and 3'),
     summary: t('Steckbriefe aller Modelle, Checklisten der Strategien und eine Entscheidungshilfe', 'Profiles of all models, strategy checklists and a decision guide'),
     html: `
-  <p>${t('Diese Seite fasst die Kapitel <a href="#ml">Supervised ML</a>, <a href="#klass">Klassifikation</a> und <a href="#unsup">Unsupervised</a> zum Lernen zusammen. Zu jedem Modell gibt es einen Steckbrief, zu jeder Strategie eine kurze Checkliste. Über «ausführlich →» kommst du zur Erklärung mit Demo.', 'This page summarises the chapters <a href="#ml">Supervised ML</a>, <a href="#klass">Classification</a> and <a href="#unsup">Unsupervised</a> for revision. Each model has a profile, each strategy a short checklist. “in detail →” takes you to the explanation with a demo.')}</p>
+  <p>${t('Diese Seite fasst die Kapitel <a href="#ml">Supervised ML</a>, <a href="#klass">Klassifikation</a> und <a href="#unsup">Unsupervised</a> zum Lernen zusammen. Zu jedem Modell gibt es einen Steckbrief, zu jeder Strategie eine kurze Checkliste. Über «ausführlich →» kommst du zur Erklärung mit Demo, über «Beispiele →» zu einem Notebook mit lauffähigem Code (braucht Jupyter, siehe Notebook-Seite).', 'This page summarises the chapters <a href="#ml">Supervised ML</a>, <a href="#klass">Classification</a> and <a href="#unsup">Unsupervised</a> for revision. Each model has a profile, each strategy a short checklist. “in detail →” takes you to the explanation with a demo, “Examples →” to a notebook with runnable code (needs Jupyter, see the notebook page).')}</p>
 
   <h3 id="ue-wahl">${t('Welches Modell wann?', 'Which model when?')}</h3>
   <div class="ue-tree">
@@ -262,51 +273,52 @@
       <li>${t('Kategorien in Zahlen: <code>OneHotEncoder</code>', 'Categories into numbers: <code>OneHotEncoder</code>')}</li>
       <li>${t('Skalieren: <code>StandardScaler</code> (Mittel 0, Streuung 1)', 'Scaling: <code>StandardScaler</code> (mean 0, spread 1)')}</li>
       <li>${t('Alles nur auf den Trainingsdaten lernen (<code>fit</code>), auf Test nur anwenden', 'Learn everything on the training data only (<code>fit</code>), only apply it to test')}</li>
-    </ul><div class="sb-f"><a href="#ml-prep">${MEHR}</a></div></div>
+    </ul><div class="sb-f"><a href="#ml-prep">${MEHR}</a> ${bsp('06_Strategien')}</div></div>
     <div class="sb"><h4>Train, Validation, Test</h4><ul>
       <li>${t('Test-Set zuerst abtrennen und erst ganz am Schluss einmal benutzen', 'Split off the test set first and use it only once, at the very end')}</li>
       <li>${t('Modelle und Hyperparameter auf der Validierung vergleichen', 'Compare models and hyperparameters on the validation set')}</li>
       <li>${t('Cross-Validation: k Läufe mit wechselndem Validierungsteil, Mittelwert ist stabiler', 'Cross-Validation: k runs with a changing validation part, the mean is more stable')}</li>
       <li>${t('Bei Klassifikation <code>stratify=y</code>, damit die Klassenanteile gleich bleiben', 'For classification <code>stratify=y</code>, so the class proportions stay the same')}</li>
-    </ul><div class="sb-f"><a href="#ml-split">${MEHR}</a></div></div>
+    </ul><div class="sb-f"><a href="#ml-split">${MEHR}</a> ${bsp('06_Strategien')}</div></div>
     <div class="sb"><h4>Feature Selection</h4><ul>
       <li>${t('<b>Filter:</b> Merkmale nach Statistik oder Korrelation bewerten', '<b>Filter:</b> rate features by statistics or correlation')}</li>
       <li>${t('<b>Wrapper:</b> Modell mit verschiedenen Merkmals-Sets trainieren (z. B. RFE)', '<b>Wrapper:</b> train the model with different feature sets (e.g. RFE)')}</li>
       <li>${t('<b>Embedded:</b> das Modell wählt selbst (Lasso, Wichtigkeit im Random Forest)', '<b>Embedded:</b> the model chooses itself (Lasso, importance in the Random Forest)')}</li>
-    </ul><div class="sb-f"><a href="#ml-fs">${MEHR}</a></div></div>
+    </ul><div class="sb-f"><a href="#ml-fs">${MEHR}</a> ${bsp('06_Strategien')}</div></div>
     <div class="sb"><h4>${t('Under- und Overfitting erkennen', 'Spotting underfitting and overfitting')}</h4><ul>
       <li>${t('<b>Underfitting</b> (hoher Bias): Train und Validierung beide schlecht → komplexeres Modell, mehr Merkmale, weniger Regularisierung', '<b>Underfitting</b> (high bias): train and validation both poor → more complex model, more features, less regularisation')}</li>
       <li>${t('<b>Overfitting</b> (hohe Variance): Train gut, Validierung schlecht → einfacheres Modell, mehr Daten, mehr Regularisierung', '<b>Overfitting</b> (high variance): train good, validation poor → simpler model, more data, more regularisation')}</li>
-    </ul><div class="sb-f"><a href="#ml-bv">${MEHR}</a></div></div>
+    </ul><div class="sb-f"><a href="#ml-bv">${MEHR}</a> ${bsp('06_Strategien')}</div></div>
     <div class="sb"><h4>${t('Regularisierung', 'Regularisation')}</h4><ul>
       <li>${t('Strafe für grosse Gewichte gegen Overfitting', 'Penalty on large weights against overfitting')}</li>
       <li>${t('L2 (Ridge) schrumpft, L1 (Lasso) setzt auf 0', 'L2 (Ridge) shrinks, L1 (Lasso) sets to 0')}</li>
       <li>${t('Stärke über <code>alpha</code>, bei der logistischen Regression über <code>C</code> (umgekehrt: kleines C = starke Strafe)', 'Strength via <code>alpha</code>, for logistic regression via <code>C</code> (reversed: small C = strong penalty)')}</li>
-    </ul><div class="sb-f"><a href="#ml-reg">${MEHR}</a></div></div>
+    </ul><div class="sb-f"><a href="#ml-reg">${MEHR}</a> ${bsp('06_Strategien')}</div></div>
     <div class="sb"><h4>${t('Hyperparameter suchen', 'Searching hyperparameters')}</h4><ul>
       <li>${t('Hyperparameter stellst du ein, Gewichte lernt das Modell', 'You set the hyperparameters, the model learns the weights')}</li>
       <li>${t('<code>GridSearchCV</code> probiert alle Kombinationen mit Cross-Validation', '<code>GridSearchCV</code> tries all combinations with Cross-Validation')}</li>
       <li>${t('Danach mit den besten Werten einmal auf dem Test-Set prüfen', 'Then check once on the test set with the best values')}</li>
-    </ul><div class="sb-f"><a href="#ml-hp">${MEHR}</a></div></div>
+    </ul><div class="sb-f"><a href="#ml-hp">${MEHR}</a> ${bsp('06_Strategien')}</div></div>
     <div class="sb"><h4>${t('Metriken', 'Metrics')}</h4><ul>
       <li>${t('<b>Regression:</b> MAE (mittlerer Fehler), RMSE (bestraft grosse Fehler), R² (Anteil erklärter Streuung)', '<b>Regression:</b> MAE (mean error), RMSE (penalises large errors), R² (share of explained spread)')}</li>
       <li>${t('<b>Klassifikation:</b> Confusion Matrix, Accuracy, Precision (wie oft stimmt «positiv»?), Recall (wie viele Positive gefunden?), F1, ROC/AUC', '<b>Classification:</b> confusion matrix, accuracy, precision (how often is “positive” right?), recall (how many positives found?), F1, ROC/AUC')}</li>
       <li>${t('<b>Clustering:</b> Inertia (Elbow), Silhouette (−1 bis 1, höher = besser getrennt), danach Cluster inhaltlich deuten', '<b>Clustering:</b> inertia (elbow), silhouette (−1 to 1, higher = better separated), then interpret the clusters by content')}</li>
-    </ul><div class="sb-f"><a href="#klass-metriken">${MEHR}</a></div></div>
+    </ul><div class="sb-f"><a href="#klass-metriken">${MEHR}</a> ${bsp('06_Strategien')}</div></div>
     <div class="sb"><h4>${t('Unausgewogene Klassen', 'Imbalanced classes')}</h4><ul>
       <li>${t('Nicht Accuracy anschauen, sondern Precision, Recall, F1', 'Do not look at accuracy, but at precision, recall, F1')}</li>
       <li>${t('Einfachste Lösung: <code>class_weight="balanced"</code>', 'Simplest solution: <code>class_weight="balanced"</code>')}</li>
       <li>${t('Sonst Down- oder Upsampling, SMOTE', 'Otherwise downsampling or upsampling, SMOTE')}</li>
       <li>${t('Resampling nur auf den Trainingsdaten', 'Resampling only on the training data')}</li>
       <li>${t('Schwelle an die Kosten von falschem Alarm und verpassten Fällen anpassen', 'Adjust the threshold to the cost of false alarms and missed cases')}</li>
-    </ul><div class="sb-f"><a href="#klass">${MEHR}</a></div></div>
+    </ul><div class="sb-f"><a href="#klass">${MEHR}</a> ${bsp('06_Strategien')}</div></div>
     <div class="sb"><h4>${t('Data Leakage vermeiden', 'Avoiding data leakage')}</h4><ul>
       <li>${t('Keine Information aus dem Test-Set ins Training lassen', 'Let no information from the test set into training')}</li>
       <li>${t('Skalieren, Ergänzen und Auswählen erst nach dem Split, nur mit Trainingsdaten', 'Scale, fill in and select only after the split, using training data only')}</li>
       <li>${t('Am sichersten: alle Schritte in eine <code>Pipeline</code>, dann macht Cross-Validation es automatisch richtig', 'Safest: put all steps in a <code>Pipeline</code>, then Cross-Validation does it right automatically')}</li>
       <li>${t('Merkmale, die die Antwort schon verraten, entfernen', 'Remove features that already give away the answer')}</li>
-    </ul><div class="sb-f"><a href="#klass-leakage">${MEHR}</a></div></div>
+    </ul><div class="sb-f"><a href="#klass-leakage">${MEHR}</a> ${bsp('06_Strategien')}</div></div>
   </div>
+  <p class="note">${t('Alles zusammen an einem echten Datensatz: <a href="notebook.html?nb=beispiele/07_Titanic.ipynb">Titanic-Notebook</a> (einfaches Modell und Random Forest, mit EDA und Feature Engineering), dazu die Seite <a href="titanic.html">Titanic in der Lernapp</a>.', 'Everything together on a real dataset: <a href="notebook.html?nb=beispiele/07_Titanic.ipynb">Titanic notebook</a> (simple model and random forest, with EDA and feature engineering), plus the page <a href="titanic.html">Titanic in the study app</a>.')}</p>
   <div class="falle">${t('<b>Falle</b><p>Das Test-Set mehrfach zum Vergleichen benutzen. Dann wird es zur zweiten Validierung, und die Endzahl ist zu optimistisch.</p>', '<b>Pitfall</b><p>Using the test set several times for comparisons. It then becomes a second validation set, and the final number is too optimistic.</p>')}</div>
 `,
     quiz: [
