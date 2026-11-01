@@ -1,0 +1,20 @@
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = [".venv", "node_modules", "*.ipynb"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "W"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-m 'not slow' --strict-markers"
+markers = ["slow: runs every example notebook end to end (about two minutes; Titanic needs the internet without a local data file)"]
+
+[tool.pyright]
+include = ["server.py", "tools", "tests"]
+exclude = [".venv", "**/node_modules"]
+pythonVersion = "3.12"
+venvPath = "."
+venv = ".venv"

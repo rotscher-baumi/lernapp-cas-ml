@@ -1,4 +1,5 @@
 """Static server for the Lernapp with a small JSON persistence endpoint (stdlib only)."""
+
 import importlib.util
 import json
 import logging
@@ -47,9 +48,18 @@ def start_jupyter() -> str:
         python = jupyter_python()
         if python == sys.executable and importlib.util.find_spec("jupyterlab") is None:
             return "missing"
-        cmd = [python, "-m", "jupyterlab", "--no-browser", f"--ip={JUPYTER_ADDR[0]}",
-               f"--port={JUPYTER_ADDR[1]}", "--port-retries=0", f"--ServerApp.root_dir={ROOT}",
-               f"--ServerApp.base_url={JUPYTER_PREFIX}", f"--IdentityProvider.token={JUPYTER_TOKEN}"]
+        cmd = [
+            python,
+            "-m",
+            "jupyterlab",
+            "--no-browser",
+            f"--ip={JUPYTER_ADDR[0]}",
+            f"--port={JUPYTER_ADDR[1]}",
+            "--port-retries=0",
+            f"--ServerApp.root_dir={ROOT}",
+            f"--ServerApp.base_url={JUPYTER_PREFIX}",
+            f"--IdentityProvider.token={JUPYTER_TOKEN}",
+        ]
         JUPYTER_LOG.parent.mkdir(exist_ok=True)
         log = open(JUPYTER_LOG, "ab")
         if os.name == "nt":
