@@ -22,6 +22,7 @@ lernapp/
     en/             englische Texte je Kapitel
     _vorlage.js     Vorlage für ein neues Kapitel
   notebooks/        Übungs-Notebooks (Jupyter / VS Code)
+    beispiele/      Beispiel-Notebooks zu allen Modellen und Strategien (01 bis 07)
   docs/             Architektur, PlantUML-Diagramme, Design-Dokument
 ```
 
@@ -38,6 +39,12 @@ Die Kapitel sind JavaScript-Dateien (mit dem HTML als Text), weil Browser beim �
 ## Notebooks
 
 Die Übungs-Notebooks liegen in `notebooks/`. Sie brauchen `pandas`, `numpy`, `matplotlib` und `scikit-learn`. Das Notebook `Fehlende_Werte_Imputation.ipynb` zeigt separat, wie fehlende Werte ohne Data Leakage anhand der Trainingsmediane ergänzt werden. Die Kursunterlagen in den Modulordnern werden nicht verändert.
+
+### Beispiel-Notebooks
+
+`notebooks/beispiele/` hat ein eigenständiges Notebook pro Thema der Übersicht: `01_Regression`, `02_Klassifikation`, `03_Ensembles`, `04_Clustering_Anomalien`, `05_Dimensionsreduktion`, `06_Strategien` und `07_Titanic` (der ganze Ablauf an einem echten Datensatz, derselbe Code wie auf `titanic.html`). Jedes lädt seine Daten selbst (scikit-learn-Datensätze oder erzeugte Daten, nur Titanic nimmt `../../../titanic/data.csv`, falls vorhanden, sonst die öffentliche Kaggle-Kopie aus dem Netz) und hängt von keinem anderen ab. Die Steckbriefe der Übersicht verlinken mit «Beispiele →» darauf, `notebook.html?nb=beispiele/01_Regression.ipynb` öffnet ein Notebook direkt.
+
+**Auf einem anderen PC:** Repo klonen, dann im Lernapp-Ordner `python -m venv .venv`, `.venv\Scripts\pip install -r requirements.txt`, `python server.py`. Der Knopf «Jupyter starten» nimmt automatisch das Python aus `.venv`. Ohne Installation geht es im Browser mit Google Colab: Jedes Beispiel-Notebook hat oben den Link «In Colab öffnen» (Repo ist privat, beim ersten Mal mit GitHub anmelden und «Include private repos» anhaken). Die Setup-Zelle installiert dort `umap-learn` und `imbalanced-learn` bei Bedarf selbst.
 
 ### Übungen in der App und im Notebook
 
@@ -91,3 +98,5 @@ Ein Thema kann zusätzlich eigene Seiten haben, z. B. `mathe-kompakt.html` (Spic
 ## Mit Server (Eingaben dauerhaft speichern)
 
 `python server.py` startet die App auf http://localhost:8765. Eingaben (Übungscode) werden zusätzlich in `data/state.json` gespeichert (nicht in git). Ohne Server speichert die App nur im Browser (localStorage).
+
+Das Übungs-Notebook (`notebook.html`) braucht JupyterLab hinter `/jupyter/` auf Port 8899. Läuft es nicht, startet der Knopf «Jupyter starten» es über den Server (`POST /api/jupyter/start`, nur von 127.0.0.1). Der Server nimmt dafür das Python aus `.venv` im Lernapp-Ordner (sonst sein eigenes) und den Lernapp-Ordner als Startordner; das Log landet in `data/jupyter.log`. Jupyter läuft danach unabhängig weiter, auch wenn der Server neu startet. Beenden mit `jupyter server stop 8899`.
