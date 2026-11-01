@@ -28,6 +28,160 @@
 
   <p class="note">Voraussetzung: Das Kapitel «Mathe-Grundlagen» erklärt, was eine Ableitung und der Gradient sind. Hier geht es direkt los mit dem Lernen.</p>
 
+  <h3 id="ml-ablauf">Der ganze Ablauf auf einen Blick</h3>
+  <p>Vor jedem Modell steht die explorative Datenanalyse (EDA). Sie zeigt, welche Vorverarbeitung nötig ist und welches Modell sinnvoll ist.</p>
+  <p class="hint">Klicke auf einen Schritt in der Grafik: Darunter klappt die Erklärung auf, mit Links zu den passenden Stellen im Kapitel.</p>
+  <figure class="fig ab-fig">
+    <div class="ab-scroll">
+    <svg viewBox="-50 0 830 774" role="img" aria-label="Ablauf eines ML-Projekts: Rohdaten, Split 80/20, EDA auf den Trainingsdaten, Merkmalsauswahl, Vorverarbeitung und Skalierung nur auf Trainingsdaten berechnen, Training und Validierung mit Schleife über Hyperparameter, bestes Modell wählen, Testdaten genau einmal am Ende.">
+      <defs>
+        <marker id="ab-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" style="fill:var(--line)"/>
+        </marker>
+        <marker id="ab-al" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" style="fill:var(--warn)"/>
+        </marker>
+      </defs>
+
+      <g class="ab-step" data-s="1" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 1: Erklärung aufklappen">
+      <rect x="60" y="20" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="42" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">1 · Rohdaten laden</text>
+      <text x="210" y="60" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Zeilen, Spalten, Datentypen prüfen</text>
+      </g>
+      <line x1="210" y1="72" x2="210" y2="104" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+
+      <g class="ab-step" data-s="2" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 2: Erklärung aufklappen">
+      <rect x="60" y="104" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="126" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">2 · Aufteilen</text>
+      <text x="210" y="144" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">zuerst trennen, bevor man etwas auswertet</text>
+      </g>
+      <line x1="360" y1="130" x2="440" y2="130" marker-end="url(#ab-al)" style="stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4;fill:none"/>
+      <text x="400" y="122" text-anchor="middle" style="fill:var(--warn);font-size:11.5px;font-family:var(--f-mono)">20 %</text>
+      <g class="ab-step" data-s="t" tabindex="0" role="button" aria-expanded="false" aria-label="Testset: Erklärung aufklappen">
+      <rect x="440" y="104" width="240" height="52" rx="6" style="fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4"/>
+      <text x="560" y="126" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body);fill:var(--warn)">Testset: gesperrt</text>
+      <text x="560" y="144" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">nicht ansehen, nicht anfassen</text>
+      </g>
+      <path d="M680,130 H745 V742 H360" marker-end="url(#ab-al)" style="stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4;fill:none"/>
+
+      <line x1="210" y1="156" x2="210" y2="188" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <text x="222" y="177" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">80 % Train + Val</text>
+
+      <g class="ab-step" data-s="3" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 3: Erklärung aufklappen">
+      <rect x="60" y="188" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="210" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">3 · Daten ansehen (EDA)</text>
+      <text x="210" y="228" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">nur auf den 80 %, ohne Modell</text>
+      </g>
+      <line x1="360" y1="214" x2="410" y2="214" marker-end="url(#ab-a)" style="stroke:var(--accent);stroke-width:1.5;fill:none"/>
+
+      <rect x="410" y="168" width="300" height="130" rx="8" style="fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 4"/>
+      <text x="424" y="188" style="fill:var(--accent);font-size:12px;font-weight:600;font-family:var(--f-body)">Was man dabei sucht</text>
+
+      <g transform="translate(428,200)">
+        <rect x="0" y="34" width="9" height="12" style="fill:var(--accent)"/>
+        <rect x="11" y="20" width="9" height="26" style="fill:var(--accent)"/>
+        <rect x="22" y="4" width="9" height="42" style="fill:var(--accent)"/>
+        <rect x="33" y="14" width="9" height="32" style="fill:var(--accent)"/>
+        <rect x="44" y="30" width="9" height="16" style="fill:var(--accent)"/>
+        <rect x="55" y="42" width="9" height="4" style="fill:var(--accent)"/>
+        <line x1="0" y1="46.5" x2="66" y2="46.5" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      </g>
+      <text x="461" y="268" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Verteilungen</text>
+      <text x="461" y="283" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Ausreisser</text>
+
+      <g transform="translate(538,200)">
+        <line x1="0" y1="46.5" x2="66" y2="46.5" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+        <line x1="0.5" y1="0" x2="0.5" y2="46" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+        <circle cx="10" cy="38" r="2.5" style="fill:var(--accent)"/><circle cx="18" cy="32" r="2.5" style="fill:var(--accent)"/>
+        <circle cx="26" cy="35" r="2.5" style="fill:var(--accent)"/><circle cx="32" cy="24" r="2.5" style="fill:var(--accent)"/>
+        <circle cx="42" cy="20" r="2.5" style="fill:var(--accent)"/><circle cx="48" cy="26" r="2.5" style="fill:var(--accent)"/>
+        <circle cx="56" cy="10" r="2.5" style="fill:var(--accent)"/><circle cx="62" cy="14" r="2.5" style="fill:var(--accent)"/>
+      </g>
+      <text x="571" y="268" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Zusammenhang</text>
+      <text x="571" y="283" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Merkmal ↔ Ziel</text>
+
+      <g transform="translate(648,200)">
+        <rect x="0" y="0" width="20" height="14" opacity="1" style="fill:var(--accent)"/>
+        <rect x="22" y="0" width="20" height="14" opacity="0.2" style="fill:var(--accent)"/>
+        <rect x="44" y="0" width="20" height="14" opacity="0.75" style="fill:var(--accent)"/>
+        <rect x="0" y="16" width="20" height="14" opacity="0.2" style="fill:var(--accent)"/>
+        <rect x="22" y="16" width="20" height="14" opacity="1" style="fill:var(--accent)"/>
+        <rect x="44" y="16" width="20" height="14" opacity="0.35" style="fill:var(--accent)"/>
+        <rect x="0" y="32" width="20" height="14" opacity="0.75" style="fill:var(--accent)"/>
+        <rect x="22" y="32" width="20" height="14" opacity="0.35" style="fill:var(--accent)"/>
+        <rect x="44" y="32" width="20" height="14" opacity="1" style="fill:var(--accent)"/>
+      </g>
+      <text x="680" y="268" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Korrelationen</text>
+      <text x="680" y="283" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Fehlende Werte</text>
+
+      <line x1="210" y1="240" x2="210" y2="300" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <text x="222" y="274" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">daraus folgt die Strategie</text>
+
+      <g class="ab-step" data-s="4" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 4: Erklärung aufklappen">
+      <rect x="60" y="300" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="322" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">4 · Merkmale auswählen</text>
+      <text x="210" y="340" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">nur Train, am besten in der CV-Pipeline</text>
+      </g>
+      <line x1="210" y1="352" x2="210" y2="384" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+
+      <line x1="360" y1="326" x2="410" y2="326" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <rect x="410" y="308" width="300" height="94" rx="8" style="fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 4;stroke:var(--line)"/>
+      <text x="424" y="328" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Filter</text>
+      <text x="494" y="328" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Varianz, Korrelation mit Ziel</text>
+      <text x="424" y="350" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Wrapper</text>
+      <text x="494" y="350" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">RFE: Modell wirft Merkmale raus</text>
+      <text x="424" y="372" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Embedded</text>
+      <text x="494" y="372" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">L1 (Lasso), Baum-Wichtigkeit</text>
+      <text x="424" y="392" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">auch: Merkmale zusammenfassen/neu bilden</text>
+
+      <g class="ab-step" data-s="5" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 5: Erklärung aufklappen">
+      <rect x="60" y="384" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="406" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">5 · Vorverarbeitung festlegen</text>
+      <text x="210" y="424" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">z. B. Median nur aus Trainingsdaten (fit)</text>
+      </g>
+      <line x1="210" y1="436" x2="210" y2="468" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+
+      <g class="ab-step" data-s="6" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 6: Erklärung aufklappen">
+      <rect x="60" y="468" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="490" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">6 · Skalieren</text>
+      <text x="210" y="508" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Skaler ebenfalls nur auf Training anpassen</text>
+      </g>
+      <line x1="210" y1="520" x2="210" y2="552" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+
+      <g class="ab-step" data-s="7" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 7: Erklärung aufklappen">
+      <rect x="60" y="552" width="300" height="60" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="575" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">7 · Trainieren und validieren</text>
+      <text x="210" y="593" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Split 75:25 oder Cross-Validation</text>
+      </g>
+      <path d="M60,596 H34 V568 H60" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <text x="26" y="582" text-anchor="end" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">Hyper-</text>
+      <text x="26" y="596" text-anchor="end" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">parameter</text>
+      <line x1="210" y1="612" x2="210" y2="644" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+
+      <g class="ab-step" data-s="8" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 8: Erklärung aufklappen">
+      <rect x="60" y="644" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="666" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">8 · Bestes Modell wählen</text>
+      <text x="210" y="684" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">anhand der Validierung, neu auf 80 % trainieren</text>
+      </g>
+      <line x1="210" y1="696" x2="210" y2="722" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+
+      <g class="ab-step" data-s="9" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 9: Erklärung aufklappen">
+      <rect x="60" y="722" width="300" height="40" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="747" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">9 · Einmal auf Testset bewerten</text>
+      </g>
+      <text x="738" y="732" text-anchor="end" style="fill:var(--warn);font-size:11.5px;font-family:var(--f-mono)">transform mit Train-Median und Train-Skaler</text>
+    </svg>
+    </div>
+    <div class="ab-detail" id="abDetail" role="region" aria-live="polite" hidden>
+      <div class="ab-dh"><b></b><button type="button" class="ab-x" aria-label="Schliessen">✕</button></div>
+      <div class="ab-db"></div>
+      <div class="ab-dl"></div>
+    </div>
+    <figcaption>Die EDA (blau) kommt vor Vorverarbeitung und Modell. Das Testset (orange) wird gleich zu Beginn abgetrennt und erst im letzten Schritt benutzt, damit das Testergebnis nicht durch Wissen aus den Testdaten verfälscht wird.</figcaption>
+  </figure>
+  <div class="merk"><b>Erst Daten anschauen</b><p>Ohne EDA weiss man nicht, ob Werte fehlen, ob Ausreisser Median oder Mittelwert verzerren, ob skaliert werden muss oder ob die Klassen ungleich verteilt sind. Die EDA bestimmt Schritt 4 bis 7.</p></div>
+  <div class="falle"><b>Data Leakage</b><p>Auch die EDA nur auf den 80 % machen. Merkmalsauswahl, Median und Skaler werden wie das Modell nur mit den Trainingsdaten berechnet, am sichersten innerhalb jedes Cross-Validation-Durchgangs. Sonst fliesst Testwissen ein und die Validierung ist zu optimistisch.</p></div>
+
   <h3 id="ml-gd">1 · Gradient Descent: so «lernt» ein Modell</h3>
   <p>Stell dir einen Nebel auf einem Berg vor. Du willst ins Tal, siehst aber nur, wie steil der Boden unter deinen Füssen ist. Also gehst du immer ein Stück bergab. Genau das macht der Algorithmus.</p>
   <pre><code>x_neu = x_alt - lernrate * steigung_bei(x_alt)</code></pre>
@@ -239,162 +393,7 @@ search = GridSearchCV(pipe, grid, cv=5, n_jobs=-1)
 search.fit(X_trainval, y_trainval)
 search.best_params_, search.best_estimator_</code></pre>
   <p>Der Name vor dem doppelten Unterstrich (<code>lasso__alpha</code>) ist der Name des Schritts in der Pipeline.</p>
-  <p class="note"><b>Mit den 10 Wohnungen:</b> Hyperparameter sind hier der Polynomgrad (1 bis 9) und bei Ridge/Lasso das alpha. Du probierst jede Einstellung aus, misst jeweils den Fehler bei fehlender Wohnung (Cross-Validation) und nimmst die beste. Beim Polynomgrad gewinnt Grad 1 (123 CHF), nicht Grad 9 (Training 0 CHF, aber mehrere 100 000 bei fehlender Wohnung). Bei echten Daten bliebe zusätzlich ein Test-Set bis zum Schluss unberührt, bei nur 10 Wohnungen verzichten wir darauf.</p>
-
-
-  <h3 id="ml-ablauf">Der ganze Ablauf auf einen Blick</h3>
-  <p>Vor jedem Modell steht die explorative Datenanalyse (EDA). Sie zeigt, welche Vorverarbeitung nötig ist und welches Modell sinnvoll ist.</p>
-  <p class="hint">Klicke auf einen Schritt in der Grafik: Darunter klappt die Erklärung auf, mit Links zu den passenden Stellen im Kapitel.</p>
-  <figure class="fig ab-fig">
-    <div class="ab-scroll">
-    <svg viewBox="-50 0 830 774" role="img" aria-label="Ablauf eines ML-Projekts: Rohdaten, Split 80/20, EDA auf den Trainingsdaten, Merkmalsauswahl, Vorverarbeitung und Skalierung nur auf Trainingsdaten berechnen, Training und Validierung mit Schleife über Hyperparameter, bestes Modell wählen, Testdaten genau einmal am Ende.">
-      <defs>
-        <marker id="ab-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-          <path d="M0,0 L10,5 L0,10 z" style="fill:var(--line)"/>
-        </marker>
-        <marker id="ab-al" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-          <path d="M0,0 L10,5 L0,10 z" style="fill:var(--warn)"/>
-        </marker>
-      </defs>
-
-      <g class="ab-step" data-s="1" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 1: Erklärung aufklappen">
-      <rect x="60" y="20" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="42" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">1 · Rohdaten laden</text>
-      <text x="210" y="60" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Zeilen, Spalten, Datentypen prüfen</text>
-      </g>
-      <line x1="210" y1="72" x2="210" y2="104" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-
-      <g class="ab-step" data-s="2" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 2: Erklärung aufklappen">
-      <rect x="60" y="104" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="126" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">2 · Aufteilen</text>
-      <text x="210" y="144" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">zuerst trennen, bevor man etwas auswertet</text>
-      </g>
-      <line x1="360" y1="130" x2="440" y2="130" marker-end="url(#ab-al)" style="stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4;fill:none"/>
-      <text x="400" y="122" text-anchor="middle" style="fill:var(--warn);font-size:11.5px;font-family:var(--f-mono)">20 %</text>
-      <g class="ab-step" data-s="t" tabindex="0" role="button" aria-expanded="false" aria-label="Testset: Erklärung aufklappen">
-      <rect x="440" y="104" width="240" height="52" rx="6" style="fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4"/>
-      <text x="560" y="126" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body);fill:var(--warn)">Testset: gesperrt</text>
-      <text x="560" y="144" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">nicht ansehen, nicht anfassen</text>
-      </g>
-      <path d="M680,130 H745 V742 H360" marker-end="url(#ab-al)" style="stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4;fill:none"/>
-
-      <line x1="210" y1="156" x2="210" y2="188" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-      <text x="222" y="177" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">80 % Train + Val</text>
-
-      <g class="ab-step" data-s="3" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 3: Erklärung aufklappen">
-      <rect x="60" y="188" width="300" height="52" rx="6" style="fill:var(--accent-soft);stroke:var(--accent);stroke-width:2.5"/>
-      <text x="210" y="210" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">3 · Daten ansehen (EDA)</text>
-      <text x="210" y="228" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">nur auf den 80 %, ohne Modell</text>
-      </g>
-      <line x1="360" y1="214" x2="410" y2="214" marker-end="url(#ab-a)" style="stroke:var(--accent);stroke-width:1.5;fill:none"/>
-
-      <rect x="410" y="168" width="300" height="130" rx="8" style="fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 4"/>
-      <text x="424" y="188" style="fill:var(--accent);font-size:12px;font-weight:600;font-family:var(--f-body)">Was man dabei sucht</text>
-
-      <g transform="translate(428,200)">
-        <rect x="0" y="34" width="9" height="12" style="fill:var(--accent)"/>
-        <rect x="11" y="20" width="9" height="26" style="fill:var(--accent)"/>
-        <rect x="22" y="4" width="9" height="42" style="fill:var(--accent)"/>
-        <rect x="33" y="14" width="9" height="32" style="fill:var(--accent)"/>
-        <rect x="44" y="30" width="9" height="16" style="fill:var(--accent)"/>
-        <rect x="55" y="42" width="9" height="4" style="fill:var(--accent)"/>
-        <line x1="0" y1="46.5" x2="66" y2="46.5" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-      </g>
-      <text x="461" y="268" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Verteilungen</text>
-      <text x="461" y="283" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Ausreisser</text>
-
-      <g transform="translate(538,200)">
-        <line x1="0" y1="46.5" x2="66" y2="46.5" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-        <line x1="0.5" y1="0" x2="0.5" y2="46" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-        <circle cx="10" cy="38" r="2.5" style="fill:var(--accent)"/><circle cx="18" cy="32" r="2.5" style="fill:var(--accent)"/>
-        <circle cx="26" cy="35" r="2.5" style="fill:var(--accent)"/><circle cx="32" cy="24" r="2.5" style="fill:var(--accent)"/>
-        <circle cx="42" cy="20" r="2.5" style="fill:var(--accent)"/><circle cx="48" cy="26" r="2.5" style="fill:var(--accent)"/>
-        <circle cx="56" cy="10" r="2.5" style="fill:var(--accent)"/><circle cx="62" cy="14" r="2.5" style="fill:var(--accent)"/>
-      </g>
-      <text x="571" y="268" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Zusammenhang</text>
-      <text x="571" y="283" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Merkmal ↔ Ziel</text>
-
-      <g transform="translate(648,200)">
-        <rect x="0" y="0" width="20" height="14" opacity="1" style="fill:var(--accent)"/>
-        <rect x="22" y="0" width="20" height="14" opacity="0.2" style="fill:var(--accent)"/>
-        <rect x="44" y="0" width="20" height="14" opacity="0.75" style="fill:var(--accent)"/>
-        <rect x="0" y="16" width="20" height="14" opacity="0.2" style="fill:var(--accent)"/>
-        <rect x="22" y="16" width="20" height="14" opacity="1" style="fill:var(--accent)"/>
-        <rect x="44" y="16" width="20" height="14" opacity="0.35" style="fill:var(--accent)"/>
-        <rect x="0" y="32" width="20" height="14" opacity="0.75" style="fill:var(--accent)"/>
-        <rect x="22" y="32" width="20" height="14" opacity="0.35" style="fill:var(--accent)"/>
-        <rect x="44" y="32" width="20" height="14" opacity="1" style="fill:var(--accent)"/>
-      </g>
-      <text x="680" y="268" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Korrelationen</text>
-      <text x="680" y="283" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Fehlende Werte</text>
-
-      <line x1="210" y1="240" x2="210" y2="300" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-      <text x="222" y="274" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">daraus folgt die Strategie</text>
-
-      <g class="ab-step" data-s="4" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 4: Erklärung aufklappen">
-      <rect x="60" y="300" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="322" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">4 · Merkmale auswählen</text>
-      <text x="210" y="340" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">nur Train, am besten in der CV-Pipeline</text>
-      </g>
-      <line x1="210" y1="352" x2="210" y2="384" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-
-      <line x1="360" y1="326" x2="410" y2="326" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-      <rect x="410" y="308" width="300" height="94" rx="8" style="fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 4;stroke:var(--line)"/>
-      <text x="424" y="328" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Filter</text>
-      <text x="494" y="328" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Varianz, Korrelation mit Ziel</text>
-      <text x="424" y="350" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Wrapper</text>
-      <text x="494" y="350" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">RFE: Modell wirft Merkmale raus</text>
-      <text x="424" y="372" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Embedded</text>
-      <text x="494" y="372" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">L1 (Lasso), Baum-Wichtigkeit</text>
-      <text x="424" y="392" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">auch: Merkmale zusammenfassen/neu bilden</text>
-
-      <g class="ab-step" data-s="5" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 5: Erklärung aufklappen">
-      <rect x="60" y="384" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="406" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">5 · Vorverarbeitung festlegen</text>
-      <text x="210" y="424" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">z. B. Median nur aus Trainingsdaten (fit)</text>
-      </g>
-      <line x1="210" y1="436" x2="210" y2="468" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-
-      <g class="ab-step" data-s="6" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 6: Erklärung aufklappen">
-      <rect x="60" y="468" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="490" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">6 · Skalieren</text>
-      <text x="210" y="508" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Skaler ebenfalls nur auf Training anpassen</text>
-      </g>
-      <line x1="210" y1="520" x2="210" y2="552" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-
-      <g class="ab-step" data-s="7" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 7: Erklärung aufklappen">
-      <rect x="60" y="552" width="300" height="60" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="575" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">7 · Trainieren und validieren</text>
-      <text x="210" y="593" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Split 75:25 oder Cross-Validation</text>
-      </g>
-      <path d="M60,596 H34 V568 H60" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-      <text x="26" y="582" text-anchor="end" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">Hyper-</text>
-      <text x="26" y="596" text-anchor="end" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">parameter</text>
-      <line x1="210" y1="612" x2="210" y2="644" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-
-      <g class="ab-step" data-s="8" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 8: Erklärung aufklappen">
-      <rect x="60" y="644" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="666" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">8 · Bestes Modell wählen</text>
-      <text x="210" y="684" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">anhand der Validierung, neu auf 80 % trainieren</text>
-      </g>
-      <line x1="210" y1="696" x2="210" y2="722" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-
-      <g class="ab-step" data-s="9" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 9: Erklärung aufklappen">
-      <rect x="60" y="722" width="300" height="40" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="747" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">9 · Einmal auf Testset bewerten</text>
-      </g>
-      <text x="738" y="732" text-anchor="end" style="fill:var(--warn);font-size:11.5px;font-family:var(--f-mono)">transform mit Train-Median und Train-Skaler</text>
-    </svg>
-    </div>
-    <div class="ab-detail" id="abDetail" role="region" aria-live="polite" hidden>
-      <div class="ab-dh"><b></b><button type="button" class="ab-x" aria-label="Schliessen">✕</button></div>
-      <div class="ab-db"></div>
-      <div class="ab-dl"></div>
-    </div>
-    <figcaption>Die EDA (blau) kommt vor Vorverarbeitung und Modell. Das Testset (orange) wird gleich zu Beginn abgetrennt und erst im letzten Schritt benutzt, damit das Testergebnis nicht durch Wissen aus den Testdaten verfälscht wird.</figcaption>
-  </figure>
-  <div class="merk"><b>Erst Daten anschauen</b><p>Ohne EDA weiss man nicht, ob Werte fehlen, ob Ausreisser Median oder Mittelwert verzerren, ob skaliert werden muss oder ob die Klassen ungleich verteilt sind. Die EDA bestimmt Schritt 4 bis 7.</p></div>
-  <div class="falle"><b>Data Leakage</b><p>Auch die EDA nur auf den 80 % machen. Merkmalsauswahl, Median und Skaler werden wie das Modell nur mit den Trainingsdaten berechnet, am sichersten innerhalb jedes Cross-Validation-Durchgangs. Sonst fliesst Testwissen ein und die Validierung ist zu optimistisch.</p></div>`,
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Hyperparameter sind hier der Polynomgrad (1 bis 9) und bei Ridge/Lasso das alpha. Du probierst jede Einstellung aus, misst jeweils den Fehler bei fehlender Wohnung (Cross-Validation) und nimmst die beste. Beim Polynomgrad gewinnt Grad 1 (123 CHF), nicht Grad 9 (Training 0 CHF, aber mehrere 100 000 bei fehlender Wohnung). Bei echten Daten bliebe zusätzlich ein Test-Set bis zum Schluss unberührt, bei nur 10 Wohnungen verzichten wir darauf.</p>`,
     nbExercises: 'Supervised_Learning_1_Uebungen_own.ipynb',
     notebooks: [
       { file: 'Fehlende_Werte_Imputation.ipynb', desc: `Mit Cross-Validation-Beispiel (4 Folds, Imputer pro Fold neu, finales Modell). Schritt-für-Schritt-Beispiel mit 10 Datensätzen, 4 Features und SimpleImputer: Median nur am Training lernen und dann auf Validation und Test anwenden.` },
