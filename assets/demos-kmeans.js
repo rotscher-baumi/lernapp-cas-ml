@@ -2,6 +2,7 @@
  * KMeansDemo.html(p) returns the markup, KMeansDemo.init(p) wires it; p is the id prefix, so several copies can live on one page. */
 (function () {
   const { $, fmt } = LernApp;
+  const t = LernApp.t;
 
   function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
   function gauss(r){let u=0,v=0;while(u===0)u=r();while(v===0)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
@@ -14,13 +15,13 @@
   function dot(x,y,c,rad){return '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(rad||3.5)+'" style="fill:'+c+';stroke:var(--fg);stroke-width:.8"/>'}
 
   const LBL='<span style="align-self:center;font-size:14px;min-width:5.5em">';
-  const DONE={gauss:'Klar getrennte, runde Haufen sind der Idealfall. Probiere «Neuer Start» mit «Zufällig»: Manchmal landen zwei Zentren im selben Haufen.',
-    circles:'Die Kreise sind verschieden gross. k-Means bevorzugt ähnlich grosse Cluster und schneidet darum oft durch den grossen Kreis.',
-    smiley:'Gesicht, Augen und Mund sind für dich klare Gruppen. k-Means zieht aber nur gerade Grenzen und zerschneidet den Ring.',
-    moons:'k-Means sucht runde Gruppen und trennt mit geraden Linien. Die Monde werden darum zerschnitten. Hier hilft DBSCAN.',
-    rings:'Beide Ringe haben dasselbe Zentrum. k-Means kann sie nicht trennen und schneidet sie wie eine Torte.',
-    uniform:'Es gibt keine echten Gruppen, trotzdem liefert k-Means k Cluster. Das Ergebnis allein beweist nicht, dass Gruppen existieren.',
-    draw:'Probiere «Neuer Start» oder eine andere Startmethode: Kommt dasselbe heraus?'};
+  const DONE={gauss:t('Klar getrennte, runde Haufen sind der Idealfall. Probiere «Neuer Start» mit «Zufällig»: Manchmal landen zwei Zentren im selben Haufen.','Clearly separated, round blobs are the ideal case. Try «New start» with «Random»: sometimes two centres land in the same blob.'),
+    circles:t('Die Kreise sind verschieden gross. k-Means bevorzugt ähnlich grosse Cluster und schneidet darum oft durch den grossen Kreis.','The circles differ in size. k-means prefers clusters of similar size and therefore often cuts through the big circle.'),
+    smiley:t('Gesicht, Augen und Mund sind für dich klare Gruppen. k-Means zieht aber nur gerade Grenzen und zerschneidet den Ring.','Face, eyes and mouth are clear groups to you. But k-means only draws straight borders and cuts the ring apart.'),
+    moons:t('k-Means sucht runde Gruppen und trennt mit geraden Linien. Die Monde werden darum zerschnitten. Hier hilft DBSCAN.','k-means looks for round groups and separates them with straight lines, so the moons get cut apart. DBSCAN helps here.'),
+    rings:t('Beide Ringe haben dasselbe Zentrum. k-Means kann sie nicht trennen und schneidet sie wie eine Torte.','Both rings share the same centre. k-means cannot separate them and slices them like a cake.'),
+    uniform:t('Es gibt keine echten Gruppen, trotzdem liefert k-Means k Cluster. Das Ergebnis allein beweist nicht, dass Gruppen existieren.','There are no real groups, yet k-means still returns k clusters. The result alone does not prove that groups exist.'),
+    draw:t('Probiere «Neuer Start» oder eine andere Startmethode: Kommt dasselbe heraus?','Try «New start» or another start method: do you get the same result?')};
 
   // Data lives in x ∈ [-1.4, 1.4], y ∈ [-1, 1] so distances look the same as on screen.
   function gen(s,r){const p=[],g=(cx,cy,sd,m)=>{for(let i=0;i<m;i++)p.push([cx+sd*gauss(r),cy+sd*gauss(r)])},
@@ -35,13 +36,13 @@
 
   window.KMeansDemo = {
     html: function (p) {
-      return `<p class="hint">Wähle die Form der Daten, k und wie die Startzentren gesetzt werden. «Bis fertig» lässt den Algorithmus laufen, bis sich nichts mehr ändert.</p>
-    <div class="btnrow" id="${p}Shape" role="group" aria-label="Datenform">${LBL}Daten</span><button data-v="gauss">3 Haufen</button><button data-v="circles">Gepackte Kreise</button><button data-v="smiley">Smiley</button><button data-v="moons">Monde</button><button data-v="rings">Ringe</button><button data-v="uniform">Gleichverteilt</button><button data-v="draw">Selber zeichnen</button></div>
-    <div class="btnrow" id="${p}Ks" role="group" aria-label="Anzahl Cluster k">${LBL}k</span><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button><button data-v="6">6</button></div>
-    <div class="btnrow" id="${p}Init" role="group" aria-label="Startmethode">${LBL}Start</span><button data-v="random">Zufällig</button><button data-v="far">Am weitesten weg</button><button data-v="pick">Selber setzen</button></div>
-    <svg class="plot" id="${p}Svg" viewBox="0 0 320 240" role="img" aria-label="Datenpunkte mit k-Means-Zentren; Hintergrund zeigt das nächste Zentrum"></svg>
-    <div class="btnrow"><button id="${p}Step">1 Schritt</button><button class="pri" id="${p}Run">Bis fertig</button><button id="${p}New">Neuer Start</button></div>
-    <div class="stats"><span>Schritt <b id="${p}N"></b></span><span>Als Nächstes <b id="${p}Nx"></b></span><span>WSS <b id="${p}W"></b></span></div>
+      return `<p class="hint">${t('Wähle die Form der Daten, k und wie die Startzentren gesetzt werden. «Bis fertig» lässt den Algorithmus laufen, bis sich nichts mehr ändert.','Choose the shape of the data, k and how the start centres are placed. «Run to end» lets the algorithm run until nothing changes any more.')}</p>
+    <div class="btnrow" id="${p}Shape" role="group" aria-label="${t('Datenform','Data shape')}">${LBL}${t('Daten','Data')}</span><button data-v="gauss">${t('3 Haufen','3 blobs')}</button><button data-v="circles">${t('Gepackte Kreise','Packed circles')}</button><button data-v="smiley">Smiley</button><button data-v="moons">${t('Monde','Moons')}</button><button data-v="rings">${t('Ringe','Rings')}</button><button data-v="uniform">${t('Gleichverteilt','Uniform')}</button><button data-v="draw">${t('Selber zeichnen','Draw yourself')}</button></div>
+    <div class="btnrow" id="${p}Ks" role="group" aria-label="${t('Anzahl Cluster k','Number of clusters k')}">${LBL}k</span><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button><button data-v="6">6</button></div>
+    <div class="btnrow" id="${p}Init" role="group" aria-label="${t('Startmethode','Start method')}">${LBL}Start</span><button data-v="random">${t('Zufällig','Random')}</button><button data-v="far">${t('Am weitesten weg','Farthest away')}</button><button data-v="pick">${t('Selber setzen','Place yourself')}</button></div>
+    <svg class="plot" id="${p}Svg" viewBox="0 0 320 240" role="img" aria-label="${t('Datenpunkte mit k-Means-Zentren; Hintergrund zeigt das nächste Zentrum','Data points with k-means centres; the background shows the nearest centre')}"></svg>
+    <div class="btnrow"><button id="${p}Step">${t('1 Schritt','1 step')}</button><button class="pri" id="${p}Run">${t('Bis fertig','Run to end')}</button><button id="${p}New">${t('Neuer Start','New start')}</button></div>
+    <div class="stats"><span>${t('Schritt','Step')} <b id="${p}N"></b></span><span>${t('Als Nächstes','Next')} <b id="${p}Nx"></b></span><span>WSS <b id="${p}W"></b></span></div>
     <p class="hint" id="${p}Msg"></p>`;
     },
     init: function (p) {
@@ -61,17 +62,17 @@
       function step(){note='';
         if(done){draw();return false}
         if(!ready){
-          if(picking)note='Setze zuerst die Startzentren: Klicke noch '+(k-cent.length)+'-mal ins Feld.';
-          else if(pts.length<k)note='Zeichne zuerst Punkte: mindestens '+k+'.';
+          if(picking)note=t('Setze zuerst die Startzentren: Klicke noch '+(k-cent.length)+'-mal ins Feld.','Place the start centres first: click '+(k-cent.length)+' more times in the field.');
+          else if(pts.length<k)note=t('Zeichne zuerst Punkte: mindestens '+k+'.','Draw points first: at least '+k+'.');
           else placeCentres();
           draw();return ready}
         if(next==='assign'){const ch=assign(pts,cent,lab);if(!ch&&n>0)done=true;else next='update'}
         else{update(pts,cent,lab);next='assign'}
         n++;draw();return !done}
-      function stop(){if(timer){clearInterval(timer);timer=null}el('Run').textContent='Bis fertig'}
+      function stop(){if(timer){clearInterval(timer);timer=null}el('Run').textContent=t('Bis fertig','Run to end')}
       function run(){if(timer){stop();return}
         if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches){for(let i=0;i<500&&step();i++);return}
-        if(!step())return;timer=setInterval(()=>{if(!step())stop()},400);el('Run').textContent='Stopp'}
+        if(!step())return;timer=setInterval(()=>{if(!step())stop()},400);el('Run').textContent=t('Stopp','Stop')}
       function cross(c,col){const x=sx(c),y=sy(c),d='M'+(x-8)+' '+y+'H'+(x+8)+'M'+x+' '+(y-8)+'V'+(y+8);
         return '<path d="'+d+'" style="stroke:'+col+';stroke-width:5;fill:none"/><path d="'+d+'" style="stroke:var(--fg);stroke-width:1.4;fill:none"/>'}
       function draw(){let s='';
@@ -82,15 +83,15 @@
         pts.forEach((q,i)=>{s+=dot(sx(q),sy(q),lab[i]<0?'var(--muted)':COL[lab[i]%COL.length],2.6)});
         cent.forEach((c,j)=>{s+=cross(c,COL[j%COL.length])});
         el('Svg').innerHTML=s;el('Svg').style.cursor=picking||(shape==='draw'&&n===0)?'crosshair':'';
-        el('N').textContent=n;el('Nx').textContent=!ready||done?'–':next==='assign'?'Zuordnen':'Zentren verschieben';
+        el('N').textContent=n;el('Nx').textContent=!ready||done?'–':next==='assign'?t('Zuordnen','Assign'):t('Zentren verschieben','Move centres');
         el('W').textContent=lab.length&&lab.every(l=>l>=0)?fmt(wss(pts,cent,lab),2):'–';
         el('Msg').textContent=note?note
-          :picking?'Klicke ins Feld, um die Startzentren zu setzen. Noch '+(k-cent.length)+'.'
-          :!ready?(pts.length?'Klicke weiter, um mehr Punkte zu sprühen. Dann «1 Schritt» oder «Bis fertig».':'Klicke ins Feld: Jeder Klick sprüht ein paar Punkte. Dann «1 Schritt» oder «Bis fertig».')
-          :done?'Fertig nach '+n+' Schritten: Die Zuordnung ändert sich nicht mehr. '+DONE[shape]
-          :n===0?'Startzentren gesetzt (Kreuze). Die Hintergrundfarbe zeigt, welches Zentrum am nächsten ist. Als Nächstes wird jeder Punkt dem nächsten Zentrum zugeordnet.'+(shape==='draw'?' Du kannst noch Punkte dazuklicken.':'')
-          :next==='update'?'Zugeordnet: Jeder Punkt hat die Farbe seines nächsten Zentrums. Als Nächstes wandert jedes Zentrum in die Mitte seiner Punkte.'
-          :'Verschoben: Jedes Zentrum sitzt jetzt im Mittelwert seiner Punkte. Als Nächstes werden die Punkte neu zugeordnet.'}
+          :picking?t('Klicke ins Feld, um die Startzentren zu setzen. Noch '+(k-cent.length)+'.','Click in the field to place the start centres. '+(k-cent.length)+' to go.')
+          :!ready?(pts.length?t('Klicke weiter, um mehr Punkte zu sprühen. Dann «1 Schritt» oder «Bis fertig».','Keep clicking to spray more points. Then «1 step» or «Run to end».'):t('Klicke ins Feld: Jeder Klick sprüht ein paar Punkte. Dann «1 Schritt» oder «Bis fertig».','Click in the field: each click sprays a few points. Then «1 step» or «Run to end».'))
+          :done?t('Fertig nach '+n+' Schritten: Die Zuordnung ändert sich nicht mehr. ','Done after '+n+' steps: the assignment no longer changes. ')+DONE[shape]
+          :n===0?t('Startzentren gesetzt (Kreuze). Die Hintergrundfarbe zeigt, welches Zentrum am nächsten ist. Als Nächstes wird jeder Punkt dem nächsten Zentrum zugeordnet.','Start centres placed (crosses). The background colour shows which centre is nearest. Next, every point is assigned to its nearest centre.')+(shape==='draw'?t(' Du kannst noch Punkte dazuklicken.',' You can still click to add points.'):'')
+          :next==='update'?t('Zugeordnet: Jeder Punkt hat die Farbe seines nächsten Zentrums. Als Nächstes wandert jedes Zentrum in die Mitte seiner Punkte.','Assigned: every point has the colour of its nearest centre. Next, every centre moves to the middle of its points.')
+          :t('Verschoben: Jedes Zentrum sitzt jetzt im Mittelwert seiner Punkte. Als Nächstes werden die Punkte neu zugeordnet.','Moved: every centre now sits at the mean of its points. Next, the points are assigned again.')}
       el('Svg').addEventListener('click',e=>{const b=el('Svg').getBoundingClientRect(),q=[((e.clientX-b.left)/b.width*W-160)/100,(120-(e.clientY-b.top)/b.height*H)/100];note='';
         if(picking){cent.push(q);if(cent.length>=k){picking=false;ready=true}draw()}
         else if(shape==='draw'&&n===0){for(let i=0;i<8;i++){pts.push([q[0]+0.07*gauss(Math.random),q[1]+0.07*gauss(Math.random)]);lab.push(-1)}draw()}});
