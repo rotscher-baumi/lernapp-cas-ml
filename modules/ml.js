@@ -141,18 +141,18 @@
       <g class="ab-step" data-s="7" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 7: Erklärung aufklappen">
       <rect x="60" y="552" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
       <text x="210" y="574" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">7 · Feature Selection (automatisch)</text>
-      <text x="210" y="592" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Filter, Wrapper, Embedded in der Pipeline</text>
+      <text x="210" y="592" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">optional · Filter, Wrapper, Embedded in der Pipeline</text>
       </g>
       <line x1="210" y1="604" x2="210" y2="636" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
       <line x1="360" y1="578" x2="410" y2="578" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
       <rect x="410" y="560" width="300" height="94" rx="8" style="fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 4;stroke:var(--line)"/>
       <text x="424" y="580" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Filter</text>
-      <text x="494" y="580" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Varianz, Korrelation mit Ziel</text>
+      <text x="494" y="580" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Korrelation oder F-Test mit Ziel</text>
       <text x="424" y="602" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Wrapper</text>
       <text x="494" y="602" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">RFE: Modell wirft Merkmale raus</text>
       <text x="424" y="624" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Embedded</text>
       <text x="494" y="624" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">L1 (Lasso), Baum-Wichtigkeit</text>
-      <text x="424" y="644" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">auch: Merkmale zusammenfassen/neu bilden</text>
+      <text x="424" y="644" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">nicht dasselbe: PCA bildet neue Merkmale</text>
 
       <g class="ab-step" data-s="8" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 8: Erklärung aufklappen">
       <rect x="60" y="636" width="300" height="60" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
@@ -185,64 +185,7 @@
     </div>
     <figcaption>Die EDA (blau) kommt vor Vorverarbeitung und Modell. Das Testset (orange) wird gleich zu Beginn abgetrennt und erst im letzten Schritt benutzt, damit das Testergebnis nicht durch Wissen aus den Testdaten verfälscht wird.</figcaption>
   </figure>
-  <div class="box" id="ml-titanic">
-    <h4>Komplettes Beispiel: Titanic in 10 Schritten</h4>
-    <p class="hint">Stark gekürzt. Die Nummern in den Kommentaren sind die Schritte der Grafik oben. Daten: Kaggle-Titanic (<code>train.csv</code>, 891 Passagiere, Ziel <code>Survived</code>). Ausgabe und Bilder stammen aus genau diesem Code (scikit-learn 1.9).</p>
-    <pre><code>import pandas as pd, matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.compose import make_column_transformer
-from sklearn.pipeline import make_pipeline
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, ConfusionMatrixDisplay
-
-# 1 · Rohdaten laden
-df = pd.read_csv(&quot;titanic/data.csv&quot;).dropna(subset=[&quot;Survived&quot;]).astype({&quot;Pclass&quot;: int, &quot;Survived&quot;: int})  # 1 leere Zeile
-print(df.shape, &quot;| fehlend:&quot;, df[[&quot;Age&quot;, &quot;Cabin&quot;, &quot;Embarked&quot;]].isna().sum().to_dict())
-
-# 2 · Aufteilen: Testset sofort wegsperren
-X, y = df.drop(columns=&quot;Survived&quot;), df[&quot;Survived&quot;]
-X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, stratify=y, random_state=0)
-
-# 3 · EDA, nur auf den Trainingsdaten
-eda = X_tr.assign(Survived=y_tr)
-fig, ax = plt.subplots(1, 2, figsize=(9, 3.2))
-eda.groupby([&quot;Pclass&quot;, &quot;Sex&quot;])[&quot;Survived&quot;].mean().unstack().plot.bar(ax=ax[0], rot=0, title=&quot;Überlebensrate nach Klasse und Geschlecht&quot;)
-eda[&quot;Age&quot;].plot.hist(bins=30, ax=ax[1], title=&quot;Alter (fehlt bei rund 20 %)&quot;)
-plt.show()
-
-# 4 · Feature Selection (manuell): ID, Name, Ticket und fast leere Cabin raus
-num, cat = [&quot;Age&quot;, &quot;Fare&quot;, &quot;SibSp&quot;, &quot;Parch&quot;], [&quot;Pclass&quot;, &quot;Sex&quot;, &quot;Embarked&quot;]
-
-# 5 + 6 · Vorverarbeitung und Skalieren, in der Pipeline nur auf Train gelernt
-prep = make_column_transformer(
-    (make_pipeline(SimpleImputer(strategy=&quot;median&quot;), StandardScaler()), num),
-    (make_pipeline(SimpleImputer(strategy=&quot;most_frequent&quot;), OneHotEncoder(handle_unknown=&quot;ignore&quot;)), cat))
-
-# 7 · Feature Selection (automatisch): L1 setzt unwichtige Gewichte auf 0
-model = make_pipeline(prep, LogisticRegression(l1_ratio=1, solver=&quot;liblinear&quot;))  # vor sklearn 1.8: penalty=&quot;l1&quot;
-
-# 8 + 9 · Mit 5-facher Cross-Validation trainieren und validieren, bestes C wählen
-search = GridSearchCV(model, {&quot;logisticregression__C&quot;: [0.01, 0.1, 1, 10]}, cv=5)
-search.fit(X_tr[num + cat], y_tr)
-print(&quot;bestes C:&quot;, search.best_params_[&quot;logisticregression__C&quot;], &quot;| CV-Accuracy:&quot;, round(search.best_score_, 3))
-coef = search.best_estimator_[-1].coef_[0]
-print(&quot;Merkmale mit Gewicht 0:&quot;, (coef == 0).sum(), &quot;von&quot;, len(coef))
-
-# 10 · Genau einmal auf dem Testset bewerten
-pred = search.predict(X_te[num + cat])
-print(&quot;Test-Accuracy:&quot;, round(accuracy_score(y_te, pred), 3))
-ConfusionMatrixDisplay.from_predictions(y_te, pred, display_labels=[&quot;gestorben&quot;, &quot;überlebt&quot;])
-plt.show()</code></pre>
-    <figure class="fig"><img src="assets/img/titanic-sup-1.png" alt="Balkendiagramm Überlebensrate nach Klasse und Geschlecht, Histogramm des Alters" loading="lazy"><figcaption>Schritt 3: Frauen und die 1. Klasse überlebten viel häufiger. Das Alter fehlt oft und ist schief verteilt, darum Median statt Mittelwert.</figcaption></figure>
-    <pre class="out">(891, 12) | fehlend: {&#x27;Age&#x27;: 177, &#x27;Cabin&#x27;: 687, &#x27;Embarked&#x27;: 2}
-bestes C: 1 | CV-Accuracy: 0.803
-Merkmale mit Gewicht 0: 3 von 12
-Test-Accuracy: 0.793</pre>
-    <figure class="fig"><img style="max-width:400px;margin:0 auto" src="assets/img/titanic-sup-2.png" alt="Confusion Matrix auf dem Testset" loading="lazy"><figcaption>Schritt 10: Confusion Matrix auf den 179 Testpassagieren. Die Test-Accuracy (0,79) liegt nahe an der CV-Schätzung (0,80): Das Modell ist nicht überangepasst.</figcaption></figure>
-    <p class="note">Was der Code bewusst weglässt: Feature Engineering (z. B. Familiengrösse, Titel aus dem Namen), andere Modelle vergleichen, Metriken neben Accuracy. Die ausführlichere Version mit Random Forest steht im Kapitel Klassifikation unter <a href="#klass-ablauf">Der ganze Ablauf (Titanic-Aufgabe)</a>.</p>
-  </div>
+  <p class="note"><b>Was du am Schluss kannst:</b> die Überlebenschance auf der Titanic in diesen 10 Schritten berechnen. Die Kurzversion steht <a href="#ml-titanic">am Ende des Kapitels</a>, das komplette Beispiel mit allen Erklärungen auf der eigenen Seite <a href="titanic.html">Titanic ausführlich</a>.</p>
   <div class="merk"><b>Erst Daten anschauen</b><p>Ohne EDA weiss man nicht, ob Werte fehlen, ob Ausreisser Median oder Mittelwert verzerren, ob skaliert werden muss oder ob die Klassen ungleich verteilt sind. Die EDA bestimmt Schritt 4 bis 8.</p></div>
   <div class="falle"><b>Data Leakage</b><p>Auch die EDA nur auf den 80 % machen. Merkmalsauswahl, Median und Skaler werden wie das Modell nur mit den Trainingsdaten berechnet, am sichersten innerhalb jedes Cross-Validation-Durchgangs. Sonst fliesst Testwissen ein und die Validierung ist zu optimistisch.</p></div>
 
@@ -469,6 +412,37 @@ search = GridSearchCV(pipe, grid, cv=5, n_jobs=-1)
 search.fit(X_trainval, y_trainval)
 search.best_params_, search.best_estimator_</code></pre>
   <p>Der Name vor dem doppelten Unterstrich (<code>lasso__alpha</code>) ist der Name des Schritts in der Pipeline.</p>
+
+  <h3 id="ml-titanic">9 · Zum Schluss: Titanic in 10 Schritten</h3>
+  <p>Alles aus diesem Kapitel zusammen, an einem echten Datensatz: Wer hat die Titanic überlebt? Die Nummern sind die Schritte der <a href="#ml-ablauf">Ablauf-Grafik</a>. Das Ziel ist eine Klasse (überlebt ja oder nein), darum steht hier die logistische Regression aus dem Kapitel Klassifikation statt der linearen Regression. Der Ablauf bleibt derselbe.</p>
+  <div class="box">
+    <pre><code>import pandas as pd
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.compose import make_column_transformer
+from sklearn.pipeline import make_pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.linear_model import LogisticRegression
+
+# 1 + 2 · Laden, Testset sofort wegsperren
+df = pd.read_csv(&quot;titanic/data.csv&quot;).dropna(subset=[&quot;Survived&quot;]).astype({&quot;Pclass&quot;: int, &quot;Survived&quot;: int})
+X, y = df.drop(columns=&quot;Survived&quot;), df[&quot;Survived&quot;]
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, stratify=y, random_state=0)
+# 3 · EDA nur auf X_tr (Grafiken auf der ausführlichen Seite)
+# 4 · Feature Selection (manuell): ID, Name, Ticket, Cabin raus
+num, cat = [&quot;Age&quot;, &quot;Fare&quot;, &quot;SibSp&quot;, &quot;Parch&quot;], [&quot;Pclass&quot;, &quot;Sex&quot;, &quot;Embarked&quot;]
+# 5 + 6 · Auffüllen, One-Hot, Skalieren; 7 · L1 als automatische Feature Selection
+prep = make_column_transformer(
+    (make_pipeline(SimpleImputer(strategy=&quot;median&quot;), StandardScaler()), num),
+    (make_pipeline(SimpleImputer(strategy=&quot;most_frequent&quot;), OneHotEncoder(handle_unknown=&quot;ignore&quot;)), cat))
+model = make_pipeline(prep, LogisticRegression(l1_ratio=1, solver=&quot;liblinear&quot;))  # vor sklearn 1.8: penalty=&quot;l1&quot;
+# 8 + 9 · Cross-Validation, bestes C wählen, neu auf allen 80 % trainieren
+search = GridSearchCV(model, {&quot;logisticregression__C&quot;: [0.01, 0.1, 1, 10]}, cv=5).fit(X_tr[num + cat], y_tr)
+# 10 · Genau einmal auf dem Testset
+print(&quot;CV-Accuracy:&quot;, round(search.best_score_, 3), &quot;| Test-Accuracy:&quot;, round(search.score(X_te[num + cat], y_te), 3))</code></pre>
+    <pre class="out">CV-Accuracy: 0.803 | Test-Accuracy: 0.793</pre>
+    <p class="hint">Die Test-Accuracy liegt nahe an der CV-Schätzung: Das Modell ist nicht überangepasst. Jeder Schritt mit Erklärung, EDA-Grafiken, Ausgaben und einer zweiten, ausführlicheren Version mit Random Forest: <a href="titanic.html">Titanic ausführlich</a>.</p>
+  </div>
   <p class="note"><b>Mit den 10 Wohnungen:</b> Hyperparameter sind hier der Polynomgrad (1 bis 9) und bei Ridge/Lasso das alpha. Du probierst jede Einstellung aus, misst jeweils den Fehler bei fehlender Wohnung (Cross-Validation) und nimmst die beste. Beim Polynomgrad gewinnt Grad 1 (123 CHF), nicht Grad 9 (Training 0 CHF, aber mehrere 100 000 bei fehlender Wohnung). Bei echten Daten bliebe zusätzlich ein Test-Set bis zum Schluss unberührt, bei nur 10 Wohnungen verzichten wir darauf.</p>`,
     nbExercises: 'Supervised_Learning_1_Uebungen_own.ipynb',
     notebooks: [
@@ -497,7 +471,7 @@ search.best_params_, search.best_estimator_</code></pre>
           '4':['4 · Feature Selection (manuell)','Du entscheidest selbst, mit Fachwissen und dem, was die EDA zeigt: IDs und Namen raus, Spalten raus, die das Ziel verraten (Leakage, z. B. Werte, die es erst nach dem Ereignis gibt), fast leere Spalten raus, und von zwei fast gleichen Merkmalen nur eines behalten (z. B. <code>qm</code> und <code>Zimmer</code>). Dafür braucht es noch keine aufbereiteten Daten. Vorsicht: Wer Merkmale wegen tiefer Korrelation mit dem Ziel streicht, nutzt Zielwissen, die CV-Scores werden dadurch etwas zu optimistisch.',[['Feature Selection','#ml-fs'],['Data Leakage','#klass-leakage']]],
           '5':['5 · Vorverarbeitung festlegen','Fehlende Werte füllen (Median, Mittelwert, Modus, kNN) und Kategorien in Zahlen umwandeln (One-Hot). Die Werte dafür (z. B. der Median) lernst du nur aus dem Training (<code>fit</code>) und setzt sie bei Validation und Test nur ein (<code>transform</code>).',[['Fehlende Werte','#ml-missing'],['Kategorien in Zahlen','#ml-cat'],['Data Leakage','#klass-leakage']]],
           '6':['6 · Skalieren','Standard Scaling oder Min-Max, damit Merkmale in vergleichbaren Grössenordnungen liegen. Wichtig für Gradient Descent, kNN, SVM und Regularisierung, unnötig für Bäume. Auch der Skaler wird nur auf den Trainingsdaten angepasst.',[['Skalieren','#ml-scaling'],['Pipeline','#ml-pipeline']]],
-          '7':['7 · Feature Selection (automatisch)','Mehr Merkmale sind nicht automatisch besser (Curse of Dimensionality). Hier entscheidet ein Verfahren: <b>Filter</b> bewerten Merkmale per Statistik, <b>Wrapper</b> probieren Merkmalmengen mit einem Modell aus (RFE), <b>Embedded</b> steckt im Modell (Lasso, Baum-Wichtigkeit). Das kommt nach Auffüllen und Skalieren: Die meisten Verfahren laufen nicht mit fehlenden Werten, und Lasso bestraft unskalierte Merkmale ungleich. Als Schritt in der <code>Pipeline</code> wird die Auswahl in jedem CV-Fold nur aus dessen Trainingsdaten berechnet.',[['Feature Selection','#ml-fs'],['Lasso und Ridge','#ml-reg'],['Pipeline','#ml-pipeline']]],
+          '7':['7 · Feature Selection (automatisch, optional)','Optional: Bei wenigen Merkmalen, bei Bäumen oder mit Lasso (wählt selbst aus) kannst du den Schritt weglassen. Mehr Merkmale sind nicht automatisch besser (Curse of Dimensionality). Hier entscheidet ein Verfahren: <b>Filter</b> bewerten Merkmale per Statistik, z. B. Korrelation oder F-Test mit dem Ziel (ein Varianz-Filter gehört vor das Skalieren, danach hat jedes Merkmal Varianz 1), <b>Wrapper</b> probieren Merkmalmengen mit einem Modell aus (RFE), <b>Embedded</b> steckt im Modell (Lasso, Baum-Wichtigkeit). Das kommt nach Auffüllen und Skalieren: Die meisten Verfahren laufen nicht mit fehlenden Werten, und Lasso bestraft unskalierte Merkmale ungleich. Als Schritt in der <code>Pipeline</code> wird die Auswahl in jedem CV-Fold nur aus dessen Trainingsdaten berechnet.',[['Feature Selection','#ml-fs'],['Lasso und Ridge','#ml-reg'],['Pipeline','#ml-pipeline']]],
           '8':['8 · Trainieren und validieren','Das Modell lernt auf dem Training und wird auf der Validierung gemessen, entweder mit einem Split (75 zu 25) oder mit k-facher Cross-Validation. In der Schleife probierst du Hyperparameter durch. Ein grosser Abstand zwischen Training und Validierung zeigt Overfitting.',[['Cross-Validation','#ml-split'],['Bias und Variance','#ml-bv'],['Hyperparameter','#ml-hp'],['Klassifikations-Modelle','#klass-modelle']]],
           '9':['9 · Bestes Modell wählen','Gewählt wird nach der Validierung, nie nach dem Test. Danach trainierst du das beste Modell mit den besten Einstellungen noch einmal auf allen 80 % (Training und Validierung zusammen), weil mehr Daten helfen.',[['Hyperparameter und Modellwahl','#ml-hp'],['Train, Validation, Test','#ml-split']]],
           '10':['10 · Einmal auf Testset bewerten','Genau ein einziges Mal, mit den Werten aus dem Training (<code>transform</code>, kein neues <code>fit</code>). Das Ergebnis ist die ehrliche Schätzung für neue Daten. Bei Klassifikation schaust du Accuracy, Precision, Recall und ROC an. Wird danach nochmal getunt, ist der Test verbraucht.',[['Metriken und ROC','#klass-metriken'],['Data Leakage','#klass-leakage'],['Ablauf an der Titanic-Aufgabe','#klass-ablauf']]]

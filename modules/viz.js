@@ -71,21 +71,12 @@ sns.lineplot(data=lang, x="month", y="temperature", hue="city")</code></pre>
     <li>Histogramm: die Zahl der <code>bins</code> verändert die Geschichte, probiere mehrere.</li>
   </ul>
 
-  <h3>Streudiagramm in Aktion: Gruppen einfärben</h3>
-  <p>Ein Streudiagramm mit <b>einer Farbe pro Gruppe</b> zeigt Cluster auf einen Blick. Die Demo färbt die Punkte nach dem Ergebnis von k-Means. Wie der Algorithmus funktioniert, steht im Kapitel Unsupervised.</p>
-  <div class="demo" id="vkmDemo">
-    <div class="tag">Demo</div><h4>k-Means auf verschiedenen Datenformen</h4>
-    ${KMeansDemo.html('vkm')}
-  </div>
   <div class="merk"><b>Merksatz</b><p>Erst Frage, dann Chart. Danach Titel, Achsen mit Einheit, Null-Basislinie, aufräumen.</p></div>`,
     quiz: [
       { q: `Wann ist ein Kuchendiagramm keine gute Wahl?`, a: `Bei vielen Teilen oder wenn man genau vergleichen oder ranken will. Längen (Balken) lesen wir besser als Winkel.` },
       { q: `Warum sollen Balken bei Null beginnen?`, a: `Eine abgeschnittene Achse übertreibt Unterschiede. Im Kursbeispiel wirkte 720 gegenüber 290 wie das Zwölffache statt wie das 2.5-Fache.` },
     ],
     init() {
-      // k-means demo (shared code in assets/demos-kmeans.js)
-      KMeansDemo.init('vkm');
-
       (function(){
         const out=[
           ['Balkendiagramm','Sortiere die Balken und starte bei Null. Bei langen Beschriftungen waagrecht (barh).'],
