@@ -45,7 +45,6 @@
     },
   };
 
-  /* Optional persistence: when served over http(s) by server.py, mirror localStorage to /api/state */
   const SRV = location.protocol.startsWith('http');
   let saveT = null;
   function srvPush() {

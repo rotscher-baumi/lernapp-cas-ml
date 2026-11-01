@@ -135,6 +135,25 @@ textarea.code{display:block;width:100%;max-width:100%;font-family:var(--f-mono);
 .prog{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-weight:400;margin-left:6px}
 .ex h4 .done{color:var(--ok);margin-left:6px}
 .nbfile{word-break:break-all}
+/* Ablauf-Grafik im Kapitel Supervised ML */
+.ab-fig{max-width:780px}
+.ab-scroll{overflow-x:auto}
+.ab-fig svg{min-width:560px}
+/* Ablauf-Grafik: klickbare Schritte mit aufklappbarer Erklärung */
+.ab-step{cursor:pointer;outline:none}
+.ab-step:hover rect:first-of-type,.ab-step:focus-visible rect:first-of-type{stroke:var(--accent)!important;stroke-width:3!important}
+.ab-step.on rect:first-of-type{stroke:var(--accent)!important;stroke-width:3.5!important;fill:var(--accent-soft)!important}
+.ab-detail{margin-top:10px;border:1.5px solid var(--accent);background:var(--surface);border-radius:10px;padding:12px 14px;animation:abIn .18s ease-out}
+.ab-detail[hidden]{display:none}
+.ab-dh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+.ab-dh b{font-family:var(--f-display)}
+.ab-x{border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:14px;line-height:1}
+.ab-db{font-size:14.5px}
+.ab-dl{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ab-dl a{font-size:13.5px;padding:4px 10px;border:1px solid var(--accent);border-radius:999px;color:var(--accent);text-decoration:none}
+.ab-dl a:hover{background:var(--accent-soft)}
+@keyframes abIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+h3[id],h4[id],.merk[id]{scroll-margin-top:72px}
 
 /* notebook exercises: rendered figures and DataFrame tables */
 .ex .plot{display:block;max-width:100%;height:auto;margin:10px 0;background:#fff;border-radius:6px}
