@@ -6,6 +6,7 @@
 
 - **Plan first, then code:** for any non-trivial task, outline approach, alternatives and risks and wait for the user's OK before writing code.
 - **Check before changing:** read existing code, conventions and the current state (`git status`, pull, re-read the file) before editing.
+- **Workflow overview first:** a chapter's workflow overview («Der ganze Ablauf auf einen Blick», clickable figure) sits at the start of the chapter, right after the intro and before section 1.
 - **Keep course dates current:** when editing the course overview or upcoming appointments, verify dates and deadlines (including the transfer-work topic submission) against the latest authoritative timetable, show when the information was last checked, and update or remove entries that have changed or passed. Never guess dates.
 
 ## Purpose and stack
