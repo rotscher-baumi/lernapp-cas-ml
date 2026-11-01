@@ -27,7 +27,10 @@ body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16
   padding-block:0 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));margin:0}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
 .wrap{max-width:760px;margin:0 auto}
-header.top{padding:32px 0 20px}
+header.top{padding:32px 0 20px;position:relative}
+.langsw{position:absolute;top:24px;right:0;display:flex;gap:4px}
+.langsw button{min-height:36px;padding:4px 10px;font-family:var(--f-mono);font-size:12px}
+header.top .eyebrow{padding-right:100px}
 .eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 h1{font-family:var(--f-display);font-size:clamp(30px,7vw,46px);line-height:1.1;margin:8px 0 12px;text-wrap:balance;letter-spacing:-.01em}
 h2{font-family:var(--f-display);font-size:clamp(24px,5vw,31px);line-height:1.2;margin:0 0 6px;text-wrap:balance}
@@ -82,7 +85,9 @@ button,select{font:inherit;font-size:14px;border:1px solid var(--line);backgroun
 button.pri{background:var(--accent);color:#fff;border-color:var(--accent)}
 button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
-svg.plot{display:block;width:100%;height:auto;max-width:100%;background:var(--bg);border-radius:8px;border:1px solid var(--line)}
+svg.plot{display:block;width:100%;height:auto;max-width:420px;margin:0 auto;background:var(--bg);border-radius:8px;border:1px solid var(--line)}
+svg.plot[viewBox^="0 0 240 "]{max-width:315px}
+@media (max-width:480px){.demo{padding:12px} svg.plot .lbl{font-size:11.5px}}
 svg .ax{stroke:var(--line);stroke-width:1} svg .lbl{fill:var(--muted);font-family:var(--f-mono);font-size:10px}
 svg .pt{fill:var(--fg)} svg .ln{stroke:var(--accent);stroke-width:2.5;fill:none} svg .ln2{stroke:var(--warn);stroke-width:2;fill:none}
 svg .dash{stroke:var(--muted);stroke-width:1.5;fill:none;stroke-dasharray:5 4} svg .res{stroke:var(--bad);stroke-width:1.5;opacity:.7}
@@ -112,6 +117,9 @@ textarea.code{display:block;width:100%;max-width:100%;font-family:var(--f-mono);
 #freeOut{white-space:pre-wrap;word-break:break-word}
 .fig{margin:16px auto;max-width:560px}
 .fig svg{display:block;width:100%;height:auto;overflow:visible}
+.fig img{display:block;width:100%;height:auto;border-radius:6px;border:1px solid var(--line)}
+.box h4{margin:0 0 6px;font-family:var(--f-display);font-size:17px}
+.box pre.out{background:var(--bg);border:1px solid var(--line)}
 .fig figcaption{font-size:13.5px;color:var(--muted);margin-top:6px;line-height:1.5}
 .d-box{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
 .d-hl{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}

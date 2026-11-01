@@ -18,6 +18,12 @@
  *             generated from the notebook) are shown at the end of the chapter and run
  *             with Pyodide (real pandas / scikit-learn)
  *   init()    optional, called once after the chapter is in the page
+ *
+ * Language: LernApp.lang is 'de' (default) or 'en', chosen with the DE/EN switch in the
+ * header. English texts live in modules/en/<id>.js and call LernApp.translate(id, {...})
+ * with the fields to replace (nav, title, kicker, summary, html, quiz, notebooks,
+ * exercises as [{ t, task, ... }] merged by position). Demo code picks its strings with
+ * LernApp.t('deutsch', 'english'). Static page text uses a data-en attribute.
  */
 (function () {
   'use strict';
@@ -25,6 +31,9 @@
   const $ = (id) => document.getElementById(id);
   const fmt = (v, d) => Number(v).toFixed(d);
   const modules = [];
+  const EN = {};
+  let LANG = 'de';
+  const t = (de, en) => (LANG === 'en' && en !== undefined ? en : de);
   const SKULPT = 'https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/';
   const PYODIDE = 'https://cdn.jsdelivr.net/pyodide/v0.27.7/full/';
 
@@ -43,6 +52,9 @@
       }
       modules.push(mod);
     },
+    translate: function (id, fields) { EN[id] = fields; },
+    t: t,
+    lang: 'de',
   };
 
   const SRV = location.protocol.startsWith('http');
@@ -72,6 +84,12 @@
     } catch (e) {}
   }
 
+  // ?lang=en or ?lang=de in the address wins over the stored choice (for links and tests)
+  const qLang = (location.search.match(/[?&]lang=(de|en)\b/) || [])[1];
+  try { if ((qLang || localStorage.getItem('cas-ml-lang')) === 'en') LANG = 'en'; } catch (e) { if (qLang === 'en') LANG = 'en'; }
+  LernApp.lang = LANG;
+  document.documentElement.lang = LANG;
+
   function store(key, val) {
     try {
       if (val === undefined) return localStorage.getItem(key);
@@ -92,7 +110,7 @@
       s.src = src;
       s.onload = ok;
       s.onerror = function () {
-        bad(new Error('Der Python-Interpreter konnte nicht geladen werden. Prüfe die Internetverbindung und versuche es nochmals.'));
+        bad(new Error(t('Der Python-Interpreter konnte nicht geladen werden. Prüfe die Internetverbindung und versuche es nochmals.', 'The Python interpreter could not be loaded. Check your internet connection and try again.')));
       };
       document.head.appendChild(s);
     });
@@ -116,16 +134,16 @@
   }
 
   const ERR_HINTS = [
-    [/^SyntaxError|^IndentationError|^ParseError/, 'Der Code ist grammatisch nicht korrekt. Prüfe Doppelpunkte nach if/for/def, Klammern, Anführungszeichen und die Einrückung.'],
-    [/^NameError/, 'Ein Name ist unbekannt. Tippfehler? Variable vor der Verwendung zuweisen? Modul mit import geladen?'],
-    [/^TypeError/, 'Ein Wert hat nicht den passenden Typ, zum Beispiel Text plus Zahl, oder eine Funktion bekommt falsche Argumente.'],
-    [/^IndexError/, 'Der Index liegt ausserhalb der Liste. Der erste Eintrag hat Index 0, der letzte len(liste) - 1.'],
-    [/^KeyError/, 'Dieser Schlüssel existiert nicht im Dictionary oder DataFrame. Gross-/Kleinschreibung prüfen.'],
-    [/^ValueError/, 'Der Typ des Werts stimmt, der Inhalt aber nicht, zum Beispiel int("abc").'],
-    [/^ZeroDivisionError/, 'Division durch 0. Prüfe den Nenner.'],
-    [/^AttributeError/, 'Dieses Objekt hat diese Methode oder dieses Attribut nicht. Tippfehler oder falscher Typ?'],
-    [/^ImportError|^ModuleNotFoundError/, 'Dieses Modul gibt es im Browser-Interpreter nicht. Die Übungen laufen nur mit den Grundlagen von Python.'],
-    [/^TimeLimitError|execution/i, 'Das Programm läuft zu lange, vermutlich eine Endlosschleife.']
+    [/^SyntaxError|^IndentationError|^ParseError/, 'Der Code ist grammatisch nicht korrekt. Prüfe Doppelpunkte nach if/for/def, Klammern, Anführungszeichen und die Einrückung.', 'The code is not valid Python. Check the colons after if/for/def, brackets, quotes and indentation.'],
+    [/^NameError/, 'Ein Name ist unbekannt. Tippfehler? Variable vor der Verwendung zuweisen? Modul mit import geladen?', 'A name is unknown. A typo? Was the variable assigned before use? Was the module imported?'],
+    [/^TypeError/, 'Ein Wert hat nicht den passenden Typ, zum Beispiel Text plus Zahl, oder eine Funktion bekommt falsche Argumente.', 'A value has the wrong type, for example text plus a number, or a function gets the wrong arguments.'],
+    [/^IndexError/, 'Der Index liegt ausserhalb der Liste. Der erste Eintrag hat Index 0, der letzte len(liste) - 1.', 'The index is outside the list. The first item has index 0, the last one len(list) - 1.'],
+    [/^KeyError/, 'Dieser Schlüssel existiert nicht im Dictionary oder DataFrame. Gross-/Kleinschreibung prüfen.', 'This key does not exist in the dictionary or DataFrame. Check upper and lower case.'],
+    [/^ValueError/, 'Der Typ des Werts stimmt, der Inhalt aber nicht, zum Beispiel int("abc").', 'The value has the right type but the wrong content, for example int("abc").'],
+    [/^ZeroDivisionError/, 'Division durch 0. Prüfe den Nenner.', 'Division by 0. Check the denominator.'],
+    [/^AttributeError/, 'Dieses Objekt hat diese Methode oder dieses Attribut nicht. Tippfehler oder falscher Typ?', 'This object has no such method or attribute. A typo or the wrong type?'],
+    [/^ImportError|^ModuleNotFoundError/, 'Dieses Modul gibt es im Browser-Interpreter nicht. Die Übungen laufen nur mit den Grundlagen von Python.', 'This module is not available in the browser interpreter. The exercises only use basic Python.'],
+    [/^TimeLimitError|execution/i, 'Das Programm läuft zu lange, vermutlich eine Endlosschleife.', 'The program runs too long, probably an endless loop.']
   ];
 
   /* Returns {title, msg, line, src, hint, check} for a Skulpt exception. `check` is true when the
@@ -148,17 +166,17 @@
       return '';
     });
     if (type === 'AssertionError' && (line === null || line > userLines)) {
-      return { check: true, title: 'Noch nicht richtig', msg: msg || 'Das Ergebnis stimmt noch nicht mit der Aufgabe überein.' };
+      return { check: true, title: t('Noch nicht richtig', 'Not right yet'), msg: msg || t('Das Ergebnis stimmt noch nicht mit der Aufgabe überein.', 'The result does not match the task yet.') };
     }
     const inUser = line !== null && line <= userLines;
     const lines = (userCode || '').split('\n');
-    const full = (type ? type : 'Fehler') + (msg ? ': ' + msg : '');
+    const full = (type ? type : t('Fehler', 'Error')) + (msg ? ': ' + msg : '');
     let hint = '';
-    for (let i = 0; i < ERR_HINTS.length; i++) if (ERR_HINTS[i][0].test(full)) { hint = ERR_HINTS[i][1]; break; }
+    for (let i = 0; i < ERR_HINTS.length; i++) if (ERR_HINTS[i][0].test(full)) { hint = t(ERR_HINTS[i][1], ERR_HINTS[i][2]); break; }
     return {
       check: false,
-      title: type || 'Fehler',
-      msg: msg || 'Unbekannter Fehler',
+      title: type || t('Fehler', 'Error'),
+      msg: msg || t('Unbekannter Fehler', 'Unknown error'),
       line: inUser ? line : null,
       src: inUser ? lines[line - 1] : null,
       hint: hint
@@ -168,7 +186,7 @@
   function renderErr(e) {
     const esc = function (t) { return String(t).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
     if (e.check) return '<b>❌ ' + esc(e.title) + '</b><div class="errmsg">' + esc(e.msg) + '</div>';
-    return '<b>❌ ' + esc(e.title) + (e.line ? ' in Zeile ' + e.line : '') + '</b>' +
+    return '<b>❌ ' + esc(e.title) + (e.line ? t(' in Zeile ', ' in line ') + e.line : '') + '</b>' +
       '<div class="errmsg">' + esc(e.msg) + '</div>' +
       (e.src !== null && e.src !== undefined ? '<pre class="errsrc">' + e.line + ' │ ' + esc(e.src) + '</pre>' : '') +
       (e.hint ? '<div class="errhint">💡 ' + esc(e.hint) + '</div>' : '');
@@ -244,18 +262,18 @@
 
   function pyErr(e) {
     const lines = String(e && e.message ? e.message : e).trim().split('\n');
-    return lines[lines.length - 1].replace(/^AssertionError:\s*/, '') || 'Unbekannter Fehler';
+    return lines[lines.length - 1].replace(/^AssertionError:\s*/, '') || t('Unbekannter Fehler', 'Unknown error');
   }
 
   // One shared namespace per notebook (like a kernel); runs are queued one after the other.
   function runNb(nbKey, setup, code, status) {
     const job = pyQueue.then(function () {
-      status('Python wird geladen (beim ersten Mal rund 1 Minute, danach schnell) …');
+      status(t('Python wird geladen (beim ersten Mal rund 1 Minute, danach schnell) …', 'Loading Python (about 1 minute the first time, fast afterwards) …'));
       return loadPy().then(function (py) {
         const nb = (runNb.spaces = runNb.spaces || {});
         let ready = Promise.resolve();
         if (!nb[nbKey]) {
-          status('Pakete werden geladen …');
+          status(t('Pakete werden geladen …', 'Loading packages …'));
           ready = py.loadPackagesFromImports(setup).then(function () {
             py.runPython(PY_HELPER);
             nb[nbKey] = py.globals.get('dict')();
@@ -264,7 +282,7 @@
           });
         }
         return ready.then(function () {
-          status('Läuft …');
+          status(t('Läuft …', 'Running …'));
           pyOut = '';
           const res = { ok: true, out: '', shown: [], figs: [] };
           try {
@@ -290,24 +308,29 @@
   function buildSection(m) {
     const sec = document.createElement('section');
     sec.id = m.id;
-    let html = '<div class="kicker">' + (m.kicker || '') + '</div><h2>' + m.title + '</h2>' + (m.html || '');
+    let html = '<div class="kicker">' + (m.kicker || '') + '</div><h2>' + m.title + '</h2>' +
+      (LANG === 'en' && !EN[m.id] ? '<p class="note">This chapter is not available in English yet. It is shown in German.</p>' : '') + (m.html || '');
 
     (m.notebooks || []).forEach(function (nb) {
-      html += '<div class="merk"><b>Übungs-Notebook</b><p><code class="nbfile">lernapp/notebooks/' + nb.file + '</code><br>' + nb.desc + '</p></div>';
+      html += '<div class="merk"><b>' + t('Übungs-Notebook', 'Exercise notebook') + '</b><p><code class="nbfile">lernapp/notebooks/' + nb.file + '</code><br>' + nb.desc + '</p></div>';
     });
     if (m.exercises && m.exercises.length) {
-      html += '<h3>Python-Übungen <span class="prog" id="prog-' + m.id + '"></span></h3>' +
-        '<p class="note">Code ändern, «Ausführen» drücken, mit «Prüfen» kontrollieren. Beim ersten Ausführen lädt die Seite einmalig den Python-Interpreter (Skulpt, rund 1 MB). Er versteht die Grundlagen aus dem Kurs, aber nicht jede neue Python-Funktion.</p>' +
+      html += '<h3>' + t('Python-Übungen', 'Python exercises') + ' <span class="prog" id="prog-' + m.id + '"></span></h3>' +
+        '<p class="note">' + t('Code ändern, «Ausführen» drücken, mit «Prüfen» kontrollieren. Beim ersten Ausführen lädt die Seite einmalig den Python-Interpreter (Skulpt, rund 1 MB). Er versteht die Grundlagen aus dem Kurs, aber nicht jede neue Python-Funktion.',
+          'Change the code, press «Run», then «Check». The first run loads the Python interpreter once (Skulpt, about 1 MB). It understands the basics from the course, but not every newer Python feature.') + '</p>' +
         '<div class="exlist" id="ex-' + m.id + '"></div>';
     }
     if (m.nbExercises && window.NbData && window.NbData[m.nbExercises]) {
       const nbd = window.NbData[m.nbExercises];
-      html += '<h3>Übungen <span class="prog" id="prog-nb-' + m.id + '"></span></h3>' +
-        '<p class="note">Dieselben ' + nbd.exercises.length + ' Aufgaben wie im Notebook <code class="nbfile">lernapp/notebooks/' + m.nbExercises + '</code>: Code ändern (ersetze <code>...</code>), «Ausführen», dann «Prüfen». Die Aufgaben bauen aufeinander auf, am besten der Reihe nach lösen. Läuft im Browser mit echtem Python (Pyodide, einmalig grosser Download). <button data-a="reset-env" id="env-' + m.id + '">Umgebung neu starten</button></p>' +
+      const nbf = '<code class="nbfile">lernapp/notebooks/' + m.nbExercises + '</code>';
+      html += '<h3>' + t('Übungen', 'Exercises') + ' <span class="prog" id="prog-nb-' + m.id + '"></span></h3>' +
+        '<p class="note">' + t('Dieselben ' + nbd.exercises.length + ' Aufgaben wie im Notebook ' + nbf + ': Code ändern (ersetze <code>...</code>), «Ausführen», dann «Prüfen». Die Aufgaben bauen aufeinander auf, am besten der Reihe nach lösen. Läuft im Browser mit echtem Python (Pyodide, einmalig grosser Download).',
+          'The same ' + nbd.exercises.length + ' tasks as in the notebook ' + nbf + ' (task texts in German, as in the notebook): change the code (replace <code>...</code>), «Run», then «Check». The tasks build on each other, so solve them in order. Runs in the browser with real Python (Pyodide, one large download).') +
+        ' <button data-a="reset-env" id="env-' + m.id + '">' + t('Umgebung neu starten', 'Restart environment') + '</button></p>' +
         '<div class="exlist" id="nbex-' + m.id + '"></div>';
     }
     if (m.quiz && m.quiz.length) {
-      html += '<h3>Selbsttest</h3><p class="note">Antworte zuerst im Kopf, dann klappe auf.</p>' +
+      html += '<h3>' + t('Selbsttest', 'Self-test') + '</h3><p class="note">' + t('Antworte zuerst im Kopf, dann klappe auf.', 'Answer in your head first, then open the answer.') + '</p>' +
         m.quiz.map(function (it) {
           return '<details class="q"><summary>' + it.q + '</summary><div class="a">' + it.a + '</div></details>';
         }).join('');
@@ -325,7 +348,7 @@
       let n = 0;
       for (let i = 0; i < total; i++) if (store('cas-ml-' + m.id + '-' + (i + 1) + '-ok') === '1') n++;
       const el = $('prog-' + m.id);
-      if (el) el.textContent = n + ' von ' + total + ' gelöst';
+      if (el) el.textContent = t(n + ' von ' + total + ' gelöst', n + ' of ' + total + ' solved');
     }
 
     m.exercises.forEach(function (ex, i) {
@@ -335,9 +358,9 @@
       card.className = 'ex';
       card.innerHTML =
         '<h4>' + (i + 1) + ' · ' + ex.t + '<span class="done"></span></h4><div class="task">' + ex.task + '</div>' +
-        '<label for="' + id + '" style="display:block;font-size:13px;color:var(--muted)">Dein Code</label>' +
+        '<label for="' + id + '" style="display:block;font-size:13px;color:var(--muted)">' + t('Dein Code', 'Your code') + '</label>' +
         '<textarea id="' + id + '" class="code" rows="' + (ex.start.split('\n').length + 1) + '" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>' +
-        '<div class="btnrow"><button class="pri" data-a="run">Ausführen</button><button data-a="chk">Prüfen</button><button data-a="rst">Zurücksetzen</button><button data-a="sol">Lösung zeigen</button></div>' +
+        '<div class="btnrow"><button class="pri" data-a="run">' + t('Ausführen', 'Run') + '</button><button data-a="chk">' + t('Prüfen', 'Check') + '</button><button data-a="rst">' + t('Zurücksetzen', 'Reset') + '</button><button data-a="sol">' + t('Lösung zeigen', 'Show solution') + '</button></div>' +
         '<pre class="out" hidden></pre><div class="verdict" aria-live="polite"></div><div class="solbox" hidden><pre><code></code></pre></div>';
       const ta = card.querySelector('textarea');
       const out = card.querySelector('.out');
@@ -351,7 +374,7 @@
 
       function exec(withCheck) {
         vd.className = 'verdict info';
-        vd.textContent = 'Läuft …';
+        vd.textContent = t('Läuft …', 'Running …');
         out.hidden = true;
         const user = ta.value;
         const lines = user.split('\n').length;
@@ -361,15 +384,15 @@
           if (r.ok) {
             if (withCheck) {
               vd.className = 'verdict good';
-              vd.textContent = '✅ Richtig!';
+              vd.textContent = t('✅ Richtig!', '✅ Correct!');
               store(key + '-ok', '1');
               done.textContent = ' ✓';
               updateProgress();
             } else {
               vd.className = 'verdict info';
               vd.textContent = r.out
-                ? 'Fertig. Mit «Prüfen» kontrollierst du die Lösung.'
-                : 'Fertig, aber es wurde nichts ausgegeben. Mit «Prüfen» kontrollierst du die Lösung.';
+                ? t('Fertig. Mit «Prüfen» kontrollierst du die Lösung.', 'Done. Use «Check» to test your solution.')
+                : t('Fertig, aber es wurde nichts ausgegeben. Mit «Prüfen» kontrollierst du die Lösung.', 'Done, but nothing was printed. Use «Check» to test your solution.');
             }
           } else {
             vd.className = 'verdict bad';
@@ -391,7 +414,7 @@
             vd.className = 'verdict';
           } else {
             sb.hidden = !sb.hidden;
-            b.textContent = sb.hidden ? 'Lösung zeigen' : 'Lösung verbergen';
+            b.textContent = sb.hidden ? t('Lösung zeigen', 'Show solution') : t('Lösung verbergen', 'Hide solution');
           }
         });
       });
@@ -411,12 +434,12 @@
       let n = 0;
       for (let i = 0; i < total; i++) if (store('cas-ml-' + m.id + '-nb-' + (i + 1) + '-ok') === '1') n++;
       const el = $('prog-nb-' + m.id);
-      if (el) el.textContent = n + ' von ' + total + ' gelöst';
+      if (el) el.textContent = t(n + ' von ' + total + ' gelöst', n + ' of ' + total + ' solved');
     }
 
     $('env-' + m.id).addEventListener('click', function () {
       if (runNb.spaces) delete runNb.spaces[nbKey];
-      this.textContent = 'Umgebung neu gestartet ✓';
+      this.textContent = t('Umgebung neu gestartet ✓', 'Environment restarted ✓');
     });
 
     nbd.exercises.forEach(function (ex, i) {
@@ -425,10 +448,10 @@
       const card = document.createElement('div');
       card.className = 'ex';
       card.innerHTML =
-        '<h4>Aufgabe ' + (i + 1) + ' · ' + ex.t + '<span class="done"></span></h4><div class="task">' + ex.task + '</div>' +
-        '<label for="' + id + '" style="display:block;font-size:13px;color:var(--muted)">Dein Code</label>' +
+        '<h4>' + t('Aufgabe ', 'Task ') + (i + 1) + ' · ' + ex.t + '<span class="done"></span></h4><div class="task">' + ex.task + '</div>' +
+        '<label for="' + id + '" style="display:block;font-size:13px;color:var(--muted)">' + t('Dein Code', 'Your code') + '</label>' +
         '<textarea id="' + id + '" class="code" rows="' + (ex.start.split('\n').length + 1) + '" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>' +
-        '<div class="btnrow"><button class="pri" data-a="run">Ausführen</button><button data-a="chk">Prüfen</button><button data-a="rst">Zurücksetzen</button><button data-a="sol">Lösung zeigen</button></div>' +
+        '<div class="btnrow"><button class="pri" data-a="run">' + t('Ausführen', 'Run') + '</button><button data-a="chk">' + t('Prüfen', 'Check') + '</button><button data-a="rst">' + t('Zurücksetzen', 'Reset') + '</button><button data-a="sol">' + t('Lösung zeigen', 'Show solution') + '</button></div>' +
         '<pre class="out" hidden></pre><div class="rich"></div><div class="verdict" aria-live="polite"></div><div class="solbox" hidden><pre><code></code></pre></div>';
       const ta = card.querySelector('textarea');
       const out = card.querySelector('.out');
@@ -458,20 +481,20 @@
           r.figs.forEach(function (b64) {
             const img = document.createElement('img');
             img.className = 'plot';
-            img.alt = 'Diagramm';
+            img.alt = t('Diagramm', 'Chart');
             img.src = 'data:image/png;base64,' + b64;
             rich.appendChild(img);
           });
           if (r.ok) {
             if (withCheck) {
               vd.className = 'verdict good';
-              vd.textContent = '✅ Richtig!';
+              vd.textContent = t('✅ Richtig!', '✅ Correct!');
               store(key + '-ok', '1');
               done.textContent = ' ✓';
               updateProgress();
             } else {
               vd.className = 'verdict info';
-              vd.textContent = 'Fertig. Mit «Prüfen» kontrollierst du die Lösung.';
+              vd.textContent = t('Fertig. Mit «Prüfen» kontrollierst du die Lösung.', 'Done. Use «Check» to test your solution.');
             }
           } else {
             vd.className = 'verdict bad';
@@ -494,7 +517,7 @@
             vd.className = 'verdict';
           } else {
             sb.hidden = !sb.hidden;
-            b.textContent = sb.hidden ? 'Lösung zeigen' : 'Lösung verbergen';
+            b.textContent = sb.hidden ? t('Lösung zeigen', 'Show solution') : t('Lösung verbergen', 'Hide solution');
           }
         });
       });
@@ -510,15 +533,15 @@
       const o = $('freeOut');
       const code = $('freeCode').value;
       o.hidden = false;
-      o.textContent = 'Läuft …';
+      o.textContent = t('Läuft …', 'Running …');
       runPy(code + '\n', code.split('\n').length, code).then(function (r) {
         o.textContent = r.out.replace(/\n$/, '');
         if (!r.ok) {
           const e = r.err;
-          o.textContent += (r.out ? '\n' : '') + '❌ ' + e.title + (e.line ? ' in Zeile ' + e.line : '') + ': ' + e.msg +
+          o.textContent += (r.out ? '\n' : '') + '❌ ' + e.title + (e.line ? t(' in Zeile ', ' in line ') + e.line : '') + ': ' + e.msg +
             (e.src !== null && e.src !== undefined ? '\n  ' + e.line + ' │ ' + e.src : '') + (e.hint ? '\n💡 ' + e.hint : '');
         }
-        if (!o.textContent) o.textContent = '(keine Ausgabe)';
+        if (!o.textContent) o.textContent = t('(keine Ausgabe)', '(no output)');
       });
     });
   }
@@ -543,20 +566,53 @@
     update();
   }
 
+  function applyEn(m, e) {
+    Object.keys(e).forEach(function (k) {
+      if (k === 'exercises' && m.exercises) m.exercises = m.exercises.map(function (ex, i) { return Object.assign({}, ex, e.exercises[i] || {}); });
+      else m[k] = e[k];
+    });
+  }
+
+  function wireLang() {
+    const head = document.querySelector('header.top');
+    if (head) {
+      head.insertAdjacentHTML('afterbegin', '<div class="langsw" role="group" aria-label="Sprache / Language">' +
+        '<button type="button" data-l="de" lang="de">DE</button><button type="button" data-l="en" lang="en">EN</button></div>');
+      head.querySelectorAll('.langsw button').forEach(function (b) {
+        const on = b.dataset.l === LANG;
+        b.className = on ? 'pri' : '';
+        b.setAttribute('aria-pressed', on);
+        b.addEventListener('click', function () {
+          if (b.dataset.l === LANG) return;
+          store('cas-ml-lang', b.dataset.l);
+          location.reload();
+        });
+      });
+    }
+    if (LANG !== 'en') return;
+    document.querySelectorAll('[data-en]').forEach(function (el) {
+      if (el.tagName === 'TEXTAREA') el.value = el.getAttribute('data-en');
+      else el.innerHTML = el.getAttribute('data-en');
+    });
+    document.querySelectorAll('[data-en-label]').forEach(function (el) { el.setAttribute('aria-label', el.getAttribute('data-en-label')); });
+  }
+
   function start() {
+    wireLang();
+    if (LANG === 'en') modules.forEach(function (m) { if (EN[m.id]) applyEn(m, EN[m.id]); });
     const mods = modules.slice().sort(function (a, b) { return (a.order || 100) - (b.order || 100); });
 
     // Sub pages (e.g. mathe-kompakt.html) have no overview and no playground section.
     const hasOverview = !!$('ueberblick'), hasPlay = !!$('spielwiese');
     $('chips').innerHTML =
-      (hasOverview ? '<a href="#ueberblick">Überblick</a>' : '') +
+      (hasOverview ? '<a href="#ueberblick">' + t('Überblick', 'Overview') + '</a>' : '') +
       mods.map(function (m) { return '<a href="#' + m.id + '">' + (m.nav || m.title) + '</a>'; }).join('') +
-      (hasPlay ? '<a href="#spielwiese">Üben</a>' : '');
+      (hasPlay ? '<a href="#spielwiese">' + t('Üben', 'Practice') + '</a>' : '');
 
     if ($('toc')) {
       $('toc').innerHTML =
         mods.map(function (m) { return '<a href="#' + m.id + '"><b>' + (m.nav || m.title) + '</b><span>' + (m.summary || '') + '</span></a>'; }).join('') +
-        '<a href="#spielwiese"><b>Üben</b><span>Spielwiese und Notebooks</span></a>';
+        '<a href="#spielwiese"><b>' + t('Üben', 'Practice') + '</b><span>' + t('Spielwiese und Notebooks', 'Playground and notebooks') + '</span></a>';
     }
 
     const host = $('modules');
@@ -569,7 +625,7 @@
       } catch (e) {
         console.error('Module "' + m.id + '" failed to start', e);
         const sec = $(m.id);
-        if (sec) sec.insertAdjacentHTML('beforeend', '<div class="falle"><b>Fehler</b><p>Dieses Kapitel konnte nicht vollständig geladen werden (' + m.id + ').</p></div>');
+        if (sec) sec.insertAdjacentHTML('beforeend', '<div class="falle"><b>' + t('Fehler', 'Error') + '</b><p>' + t('Dieses Kapitel konnte nicht vollständig geladen werden', 'This chapter could not be loaded completely') + ' (' + m.id + ').</p></div>');
       }
     });
 
