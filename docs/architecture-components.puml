@@ -12,7 +12,7 @@ actor "Lernende:r\n(Browser)" as user
 package "Seiten (HTML, kein Build)" {
   [index.html\nHauptseite: Kopf, Überblick,\n#modules, Spielwiese] as index
   [titanic.html\nmathe-kompakt.html\nmathe-ausfuehrlich.html\nUnterseiten: Kopf + ein Modul] as sub
-  [notebook.html\niframe auf JupyterLab] as nbpage
+  [notebook.html\nModus lokal: iframe auf JupyterLab\nModus Colab: Links] as nbpage
 }
 
 package "assets/" {
