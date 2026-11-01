@@ -70,19 +70,29 @@ sns.lineplot(data=lang, x="month", y="temperature", hue="city")</code></pre>
     <li>Streudiagramm zeigt: Zusammenhang ist nicht Ursache (<i>Korrelation ≠ Kausalität</i>).</li>
     <li>Histogramm: die Zahl der <code>bins</code> verändert die Geschichte, probiere mehrere.</li>
   </ul>
+
+  <h3>Streudiagramm in Aktion: Gruppen einfärben</h3>
+  <p>Ein Streudiagramm mit <b>einer Farbe pro Gruppe</b> zeigt Cluster auf einen Blick. Die Demo färbt die Punkte nach dem Ergebnis von k-Means. Wie der Algorithmus funktioniert, steht im Kapitel Unsupervised.</p>
+  <div class="demo" id="vkmDemo">
+    <div class="tag">Demo</div><h4>k-Means auf verschiedenen Datenformen</h4>
+    ${KMeansDemo.html('vkm')}
+  </div>
   <div class="merk"><b>Merksatz</b><p>Erst Frage, dann Chart. Danach Titel, Achsen mit Einheit, Null-Basislinie, aufräumen.</p></div>`,
     quiz: [
       { q: `Wann ist ein Kuchendiagramm keine gute Wahl?`, a: `Bei vielen Teilen oder wenn man genau vergleichen oder ranken will. Längen (Balken) lesen wir besser als Winkel.` },
       { q: `Warum sollen Balken bei Null beginnen?`, a: `Eine abgeschnittene Achse übertreibt Unterschiede. Im Kursbeispiel wirkte 720 gegenüber 290 wie das Zwölffache statt wie das 2.5-Fache.` },
     ],
     init() {
+      // k-means demo (shared code in assets/demos-kmeans.js)
+      KMeansDemo.init('vkm');
+
       (function(){
         const out=[
           ['Balkendiagramm','Sortiere die Balken und starte bei Null. Bei langen Beschriftungen waagrecht (barh).'],
           ['Liniendiagramm','Die x-Achse hat eine natürliche Reihenfolge, meist Zeit. Höchstens 4 bis 5 Linien, mit eigenem Marker oder Linienstil.'],
           ['Streudiagramm (Scatter)','Ein Punkt pro Beobachtung. Achte auf Richtung, Stärke und Ausreisser. Dritte Variable über Farbe oder Grösse. Zusammenhang ist keine Ursache.'],
           ['Histogramm','Zeigt, wie oft welcher Wertebereich vorkommt. Probiere verschiedene bins, sie verändern das Bild.'],
-          ['Boxplot','Linie = Median, Box = mittlere 50 Prozent, Striche = Spannweite, Punkte = Ausreisser. Ideal zum Vergleichen von Gruppen.'],
+          ['Boxplot','Linie = Median, Box = mittlere 50 Prozent, Striche = bis zum letzten Wert innerhalb von 1,5 × Boxhöhe (IQR), Punkte = Ausreisser jenseits davon. Ideal zum Vergleichen von Gruppen.'],
           ['Gestapelter Balken oder Kuchen','Nur wenn die Teile wirklich ein Ganzes ergeben und es wenige sind (höchstens 5 Kuchenstücke). Zum genauen Vergleichen lieber Balken.']];
         function upd(){const o=out[+$('qsel').value];$('qout').innerHTML='Nimm ein <b>'+o[0]+'</b>. '+o[1]}
         $('qsel').addEventListener('change',upd);upd()})();

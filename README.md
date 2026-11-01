@@ -81,18 +81,6 @@ nicht sämtliche Requirements in die Jupyter-Basisumgebung mischen.
 
 Ein Thema kann zusätzlich eigene Seiten haben, z. B. `mathe-kompakt.html` (Spickzettel) und `mathe-ausfuehrlich.html` (alle Erklärungen und Diagramme). Eine Seite ist eine Kopie von `mathe-kompakt.html`: `core.js`, dann die Demo-Datei und ein Modul. Die Hauptseite verweist über ein kleines Teaser-Modul (`modules/mathe.js`) darauf. Gemeinsame Demos liegen in `assets/demos-mathe.js` (`MatheDemos.deriv()`, `.stats()`, `.scaler()`), damit beide Seiten denselben Code nutzen.
 
-## Server und Deployment
+## Mit Server (Eingaben dauerhaft speichern)
 
 `python server.py` startet die App auf http://localhost:8765. Eingaben (Übungscode) werden zusätzlich in `data/state.json` gespeichert (nicht in git). Ohne Server speichert die App nur im Browser (localStorage).
-
-Nur Python-Standardbibliothek, keine Abhängigkeiten. Konfiguration über Umgebungsvariablen:
-
-```
-HOST=0.0.0.0 PORT=8080 STATE_FILE=/data/state.json python server.py
-```
-
-Für persistente Eingaben `STATE_FILE` auf ein gemountetes Volume legen. Der Endpunkt `/api/state` hat keine Authentifizierung: nur hinter einem Login/Reverse-Proxy öffentlich betreiben.
-
-## Bezug zum Schulstoff
-
-Inhalt basiert auf dem CAS Machine Learning @ HSLU (HS26). Die Kursunterlagen selbst sind nicht Teil dieses Repos; sie liegen im privaten Kursrepo `cas-ml-hs26` und sind nicht frei verteilbar. Darum dieses Repo privat halten, solange die App Kursinhalte zusammenfasst.
