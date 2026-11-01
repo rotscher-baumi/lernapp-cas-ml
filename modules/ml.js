@@ -33,7 +33,7 @@
   <p class="hint">Klicke auf einen Schritt in der Grafik: Darunter klappt die Erklärung auf, mit Links zu den passenden Stellen im Kapitel.</p>
   <figure class="fig ab-fig">
     <div class="ab-scroll">
-    <svg viewBox="-50 0 830 774" role="img" aria-label="Ablauf eines ML-Projekts: Rohdaten, Split 80/20, EDA auf den Trainingsdaten, Merkmalsauswahl, Vorverarbeitung und Skalierung nur auf Trainingsdaten berechnen, Training und Validierung mit Schleife über Hyperparameter, bestes Modell wählen, Testdaten genau einmal am Ende.">
+    <svg viewBox="-50 0 830 858" role="img" aria-label="Ablauf eines ML-Projekts: Rohdaten, Split 80/20, EDA auf den Trainingsdaten, manuelle Feature Selection mit Fachwissen, Vorverarbeitung und Skalierung nur auf Trainingsdaten berechnen, automatische Feature Selection in der Pipeline, Training und Validierung mit Schleife über Hyperparameter, bestes Modell wählen, Testdaten genau einmal am Ende.">
       <defs>
         <marker id="ab-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
           <path d="M0,0 L10,5 L0,10 z" style="fill:var(--line)"/>
@@ -62,7 +62,7 @@
       <text x="560" y="126" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body);fill:var(--warn)">Testset: gesperrt</text>
       <text x="560" y="144" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">nicht ansehen, nicht anfassen</text>
       </g>
-      <path d="M680,130 H745 V742 H360" marker-end="url(#ab-al)" style="stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4;fill:none"/>
+      <path d="M680,130 H745 V826 H360" marker-end="url(#ab-al)" style="stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4;fill:none"/>
 
       <line x1="210" y1="156" x2="210" y2="188" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
       <text x="222" y="177" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">80 % Train + Val</text>
@@ -119,20 +119,10 @@
 
       <g class="ab-step" data-s="4" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 4: Erklärung aufklappen">
       <rect x="60" y="300" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="322" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">4 · Merkmale auswählen</text>
-      <text x="210" y="340" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">nur Train, am besten in der CV-Pipeline</text>
+      <text x="210" y="322" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">4 · Feature Selection (manuell)</text>
+      <text x="210" y="340" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Fachwissen + EDA: IDs, Leakage, Dubletten raus</text>
       </g>
       <line x1="210" y1="352" x2="210" y2="384" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-
-      <line x1="360" y1="326" x2="410" y2="326" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-      <rect x="410" y="308" width="300" height="94" rx="8" style="fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 4;stroke:var(--line)"/>
-      <text x="424" y="328" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Filter</text>
-      <text x="494" y="328" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Varianz, Korrelation mit Ziel</text>
-      <text x="424" y="350" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Wrapper</text>
-      <text x="494" y="350" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">RFE: Modell wirft Merkmale raus</text>
-      <text x="424" y="372" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Embedded</text>
-      <text x="494" y="372" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">L1 (Lasso), Baum-Wichtigkeit</text>
-      <text x="424" y="392" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">auch: Merkmale zusammenfassen/neu bilden</text>
 
       <g class="ab-step" data-s="5" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 5: Erklärung aufklappen">
       <rect x="60" y="384" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
@@ -149,27 +139,43 @@
       <line x1="210" y1="520" x2="210" y2="552" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
 
       <g class="ab-step" data-s="7" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 7: Erklärung aufklappen">
-      <rect x="60" y="552" width="300" height="60" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="575" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">7 · Trainieren und validieren</text>
-      <text x="210" y="593" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Split 75:25 oder Cross-Validation</text>
+      <rect x="60" y="552" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="574" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">7 · Feature Selection (automatisch)</text>
+      <text x="210" y="592" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Filter, Wrapper, Embedded in der Pipeline</text>
       </g>
-      <path d="M60,596 H34 V568 H60" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
-      <text x="26" y="582" text-anchor="end" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">Hyper-</text>
-      <text x="26" y="596" text-anchor="end" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">parameter</text>
-      <line x1="210" y1="612" x2="210" y2="644" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <line x1="210" y1="604" x2="210" y2="636" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <line x1="360" y1="578" x2="410" y2="578" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <rect x="410" y="560" width="300" height="94" rx="8" style="fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 4;stroke:var(--line)"/>
+      <text x="424" y="580" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Filter</text>
+      <text x="494" y="580" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Varianz, Korrelation mit Ziel</text>
+      <text x="424" y="602" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Wrapper</text>
+      <text x="494" y="602" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">RFE: Modell wirft Merkmale raus</text>
+      <text x="424" y="624" style="fill:var(--muted);font-size:12px;font-family:var(--f-body);font-weight:600">Embedded</text>
+      <text x="494" y="624" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">L1 (Lasso), Baum-Wichtigkeit</text>
+      <text x="424" y="644" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">auch: Merkmale zusammenfassen/neu bilden</text>
 
       <g class="ab-step" data-s="8" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 8: Erklärung aufklappen">
-      <rect x="60" y="644" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="666" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">8 · Bestes Modell wählen</text>
-      <text x="210" y="684" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">anhand der Validierung, neu auf 80 % trainieren</text>
+      <rect x="60" y="636" width="300" height="60" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="659" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">8 · Trainieren und validieren</text>
+      <text x="210" y="677" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Split 75:25 oder Cross-Validation</text>
       </g>
-      <line x1="210" y1="696" x2="210" y2="722" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <path d="M60,680 H34 V652 H60" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      <text x="26" y="666" text-anchor="end" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">Hyper-</text>
+      <text x="26" y="680" text-anchor="end" style="fill:var(--muted);font-size:11.5px;font-family:var(--f-mono)">parameter</text>
+      <line x1="210" y1="696" x2="210" y2="728" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
 
       <g class="ab-step" data-s="9" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 9: Erklärung aufklappen">
-      <rect x="60" y="722" width="300" height="40" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
-      <text x="210" y="747" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">9 · Einmal auf Testset bewerten</text>
+      <rect x="60" y="728" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="750" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">9 · Bestes Modell wählen</text>
+      <text x="210" y="768" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">anhand der Validierung, neu auf 80 % trainieren</text>
       </g>
-      <text x="738" y="732" text-anchor="end" style="fill:var(--warn);font-size:11.5px;font-family:var(--f-mono)">transform mit Train-Median und Train-Skaler</text>
+      <line x1="210" y1="780" x2="210" y2="806" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+
+      <g class="ab-step" data-s="10" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 10: Erklärung aufklappen">
+      <rect x="60" y="806" width="300" height="40" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <text x="210" y="831" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">10 · Einmal auf Testset bewerten</text>
+      </g>
+      <text x="738" y="816" text-anchor="end" style="fill:var(--warn);font-size:11.5px;font-family:var(--f-mono)">transform mit Train-Median und Train-Skaler</text>
     </svg>
     </div>
     <div class="ab-detail" id="abDetail" role="region" aria-live="polite" hidden>
@@ -179,7 +185,65 @@
     </div>
     <figcaption>Die EDA (blau) kommt vor Vorverarbeitung und Modell. Das Testset (orange) wird gleich zu Beginn abgetrennt und erst im letzten Schritt benutzt, damit das Testergebnis nicht durch Wissen aus den Testdaten verfälscht wird.</figcaption>
   </figure>
-  <div class="merk"><b>Erst Daten anschauen</b><p>Ohne EDA weiss man nicht, ob Werte fehlen, ob Ausreisser Median oder Mittelwert verzerren, ob skaliert werden muss oder ob die Klassen ungleich verteilt sind. Die EDA bestimmt Schritt 4 bis 7.</p></div>
+  <div class="box" id="ml-titanic">
+    <h4>Komplettes Beispiel: Titanic in 10 Schritten</h4>
+    <p class="hint">Stark gekürzt. Die Nummern in den Kommentaren sind die Schritte der Grafik oben. Daten: Kaggle-Titanic (<code>train.csv</code>, 891 Passagiere, Ziel <code>Survived</code>). Ausgabe und Bilder stammen aus genau diesem Code (scikit-learn 1.9).</p>
+    <pre><code>import pandas as pd, matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.compose import make_column_transformer
+from sklearn.pipeline import make_pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, ConfusionMatrixDisplay
+
+# 1 · Rohdaten laden
+df = pd.read_csv(&quot;titanic/data.csv&quot;).dropna(subset=[&quot;Survived&quot;]).astype({&quot;Pclass&quot;: int, &quot;Survived&quot;: int})  # 1 leere Zeile
+print(df.shape, &quot;| fehlend:&quot;, df[[&quot;Age&quot;, &quot;Cabin&quot;, &quot;Embarked&quot;]].isna().sum().to_dict())
+
+# 2 · Aufteilen: Testset sofort wegsperren
+X, y = df.drop(columns=&quot;Survived&quot;), df[&quot;Survived&quot;]
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, stratify=y, random_state=0)
+
+# 3 · EDA, nur auf den Trainingsdaten
+eda = X_tr.assign(Survived=y_tr)
+fig, ax = plt.subplots(1, 2, figsize=(9, 3.2))
+eda.groupby([&quot;Pclass&quot;, &quot;Sex&quot;])[&quot;Survived&quot;].mean().unstack().plot.bar(ax=ax[0], rot=0, title=&quot;Überlebensrate nach Klasse und Geschlecht&quot;)
+eda[&quot;Age&quot;].plot.hist(bins=30, ax=ax[1], title=&quot;Alter (fehlt bei rund 20 %)&quot;)
+plt.show()
+
+# 4 · Feature Selection (manuell): ID, Name, Ticket und fast leere Cabin raus
+num, cat = [&quot;Age&quot;, &quot;Fare&quot;, &quot;SibSp&quot;, &quot;Parch&quot;], [&quot;Pclass&quot;, &quot;Sex&quot;, &quot;Embarked&quot;]
+
+# 5 + 6 · Vorverarbeitung und Skalieren, in der Pipeline nur auf Train gelernt
+prep = make_column_transformer(
+    (make_pipeline(SimpleImputer(strategy=&quot;median&quot;), StandardScaler()), num),
+    (make_pipeline(SimpleImputer(strategy=&quot;most_frequent&quot;), OneHotEncoder(handle_unknown=&quot;ignore&quot;)), cat))
+
+# 7 · Feature Selection (automatisch): L1 setzt unwichtige Gewichte auf 0
+model = make_pipeline(prep, LogisticRegression(l1_ratio=1, solver=&quot;liblinear&quot;))  # vor sklearn 1.8: penalty=&quot;l1&quot;
+
+# 8 + 9 · Mit 5-facher Cross-Validation trainieren und validieren, bestes C wählen
+search = GridSearchCV(model, {&quot;logisticregression__C&quot;: [0.01, 0.1, 1, 10]}, cv=5)
+search.fit(X_tr[num + cat], y_tr)
+print(&quot;bestes C:&quot;, search.best_params_[&quot;logisticregression__C&quot;], &quot;| CV-Accuracy:&quot;, round(search.best_score_, 3))
+coef = search.best_estimator_[-1].coef_[0]
+print(&quot;Merkmale mit Gewicht 0:&quot;, (coef == 0).sum(), &quot;von&quot;, len(coef))
+
+# 10 · Genau einmal auf dem Testset bewerten
+pred = search.predict(X_te[num + cat])
+print(&quot;Test-Accuracy:&quot;, round(accuracy_score(y_te, pred), 3))
+ConfusionMatrixDisplay.from_predictions(y_te, pred, display_labels=[&quot;gestorben&quot;, &quot;überlebt&quot;])
+plt.show()</code></pre>
+    <figure class="fig"><img src="assets/img/titanic-sup-1.png" alt="Balkendiagramm Überlebensrate nach Klasse und Geschlecht, Histogramm des Alters" loading="lazy"><figcaption>Schritt 3: Frauen und die 1. Klasse überlebten viel häufiger. Das Alter fehlt oft und ist schief verteilt, darum Median statt Mittelwert.</figcaption></figure>
+    <pre class="out">(891, 12) | fehlend: {&#x27;Age&#x27;: 177, &#x27;Cabin&#x27;: 687, &#x27;Embarked&#x27;: 2}
+bestes C: 1 | CV-Accuracy: 0.803
+Merkmale mit Gewicht 0: 3 von 12
+Test-Accuracy: 0.793</pre>
+    <figure class="fig"><img style="max-width:400px;margin:0 auto" src="assets/img/titanic-sup-2.png" alt="Confusion Matrix auf dem Testset" loading="lazy"><figcaption>Schritt 10: Confusion Matrix auf den 179 Testpassagieren. Die Test-Accuracy (0,79) liegt nahe an der CV-Schätzung (0,80): Das Modell ist nicht überangepasst.</figcaption></figure>
+    <p class="note">Was der Code bewusst weglässt: Feature Engineering (z. B. Familiengrösse, Titel aus dem Namen), andere Modelle vergleichen, Metriken neben Accuracy. Die ausführlichere Version mit Random Forest steht im Kapitel Klassifikation unter <a href="#klass-ablauf">Der ganze Ablauf (Titanic-Aufgabe)</a>.</p>
+  </div>
+  <div class="merk"><b>Erst Daten anschauen</b><p>Ohne EDA weiss man nicht, ob Werte fehlen, ob Ausreisser Median oder Mittelwert verzerren, ob skaliert werden muss oder ob die Klassen ungleich verteilt sind. Die EDA bestimmt Schritt 4 bis 8.</p></div>
   <div class="falle"><b>Data Leakage</b><p>Auch die EDA nur auf den 80 % machen. Merkmalsauswahl, Median und Skaler werden wie das Modell nur mit den Trainingsdaten berechnet, am sichersten innerhalb jedes Cross-Validation-Durchgangs. Sonst fliesst Testwissen ein und die Validierung ist zu optimistisch.</p></div>
 
   <h3 id="ml-gd">1 · Gradient Descent: so «lernt» ein Modell</h3>
@@ -331,6 +395,18 @@ scores = cross_val_score(pipe, X, y, cv=10,    # 10 Folds
     <li><b>Wrapper</b>: Mit einem Modell verschiedene Merkmalmengen ausprobieren.</li>
     <li><b>Embedded</b>: Die Auswahl steckt im Modell (Lasso, siehe unten).</li>
   </ul>
+  <p>Im Ablauf kommt Feature Selection zweimal vor:</p>
+  <ul>
+    <li><b>Manuell</b> (Schritt 4): Du streichst mit Fachwissen und EDA, was nicht ins Modell gehört: IDs, Namen, Spalten mit Leakage, fast leere Spalten, Dubletten wie <code>qm</code> und <code>Zimmer</code>. Das geht vor der Vorverarbeitung.</li>
+    <li><b>Automatisch</b> (Schritt 7): Filter, Wrapper oder Embedded als Schritt in der <code>Pipeline</code>, nach Auffüllen und Skalieren. So wird die Auswahl in jedem CV-Fold nur aus dessen Trainingsdaten berechnet.</li>
+  </ul>
+  <pre><code>from sklearn.feature_selection import SelectFromModel
+pipe = Pipeline([
+    ("impute", SimpleImputer(strategy="median")),
+    ("scale", StandardScaler()),
+    ("select", SelectFromModel(Lasso(alpha=0.1))),
+    ("model", LinearRegression()),
+])</code></pre>
   <pre><code>import seaborn as sns
 sns.heatmap(data.corr(), annot=True, cmap="Reds")</code></pre>
   <p class="note"><b>Mit den 10 Wohnungen:</b> Die Korrelation mit dem Preis ist bei <code>qm</code> 0,96, bei <code>Zimmer</code> 0,96 und bei <code>Lage</code> nur 0,52 (trotzdem nützlich, siehe Regularisierung). Zugleich korrelieren <code>qm</code> und <code>Zimmer</code> untereinander mit 0,996: Sie sind praktisch dasselbe Merkmal (grosse Wohnungen haben mehr Zimmer). Eines davon wegzulassen kostet fast keine Information.</p>
@@ -416,14 +492,15 @@ search.best_params_, search.best_estimator_</code></pre>
         const S={
           '1':['1 · Rohdaten laden','Zuerst prüfst du, was du überhaupt hast: Zeilen und Spalten (<code>df.shape</code>), Datentypen (<code>df.info()</code>) und die ersten Zeilen (<code>df.head()</code>). Zahlen, die als Text eingelesen wurden, oder Fremdzeilen am Dateiende fallen schon hier auf.',[['Pandas-Grundlagen','#pandas']]],
           '2':['2 · Aufteilen','Bevor du irgendetwas auswertest, trennst du Trainings- und Testdaten (zum Beispiel 80 zu 20, bei Klassifikation mit <code>stratify</code>). Aus den 80 % werden später Training und Validierung. Der Test bleibt gesperrt, sonst fliesst sein Wissen in jede Entscheidung.',[['Train, Validation, Test','#ml-split'],['Data Leakage','#klass-leakage']]],
-          't':['Testset: gesperrt','Der abgetrennte Teil (hier 20 %) wird nicht angesehen und nicht zum Entscheiden benutzt. Erst in Schritt 9 wird er genau einmal gebraucht. So bleibt das Ergebnis eine ehrliche Schätzung für neue Daten.',[['Train, Validation, Test','#ml-split'],['Data Leakage','#klass-leakage']]],
+          't':['Testset: gesperrt','Der abgetrennte Teil (hier 20 %) wird nicht angesehen und nicht zum Entscheiden benutzt. Erst in Schritt 10 wird er genau einmal gebraucht. So bleibt das Ergebnis eine ehrliche Schätzung für neue Daten.',[['Train, Validation, Test','#ml-split'],['Data Leakage','#klass-leakage']]],
           '3':['3 · Daten ansehen (EDA)','Verteilungen und Ausreisser, Zusammenhang zwischen Merkmal und Ziel, Korrelationen, fehlende Werte. Nur auf den 80 % und ohne Modell. Daraus folgt die Strategie: Was muss gefüllt, skaliert oder umgebaut werden, welches Modell passt?',[['Visualisieren','#viz'],['Pandas-Grundlagen','#pandas'],['Korrelation ist keine Ursache','#ml-fs']]],
-          '4':['4 · Merkmale auswählen','Mehr Merkmale sind nicht automatisch besser (Curse of Dimensionality). <b>Filter</b> bewerten Merkmale per Statistik, <b>Wrapper</b> probieren Merkmalmengen mit einem Modell aus, <b>Embedded</b> steckt im Modell (Lasso, Baum-Wichtigkeit). Nur auf den Trainingsdaten, am besten innerhalb der Cross-Validation.',[['Feature Selection','#ml-fs'],['Lasso und Ridge','#ml-reg']]],
+          '4':['4 · Feature Selection (manuell)','Du entscheidest selbst, mit Fachwissen und dem, was die EDA zeigt: IDs und Namen raus, Spalten raus, die das Ziel verraten (Leakage, z. B. Werte, die es erst nach dem Ereignis gibt), fast leere Spalten raus, und von zwei fast gleichen Merkmalen nur eines behalten (z. B. <code>qm</code> und <code>Zimmer</code>). Dafür braucht es noch keine aufbereiteten Daten. Vorsicht: Wer Merkmale wegen tiefer Korrelation mit dem Ziel streicht, nutzt Zielwissen, die CV-Scores werden dadurch etwas zu optimistisch.',[['Feature Selection','#ml-fs'],['Data Leakage','#klass-leakage']]],
           '5':['5 · Vorverarbeitung festlegen','Fehlende Werte füllen (Median, Mittelwert, Modus, kNN) und Kategorien in Zahlen umwandeln (One-Hot). Die Werte dafür (z. B. der Median) lernst du nur aus dem Training (<code>fit</code>) und setzt sie bei Validation und Test nur ein (<code>transform</code>).',[['Fehlende Werte','#ml-missing'],['Kategorien in Zahlen','#ml-cat'],['Data Leakage','#klass-leakage']]],
           '6':['6 · Skalieren','Standard Scaling oder Min-Max, damit Merkmale in vergleichbaren Grössenordnungen liegen. Wichtig für Gradient Descent, kNN, SVM und Regularisierung, unnötig für Bäume. Auch der Skaler wird nur auf den Trainingsdaten angepasst.',[['Skalieren','#ml-scaling'],['Pipeline','#ml-pipeline']]],
-          '7':['7 · Trainieren und validieren','Das Modell lernt auf dem Training und wird auf der Validierung gemessen, entweder mit einem Split (75 zu 25) oder mit k-facher Cross-Validation. In der Schleife probierst du Hyperparameter durch. Ein grosser Abstand zwischen Training und Validierung zeigt Overfitting.',[['Cross-Validation','#ml-split'],['Bias und Variance','#ml-bv'],['Hyperparameter','#ml-hp'],['Klassifikations-Modelle','#klass-modelle']]],
-          '8':['8 · Bestes Modell wählen','Gewählt wird nach der Validierung, nie nach dem Test. Danach trainierst du das beste Modell mit den besten Einstellungen noch einmal auf allen 80 % (Training und Validierung zusammen), weil mehr Daten helfen.',[['Hyperparameter und Modellwahl','#ml-hp'],['Train, Validation, Test','#ml-split']]],
-          '9':['9 · Einmal auf Testset bewerten','Genau ein einziges Mal, mit den Werten aus dem Training (<code>transform</code>, kein neues <code>fit</code>). Das Ergebnis ist die ehrliche Schätzung für neue Daten. Bei Klassifikation schaust du Accuracy, Precision, Recall und ROC an. Wird danach nochmal getunt, ist der Test verbraucht.',[['Metriken und ROC','#klass-metriken'],['Data Leakage','#klass-leakage'],['Ablauf an der Titanic-Aufgabe','#klass-ablauf']]]
+          '7':['7 · Feature Selection (automatisch)','Mehr Merkmale sind nicht automatisch besser (Curse of Dimensionality). Hier entscheidet ein Verfahren: <b>Filter</b> bewerten Merkmale per Statistik, <b>Wrapper</b> probieren Merkmalmengen mit einem Modell aus (RFE), <b>Embedded</b> steckt im Modell (Lasso, Baum-Wichtigkeit). Das kommt nach Auffüllen und Skalieren: Die meisten Verfahren laufen nicht mit fehlenden Werten, und Lasso bestraft unskalierte Merkmale ungleich. Als Schritt in der <code>Pipeline</code> wird die Auswahl in jedem CV-Fold nur aus dessen Trainingsdaten berechnet.',[['Feature Selection','#ml-fs'],['Lasso und Ridge','#ml-reg'],['Pipeline','#ml-pipeline']]],
+          '8':['8 · Trainieren und validieren','Das Modell lernt auf dem Training und wird auf der Validierung gemessen, entweder mit einem Split (75 zu 25) oder mit k-facher Cross-Validation. In der Schleife probierst du Hyperparameter durch. Ein grosser Abstand zwischen Training und Validierung zeigt Overfitting.',[['Cross-Validation','#ml-split'],['Bias und Variance','#ml-bv'],['Hyperparameter','#ml-hp'],['Klassifikations-Modelle','#klass-modelle']]],
+          '9':['9 · Bestes Modell wählen','Gewählt wird nach der Validierung, nie nach dem Test. Danach trainierst du das beste Modell mit den besten Einstellungen noch einmal auf allen 80 % (Training und Validierung zusammen), weil mehr Daten helfen.',[['Hyperparameter und Modellwahl','#ml-hp'],['Train, Validation, Test','#ml-split']]],
+          '10':['10 · Einmal auf Testset bewerten','Genau ein einziges Mal, mit den Werten aus dem Training (<code>transform</code>, kein neues <code>fit</code>). Das Ergebnis ist die ehrliche Schätzung für neue Daten. Bei Klassifikation schaust du Accuracy, Precision, Recall und ROC an. Wird danach nochmal getunt, ist der Test verbraucht.',[['Metriken und ROC','#klass-metriken'],['Data Leakage','#klass-leakage'],['Ablauf an der Titanic-Aufgabe','#klass-ablauf']]]
         };
         let cur=null;
         function close(){
