@@ -10,14 +10,25 @@
   .nbbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:12px 0}
   .nbbar a{min-height:44px;display:inline-flex;align-items:center}
   #nbframe{width:100%;height:calc(100vh - 150px);min-height:480px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
-  #nbmiss{display:none}
+  #nbmiss,#nbframe{display:none}
+  #nbmiss button{margin:8px 0}
+  #nbmiss details{margin-top:8px;font-size:14px}
+  #nbmiss code{overflow-wrap:anywhere}
 </style>
 </head>
 <body>
 <div class="wrap">
 <div class="nbbar"><a href="index.html" data-en="← Back to the study guide">← Zurück zur Lernhilfe</a><a id="nbopen" target="_blank" rel="noopener" data-en="Open in a separate tab">In eigenem Tab öffnen</a></div>
 <iframe id="nbframe" title="Jupyter-Notebook mit den Python-Übungen" data-en-title="Jupyter notebook with the Python exercises"></iframe>
-<div id="nbmiss" class="merk" data-en="&lt;b&gt;Jupyter is not running&lt;/b&gt;&lt;p&gt;Start it in the study app folder:&lt;br&gt;&lt;code&gt;jupyter-lab --no-browser --ip=127.0.0.1 --port=8899 --ServerApp.base_url=/jupyter/ --ServerApp.token=lernapp-local&lt;/code&gt;&lt;/p&gt;"><b>Jupyter läuft nicht</b><p>Starte im Ordner der Lernapp:<br><code>jupyter-lab --no-browser --ip=127.0.0.1 --port=8899 --ServerApp.base_url=/jupyter/ --ServerApp.token=lernapp-local</code></p></div>
+<div id="nbmiss" class="merk">
+  <b data-en="Jupyter is not running">Jupyter läuft nicht</b>
+  <p data-en="The study app can start it for you. This takes a few seconds.">Die Lernapp kann es für dich starten. Das dauert ein paar Sekunden.</p>
+  <button class="pri" id="nbstart" data-en="Start Jupyter">Jupyter starten</button>
+  <p id="nbmsg" role="status"></p>
+  <details><summary data-en="Start it by hand instead">Lieber von Hand starten</summary>
+  <p data-en="In a terminal:">Im Terminal:</p>
+  <p><code>jupyter-lab --no-browser --ip=127.0.0.1 --port=8899 --ServerApp.base_url=/jupyter/ --IdentityProvider.token=lernapp-local --ServerApp.root_dir=C:\Studium\CAS_ML\lernapp-cas-ml</code></p></details>
+</div>
 </div>
 <script>
 (function () {
@@ -31,15 +42,50 @@
   }
 })();
 (function () {
-  var url = '/jupyter/lab/tree/notebooks/Lernapp_Lernhilfe.ipynb?token=lernapp-local';
-  var frame = document.getElementById('nbframe');
-  frame.src = url;
+  // ?nb=beispiele/01_Regression.ipynb opens another notebook from lernapp/notebooks (no '..', only .ipynb)
+  var nb = (location.search.match(/[?&]nb=([\w\/-]+\.ipynb)(?:&|$)/) || [])[1] || 'Lernapp_Lernhilfe.ipynb';
+  var url = '/jupyter/lab/tree/notebooks/' + nb + '?token=lernapp-local';
+  var en = document.documentElement.lang === 'en';
+  var frame = document.getElementById('nbframe'), miss = document.getElementById('nbmiss');
+  var btn = document.getElementById('nbstart'), msg = document.getElementById('nbmsg');
   document.getElementById('nbopen').href = url;
-  fetch('/jupyter/api/status?token=lernapp-local').then(function (r) {
-    if (!r.ok) throw new Error(r.status);
-  }).catch(function () {
-    frame.style.display = 'none';
-    document.getElementById('nbmiss').style.display = 'block';
+  function up() {
+    return fetch('/jupyter/api/status?token=lernapp-local').then(function (r) { return r.ok; }, function () { return false; });
+  }
+  function show() { miss.style.display = 'none'; frame.style.display = 'block'; frame.src = url; }
+  up().then(function (ok) { if (ok) show(); else miss.style.display = 'block'; });
+
+  btn.addEventListener('click', function () {
+    btn.disabled = true;
+    msg.textContent = en ? 'Starting Jupyter …' : 'Jupyter startet …';
+    fetch('/api/jupyter/start', { method: 'POST', headers: { 'X-Lernapp': '1' } }).then(function (r) {
+      return r.json().catch(function () { return { status: r.status === 405 ? 'old' : 'error' }; });
+    }, function () { return { status: 'error' }; }).then(function (res) {
+      if (res.status === 'missing') {
+        msg.innerHTML = (en ? 'JupyterLab is not installed for the Python that runs the server. Install it with:' :
+          'JupyterLab ist für das Python, das den Server ausführt, nicht installiert. Installiere es mit:') +
+          '<br><code>"' + res.python + '" -m pip install jupyterlab</code>';
+      } else if (res.status === 'old') {
+        msg.textContent = en ? 'The server is an older version. Restart it with python server.py.' : 'Der Server ist eine ältere Version. Starte ihn neu mit python server.py.';
+      } else if (res.status !== 'running' && res.status !== 'starting') {
+        msg.textContent = en ? 'Could not start Jupyter. Is the study app running via python server.py?' : 'Jupyter konnte nicht starten. Läuft die Lernapp über python server.py?';
+      } else {
+        var tries = 0;
+        (function poll() {
+          up().then(function (ok) {
+            if (ok) return show();
+            if (++tries > 60) {
+              msg.textContent = en ? 'Jupyter did not answer within a minute. See data/jupyter.log.' : 'Jupyter hat nach einer Minute nicht geantwortet. Siehe data/jupyter.log.';
+              btn.disabled = false;
+              return;
+            }
+            setTimeout(poll, 1000);
+          });
+        })();
+        return;
+      }
+      btn.disabled = false;
+    });
   });
 })();
 </script>
