@@ -19,6 +19,10 @@
  * header. English texts live in modules/en/<id>.js and call LernApp.translate(id, {...})
  * with the fields to replace (nav, title, kicker, summary, html, quiz, notebooks). Demo code picks its strings with
  * LernApp.t('deutsch', 'english'). Static page text uses a data-en attribute.
+ *
+ * Theme: 'light', 'dark' or 'auto' (follows the system), chosen with the switch in the
+ * header and stored under cas-ml-theme. It is applied as data-theme on <html>; the pages
+ * also set it in a tiny inline script in <head> so the first paint has the right colours.
  */
 (function () {
   'use strict';
@@ -83,6 +87,16 @@
   try { if ((qLang || localStorage.getItem('cas-ml-lang')) === 'en') LANG = 'en'; } catch (e) { if (qLang === 'en') LANG = 'en'; }
   LernApp.lang = LANG;
   document.documentElement.lang = LANG;
+
+  // ?theme=dark|light|auto in the address wins over the stored choice (for links and tests)
+  let THEME = (location.search.match(/[?&]theme=(light|dark|auto)\b/) || [])[1] || 'auto';
+  try { const th = localStorage.getItem('cas-ml-theme'); if (!/[?&]theme=/.test(location.search) && (th === 'light' || th === 'dark')) THEME = th; } catch (e) {}
+  function applyTheme(th) {
+    THEME = th;
+    if (th === 'auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', th);
+  }
+  applyTheme(THEME);
 
   function store(key, val) {
     try {
@@ -261,9 +275,22 @@
   function wireLang() {
     const head = document.querySelector('header.top');
     if (head) {
-      head.insertAdjacentHTML('afterbegin', '<div class="langsw" role="group" aria-label="Sprache / Language">' +
-        '<button type="button" data-l="de" lang="de">DE</button><button type="button" data-l="en" lang="en">EN</button></div>');
-      head.querySelectorAll('.langsw button').forEach(function (b) {
+      head.insertAdjacentHTML('afterbegin', '<div class="hdrsw">' +
+        '<div class="langsw" role="group" aria-label="Sprache / Language">' +
+        '<button type="button" data-l="de" lang="de">DE</button><button type="button" data-l="en" lang="en">EN</button></div>' +
+        '<div class="langsw themesw" role="group" aria-label="' + t('Farbschema', 'Colour scheme') + '">' +
+        '<button type="button" data-th="light">' + t('Hell', 'Light') + '</button>' +
+        '<button type="button" data-th="dark">' + t('Dunkel', 'Dark') + '</button>' +
+        '<button type="button" data-th="auto">Auto</button></div></div>');
+      const thBtns = head.querySelectorAll('.themesw button');
+      function markTheme() {
+        thBtns.forEach(function (b) { const on = b.dataset.th === THEME; b.className = on ? 'pri' : ''; b.setAttribute('aria-pressed', on); });
+      }
+      thBtns.forEach(function (b) {
+        b.addEventListener('click', function () { applyTheme(b.dataset.th); store('cas-ml-theme', b.dataset.th); markTheme(); });
+      });
+      markTheme();
+      head.querySelectorAll('.langsw:not(.themesw) button').forEach(function (b) {
         const on = b.dataset.l === LANG;
         b.className = on ? 'pri' : '';
         b.setAttribute('aria-pressed', on);

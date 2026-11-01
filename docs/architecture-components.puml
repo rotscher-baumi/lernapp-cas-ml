@@ -1,0 +1,90 @@
+@startuml architecture-components
+' Komponenten der Lernapp: Seiten, Kern, Kapitel, Server und externe Dienste.
+' Stand 2026-11-01. Rendern: VS-Code-Erweiterung jebbs.plantuml oder plantuml.jar.
+title Lernapp CAS ML – Komponenten
+
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+skinparam linetype ortho
+
+actor "Lernende:r\n(Browser)" as user
+
+package "Seiten (HTML, kein Build)" {
+  [index.html\nHauptseite: Kopf, Überblick,\n#modules, Spielwiese] as index
+  [titanic.html\nmathe-kompakt.html\nmathe-ausfuehrlich.html\nUnterseiten: Kopf + ein Modul] as sub
+  [notebook.html\niframe auf JupyterLab] as nbpage
+}
+
+package "assets/" {
+  [core.js\nLernApp-Kern:\nregister · translate · t\nSprache · Theme · Speicher\nRendern · Navigation\nSpielwiese (Skulpt)] as core
+  [style.css\nDesign-Tokens hell/dunkel\n(data-theme, prefers-color-scheme)] as css
+  [demos-mathe.js\nMatheDemos] as dm
+  [demos-kmeans.js\nKMeansDemo] as dk
+  [img/\nGrafiken aus echten Läufen] as img
+  [notebook-data.js\n(generiert, zurzeit\nvon keiner Seite geladen)] as nbdata
+}
+
+package "modules/" {
+  [<kapitel>.js\nLernApp.register({...})\nein Kapitel pro Datei] as mods
+  [en/<kapitel>.js\nLernApp.translate(id, {...})\nenglische Texte] as en
+  [_vorlage.js\nVorlage für neue Kapitel] as tpl
+}
+
+package "Lokaler Server (optional)" {
+  [server.py\nstatische Dateien\nGET/PUT /api/state\nProxy /jupyter/*] as srv
+  database "data/state.json\nKopie des Browser-Speichers" as state
+  [JupyterLab\n127.0.0.1:8899] as jupyter
+  folder "notebooks/\n*.ipynb" as nbs
+}
+
+package "Werkzeuge" {
+  [tools/build_notebook_exercises.py\nnotebooks → notebook-data.js] as t1
+  [scripts/build_notebook.js\nscripts/build_lernhilfe_notebook.js\nmodules → notebooks] as t2
+}
+
+cloud "Externe Dienste" {
+  [Google Fonts] as fonts
+  [Skulpt (jsDelivr)\nPython im Browser\nfür die Spielwiese] as skulpt
+}
+
+user --> index
+user --> sub
+user --> nbpage
+
+index --> core
+sub --> core
+index ..> css
+sub ..> css
+nbpage ..> css
+index --> mods
+index --> en
+sub --> mods : genau ein Modul
+sub --> en
+sub --> dm
+index --> dk
+mods ..> dm
+mods ..> dk
+mods ..> img
+
+core ..> fonts : Schrift
+core ..> skulpt : erster Klick auf «Ausführen»
+
+core --> srv : GET /api/state beim Laden\nPUT /api/state nach jeder Änderung
+srv --> state
+nbpage --> srv : /jupyter/* (HTTP + WebSocket)
+srv --> jupyter : Tunnel
+jupyter --> nbs
+
+nbs --> t1
+t1 --> nbdata
+mods --> t2
+t2 --> nbs
+tpl .. mods : kopieren
+
+note right of srv
+  Ohne Server (Doppelklick auf index.html)
+  bleibt alles im localStorage des Browsers;
+  /api/state und /jupyter/* fehlen dann.
+end note
+
+@enduml
