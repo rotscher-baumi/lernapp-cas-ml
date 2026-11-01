@@ -31,10 +31,10 @@ package "modules/" {
 }
 
 package "Lokaler Server (optional)" {
-  [server.py\nstatische Dateien\nGET/PUT /api/state\nProxy /jupyter/*] as srv
+  [server.py\nstatische Dateien\nGET/PUT /api/state\nPOST /api/jupyter/start\nProxy /jupyter/*] as srv
   database "data/state.json\nKopie des Browser-Speichers" as state
   [JupyterLab\n127.0.0.1:8899] as jupyter
-  folder "notebooks/\n*.ipynb" as nbs
+  folder "notebooks/\n*.ipynb\nbeispiele/*.ipynb" as nbs
 }
 
 package "Werkzeuge" {
@@ -72,6 +72,8 @@ core ..> skulpt : erster Klick auf «Ausführen»
 core --> srv : GET /api/state beim Laden\nPUT /api/state nach jeder Änderung
 srv --> state
 nbpage --> srv : /jupyter/* (HTTP + WebSocket)
+nbpage --> srv : Knopf «Jupyter starten»
+srv ..> jupyter : startet bei Bedarf (.venv)
 srv --> jupyter : Tunnel
 jupyter --> nbs
 

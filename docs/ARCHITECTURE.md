@@ -35,10 +35,15 @@ lernapp-cas-ml/
     en/<id>.js               englische Texte desselben Kapitels
     _vorlage.js              Vorlage für ein neues Kapitel
   notebooks/                 Jupyter-Notebooks (Übungen, Lernhilfe)
+    beispiele/               je ein eigenständiges Beispiel-Notebook pro Thema der Übersicht (01 bis 07, Titanic = 07)
   tools/                     build_notebook_exercises.py: Notebooks → notebook-data.js
   scripts/                   build_notebook.js, build_lernhilfe_notebook.js: Module → Notebooks
   server.py                  statischer Server, /api/state, Proxy /jupyter/*
   data/state.json            Kopie des Browser-Speichers (nicht in git)
+  tests/                     pytest: server.py, Notebooks, Links der Übersicht, JS-Syntax
+  pyproject.toml             Konfiguration von ruff, pytest und pyright
+  requirements.txt           Laufzeit: JupyterLab und die Pakete der Notebooks (in `.venv`)
+  requirements-dev.txt       Entwicklung: ruff, pytest, pytest-cov, pyright, nbclient
   docs/                      diese Dokumentation
 ```
 
@@ -80,11 +85,12 @@ Alle Farben sind Tokens auf `:root` (`--bg`, `--fg`, `--accent`, ...). Der dunkl
 
 ### Server (`server.py`)
 
-Nur Standardbibliothek. Drei Aufgaben:
+Nur Standardbibliothek. Vier Aufgaben:
 
 1. Statische Dateien aus dem Projektordner ausliefern (`http://127.0.0.1:8765`).
 2. `GET /api/state` liefert `data/state.json`, `PUT /api/state` ersetzt sie atomar (Schreiben in `.tmp`, dann umbenennen). Der Kern lädt den Zustand beim Start synchron in den `localStorage` und schickt nach jeder Änderung eine Kopie aller Schlüssel zurück.
 3. `/jupyter/*` wird als Tunnel (HTTP und WebSocket) an JupyterLab auf Port 8899 weitergereicht, damit nur ein Port offen sein muss.
+4. `POST /api/jupyter/start` startet JupyterLab, wenn es nicht läuft (Knopf «Jupyter starten» auf `notebook.html`). Der Server nimmt dafür das Python aus `.venv` im Projektordner (sonst sein eigenes), startet es losgelöst mit dem Projektordner als Startordner und schreibt das Log nach `data/jupyter.log`. Der Aufruf geht nur von 127.0.0.1 und nur mit dem Header `X-Lernapp: 1`; der eigene Header löst bei fremden Webseiten eine CORS-Vorabfrage aus, die der Server nie bestätigt.
 
 Konfiguration über Umgebungsvariablen: `HOST`, `PORT`, `STATE_FILE`, `JUPYTER_HOST`, `JUPYTER_PORT`.
 
@@ -92,6 +98,7 @@ Konfiguration über Umgebungsvariablen: `HOST`, `PORT`, `STATE_FILE`, `JUPYTER_H
 
 - `tools/build_notebook_exercises.py` erzeugt `assets/notebook-data.js` aus den Übungs-Notebooks (`--check` prüft, `--verify` lässt alle Lösungen gegen ihre Prüfung laufen). Seit die Code-Übungen aus der App entfernt sind, lädt keine Seite diese Datei mehr; das Werkzeug bleibt für die Notebooks.
 - `scripts/build_notebook.js` und `scripts/build_lernhilfe_notebook.js` laufen mit Node und erzeugen aus den Modulen die Notebooks `Lernapp_Uebungen.ipynb` und `Lernapp_Lernhilfe.ipynb`.
+- Prüfung: `ruff check .`, `ruff format --check server.py tools tests`, `pyright` und `pytest` (Befehle mit `.venv`-Pfad in `AGENTS.project.md`). `pytest -m slow` führt zusätzlich alle Beispiel-Notebooks vollständig aus.
 
 ## Zustand und Persistenz
 
@@ -107,7 +114,7 @@ In der Adresse gewinnen `?lang=en` und `?theme=dark` über den gespeicherten Wer
 
 - Google Fonts (Schriften), zur Laufzeit.
 - Skulpt über jsDelivr (Python in der Spielwiese), erst beim ersten Ausführen.
-- JupyterLab lokal, nur für `notebook.html`.
+- JupyterLab lokal (aus `.venv`, Start über den Knopf auf `notebook.html`), nur für `notebook.html`. Die Beispiel-Notebooks laufen auch in Google Colab; Titanic lädt dort die öffentliche Kaggle-Kopie.
 - Zum Erzeugen der Grafiken und Ausgaben: Python mit pandas, scikit-learn, matplotlib, seaborn (siehe `requirements.txt`). Zur Laufzeit der Seite ist kein Python nötig.
 
 ## Ein Kapitel hinzufügen
