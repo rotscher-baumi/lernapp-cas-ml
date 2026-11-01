@@ -167,3 +167,23 @@ h3[id],h4[id],.merk[id]{scroll-margin-top:72px}
 .ex .plot{display:block;max-width:100%;height:auto;margin:10px 0;background:#fff;border-radius:6px}
 .ex .rich .tablewrap table{min-width:0;font-size:13px}
 .ex .rich .tablewrap style{display:none}
+
+/* overview chapter: model cards and decision tree */
+.sbgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:14px 0}
+.sb{min-width:0;display:flex;flex-direction:column;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:14px}
+.sb h4{margin:0 0 6px;font-family:var(--f-display);font-size:16px}
+.sb>p{font-size:14.5px;margin:0 0 10px}
+.sb dl{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;margin:0 0 10px;font-size:14px;line-height:1.45}
+.sb dt{font-family:var(--f-mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+.sb dd{margin:0;min-width:0}
+.sb ul{margin:0 0 10px;padding-left:18px;font-size:14px;line-height:1.45}
+.sb li{margin:3px 0}
+.sb-f{margin-top:auto;display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:space-between;align-items:center;font-size:13px;border-top:1px solid var(--line);padding-top:8px}
+.sb-f code{overflow-wrap:anywhere}
+.ue-tree{margin:14px 0}
+.ue-q{font-weight:600;border:1px solid var(--accent);background:var(--accent-soft);border-radius:8px;padding:10px 12px;margin:0 0 10px}
+.ue-branches{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.ue-b{min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px}
+.ue-b>b{display:block;font-family:var(--f-display);font-size:16px;margin-bottom:8px}
+.ue-leaf{border-left:3px solid var(--accent);padding:6px 0 6px 10px;margin:8px 0;font-size:14px;line-height:1.45}
+.ue-leaf b{display:block}

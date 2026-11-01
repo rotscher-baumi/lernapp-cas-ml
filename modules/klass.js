@@ -226,20 +226,7 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
     <li>Regularisierung und Hyperparameter-Suche.</li>
     <li>Bestes Modell <b>einmal</b> auf dem Test-Set prüfen.</li>
   </ol>
-  <pre><code>from sklearn.compose import ColumnTransformer
-from sklearn.impute import SimpleImputer
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score, train_test_split
-
-X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, stratify=y, random_state=0)
-num = Pipeline([("imp", SimpleImputer(strategy="median")), ("sc", StandardScaler())])
-cat = OneHotEncoder(handle_unknown="ignore")
-prep = ColumnTransformer([("num", num, ["Age", "Fare"]), ("cat", cat, ["Sex", "Pclass"])])
-model = Pipeline([("prep", prep), ("clf", RandomForestClassifier(random_state=0))])
-cross_val_score(model, X_tr, y_tr, cv=5, scoring="f1").mean()</code></pre>
-  <p class="note"><code>stratify=y</code> sorgt dafür, dass Train und Test das gleiche Klassenverhältnis haben. Die Pipeline lernt Imputer und Scaler in jedem Fold nur auf dem Trainingsteil und verhindert so Leakage. Die Vorlage des Dozenten liegt im Kursordner unter <code>02 - SUPERVISED-ML/code/CAS_ML_Supervised_Learning_2.ipynb</code>.</p>
+  <p class="note"><b>Komplettes Beispiel mit Code:</b> Alle 11 Schritte mit Random Forest, jeder mit Erklärung, Ausgabe und Grafik, stehen auf der eigenen Seite <a href="titanic.html#tit-rf">Titanic ausführlich</a>. Eine Kurzversion mit logistischer Regression steht <a href="#ml-titanic">am Ende von Supervised ML</a>.</p>
 `,
     exercises: [
       {
