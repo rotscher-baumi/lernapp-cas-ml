@@ -1,8 +1,12 @@
 # Lernapp CAS ML
 
-Lernseite zum Kursstoff: Erklärungen, Diagramme, Demos, Python-Übungen im Browser und Selbsttest. Alles Selbsterstellte liegt in diesem Ordner, getrennt von den Kursunterlagen.
+Lernseite zum Kursstoff: Erklärungen, Diagramme, Demos und Selbsttest, auf Deutsch und Englisch, hell und dunkel. Alles Selbsterstellte liegt in diesem Ordner, getrennt von den Kursunterlagen.
 
-Öffnen: `index.html` per Doppelklick im Browser. Es braucht Internet für die Schrift (Google Fonts) und für den Python-Interpreter der Übungen (Skulpt über jsDelivr).
+Öffnen: `index.html` per Doppelklick im Browser. Es braucht Internet für die Schrift (Google Fonts) und für den Python-Interpreter der Spielwiese (Skulpt über jsDelivr).
+
+Oben rechts: **DE / EN** schaltet die Sprache um, **Hell / Dunkel / Auto** das Farbschema (Auto folgt dem System). Beides merkt sich der Browser; mit Server auch über Browser hinweg. Für Links und Tests: `?lang=en`, `?theme=dark`.
+
+Architektur, Diagramme (PlantUML) und Datenobjektmodell: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) und [docs/DESIGN.md](docs/DESIGN.md).
 
 ## Aufbau
 
@@ -11,20 +15,23 @@ lernapp/
   index.html        Kern: Kopf, Überblick, Spielwiese, Liste der Module
   assets/
     style.css       Design (hell und dunkel)
-    core.js         Navigation, Übungen, Selbsttest, Python-Ausführung
+    core.js         Navigation, Sprache, Theme, Selbsttest, Spielwiese
+    demos-*.js      geteilte Demos (Mathe, k-Means)
   modules/          ein Kapitel pro Datei
-    ds.js git.js python.js pandas.js viz.js hood.js ml.js klass.js unsup.js
+    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js uebersicht.js titanic.js
+    en/             englische Texte je Kapitel
     _vorlage.js     Vorlage für ein neues Kapitel
   notebooks/        Übungs-Notebooks (Jupyter / VS Code)
+  docs/             Architektur, PlantUML-Diagramme, Design-Dokument
 ```
 
 ## Neues Kapitel hinzufügen
 
 1. `modules/_vorlage.js` nach `modules/<name>.js` kopieren.
-2. `id`, `order`, `nav`, `title`, `kicker`, `summary` und `html` ausfüllen. Optional `exercises` (Python-Aufgaben), `quiz` (Selbsttest), `notebooks` und `init()` für Demos.
-3. In `index.html` unten eine Zeile ergänzen: `<script src="modules/<name>.js"></script>`.
+2. `id`, `order`, `nav`, `title`, `kicker`, `summary` und `html` ausfüllen. Optional `quiz` (Selbsttest), `notebooks` und `init()` für Demos.
+3. In `index.html` unten eine Zeile ergänzen: `<script src="modules/<name>.js"></script>`. Für Englisch `modules/en/<name>.js` mit `LernApp.translate('<name>', {...})` anlegen und nach den Kapiteln einbinden.
 
-Navigation, Übersichtskarte, Übungen, Fortschrittsanzeige und Selbsttest erscheinen automatisch. Die Reihenfolge bestimmt `order`.
+Navigation, Übersichtskarte und Selbsttest erscheinen automatisch. Die Reihenfolge bestimmt `order`.
 
 Die Kapitel sind JavaScript-Dateien (mit dem HTML als Text), weil Browser beim Öffnen per Doppelklick keine zusätzlichen HTML-Dateien nachladen dürfen. Es gibt keinen Build-Schritt.
 
