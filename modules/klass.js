@@ -276,7 +276,7 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
           const bd=-b/w;if(bd>-6&&bd<6)s+='<line class="res" x1="'+sx(bd)+'" y1="12" x2="'+sx(bd)+'" y2="'+sy(0)+'"/>';
           let ok=0;xs.forEach((x,i)=>{const pr=sigmoid(w*x+b);if((pr>=0.5?1:0)===ys[i])ok++;
             s+='<circle cx="'+sx(x)+'" cy="'+sy(ys[i])+'" r="5" style="fill:'+(ys[i]?'var(--accent)':'var(--surface)')+';stroke:var(--accent);stroke-width:2"/>'});
-          $('sgSvg').innerHTML=s;$('sgBd').textContent=fmt(bd,2).replace('-',MU);$('sgAcc').textContent=ok+' von '+xs.length}
+          $('sgSvg').innerHTML=s;$('sgBd').textContent=fmt(bd,2).replace('-',MU);$('sgAcc').textContent=ok+LernApp.t(' von ',' of ')+xs.length}
         $('sgW').addEventListener('input',draw);$('sgB').addEventListener('input',draw);draw()})();
 
       // Demo 1b: 10 apartments, linear price vs. logistic P(expensive), same z = b + w*qm
@@ -298,7 +298,7 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
           const sy=lin?(v=>H-PY-((v-1000)/(2800-1000))*(H-PY-12)):(p=>H-PY-p*(H-PY-12));
           let s='<line class="ax" x1="'+PX+'" y1="'+(H-PY)+'" x2="'+(W-8)+'" y2="'+(H-PY)+'"/>';
           for(let t=40;t<=140;t+=20)s+='<text class="lbl" x="'+(sx(t)-8)+'" y="'+(H-6)+'">'+t+'</text>';
-          s+='<text class="lbl" x="'+(W-24)+'" y="'+(H-PY-4)+'">qm</text>';
+          s+='<text class="lbl" x="'+(W-24)+'" y="'+(H-PY-4)+'">'+LernApp.t('qm','m²')+'</text>';
           let bd;
           if(lin){
             for(const t of[1000,1500,2000,2500])s+='<text class="lbl" x="2" y="'+(sy(t)+3)+'">'+t+'</text>';
@@ -307,8 +307,8 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
             bd=(T-ln.b)/ln.w;
             pr.forEach((p,i)=>{s+='<line class="res" x1="'+sx(qm[i])+'" y1="'+sy(p)+'" x2="'+sx(qm[i])+'" y2="'+sy(ln.b+ln.w*qm[i])+'"/>'});
             pr.forEach((p,i)=>{s+='<circle cx="'+sx(qm[i])+'" cy="'+sy(p)+'" r="4.5" style="fill:'+(y[i]?'var(--accent)':'var(--surface)')+';stroke:var(--accent);stroke-width:2"/>'});
-            $('lgForm').innerHTML='Preis = z = <b>'+fmt(ln.b,0)+'</b> + <b>'+fmt(ln.w,1)+'</b>·qm';
-            $('lgOdds').innerHTML='10 qm mehr = <b>+'+fmt(ln.w*10,0)+'</b> CHF';
+            $('lgForm').innerHTML=LernApp.t('Preis = z = <b>','Price = z = <b>')+fmt(ln.b,0)+'</b> + <b>'+fmt(ln.w,1)+LernApp.t('</b>·qm','</b>·m²');
+            $('lgOdds').innerHTML=LernApp.t('10 qm mehr = <b>+','10 m² more = <b>+')+fmt(ln.w*10,0)+'</b> CHF';
           }else{
             for(const t of[0,0.5,1])s+='<text class="lbl" x="2" y="'+(sy(t)+3)+'">'+t+'</text>';
             s+='<line class="dash" x1="'+PX+'" y1="'+sy(0.5)+'" x2="'+(W-8)+'" y2="'+sy(0.5)+'"/>';
@@ -316,8 +316,8 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
             s+='<path class="ln" d="'+p+'"/>';
             bd=-lg.b/lg.w;
             pr.forEach((q,i)=>{s+='<circle cx="'+sx(qm[i])+'" cy="'+sy(y[i])+'" r="4.5" style="fill:'+(y[i]?'var(--accent)':'var(--surface)')+';stroke:var(--accent);stroke-width:2"/>'});
-            $('lgForm').innerHTML='z = <b>'+fmt(lg.b,2).replace('-',MU)+'</b> + <b>'+fmt(lg.w,3)+'</b>·qm &nbsp;→&nbsp; P(teuer) = 1/(1+e<sup>−z</sup>)';
-            $('lgOdds').innerHTML='10 qm mehr = Odds ×<b>'+fmt(Math.exp(lg.w*10),1)+'</b>';
+            $('lgForm').innerHTML='z = <b>'+fmt(lg.b,2).replace('-',MU)+'</b> + <b>'+fmt(lg.w,3)+LernApp.t('</b>·qm &nbsp;→&nbsp; P(teuer) = 1/(1+e<sup>−z</sup>)','</b>·m² &nbsp;→&nbsp; P(expensive) = 1/(1+e<sup>−z</sup>)');
+            $('lgOdds').innerHTML=LernApp.t('10 qm mehr = Odds ×<b>','10 m² more = odds ×<b>')+fmt(Math.exp(lg.w*10),1)+'</b>';
           }
           if(bd>XA&&bd<XB)s+='<line class="res" x1="'+sx(bd)+'" y1="12" x2="'+sx(bd)+'" y2="'+(H-PY)+'"/>';
           $('lgSvg').innerHTML=s;$('lgBd').textContent=fmt(bd,0);
@@ -355,7 +355,7 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
           for(const v of[0,0.5,1])s+='<text class="lbl" x="'+(sx(v)-6)+'" y="165">'+v+'</text>';
           pos.forEach((p,i)=>{const col=p>=t?'var(--ok)':'var(--bad)';s+='<circle cx="'+sx(p)+'" cy="'+(40+(i%3)*10)+'" r="5" style="fill:'+col+';stroke:var(--fg);stroke-width:1"/>'});
           neg.forEach((p,i)=>{const col=p>=t?'var(--bad)':'var(--ok)';s+='<rect x="'+(sx(p)-5)+'" y="'+(112+(i%3)*10-5)+'" width="10" height="10" style="fill:'+col+';stroke:var(--fg);stroke-width:1"/>'});
-          s+='<text class="lbl" x="'+PX+'" y="18">echt positiv (Kreis)</text><text class="lbl" x="'+PX+'" y="150">echt negativ (Quadrat)</text>';
+          s+='<text class="lbl" x="'+PX+'" y="18">'+LernApp.t('echt positiv (Kreis)','actually positive (circle)')+'</text><text class="lbl" x="'+PX+'" y="150">'+LernApp.t('echt negativ (Quadrat)','actually negative (square)')+'</text>';
           s+='<line class="ln2" x1="'+sx(t)+'" y1="24" x2="'+sx(t)+'" y2="148"/>';
           $('thSvg').innerHTML=s;
           $('thTP').textContent=c.tp;$('thFN').textContent=c.fn;$('thFP').textContent=c.fp;$('thTN').textContent=c.tn;
@@ -364,7 +364,7 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
           let g='<line class="ax" x1="'+RX+'" y1="'+ry(0)+'" x2="'+rx(1)+'" y2="'+ry(0)+'"/><line class="ax" x1="'+RX+'" y1="'+ry(0)+'" x2="'+RX+'" y2="'+ry(1)+'"/>';
           g+='<line class="dash" x1="'+rx(0)+'" y1="'+ry(0)+'" x2="'+rx(1)+'" y2="'+ry(1)+'"/>';
           g+='<path class="ln" d="'+roc.map((p,i)=>(i?'L':'M')+rx(p[0]).toFixed(1)+' '+ry(p[1]).toFixed(1)).join('')+'"/>';
-          g+='<text class="lbl" x="'+(RX+60)+'" y="'+(RH-6)+'">Rate falscher Alarme (FPR)</text><text class="lbl" x="2" y="10">Recall (TPR)</text>';
+          g+='<text class="lbl" x="'+(RX+60)+'" y="'+(RH-6)+'">'+LernApp.t('Rate falscher Alarme (FPR)','False alarm rate (FPR)')+'</text><text class="lbl" x="2" y="10">Recall (TPR)</text>';
           g+='<circle cx="'+rx(c.fp/10)+'" cy="'+ry(c.tp/10)+'" r="6" style="fill:var(--warn)"/>';
           $('thRoc').innerHTML=g}
         $('thT').addEventListener('input',draw);draw()})();
@@ -378,7 +378,7 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
           const pre=tp/(tp+fp),f2=2*tp/(2*tp+fp+fn);
           $('imA1').textContent=fmt(a1,3);$('imP1').textContent='–';$('imR1').textContent='0.000';$('imF1').textContent='0.000';
           $('imA2').textContent=fmt((tp+tn)/1000,3);$('imP2').textContent=fmt(pre,3);$('imR2').textContent=fmt(0.8,3);$('imF2').textContent=fmt(f2,3);
-          $('imMsg').textContent='Bei '+fmt(pp,1)+' % Positiven hat «Immer negativ» '+fmt(a1*100,1)+' % Accuracy und findet nichts. '+((tp+tn)/1000<a1?'Das echte Modell hat eine tiefere Accuracy, ist aber das nützliche. ':'Hier sind die Klassen ausgeglichen genug, dass Accuracy das bessere Modell auch zeigt. ')+'Beachte auch: Bei seltener Klasse sinkt die Precision des echten Modells, weil die vielen Negativen auch bei 10 % falschem Alarm viele FP liefern.'}
+          $('imMsg').textContent=LernApp.t('Bei ','With ')+fmt(pp,1)+LernApp.t(' % Positiven hat «Immer negativ» ',' % positives, «Always negative» has ')+fmt(a1*100,1)+LernApp.t(' % Accuracy und findet nichts. ',' % accuracy and finds nothing. ')+((tp+tn)/1000<a1?LernApp.t('Das echte Modell hat eine tiefere Accuracy, ist aber das nützliche. ','The real model has a lower accuracy, but it is the useful one. '):LernApp.t('Hier sind die Klassen ausgeglichen genug, dass Accuracy das bessere Modell auch zeigt. ','Here the classes are balanced enough for accuracy to show the better model too. '))+LernApp.t('Beachte auch: Bei seltener Klasse sinkt die Precision des echten Modells, weil die vielen Negativen auch bei 10 % falschem Alarm viele FP liefern.','Note also: with a rare class the precision of the real model drops, because the many negatives produce many FP even at 10 % false alarms.')}
         $('imP').addEventListener('input',draw);draw()})();
 
       // Demo 4: kNN
@@ -397,11 +397,11 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
           s+='<ellipse cx="'+sx(q.x)+'" cy="'+sy(q.y)+'" rx="'+dk*W+'" ry="'+dk*H+'" style="fill:none;stroke:var(--fg);stroke-width:1;stroke-dasharray:4 3"/>';
           nb.forEach(n=>{s+='<line x1="'+sx(q.x)+'" y1="'+sy(q.y)+'" x2="'+sx(n.p.x)+'" y2="'+sy(n.p.y)+'" style="stroke:var(--fg);stroke-width:1;opacity:.5"/>'});
           s+='<path d="M'+sx(q.x)+' '+(sy(q.y)-9)+' L'+(sx(q.x)+9)+' '+sy(q.y)+' L'+sx(q.x)+' '+(sy(q.y)+9)+' L'+(sx(q.x)-9)+' '+sy(q.y)+' Z" style="fill:var(--fg);stroke:var(--bg);stroke-width:2"/>';
-          s+='<text x="'+(sx(q.x)+12)+'" y="'+(sy(q.y)-12)+'" style="fill:var(--fg);font-size:13px;font-weight:700;paint-order:stroke;stroke:var(--bg);stroke-width:3px">Startpunkt</text>';
+          s+='<text x="'+(sx(q.x)+12)+'" y="'+(sy(q.y)-12)+'" style="fill:var(--fg);font-size:13px;font-weight:700;paint-order:stroke;stroke:var(--bg);stroke-width:3px">'+LernApp.t('Startpunkt','Start point')+'</text>';
           $('knSvg').innerHTML=s;
           const acc=set=>set.filter(p=>pred(p.x,p.y,k)===p.c).length/set.length;
           const a=acc(tr),b=acc(te);$('knTr').textContent=fmt(a,2);$('knTe').textContent=fmt(b,2);
-          $('knMsg').textContent=k===1?'k = 1: Jeder Punkt zieht seine eigene Insel. Trainings-Accuracy ist perfekt, aber auf neuen Punkten schlechter (Overfitting).':k>=55?'Sehr grosses k: Die Fläche wird fast einfarbig, das Modell ignoriert die Struktur (Underfitting).':k<15?'Kleines k: Die Grenze ist noch zackig, Training ist deutlich besser als Test (noch etwas Overfitting).':'Mittleres k: Eine glatte Grenze, Training und Test liegen nahe beieinander.'}
+          $('knMsg').textContent=k===1?LernApp.t('k = 1: Jeder Punkt zieht seine eigene Insel. Trainings-Accuracy ist perfekt, aber auf neuen Punkten schlechter (Overfitting).','k = 1: Every point draws its own island. Training accuracy is perfect, but worse on new points (overfitting).'):k>=55?LernApp.t('Sehr grosses k: Die Fläche wird fast einfarbig, das Modell ignoriert die Struktur (Underfitting).','Very large k: The area becomes almost one colour, the model ignores the structure (underfitting).'):k<15?LernApp.t('Kleines k: Die Grenze ist noch zackig, Training ist deutlich besser als Test (noch etwas Overfitting).','Small k: The boundary is still jagged, training is clearly better than test (still some overfitting).'):LernApp.t('Mittleres k: Eine glatte Grenze, Training und Test liegen nahe beieinander.','Medium k: A smooth boundary, training and test are close together.')}
         $('knK').addEventListener('input',draw);
         $('knSvg').addEventListener('click',e=>{const b=e.currentTarget.getBoundingClientRect();q.x=Math.min(1,Math.max(0,(e.clientX-b.left)/b.width));q.y=Math.min(1,Math.max(0,1-(e.clientY-b.top)/b.height));draw()});
         draw()})();
@@ -442,7 +442,7 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
           let s='<line class="ax" x1="'+PX+'" y1="'+(H-PY)+'" x2="'+(W-8)+'" y2="'+(H-PY)+'"/>';
           for(let t=40;t<=140;t+=20)s+='<text class="lbl" x="'+(sx(t)-8)+'" y="'+(H-6)+'">'+t+'</text>';
           for(const t of[1000,1500,2000,2500])s+='<text class="lbl" x="2" y="'+(sy(t)+3)+'">'+t+'</text>';
-          s+='<text class="lbl" x="'+(W-24)+'" y="'+(H-PY-4)+'">qm</text>';
+          s+='<text class="lbl" x="'+(W-24)+'" y="'+(H-PY-4)+'">'+LernApp.t('qm','m²')+'</text>';
           const path=f=>{let q='';for(let x=XA;x<=XB;x+=0.5)q+=(x===XA?'M':'L')+sx(x).toFixed(1)+' '+sy(f(x)).toFixed(1);return q};
           m.parts.slice(0,20).forEach(t=>{s+='<path d="'+path(x=>pt(t,x))+'" style="fill:none;stroke:var(--warn);stroke-width:1;opacity:.3"/>'});
           s+='<path class="ln" d="'+path(m.f)+'"/>';
@@ -451,9 +451,9 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
           const tr=qm.map((x,i)=>m.f(x)-pr[i]);
           const lo=qm.map((x,i)=>{const xs=qm.filter((v,j)=>j!==i),ys=pr.filter((v,j)=>j!==i);return model(xs,ys,mode,d,n,lr).f(x)-pr[i]});
           $('enTr').textContent=fmt(rmse(tr),0);$('enLo').textContent=fmt(rmse(lo),0);
-          $('enMsg').textContent=mode===1?(d>=3?'Tiefer Einzelbaum: Fast jede Wohnung hat ihr eigenes Blatt, die Stufen folgen den Ausreissern. Der Fehler auf bekannten Wohnungen ist klein, der Fehler bei fehlender Wohnung viel grösser (Overfitting).':'Flacher Einzelbaum: Wenige grobe Stufen. Der Fehler ist schon auf den bekannten Wohnungen hoch (Underfitting).')
-            :mode===2?'Bagging: Die orangen Linien sind einzelne Bäume (je auf einer anderen Stichprobe der 10 Wohnungen), die blaue Linie ist ihr Mittelwert. Mit mehr Bäumen wird sie glatter. Der Fehler auf bekannten Wohnungen steigt (ab Tiefe 2) gegenüber dem Einzelbaum (weniger Auswendiglernen), der Fehler bei fehlender Wohnung bleibt bei nur 10 Wohnungen etwa gleich.'
-            :'Boosting: Die Linie startet beim Durchschnitt (1841 CHF) und nähert sich pro Runde den Preisen. Mit Tiefe 1 und wenigen Runden ist sie grob. Mit mehr Runden oder höherer Lernrate liegt sie näher an den Preisen (Fehler auf bekannten Wohnungen sinkt), lernt aber irgendwann nur noch die Ausreisser, der Fehler bei fehlender Wohnung bleibt gleich.'}
+          $('enMsg').textContent=mode===1?(d>=3?LernApp.t('Tiefer Einzelbaum: Fast jede Wohnung hat ihr eigenes Blatt, die Stufen folgen den Ausreissern. Der Fehler auf bekannten Wohnungen ist klein, der Fehler bei fehlender Wohnung viel grösser (Overfitting).','Deep single tree: Almost every apartment has its own leaf, the steps follow the outliers. The error on known apartments is small, the error for a left-out apartment much larger (overfitting).'):LernApp.t('Flacher Einzelbaum: Wenige grobe Stufen. Der Fehler ist schon auf den bekannten Wohnungen hoch (Underfitting).','Shallow single tree: A few coarse steps. The error is already high on the known apartments (underfitting).'))
+            :mode===2?LernApp.t('Bagging: Die orangen Linien sind einzelne Bäume (je auf einer anderen Stichprobe der 10 Wohnungen), die blaue Linie ist ihr Mittelwert. Mit mehr Bäumen wird sie glatter. Der Fehler auf bekannten Wohnungen steigt (ab Tiefe 2) gegenüber dem Einzelbaum (weniger Auswendiglernen), der Fehler bei fehlender Wohnung bleibt bei nur 10 Wohnungen etwa gleich.','Bagging: The orange lines are single trees (each on a different sample of the 10 apartments), the blue line is their mean. With more trees it gets smoother. The error on known apartments rises (from depth 2) compared with the single tree (less memorising), the error for a left-out apartment stays about the same with only 10 apartments.')
+            :LernApp.t('Boosting: Die Linie startet beim Durchschnitt (1841 CHF) und nähert sich pro Runde den Preisen. Mit Tiefe 1 und wenigen Runden ist sie grob. Mit mehr Runden oder höherer Lernrate liegt sie näher an den Preisen (Fehler auf bekannten Wohnungen sinkt), lernt aber irgendwann nur noch die Ausreisser, der Fehler bei fehlender Wohnung bleibt gleich.','Boosting: The line starts at the average (1841 CHF) and gets closer to the prices with each round. With depth 1 and few rounds it is coarse. With more rounds or a higher learning rate it lies closer to the prices (error on known apartments falls), but at some point it only learns the outliers; the error for a left-out apartment stays the same.')}
         [1,2,3].forEach(k=>{$('enM'+k).addEventListener('click',()=>{mode=k;$('enD').value=k===3?1:3;$('enN').value=k===3?30:20;draw()})});
         ['enD','enN','enL'].forEach(id=>$(id).addEventListener('input',draw));draw()})();
     },
