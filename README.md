@@ -100,3 +100,18 @@ Ein Thema kann zusätzlich eigene Seiten haben, z. B. `mathe-kompakt.html` (Spic
 `python server.py` startet die App auf http://localhost:8765. Eingaben (Übungscode) werden zusätzlich in `data/state.json` gespeichert (nicht in git). Ohne Server speichert die App nur im Browser (localStorage).
 
 Das Übungs-Notebook (`notebook.html`) braucht JupyterLab hinter `/jupyter/` auf Port 8899. Läuft es nicht, startet der Knopf «Jupyter starten» es über den Server (`POST /api/jupyter/start`, nur von 127.0.0.1). Der Server nimmt dafür das Python aus `.venv` im Lernapp-Ordner (sonst sein eigenes) und den Lernapp-Ordner als Startordner; das Log landet in `data/jupyter.log`. Jupyter läuft danach unabhängig weiter, auch wenn der Server neu startet. Beenden mit `jupyter server stop 8899`.
+
+## Entwicklung und Prüfung
+
+Einmal einrichten (Python 3.12): `py -3.12 -m venv .venv`, dann `.venv\Scripts\python -m pip install -r requirements-dev.txt` (Linux/macOS: `python3 -m venv .venv` und `.venv/bin/python -m pip install -r requirements-dev.txt`). Prüfen, alles über die `.venv`:
+
+```
+.venv\Scripts\ruff check .
+.venv\Scripts\ruff format --check server.py tools tests
+.venv\Scripts\pyright
+.venv\Scripts\pytest              # etwa 15 s
+.venv\Scripts\pytest -m slow      # führt alle Beispiel-Notebooks aus, etwa 2 Minuten
+```
+
+Die Tests decken `server.py` (Dateien, Zustandsspeicher, Jupyter-Start, Proxy), die Notebooks (gültig, ohne gespeicherte Ausgaben, Kernel `python3`, Colab-Link), die Links der Übersicht und die Syntax aller JavaScript-Module ab. Das Aussehen im Browser prüft keiner dieser Tests.
+

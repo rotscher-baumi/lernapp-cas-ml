@@ -1,0 +1,6 @@
+-r requirements.txt
+nbclient
+ruff
+pytest
+pytest-cov
+pyright
