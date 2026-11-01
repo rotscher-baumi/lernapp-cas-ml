@@ -89,10 +89,10 @@ Nur Standardbibliothek. Vier Aufgaben:
 
 1. Statische Dateien aus dem Projektordner ausliefern (`http://127.0.0.1:8765`).
 2. `GET /api/state` liefert `data/state.json`, `PUT /api/state` ersetzt sie atomar (Schreiben in `.tmp`, dann umbenennen). Der Kern lädt den Zustand beim Start synchron in den `localStorage` und schickt nach jeder Änderung eine Kopie aller Schlüssel zurück.
-3. `/jupyter/*` wird als Tunnel (HTTP und WebSocket) an JupyterLab auf Port 8899 weitergereicht, damit nur ein Port offen sein muss.
+3. `/jupyter/*` wird als Tunnel (HTTP und WebSocket) an JupyterLab auf Port 8899 weitergereicht, damit nur ein Port offen sein muss. Der Proxy lässt nur Anfragen der eigenen Seiten durch und antwortet sonst mit 403: Der `Origin` muss zum `Host` passen (Schutz vor Anfragen und WebSockets fremder Webseiten), `Sec-Fetch-Site` darf keine andere Seite nennen, und bei Bindung an localhost muss der Host-Name bekannt sein (Schutz vor DNS-Rebinding). Das muss der Proxy selbst tun, weil JupyterLab nur die umgeschriebenen Header sieht.
 4. `POST /api/jupyter/start` startet JupyterLab, wenn es nicht läuft (Knopf «Jupyter starten» auf `notebook.html`). Der Server nimmt dafür das Python aus `.venv` im Projektordner (sonst sein eigenes), startet es losgelöst mit dem Projektordner als Startordner und schreibt das Log nach `data/jupyter.log`. Der Aufruf geht nur von 127.0.0.1 und nur mit dem Header `X-Lernapp: 1`; der eigene Header löst bei fremden Webseiten eine CORS-Vorabfrage aus, die der Server nie bestätigt.
 
-Konfiguration über Umgebungsvariablen: `HOST`, `PORT`, `STATE_FILE`, `JUPYTER_HOST`, `JUPYTER_PORT`.
+Konfiguration über Umgebungsvariablen: `HOST`, `PORT`, `STATE_FILE`, `JUPYTER_HOST`, `JUPYTER_PORT`, `ALLOWED_HOSTS` (zusätzliche Host-Namen für den Proxy, kommagetrennt; localhost, 127.0.0.1 und ::1 sind immer erlaubt). Bei `HOST` mit einer Netzwerkadresse (zum Beispiel 0.0.0.0) wird der Host-Name nicht geprüft und der Server warnt beim Start: Wer den Port erreicht, kommt mit dem festen Token an JupyterLab.
 
 ### Werkzeuge
 
