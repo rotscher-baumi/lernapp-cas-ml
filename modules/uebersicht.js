@@ -134,7 +134,7 @@
       ['+', t('Dendrogramm als Bild der ganzen Struktur', 'dendrogram as a picture of the whole structure')],
       ['−', t('langsam und speicherhungrig bei vielen Punkten', 'slow and memory-hungry with many points')],
     ], 'AgglomerativeClustering', '#unsup-hier'),
-    card('DBSCAN', t('Findet dichte Regionen: Ein Punkt mit mindestens <code>min_samples</code> Nachbarn im Radius <code>eps</code> ist ein Kernpunkt. Was keiner dichten Region angehört, wird Rauschen (Label −1).', 'Finds dense regions: a point with at least <code>min_samples</code> neighbours within radius <code>eps</code> is a core point. Whatever belongs to no dense region becomes noise (label −1).'), [
+    card('DBSCAN', t('Findet dichte Regionen: Ein Punkt, in dessen Radius <code>eps</code> mindestens <code>min_samples</code> Punkte liegen (er selbst mitgezählt), ist ein Kernpunkt. Was keiner dichten Region angehört, wird Rauschen (Label −1).', 'Finds dense regions: a point with at least <code>min_samples</code> points within radius <code>eps</code> (counting itself) is a core point. Whatever belongs to no dense region becomes noise (label −1).'), [
       [WANN, t('Cluster beliebiger Form, Ausreisser erwartet, k unbekannt', 'clusters of any shape, outliers expected, k unknown')],
       [HP, '<code>eps</code>, <code>min_samples</code>'],
       [SKAL, JA],
@@ -153,10 +153,10 @@
   const ano = [
     card('Isolation Forest', t('Teilt die Daten mit zufälligen Schnitten. Ausreisser sind nach wenigen Schnitten allein, normale Punkte brauchen viele. Kurzer Weg = verdächtig.', 'Splits the data with random cuts. Outliers are isolated after a few cuts, normal points need many. Short path = suspicious.'), [
       [WANN, t('auffällige Fälle finden (Betrug, Defekte), viele Merkmale', 'finding unusual cases (fraud, defects), many features')],
-      [HP, t('<code>contamination</code> (erwarteter Anteil Ausreisser), <code>n_estimators</code>', '<code>contamination</code> (expected share of outliers), <code>n_estimators</code>')],
+      [HP, t('<code>n_estimators</code>; <code>contamination</code> setzt nur die Schwelle für <code>predict</code>, die Rangliste der Scores ändert sich nicht', '<code>n_estimators</code>; <code>contamination</code> only sets the threshold for <code>predict</code>, the ranking of the scores does not change')],
       [SKAL, NEIN],
       ['+', t('schnell, braucht keine Labels', 'fast, needs no labels')],
-      ['−', t('der Anteil muss geschätzt werden; ein Score ist ein Hinweis, kein Beweis', 'the share has to be estimated; a score is a hint, not proof')],
+      ['−', t('Schwelle oder Prüf-Budget (Top-N) musst du selbst festlegen; ein Score ist ein Hinweis, kein Beweis', 'you have to set the threshold or review budget (top N) yourself; a score is a hint, not proof')],
     ], 'IsolationForest', '#unsup-anomalie'),
   ];
 
@@ -203,7 +203,7 @@
       <div class="ue-b"><b>${t('Ja → Supervised', 'Yes → Supervised')}</b>
         <div class="ue-q">${t('Ist <code>y</code> eine Zahl oder eine Klasse?', 'Is <code>y</code> a number or a class?')}</div>
         <div class="ue-leaf">${t('<b>Zahl → Regression</b>Start: Lineare Regression. Overfitting → Ridge/Lasso. Gebogen → Polynom, Random Forest, Gradient Boosting.', '<b>Number → Regression</b>Start: linear regression. Overfitting → Ridge/Lasso. Curved → polynomial, Random Forest, Gradient Boosting.')}</div>
-        <div class="ue-leaf">${t('<b>Klasse → Klassifikation</b>Start: Logistische Regression. Erklärbar → Entscheidungsbaum. Beste Leistung auf Tabellen → Random Forest, Gradient Boosting. Wenige Merkmale, krumme Grenzen → kNN, SVM.', '<b>Class → Classification</b>Start: logistic regression. Explainable → decision tree. Best performance on tables → Random Forest, Gradient Boosting. Few features, curved boundaries → kNN, SVM.')}</div>
+        <div class="ue-leaf">${t('<b>Klasse → Klassifikation</b>Start: Logistische Regression. Erklärbar → Entscheidungsbaum. Beste Leistung auf Tabellen → Random Forest, Gradient Boosting. Krumme Grenzen → kNN (wenige Merkmale) oder SVM mit Kernel (auch viele Merkmale).', '<b>Class → Classification</b>Start: logistic regression. Explainable → decision tree. Best performance on tables → Random Forest, Gradient Boosting. Curved boundaries → kNN (few features) or SVM with a kernel (also many features).')}</div>
       </div>
       <div class="ue-b"><b>${t('Nein → Unsupervised', 'No → Unsupervised')}</b>
         <div class="ue-q">${t('Was willst du finden?', 'What do you want to find?')}</div>
@@ -231,7 +231,7 @@
     <tr><td>${t('Hierarchisch', 'Hierarchical')}</td><td>Clustering</td><td>${JA}</td><td>${JA}</td><td><code>linkage</code>, ${t('Schnitthöhe', 'cut height')}</td></tr>
     <tr><td>DBSCAN</td><td>Clustering</td><td>${JA}</td><td>${MITTEL}</td><td><code>eps</code>, <code>min_samples</code></td></tr>
     <tr><td>GMM</td><td>Clustering</td><td>${JA}</td><td>${MITTEL}</td><td><code>n_components</code></td></tr>
-    <tr><td>Isolation Forest</td><td>${t('Anomalien', 'Anomalies')}</td><td>${NEIN}</td><td>${MITTEL}</td><td><code>contamination</code></td></tr>
+    <tr><td>Isolation Forest</td><td>${t('Anomalien', 'Anomalies')}</td><td>${NEIN}</td><td>${MITTEL}</td><td>${t('Prüf-Budget (Top-N)', 'review budget (top N)')}</td></tr>
     <tr><td>PCA</td><td>${t('Dim.-Reduktion', 'Dim. reduction')}</td><td>${JA}</td><td>${MITTEL}</td><td><code>n_components</code></td></tr>
     <tr><td>t-SNE / UMAP</td><td>${t('Dim.-Reduktion', 'Dim. reduction')}</td><td>${JA}</td><td>${NEIN}</td><td><code>perplexity</code> / <code>n_neighbors</code></td></tr>
   </table></div>

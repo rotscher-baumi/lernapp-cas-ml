@@ -80,7 +80,7 @@ mse = summe / n</code></pre>
     <tr><td><b>Varianz</b></td><td>mittlere quadrierte Abweichung vom Mittelwert</td><td>(9+4+1+0+36)/5 = <b>10</b></td></tr>
     <tr><td><b>Standardabweichung</b></td><td>Wurzel der Varianz, wieder in der Einheit der Daten</td><td>√10 ≈ <b>3.16</b></td></tr>
   </table></div>
-  <p>Die Std sagt, wie breit die Werte um den Mittelwert streuen. Genau diese zwei Zahlen benutzt der <code>StandardScaler</code>, und <code>df.describe()</code> zeigt sie dir für jede Spalte.</p>
+  <p>Die Std sagt, wie breit die Werte um den Mittelwert streuen. Genau diese zwei Zahlen benutzt der <code>StandardScaler</code> (Std mit Division durch n). <code>df.describe()</code> zeigt sie dir für jede Spalte, rechnet die Std aber mit n − 1 (Stichproben-Std): Für [1, 2, 3, 4, 10] zeigt es deshalb 3.54 statt 3.16.</p>
 
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Was der StandardScaler macht</h4>
   <ul>

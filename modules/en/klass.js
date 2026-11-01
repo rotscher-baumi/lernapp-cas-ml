@@ -129,7 +129,7 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 per class +
     <tr><td>Downsampling</td><td>Randomly take only as many cases from the majority class as the minority has</td><td>Throws information away</td></tr>
     <tr><td>Upsampling</td><td>Randomly duplicate minority cases (with replacement)</td><td>Overfitting on the duplicates</td></tr>
     <tr><td>SMOTE</td><td>Create new artificial minority cases between real neighbours: <code>s = x + (x' − x) · random</code></td><td>Can create noise; needs <code>imblearn</code></td></tr>
-    <tr><td>Cost weighting</td><td>Errors on the minority count more (<code>class_weight="balanced"</code>)</td><td>Little, often the simplest choice</td></tr>
+    <tr><td>Cost weighting</td><td>Errors on the minority count more (<code>class_weight="balanced"</code>)</td><td>Probabilities are distorted afterwards (no longer calibrated); otherwise often the simplest choice</td></tr>
   </table></div>
   <div class="falle"><b>Pitfall</b><p>Resampling (up/downsampling, SMOTE) belongs <b>only on the training data</b>, never on the test set. Otherwise you evaluate on artificial data and get numbers that look too good.</p></div>
 
@@ -200,7 +200,7 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
     <li><b>Preprocessing before the split</b>: Scaling, imputing or feature selection on all data before splitting. Solution: <code>Pipeline</code>.</li>
     <li><b>Time series</b>: Future in the training. Always split by time.</li>
   </ul>
-  <div class="merk"><b>Key takeaway</b><p>Distrust numbers that are too good. Ask for every feature: «Would I really have this value at the time of the prediction?» Suspicious signs are a huge gap between training and validation and a single feature with an enormous weight.</p></div>
+  <div class="merk"><b>Key takeaway</b><p>Distrust numbers that are too good. Ask for every feature: «Would I really have this value at the time of the prediction?» Suspicious signs are strikingly good validation or test scores (which collapse in production) and a single feature with an enormous weight. A large gap between training and validation, on the other hand, is overfitting, not leakage.</p></div>
 `,
   quiz: [
     { q: `Why is accuracy a bad measure with 1 % fraud cases?`, a: `A model that never reports fraud has 99 % accuracy and is still useless. Precision, Recall, F1 and AUC show how well the rare class is detected.` },

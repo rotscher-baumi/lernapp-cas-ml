@@ -233,7 +233,7 @@
     <div class="btnrow"><button class="pri" id="whOne">Nur qm</button><button id="whAll">qm, Zimmer, Lage</button></div>
     <div class="stats"><span>R² <b id="whR2"></b></span><span>Fehler (MAE) <b id="whMae"></b> CHF</span></div>
     <div class="tablewrap"><table id="whTab"></table></div>
-    <p class="hint">Mit einem Merkmal ist das eine Gerade in 2D. Mit drei Merkmalen gibt es keine Gerade mehr, die du zeichnen kannst: Das Modell sagt für jede Wohnung einen Preis voraus (leere Kreise), die roten Striche sind die Abweichungen. Die Tabelle zeigt die Gewichte nach dem StandardScaler: Je grösser der Betrag, desto stärker treibt das Merkmal den Preis. Achtung: R² ist hier auf den Trainingsdaten gemessen, bei 10 Wohnungen und 4 Zahlen im Modell ist das nur eine Demo.</p>
+    <p class="hint">Mit einem Merkmal ist das eine Gerade in 2D. Mit drei Merkmalen gibt es keine Gerade mehr, die du zeichnen kannst: Das Modell sagt für jede Wohnung einen Preis voraus (leere Kreise), die roten Striche sind die Abweichungen. Die Tabelle zeigt die Gewichte nach dem StandardScaler: Je grösser der Betrag, desto stärker treibt das Merkmal den Preis, solange die Merkmale nicht stark korrelieren. Bei qm und Zimmer (r = 0,996) ist die Aufteilung zwischen den beiden fast zufällig, siehe Regularisierung. Achtung: R² ist hier auf den Trainingsdaten gemessen, bei 10 Wohnungen und 4 Zahlen im Modell ist das nur eine Demo.</p>
   </div>
 
   <p>Nimm zwei Merkmale (qm und Zimmer), dann gehört zu jeder Wohnung ein Punkt in einem <b>3D-Raum</b>: eine Achse pro Merkmal, die dritte Achse ist der Preis. Das Modell ist keine Gerade mehr, sondern eine <b>Ebene</b>.</p>
@@ -313,6 +313,8 @@ pipe = Pipeline([("scaler", StandardScaler()), ("model", LinearRegression())])
 scores = cross_val_score(pipe, X, y, cv=10,    # 10 Folds
                          scoring="neg_root_mean_squared_error")   # ohne scoring: R²
 -scores.mean(), scores.std()                   # RMSE (sklearn liefert negativ)</code></pre>
+  <p class="hint"><code>-scores.mean()</code> mittelt die RMSE der einzelnen Folds. Bei Leave-One-Out hat jeder Fold nur eine Wohnung, der Mittelwert ist dann der mittlere absolute Fehler (hier 105 CHF). Die 123 CHF oben sind die Wurzel aus dem mittleren quadrierten Fehler über alle 10 Vorhersagen (<code>cross_val_predict</code>, dann RMSE).</p>
+  <p class="hint"><code>-scores.mean()</code> mittelt die RMSE der einzelnen Folds. Bei Leave-One-Out hat jeder Fold nur eine Wohnung, der Mittelwert ist dann der mittlere absolute Fehler (hier 105 CHF). Die 123 CHF oben sind die Wurzel aus dem mittleren quadrierten Fehler über alle 10 Vorhersagen (<code>cross_val_predict</code>, dann RMSE).</p>
   <p><b>Wie viele Durchläufe?</b> Bei k Folds gibt es k Durchläufe, jede Zeile ist genau einmal Validierung und k−1 Mal Training. Pro Durchlauf wird ein <b>neues</b> Modell (und bei einer Pipeline auch ein neuer Imputer/Scaler) von Grund auf trainiert, bewertet und verworfen. Nichts wird «4 Mal weiter optimiert». Der Mittelwert der k Scores bewertet das <b>Setup</b> (Modelltyp, Hyperparameter, Vorverarbeitung), die Streuung zeigt die Stabilität. Das Testset ist nicht Teil der CV. Das endgültige Modell trainierst du danach einmal auf allen Entwicklungsdaten (Training + Validation) und testest es einmal. Bei einer Suche über n Kandidaten sind es n × k Trainings (<code>GridSearchCV</code> trainiert mit <code>refit=True</code> am Ende selbst nach).</p>
   <div class="demo" id="cvDemo">
     <div class="tag">Demo</div><h4>Cross-Validation Schritt für Schritt</h4>
@@ -440,7 +442,7 @@ search = GridSearchCV(model, {&quot;logisticregression__C&quot;: [0.01, 0.1, 1, 
 # 10 · Genau einmal auf dem Testset
 print(&quot;CV-Accuracy:&quot;, round(search.best_score_, 3), &quot;| Test-Accuracy:&quot;, round(search.score(X_te[num + cat], y_te), 3))</code></pre>
     <pre class="out">CV-Accuracy: 0.803 | Test-Accuracy: 0.793</pre>
-    <p class="hint">Die Test-Accuracy liegt nahe an der CV-Schätzung: Das Modell ist nicht überangepasst. Jeder Schritt mit Erklärung, EDA-Grafiken, Ausgaben und einer zweiten, ausführlicheren Version mit Random Forest: <a href="titanic.html">Titanic ausführlich</a>.</p>
+    <p class="hint">Die Test-Accuracy liegt nahe an der CV-Schätzung: Die CV war verlässlich, es ist kein Testwissen eingeflossen. Dass das Modell nicht überangepasst ist, zeigt der Vergleich mit dem Training (Accuracy 0,805 gegenüber CV 0,803). Jeder Schritt mit Erklärung, EDA-Grafiken, Ausgaben und einer zweiten, ausführlicheren Version mit Random Forest: <a href="titanic.html">Titanic ausführlich</a>.</p>
   </div>
   <p class="note"><b>Mit den 10 Wohnungen:</b> Hyperparameter sind hier der Polynomgrad (1 bis 9) und bei Ridge/Lasso das alpha. Du probierst jede Einstellung aus, misst jeweils den Fehler bei fehlender Wohnung (Cross-Validation) und nimmst die beste. Beim Polynomgrad gewinnt Grad 1 (123 CHF), nicht Grad 9 (Training 0 CHF, aber mehrere 100 000 bei fehlender Wohnung). Bei echten Daten bliebe zusätzlich ein Test-Set bis zum Schluss unberührt, bei nur 10 Wohnungen verzichten wir darauf.</p>`,
     nbExercises: 'Supervised_Learning_1_Uebungen_own.ipynb',
