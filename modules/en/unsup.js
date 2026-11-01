@@ -61,7 +61,7 @@ LernApp.translate('unsup', {
       <line x1="210" y1="240" x2="210" y2="272" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
 
       <g class="ab-step" data-s="4" tabindex="0" role="button" aria-expanded="false" aria-label="Step 4: open explanation">
-      <rect x="60" y="272" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+      <rect x="60" y="272" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--accent);stroke-width:1.5"/>
       <text x="210" y="294" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">4 · Scale</text>
       <text x="210" y="312" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">StandardScaler, RobustScaler for outliers</text>
       </g>
@@ -173,7 +173,7 @@ pca = PCA(2).fit(X_s)
 Z = pca.transform(X_s)
 plt.figure(figsize=(4.5, 3.5)); plt.scatter(Z[:, 0], Z[:, 1], c=labels, s=8, cmap=&quot;tab10&quot;)
 plt.title(f&quot;PCA, {pca.explained_variance_ratio_.sum():.0%} der Varianz&quot;); plt.show()</code></pre>
-    <figure class="fig"><img style="max-width:400px;margin:0 auto" src="assets/img/titanic-unsup-2.png" alt="PCA scatter plot of the passengers, coloured by six clusters" loading="lazy"><figcaption>The PCA map shows 67 % of the variance. The clusters partly overlap in 2D; they are separated in all 5 features.</figcaption></figure>
+    <figure class="fig"><img style="max-width:400px;margin:0 auto" src="assets/img/titanic-unsup-2.png" alt="PCA scatter plot of the passengers, coloured by six clusters" loading="lazy"><figcaption>The PCA map shows 67 % of the variance. The clusters partly overlap in 2D; in the full 5-dimensional space they are separated better, but not sharply (silhouette 0.41: moderately clear structure).</figcaption></figure>
     <pre><code># 10 · Interpret in original units; Survived only now for comparison
 print(X.assign(Cluster=labels, Survived=df[&quot;Survived&quot;]).groupby(&quot;Cluster&quot;).mean().round(2).assign(n=np.bincount(labels)))</code></pre>
     <pre class="out">         Klasse  Frau  Alter  Familie  logFare  Survived    n
@@ -288,7 +288,7 @@ labels = fcluster(Z, t=3, criterion="maxclust")   # 3 clusters</code></pre>
   <h3 id="unsup-dbscan">6 · Other cluster shapes: DBSCAN and GMM</h3>
   <p>k-Means and Ward look for round groups of similar size. If the groups are curved (moons in the demo above), have different densities or there is noise, other methods help.</p>
   <h4>DBSCAN: groups by density</h4>
-  <p>A point with at least <code>min_samples</code> neighbours within the radius <code>eps</code> is a <b>core point</b>. Core points that lie close together form a cluster, and points at the edge belong to it. Everything else is <b>noise</b> (label <code>-1</code>).</p>
+  <p>A point with at least <code>min_samples</code> points within the radius <code>eps</code> (counting itself) is a <b>core point</b>. Core points that lie close together form a cluster, and points at the edge belong to it. Everything else is <b>noise</b> (label <code>-1</code>).</p>
   <ul>
     <li>You do not have to specify k, and the clusters may have any shape.</li>
     <li>Outliers are marked as noise instead of pulling a centre away.</li>
@@ -299,7 +299,7 @@ labels = fcluster(Z, t=3, criterion="maxclust")   # 3 clusters</code></pre>
 labels = DBSCAN(eps=0.2, min_samples=5).fit_predict(X_s)   # -1 = noise
 (labels == -1).mean()                                        # share of noise
 labels = HDBSCAN(min_cluster_size=15, min_samples=5).fit_predict(X_s)</code></pre>
-  <p class="note">The silhouette leaves out noise points. So always also state how many points were assigned to a cluster at all.</p>
+  <p class="note">Careful: <code>silhouette_score</code> treats noise points (label −1) as a cluster of their own. Drop them first (<code>m = labels != -1; silhouette_score(X_s[m], labels[m])</code>) and always also state how many points were assigned to a cluster at all.</p>
   <h4 id="unsup-gmm">Gaussian Mixture Model (GMM): probabilities instead of a fixed assignment</h4>
   <p>A GMM describes each cluster as a bell curve, in the 2D picture as an ellipse. Each point gets a <b>probability per cluster</b>; the values of a row add up to 1. A row like 0.60 / 0.35 / 0.05 shows: the point lies between two groups, the assignment is uncertain. You choose the number of components, for example, with the <b>BIC</b> (lower is better).</p>
   <pre><code>from sklearn.mixture import GaussianMixture
