@@ -11,7 +11,7 @@
 
 ## Purpose and stack
 
-Self-made learning site for the CAS ML course (HSLU): explanations, diagrams, demos, in-browser Python exercises and self-test. Plain HTML/CSS/JavaScript without a build step; Skulpt (jsDelivr) runs the Python exercises; `server.py` is a small local server. Layout and how to add a chapter: `README.md`.
+Self-made learning site for the CAS ML course (HSLU): explanations, diagrams, demos and self-test, German and English, light and dark. Plain HTML/CSS/JavaScript without a build step; Skulpt (jsDelivr) runs the Python playground; `server.py` is a small local server. Layout and how to add a chapter: `README.md`. Architecture, PlantUML diagrams and the data object model: `docs/ARCHITECTURE.md`, `docs/DESIGN.md`, `docs/*.puml` (update them with every change to structure, flows or data objects).
 
 ## Commands
 

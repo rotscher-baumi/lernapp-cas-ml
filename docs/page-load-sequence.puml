@@ -1,0 +1,66 @@
+@startuml page-load-sequence
+' Ablauf beim Laden einer Seite: vom ersten Skript bis zu den fertigen Kapiteln.
+' Stand 2026-11-01.
+title Lernapp CAS ML – Ablauf beim Laden einer Seite
+
+actor "Browser" as b
+participant "<head>\nInline-Skript" as head
+participant "assets/core.js" as core
+participant "localStorage" as ls
+participant "server.py\n/api/state" as srv
+participant "modules/<id>.js" as mod
+participant "modules/en/<id>.js" as en
+participant "DOM" as dom
+
+b -> head : Seite wird geparst
+head -> ls : cas-ml-theme lesen\n(oder ?theme= in der Adresse)
+head -> dom : data-theme auf <html> setzen
+note right : vor dem ersten Zeichnen,\ndamit nichts hell aufblitzt
+
+b -> core : <script src="assets/core.js">
+core -> dom : window.LernApp anlegen\n(register, translate, t, $, fmt)
+alt Seite kommt vom Server (http)
+  core -> srv : GET /api/state (synchron)
+  srv --> core : {schlüssel: wert, ...}
+  core -> ls : alle Schlüssel übernehmen
+end
+core -> ls : cas-ml-lang lesen (oder ?lang=)
+core -> dom : <html lang> setzen
+core -> ls : cas-ml-theme lesen (oder ?theme=)
+core -> dom : data-theme setzen oder entfernen (auto)
+
+loop pro Kapitel-Skript in der Seite
+  b -> mod : <script src="modules/<id>.js">
+  mod -> core : LernApp.register({id, order, nav, title,\nkicker, summary, html, quiz, notebooks, init})
+  b -> en : <script src="modules/en/<id>.js">
+  en -> core : LernApp.translate(id, {felder})
+end
+
+b -> core : DOMContentLoaded → start()
+core -> dom : Schalter DE/EN und Hell/Dunkel/Auto\nin header.top einfügen
+alt Sprache EN
+  core -> core : applyEn(): Felder des Moduls\ndurch die englischen ersetzen
+  core -> dom : [data-en]-Texte austauschen
+end
+core -> core : Module nach order sortieren
+core -> dom : Kapitel-Leiste (#chips) und Übersicht (#toc) füllen
+loop pro Modul
+  core -> dom : buildSection(): kicker, title, html,\nNotebook-Hinweise, Selbsttest (<details>)
+end
+loop pro Modul
+  core -> mod : init()
+  mod -> dom : Demos verdrahten (Slider, Buttons, SVG)
+  note right : Fehler in init() werden abgefangen\nund als Hinweis im Kapitel gezeigt
+end
+core -> dom : Spielwiese und Navigation verdrahten,\nzum #anker springen
+
+== Später: Nutzer:in ändert eine Einstellung ==
+b -> core : Klick auf «Dunkel»
+core -> dom : data-theme="dark"
+core -> ls : cas-ml-theme = dark
+core -> srv : PUT /api/state (Kopie aller Schlüssel, 500 ms gebündelt)
+b -> core : Klick auf «EN»
+core -> ls : cas-ml-lang = en
+core -> b : location.reload()
+
+@enduml
