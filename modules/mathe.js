@@ -11,7 +11,7 @@
   <p>Die Mathematik, die der Kurs wirklich braucht, hat zwei eigene Seiten: einen Spickzettel für schnelles Nachschlagen und die ausführliche Erklärung mit Diagrammen zum Ausprobieren (Ableitung, Mittelwert und Std, StandardScaler).</p>
   <div class="toc">
     <a href="mathe-kompakt.html"><b>Kompakt</b><span>Spickzettel mit einer Demo</span></a>
-    <a href="mathe-ausfuehrlich.html"><b>Ausführlich</b><span>Alle Erklärungen, Diagramme, Übungen</span></a>
+    <a href="mathe-ausfuehrlich.html"><b>Ausführlich</b><span>Alle Erklärungen und Diagramme</span></a>
   </div>
 `,
   });
