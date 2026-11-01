@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Übungs-Notebook · CAS ML</title>
+<title data-en="Exercise notebook · CAS ML">Übungs-Notebook · CAS ML</title>
 <link rel="stylesheet" href="assets/style.css">
 <style>
   .nbbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:12px 0}
@@ -14,11 +14,21 @@
 </head>
 <body>
 <div class="wrap">
-<div class="nbbar"><a href="index.html">← Zurück zur Lernhilfe</a><a id="nbopen" target="_blank" rel="noopener">In eigenem Tab öffnen</a></div>
-<iframe id="nbframe" title="Jupyter-Notebook mit den Python-Übungen"></iframe>
-<div id="nbmiss" class="merk"><b>Jupyter läuft nicht</b><p>Starte im Ordner der Lernapp:<br><code>jupyter-lab --no-browser --ip=127.0.0.1 --port=8899 --ServerApp.base_url=/jupyter/ --ServerApp.token=lernapp-local</code></p></div>
+<div class="nbbar"><a href="index.html" data-en="← Back to the study guide">← Zurück zur Lernhilfe</a><a id="nbopen" target="_blank" rel="noopener" data-en="Open in a separate tab">In eigenem Tab öffnen</a></div>
+<iframe id="nbframe" title="Jupyter-Notebook mit den Python-Übungen" data-en-title="Jupyter notebook with the Python exercises"></iframe>
+<div id="nbmiss" class="merk" data-en="&lt;b&gt;Jupyter is not running&lt;/b&gt;&lt;p&gt;Start it in the study app folder:&lt;br&gt;&lt;code&gt;jupyter-lab --no-browser --ip=127.0.0.1 --port=8899 --ServerApp.base_url=/jupyter/ --ServerApp.token=lernapp-local&lt;/code&gt;&lt;/p&gt;"><b>Jupyter läuft nicht</b><p>Starte im Ordner der Lernapp:<br><code>jupyter-lab --no-browser --ip=127.0.0.1 --port=8899 --ServerApp.base_url=/jupyter/ --ServerApp.token=lernapp-local</code></p></div>
 </div>
 <script>
+(function () {
+  // English: ?lang=en or the stored choice from the main page swaps the [data-en] texts
+  var en = /[?&]lang=en\b/.test(location.search);
+  try { if (!/[?&]lang=de\b/.test(location.search) && localStorage.getItem('cas-ml-lang') === 'en') en = true; } catch (e) {}
+  if (en) {
+    document.documentElement.lang = 'en';
+    document.querySelectorAll('[data-en]').forEach(function (el) { el.innerHTML = el.getAttribute('data-en'); });
+    document.querySelectorAll('[data-en-title]').forEach(function (el) { el.title = el.getAttribute('data-en-title'); });
+  }
+})();
 (function () {
   var url = '/jupyter/lab/tree/notebooks/Lernapp_Lernhilfe.ipynb?token=lernapp-local';
   var frame = document.getElementById('nbframe');
