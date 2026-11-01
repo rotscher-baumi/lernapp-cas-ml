@@ -210,23 +210,6 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
     <li><b>Zeitreihen</b>: Zukunft im Training. Immer nach Zeit trennen.</li>
   </ul>
   <div class="merk"><b>Merksatz</b><p>Misstraue zu guten Zahlen. Frage bei jedem Merkmal: «Hätte ich diesen Wert zum Zeitpunkt der Vorhersage wirklich?» Verdächtig sind ein riesiger Unterschied Training zu Validation und ein einzelnes Merkmal mit enormem Gewicht.</p></div>
-
-  <h3 id="klass-ablauf">8 · Der ganze Ablauf (Titanic-Aufgabe)</h3>
-  <p>Am Nachmittag baut ihr in Gruppen ein Modell, das vorhersagt, wer die Titanic überlebt hat (Spalten: <code>Pclass</code>, <code>Sex</code>, <code>Age</code>, <code>SibSp</code>, <code>Parch</code>, <code>Fare</code>, <code>Embarked</code>; Ziel <code>Survived</code>). Der Ablauf passt auf jedes Klassifikationsproblem:</p>
-  <ol>
-    <li>Daten ansehen (Struktur, Verteilungen, Anteil der Klassen).</li>
-    <li>Aufräumen und Kategorien in Zahlen umwandeln (One-Hot).</li>
-    <li>Neue Merkmale bauen (z. B. Familiengrösse = <code>SibSp + Parch + 1</code>).</li>
-    <li>Fehlende Werte füllen (z. B. Alter mit dem Median).</li>
-    <li>Merkmale auswählen.</li>
-    <li>Klassenverhältnis prüfen, bei Bedarf Resampling oder <code>class_weight</code>.</li>
-    <li>Train/Test trennen, Cross-Validation auf dem Training.</li>
-    <li>Mit passenden Metriken bewerten (F1, AUC, nicht nur Accuracy).</li>
-    <li>Auf Leakage prüfen.</li>
-    <li>Regularisierung und Hyperparameter-Suche.</li>
-    <li>Bestes Modell <b>einmal</b> auf dem Test-Set prüfen.</li>
-  </ol>
-  <p class="note"><b>Komplettes Beispiel mit Code:</b> Alle 11 Schritte mit Random Forest, jeder mit Erklärung, Ausgabe und Grafik, stehen auf der eigenen Seite <a href="titanic.html#tit-rf">Titanic ausführlich</a>. Eine Kurzversion mit logistischer Regression steht <a href="#ml-titanic">am Ende von Supervised ML</a>.</p>
 `,
     exercises: [
       {
