@@ -119,7 +119,6 @@ textarea.code{display:block;width:100%;max-width:100%;font-family:var(--f-mono);
 .verdict{margin-top:8px;font-size:14px;font-weight:600}
 .verdict .errmsg{font-weight:400;margin-top:2px}.verdict pre.errsrc{margin:6px 0 0;font-weight:400;font-size:13px;border-left:3px solid var(--bad);white-space:pre-wrap}.verdict .errhint{font-weight:400;color:var(--muted);margin-top:6px}
 .verdict.good{color:var(--ok)} .verdict.bad{color:var(--bad)} .verdict.info{color:var(--muted);font-weight:400}
-#freeOut{white-space:pre-wrap;word-break:break-word}
 .fig{margin:16px auto;max-width:560px}
 .fig svg{display:block;width:100%;height:auto;overflow:visible}
 .fig img{display:block;width:100%;height:auto;border-radius:6px;border:1px solid var(--line)}

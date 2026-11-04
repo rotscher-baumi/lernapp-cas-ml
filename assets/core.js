@@ -1,7 +1,6 @@
 /*
  * LernApp core. Modules register themselves with LernApp.register({...}) and
- * this file renders navigation, overview cards, chapters, self-test questions
- * and the free Python playground.
+ * this file renders navigation, overview cards, chapters, self-test questions.
  *
  * Module fields:
  *   id        unique id, used as anchor (#id)
@@ -33,7 +32,6 @@
   const EN = {};
   let LANG = 'de';
   const t = (de, en) => (LANG === 'en' && en !== undefined ? en : de);
-  const SKULPT = 'https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/';
 
   window.LernApp = {
     $: $,
@@ -109,103 +107,6 @@
     return null;
   }
 
-  /* ---------- Python runner (Skulpt, loaded on first use) ---------- */
-  let skPromise = null;
-
-  function loadScript(src) {
-    return new Promise(function (ok, bad) {
-      const s = document.createElement('script');
-      s.src = src;
-      s.onload = ok;
-      s.onerror = function () {
-        bad(new Error(t('Der Python-Interpreter konnte nicht geladen werden. Prüfe die Internetverbindung und versuche es nochmals.', 'The Python interpreter could not be loaded. Check your internet connection and try again.')));
-      };
-      document.head.appendChild(s);
-    });
-  }
-
-  function loadSk() {
-    if (!skPromise) {
-      skPromise = loadScript(SKULPT + 'skulpt.min.js').then(function () {
-        return loadScript(SKULPT + 'skulpt-stdlib.js');
-      });
-      skPromise.catch(function () {
-        skPromise = null;
-      });
-    }
-    return skPromise;
-  }
-
-  function builtinRead(x) {
-    if (Sk.builtinFiles === undefined || Sk.builtinFiles['files'][x] === undefined) throw "File not found: '" + x + "'";
-    return Sk.builtinFiles['files'][x];
-  }
-
-  const ERR_HINTS = [
-    [/^SyntaxError|^IndentationError|^ParseError/, 'Der Code ist grammatisch nicht korrekt. Prüfe Doppelpunkte nach if/for/def, Klammern, Anführungszeichen und die Einrückung.', 'The code is not valid Python. Check the colons after if/for/def, brackets, quotes and indentation.'],
-    [/^NameError/, 'Ein Name ist unbekannt. Tippfehler? Variable vor der Verwendung zuweisen? Modul mit import geladen?', 'A name is unknown. A typo? Was the variable assigned before use? Was the module imported?'],
-    [/^TypeError/, 'Ein Wert hat nicht den passenden Typ, zum Beispiel Text plus Zahl, oder eine Funktion bekommt falsche Argumente.', 'A value has the wrong type, for example text plus a number, or a function gets the wrong arguments.'],
-    [/^IndexError/, 'Der Index liegt ausserhalb der Liste. Der erste Eintrag hat Index 0, der letzte len(liste) - 1.', 'The index is outside the list. The first item has index 0, the last one len(list) - 1.'],
-    [/^KeyError/, 'Dieser Schlüssel existiert nicht im Dictionary oder DataFrame. Gross-/Kleinschreibung prüfen.', 'This key does not exist in the dictionary or DataFrame. Check upper and lower case.'],
-    [/^ValueError/, 'Der Typ des Werts stimmt, der Inhalt aber nicht, zum Beispiel int("abc").', 'The value has the right type but the wrong content, for example int("abc").'],
-    [/^ZeroDivisionError/, 'Division durch 0. Prüfe den Nenner.', 'Division by 0. Check the denominator.'],
-    [/^AttributeError/, 'Dieses Objekt hat diese Methode oder dieses Attribut nicht. Tippfehler oder falscher Typ?', 'This object has no such method or attribute. A typo or the wrong type?'],
-    [/^ImportError|^ModuleNotFoundError/, 'Dieses Modul gibt es im Browser-Interpreter nicht. Die Spielwiese versteht nur die Grundlagen von Python.', 'This module is not available in the browser interpreter. The playground only understands basic Python.'],
-    [/^TimeLimitError|execution/i, 'Das Programm läuft zu lange, vermutlich eine Endlosschleife.', 'The program runs too long, probably an endless loop.']
-  ];
-
-  /* Returns {title, msg, line, src, hint, check} for a Skulpt exception. `check` is true when the
-     failure comes from the appended check code (the task is not solved yet), not from the user's code. */
-  function formatErr(err, userLines, userCode) {
-    const raw = String(err && err.toString ? err.toString() : err);
-    let type = (err && err.tp$name) || '';
-    let msg = raw;
-    const head = raw.match(/^([A-Za-z]+(?:Error|Exception|Exit)):\s*([\s\S]*)$/);
-    if (head) { type = type || head[1]; msg = head[2]; }
-    let line = null;
-    const tb = err && err.traceback;
-    if (tb && tb.length) {
-      for (let i = tb.length - 1; i >= 0; i--) {
-        if (tb[i] && tb[i].lineno && /stdin/.test(String(tb[i].filename || '<stdin>'))) { line = Number(tb[i].lineno); break; }
-      }
-    }
-    msg = msg.replace(/\s+on line (\d+)(\s+of\s+\S+)?\.?$/, function (all, n) {
-      if (line === null) line = Number(n);
-      return '';
-    });
-    if (type === 'AssertionError' && (line === null || line > userLines)) {
-      return { check: true, title: t('Noch nicht richtig', 'Not right yet'), msg: msg || t('Das Ergebnis stimmt noch nicht mit der Aufgabe überein.', 'The result does not match the task yet.') };
-    }
-    const inUser = line !== null && line <= userLines;
-    const lines = (userCode || '').split('\n');
-    const full = (type ? type : t('Fehler', 'Error')) + (msg ? ': ' + msg : '');
-    let hint = '';
-    for (let i = 0; i < ERR_HINTS.length; i++) if (ERR_HINTS[i][0].test(full)) { hint = t(ERR_HINTS[i][1], ERR_HINTS[i][2]); break; }
-    return {
-      check: false,
-      title: type || t('Fehler', 'Error'),
-      msg: msg || t('Unbekannter Fehler', 'Unknown error'),
-      line: inUser ? line : null,
-      src: inUser ? lines[line - 1] : null,
-      hint: hint
-    };
-  }
-
-  function runPy(code, userLines, userCode) {
-    let buf = '';
-    return loadSk()
-      .then(function () {
-        Sk.configure({ output: function (t) { buf += t; }, read: builtinRead, __future__: Sk.python3, execLimit: 5000 });
-        return Sk.misceval.asyncToPromise(function () {
-          return Sk.importMainWithBody('<stdin>', false, code, true);
-        });
-      })
-      .then(
-        function () { return { ok: true, out: buf }; },
-        function (err) { return { ok: false, out: buf, err: formatErr(err, userLines, userCode) }; }
-      );
-  }
-
   /* ---------- Rendering ---------- */
   function buildSection(m) {
     const sec = document.createElement('section');
@@ -224,26 +125,6 @@
     }
     sec.innerHTML = html;
     return sec;
-  }
-
-  function wirePlayground() {
-    const btn = $('freeRun');
-    if (!btn) return;
-    btn.addEventListener('click', function () {
-      const o = $('freeOut');
-      const code = $('freeCode').value;
-      o.hidden = false;
-      o.textContent = t('Läuft …', 'Running …');
-      runPy(code + '\n', code.split('\n').length, code).then(function (r) {
-        o.textContent = r.out.replace(/\n$/, '');
-        if (!r.ok) {
-          const e = r.err;
-          o.textContent += (r.out ? '\n' : '') + '❌ ' + e.title + (e.line ? t(' in Zeile ', ' in line ') + e.line : '') + ': ' + e.msg +
-            (e.src !== null && e.src !== undefined ? '\n  ' + e.line + ' │ ' + e.src : '') + (e.hint ? '\n💡 ' + e.hint : '');
-        }
-        if (!o.textContent) o.textContent = t('(keine Ausgabe)', '(no output)');
-      });
-    });
   }
 
   function wireNav() {
@@ -314,17 +195,15 @@
     if (LANG === 'en') modules.forEach(function (m) { if (EN[m.id]) applyEn(m, EN[m.id]); });
     const mods = modules.slice().sort(function (a, b) { return (a.order || 100) - (b.order || 100); });
 
-    // Sub pages (e.g. mathe-kompakt.html) have no overview and no playground section.
-    const hasOverview = !!$('ueberblick'), hasPlay = !!$('spielwiese');
+    // Sub pages (e.g. mathe-kompakt.html) have no overview section.
+    const hasOverview = !!$('ueberblick');
     $('chips').innerHTML =
       (hasOverview ? '<a href="#ueberblick">' + t('Überblick', 'Overview') + '</a>' : '') +
-      mods.map(function (m) { return '<a href="#' + m.id + '">' + (m.nav || m.title) + '</a>'; }).join('') +
-      (hasPlay ? '<a href="#spielwiese">' + t('Üben', 'Practice') + '</a>' : '');
+      mods.map(function (m) { return '<a href="#' + m.id + '">' + (m.nav || m.title) + '</a>'; }).join('');
 
     if ($('toc')) {
       $('toc').innerHTML =
-        mods.map(function (m) { return '<a href="#' + m.id + '"><b>' + (m.nav || m.title) + '</b><span>' + (m.summary || '') + '</span></a>'; }).join('') +
-        '<a href="#spielwiese"><b>' + t('Üben', 'Practice') + '</b><span>' + t('Spielwiese und Notebooks', 'Playground and notebooks') + '</span></a>';
+        mods.map(function (m) { return '<a href="#' + m.id + '"><b>' + (m.nav || m.title) + '</b><span>' + (m.summary || '') + '</span></a>'; }).join('');
     }
 
     const host = $('modules');
@@ -339,7 +218,6 @@
       }
     });
 
-    wirePlayground();
     wireNav();
     if (location.hash.length > 1) {
       const t = document.getElementById(decodeURIComponent(location.hash.slice(1)));

@@ -18,13 +18,13 @@ Eine statische Website ohne Build-Schritt. Jede HTML-Seite lädt `assets/core.js
 
 ```
 lernapp-cas-ml/
-  index.html                 Hauptseite: Kopf, Überblick, alle Kapitel, Spielwiese
+  index.html                 Hauptseite: Kopf, Überblick, alle Kapitel
   titanic.html               Unterseite: Titanic-Beispiel ausführlich
   mathe-kompakt.html         Unterseite: Mathe-Spickzettel
   mathe-ausfuehrlich.html    Unterseite: Mathe ausführlich
   notebook.html              zwei Modi: lokal (JupyterLab im iframe, nur mit Server auf dem eigenen Rechner) oder Colab (Links)
   assets/
-    core.js                  Kern: LernApp-API, Sprache, Theme, Speicher, Rendern, Spielwiese
+    core.js                  Kern: LernApp-API, Sprache, Theme, Speicher, Rendern
     style.css                Design-Tokens hell/dunkel und alle Komponenten
     demos-mathe.js           MatheDemos: Demos, die beide Mathe-Seiten teilen
     demos-kmeans.js          KMeansDemo: k-Means-Demo
@@ -51,8 +51,8 @@ lernapp-cas-ml/
 
 ### Seiten
 
-- **index.html** ist die Hauptseite. Sie enthält den Kopf, den Abschnitt «Überblick» mit Übersichtskarten (`#toc`), den leeren Container `#modules`, den die Kapitel füllen, und die Spielwiese. Unten lädt sie alle Kapitel und danach alle englischen Dateien.
-- **Unterseiten** (`titanic.html`, `mathe-*.html`) sind Kopien desselben Gerüsts mit genau einem Kapitel. Sie haben keinen Überblick und keine Spielwiese; der Kern erkennt das an den fehlenden Elementen `#ueberblick` und `#spielwiese`.
+- **index.html** ist die Hauptseite. Sie enthält den Kopf, den Abschnitt «Überblick» mit Übersichtskarten (`#toc`), den leeren Container `#modules`, den die Kapitel füllen. Unten lädt sie alle Kapitel und danach alle englischen Dateien.
+- **Unterseiten** (`titanic.html`, `mathe-*.html`) sind Kopien desselben Gerüsts mit genau einem Kapitel. Sie haben keinen Überblick; der Kern erkennt das am fehlenden Element `#ueberblick`.
 - **notebook.html** lädt den Kern nicht. Sie hat zwei Modi und merkt sich die Wahl im `localStorage` (`cas-ml-nbmode`). **Lokal** zeigt JupyterLab über den Proxy des Servers in einem iframe und gibt es nur, wenn die Seite von `localhost`, `127.0.0.1` oder `::1` geladen wird; eine gehostete Kopie (zum Beispiel statisch auf S3) hat keinen Server dahinter und fragt `/jupyter/` nie an. **Colab** listet alle Notebooks mit Link «In Colab öffnen» (die Liste ist ein Feld im Skript der Seite; ein Test hält sie mit dem Ordner `notebooks/` abgeglichen) und hebt das mit `?nb=` gewünschte Notebook hervor. Die Seite hat ein eigenes kleines Skript für Sprache und Theme.
 
 Jede Seite setzt im `<head>` mit einem Inline-Skript das Theme, bevor der Browser zeichnet, damit beim Laden nichts hell aufblitzt.
@@ -70,8 +70,6 @@ Der Kern stellt das globale Objekt `LernApp` bereit:
 | `modules`, `lang` | angemeldete Kapitel, aktuelle Sprache |
 
 Beim Start läuft `start()`: Schalter einfügen, bei EN die Übersetzungen überlagern, Kapitel nach `order` sortieren, Leiste und Übersicht füllen, pro Kapitel den Abschnitt bauen (`buildSection`), dann pro Kapitel `init()` aufrufen. Ein Fehler in einem `init()` wird abgefangen und als Hinweis im Kapitel angezeigt; die anderen Kapitel laufen weiter.
-
-Der Kern enthält ausserdem den Python-Runner der Spielwiese. Skulpt wird erst beim ersten Klick auf «Ausführen» von jsDelivr geladen; Fehlermeldungen werden in verständliche Hinweise übersetzt.
 
 ### Kapitel (`modules/`)
 
@@ -113,7 +111,6 @@ In der Adresse gewinnen `?lang=en` und `?theme=dark` über den gespeicherten Wer
 ## Externe Abhängigkeiten
 
 - Google Fonts (Schriften), zur Laufzeit.
-- Skulpt über jsDelivr (Python in der Spielwiese), erst beim ersten Ausführen.
 - JupyterLab lokal (aus `.venv`, Start über den Knopf auf `notebook.html`), nur für `notebook.html`. Die Beispiel-Notebooks laufen auch in Google Colab; Titanic lädt dort die öffentliche Kaggle-Kopie.
 - Zum Erzeugen der Grafiken und Ausgaben: Python mit pandas, scikit-learn, matplotlib, seaborn (siehe `requirements.txt`). Zur Laufzeit der Seite ist kein Python nötig.
 
