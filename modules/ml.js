@@ -319,7 +319,8 @@ scores = cross_val_score(pipe, X, y, cv=10,    # 10 Folds
   <div class="demo" id="cvDemo">
     <div class="tag">Demo</div><h4>Cross-Validation Schritt für Schritt</h4>
     <p class="hint">30 Punkte (Sinuskurve plus Rauschen). Wähle k und den Polynomgrad, dann steppe durch die Läufe. In jedem Lauf wird ein <b>neues</b> Modell (Scaler und Polynom) nur auf den ausgefüllten Punkten gelernt und auf den hohlen Punkten (Test-Fold) geprüft.</p>
-    <svg class="plot" id="cvStrip" viewBox="0 0 320 44" role="img" aria-label="Aufteilung der Daten in k Folds, der Test-Fold ist markiert"></svg>
+    <svg class="plot" id="cvStrip" viewBox="0 0 320 34" role="img" aria-label="Aufteilung der Daten in k Folds, der Test-Fold ist markiert"></svg>
+    <p class="hint" id="cvStripMsg"></p>
     <svg class="plot" id="cvSvg" viewBox="0 0 320 220" role="img" aria-label="Trainingspunkte, Testpunkte und das in diesem Lauf gelernte Polynom" style="margin-top:10px"></svg>
     <div class="ctl"><label for="cvK">k (Folds)</label><input type="range" id="cvK" min="0" max="2" step="1" value="1"><output id="cvKO"></output></div>
     <div class="ctl"><label for="cvDeg">Grad</label><input type="range" id="cvDeg" min="1" max="9" step="1" value="3"><output id="cvDegO"></output></div>
@@ -685,8 +686,8 @@ print(&quot;CV-Accuracy:&quot;, round(search.best_score_, 3), &quot;| Test-Accur
           let a='';const bw=(W-16)/k;
           for(let i=0;i<k;i++){a+='<rect x="'+(8+i*bw).toFixed(1)+'" y="6" width="'+(bw-2).toFixed(1)+'" height="24" rx="3" style="fill:'+(i===sel?'var(--warn-soft)':'var(--accent-soft)')+';stroke:'+(i===sel?'var(--warn)':'var(--accent)')+'"/>';
             if(k<=5)a+='<text class="lbl" x="'+(8+i*bw+bw/2-10).toFixed(1)+'" y="22">'+(i===sel?'Test':'Train')+'</text>'}
-          a+='<text class="lbl" x="8" y="40">Fold '+(sel+1)+LernApp.t(' von ',' of ')+k+LernApp.t(' ist der Test-Fold (orange), alle anderen trainieren.</text>',' is the test fold (orange), all others train.</text>');
           $('cvStrip').innerHTML=a;
+          $('cvStripMsg').textContent='Fold '+(sel+1)+LernApp.t(' von ',' of ')+k+LernApp.t(' ist der Test-Fold (orange), alle anderen trainieren. Die Punkte sind zufällig auf die Folds verteilt, nicht nach x-Position: Darum liegen die hohlen Punkte über die ganze Kurve.',' is the test fold (orange), all others train. The points are assigned to the folds at random, not by x position: that is why the hollow points are spread over the whole curve.');
           let g='<line class="ax" x1="0" y1="'+sy(0)+'" x2="'+W+'" y2="'+sy(0)+'"/>';
           let tp='',cp='';for(let i=0;i<=100;i++){const x=-1+i*0.02;tp+=(i?'L':'M')+sx(x).toFixed(1)+' '+sy(f(x)).toFixed(1);cp+=(i?'L':'M')+sx(x).toFixed(1)+' '+sy(polyEval(R.c,R.z(x))).toFixed(1)}
           g+='<path class="dash" d="'+tp+'"/><path class="ln" d="'+cp+'"/>';
