@@ -148,11 +148,11 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
   <p>Für einen neuen Punkt suchst du die k nächsten Trainingspunkte und nimmst die Mehrheitsklasse (bei Regression den Durchschnitt). Es gibt kein Training, dafür ist die Vorhersage bei vielen Daten langsam. k steuert Bias und Variance: <b>k = 1</b> folgt jedem Punkt (Overfitting), <b>k = N</b> sagt für alle die Mehrheitsklasse (Underfitting).</p>
   <div class="demo" id="knDemo">
     <div class="tag">Demo</div><h4>kNN: Wirkung von k</h4>
-    <svg class="plot" id="knSvg" viewBox="0 0 320 220" role="img" aria-label="Entscheidungsflächen von kNN mit Trainingspunkten"></svg>
-    <div class="ctl"><label for="knK">k</label><input type="range" id="knK" min="1" max="59" step="2" value="1"><output id="knKO"></output></div>
+    <svg class="plot" id="knSvg" viewBox="0 0 320 220" role="img" aria-label="Zwei Gruppen von Trainingspunkten (blau und orange) und ein Startpunkt mit seinen k nächsten Nachbarn"></svg>
+    <div class="ctl"><label for="knK">k</label><input type="range" id="knK" min="1" max="39" step="2" value="1"><output id="knKO"></output></div>
     <div class="stats"><span>Trainings-Accuracy <b id="knTr"></b></span><span>Test-Accuracy (neue Punkte) <b id="knTe"></b></span></div>
     <p class="hint" id="knMsg"></p>
-    <p class="hint">Die Raute «Startpunkt» = der neue Punkt, dessen Klasse gesucht ist (Klick ins Bild verschiebt ihn). Die Linien führen zu seinen k nächsten Nachbarn, der gestrichelte Kreis zeigt die Reichweite.</p>
+    <p class="hint">Die Raute «Startpunkt» = der neue Punkt, dessen Klasse gesucht ist (Klick ins Bild verschiebt ihn). Die Linien führen zu seinen k nächsten Nachbarn, der gestrichelte Kreis zeigt die Reichweite. Die Raute nimmt die Farbe der Mehrheit an.</p>
   </div>
   <p class="note"><b>Mit den 10 Wohnungen:</b> Eine neue Wohnung mit 76 qm. Die nächsten Nachbarn auf der qm-Achse sind 78 qm (teuer), 70 qm (nicht teuer) und 85 qm (teuer). Mit <b>k = 1</b> entscheidet allein die 78er: teuer. Mit <b>k = 3</b> stimmen 2 von 3 für teuer. Mit <b>k = 10</b> (alle) steht es 5 zu 5, es gibt keinen Mehrheitsentscheid mehr.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Naive Bayes</h4>
@@ -364,28 +364,29 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
           $('imMsg').textContent=LernApp.t('Bei ','With ')+fmt(pp,1)+LernApp.t(' % Positiven hat «Immer negativ» ',' % positives, «Always negative» has ')+fmt(a1*100,1)+LernApp.t(' % Accuracy und findet nichts. ',' % accuracy and finds nothing. ')+((tp+tn)/1000<a1?LernApp.t('Das echte Modell hat eine tiefere Accuracy, ist aber das nützliche. ','The real model has a lower accuracy, but it is the useful one. '):LernApp.t('Hier sind die Klassen ausgeglichen genug, dass Accuracy das bessere Modell auch zeigt. ','Here the classes are balanced enough for accuracy to show the better model too. '))+LernApp.t('Beachte auch: Bei seltener Klasse sinkt die Precision des echten Modells, weil die vielen Negativen auch bei 10 % falschem Alarm viele FP liefern.','Note also: with a rare class the precision of the real model drops, because the many negatives produce many FP even at 10 % false alarms.')}
         $('imP').addEventListener('input',draw);draw()})();
 
-      // Demo 4: kNN
+      // Demo 4: kNN (two simple groups, no background colouring)
       (function(){
         const r=mulberry32(11);
-        function make(n){const a=[];for(let i=0;i<n;i++){const c=i%2;const cx=c?0.6:0.4,cy=c?0.55:0.45;a.push({x:cx+0.2*gauss(r),y:cy+0.2*gauss(r),c:c})}return a}
-        const tr=make(60),te=make(200),q={x:0.5,y:0.5};
-        const W=320,H=220,sx=x=>x*W,sy=y=>H-y*H,G=32,GY=22;
-        function dist(ax,ay,bx,by){return Math.hypot((ax-bx)*W,(ay-by)*H)} // distance in drawn pixels: what you see is what kNN measures
-        function pred(x,y,k){const d=tr.map(p=>({d:dist(p.x,p.y,x,y),c:p.c})).sort((a,b)=>a.d-b.d);let s=0;for(let i=0;i<k;i++)s+=d[i].c;return s*2>k?1:0}
+        function make(n){const a=[];for(let i=0;i<n;i++){const c=r()<0.65?0:1;a.push({x:(c?0.65:0.35)+0.17*gauss(r),y:(c?0.6:0.4)+0.17*gauss(r),c:c})}return a}
+        const tr=make(40),te=make(400),q={x:0.5,y:0.5};
+        const W=320,H=220,sx=x=>x*W,sy=y=>H-y*H;
+        const col=c=>c?'var(--accent)':'var(--warn)';
+        function dist(ax,ay,bx,by){return Math.hypot((ax-bx)*W,(ay-by)*H)} // in drawn pixels: what you see is what kNN measures
+        function near(x,y,k){return tr.map(p=>({p:p,d:dist(p.x,p.y,x,y)})).sort((u,v)=>u.d-v.d).slice(0,k)}
+        function pred(x,y,k){const n=near(x,y,k);let s=0;n.forEach(e=>s+=e.p.c);return s*2>k?1:0}
         function draw(){const k=+$('knK').value;$('knKO').textContent=k;
-          let s='';const cw=W/G,ch=H/GY;
-          for(let i=0;i<G;i++)for(let j=0;j<GY;j++){const x=(i+0.5)/G,y=1-(j+0.5)/GY;s+='<rect x="'+(i*cw)+'" y="'+(j*ch)+'" width="'+(cw+0.5)+'" height="'+(ch+0.5)+'" style="fill:'+(pred(x,y,k)?'var(--accent)':'var(--warn)')+';opacity:.25"/>'}
-          tr.forEach(p=>{s+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="3.5" style="fill:'+(p.c?'var(--accent)':'var(--warn)')+';stroke:var(--fg);stroke-width:1"/>'});
-          const nb=tr.map(p=>({p:p,d:dist(p.x,p.y,q.x,q.y)})).sort((u,v)=>u.d-v.d).slice(0,k);
-          const dk=nb[nb.length-1].d;
+          const nb=near(q.x,q.y,k),dk=nb[nb.length-1].d,v1=nb.filter(e=>e.p.c).length,v0=k-v1,cls=v1>v0?1:0;
+          let s='';
           s+='<circle cx="'+sx(q.x)+'" cy="'+sy(q.y)+'" r="'+dk+'" style="fill:none;stroke:var(--fg);stroke-width:1;stroke-dasharray:4 3"/>';
-          nb.forEach(n=>{s+='<line x1="'+sx(q.x)+'" y1="'+sy(q.y)+'" x2="'+sx(n.p.x)+'" y2="'+sy(n.p.y)+'" style="stroke:var(--fg);stroke-width:1;opacity:.5"/>'});
-          s+='<path d="M'+sx(q.x)+' '+(sy(q.y)-9)+' L'+(sx(q.x)+9)+' '+sy(q.y)+' L'+sx(q.x)+' '+(sy(q.y)+9)+' L'+(sx(q.x)-9)+' '+sy(q.y)+' Z" style="fill:var(--fg);stroke:var(--bg);stroke-width:2"/>';
-          s+='<text x="'+(sx(q.x)+12)+'" y="'+(sy(q.y)-12)+'" style="fill:var(--fg);font-size:13px;font-weight:700;paint-order:stroke;stroke:var(--bg);stroke-width:3px">'+LernApp.t('Startpunkt','Start point')+'</text>';
+          nb.forEach(e=>{s+='<line x1="'+sx(q.x)+'" y1="'+sy(q.y)+'" x2="'+sx(e.p.x)+'" y2="'+sy(e.p.y)+'" style="stroke:var(--fg);stroke-width:1;opacity:.5"/>'});
+          tr.forEach(p=>{s+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="4.5" style="fill:'+col(p.c)+';stroke:var(--fg);stroke-width:1"/>'});
+          s+='<path d="M'+sx(q.x)+' '+(sy(q.y)-10)+' L'+(sx(q.x)+10)+' '+sy(q.y)+' L'+sx(q.x)+' '+(sy(q.y)+10)+' L'+(sx(q.x)-10)+' '+sy(q.y)+' Z" style="fill:'+col(cls)+';stroke:var(--fg);stroke-width:2"/>';
+          s+='<text x="'+(sx(q.x)+13)+'" y="'+(sy(q.y)-12)+'" style="fill:var(--fg);font-size:13px;font-weight:700;paint-order:stroke;stroke:var(--bg);stroke-width:3px">'+LernApp.t('Startpunkt','Start point')+'</text>';
           $('knSvg').innerHTML=s;
           const acc=set=>set.filter(p=>pred(p.x,p.y,k)===p.c).length/set.length;
-          const a=acc(tr),b=acc(te);$('knTr').textContent=fmt(a,2);$('knTe').textContent=fmt(b,2);
-          $('knMsg').textContent=k===1?LernApp.t('k = 1: Jeder Punkt zieht seine eigene Insel. Trainings-Accuracy ist perfekt, aber auf neuen Punkten schlechter (Overfitting).','k = 1: Every point draws its own island. Training accuracy is perfect, but worse on new points (overfitting).'):k>=55?LernApp.t('Sehr grosses k: Die Fläche wird fast einfarbig, das Modell ignoriert die Struktur (Underfitting).','Very large k: The area becomes almost one colour, the model ignores the structure (underfitting).'):k<15?LernApp.t('Kleines k: Die Grenze ist noch zackig, Training ist deutlich besser als Test (noch etwas Overfitting).','Small k: The boundary is still jagged, training is clearly better than test (still some overfitting).'):LernApp.t('Mittleres k: Eine glatte Grenze, Training und Test liegen nahe beieinander.','Medium k: A smooth boundary, training and test are close together.')}
+          $('knTr').textContent=fmt(acc(tr),2);$('knTe').textContent=fmt(acc(te),2);
+          const vote=LernApp.t('Von den '+k+' nächsten Nachbarn sind '+v1+' blau und '+v0+' orange: Der Startpunkt wird '+(cls?'blau':'orange')+'. ','Of the '+k+' nearest neighbours, '+v1+' are blue and '+v0+' orange: the start point becomes '+(cls?'blue':'orange')+'. ');
+          $('knMsg').textContent=vote+(k===1?LernApp.t('k = 1: Ein einzelner Nachbar entscheidet. Training perfekt, auf neuen Punkten schlechter (Overfitting).','k = 1: A single neighbour decides. Training is perfect, but worse on new points (overfitting).'):k>=29?LernApp.t('Sehr grosses k: Fast alle Punkte stimmen mit, das Modell ignoriert die Struktur (Underfitting).','Very large k: Almost all points vote, the model ignores the structure (underfitting).'):k<9?LernApp.t('Kleines k: Wenige Nachbarn, einzelne Ausreisser können kippen (noch etwas Overfitting).','Small k: Few neighbours, single outliers can flip the result (still some overfitting).'):LernApp.t('Mittleres k: Training und Test liegen nah beisammen (gute Balance).','Medium k: Training and test are close together (good balance).'));}
         $('knK').addEventListener('input',draw);
         $('knSvg').addEventListener('click',e=>{const b=e.currentTarget.getBoundingClientRect();q.x=Math.min(1,Math.max(0,(e.clientX-b.left)/b.width));q.y=Math.min(1,Math.max(0,1-(e.clientY-b.top)/b.height));draw()});
         draw()})();
