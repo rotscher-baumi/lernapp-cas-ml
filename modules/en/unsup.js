@@ -10,7 +10,7 @@ LernApp.translate('unsup', {
     <div><h4>Finding anomalies</h4><p>Find points that do not fit the rest. Example: suspicious payments.</p></div>
     <div><h4>Dimensionality reduction</h4><p>Summarise many features in a few, for example to plot data in 2D.</p></div>
   </div>
-  <p>The course day works with a Lego dataset (scraped from the toy shop's website), the labs with wine measurements, simulated payments and handwritten digits. There is no «right», only useful or not. That is why the <b>interpretation</b> is part of the result.</p>
+  <p>The labs work with wine measurements, simulated payments and handwritten digits. There is no «right», only useful or not. That is why the <b>interpretation</b> is part of the result.</p>
 
   <h3 id="unsup-ablauf">The whole workflow at a glance</h3>
   <p>In Unsupervised Learning there is no right answer to compare against. So the workflow is a loop of trying, checking and interpreting, not a straight path to a test result as in <a href="#ml-ablauf">Supervised Learning</a>.</p>
@@ -445,7 +445,7 @@ trustworthiness(X_s, Z, n_neighbors=10)  # 1 = neighbours well preserved</code><
   <h3 id="unsup-deep">12 · Deep clustering (outlook)</h3>
   <p>Classical clustering works poorly with very many features (images, text). In deep clustering, an <b>autoencoder</b> (a neural network that reconstructs its input through a narrow bottleneck) learns a compact representation. Clustering is then done in this «latent» representation. Advanced variants train representation and clustering together. Here you only need to be able to place it.</p>
 
-  <p class="note">Lecturer's notebooks (course folder <code>07 - UNSUPERVISED-LEARNING/code</code>): <code>clustering_k_means</code>, <code>clustering_k_means optimizing</code>, <code>hierarchical_clustering</code>, <code>dimension_reduction_pca</code>, <code>dimension_reduction_tsne</code>, each with an <code>_exercise</code> version. Data: <code>lego_daten_one_hot_encoded_cleaned.csv</code>. Labs (folder <code>notebooks</code>): <code>01_clustering_lab</code> (wine: scaling, k, DBSCAN, GMM, ARI), <code>02_anomaly_detection_lab</code> (Isolation Forest), <code>03_pca_lab</code> (components, reconstruction), <code>04_embeddings_lab</code> (t-SNE and UMAP).</p>
+  <p class="note">Lecturer's notebooks (course folder <code>07 - UNSUPERVISED-LEARNING/code</code>): <code>clustering_k_means</code>, <code>clustering_k_means optimizing</code>, <code>hierarchical_clustering</code>, <code>dimension_reduction_pca</code>, <code>dimension_reduction_tsne</code>, each with an <code>_exercise</code> version. Labs (folder <code>notebooks</code>): <code>01_clustering_lab</code> (wine: scaling, k, DBSCAN, GMM, ARI), <code>02_anomaly_detection_lab</code> (Isolation Forest), <code>03_pca_lab</code> (components, reconstruction), <code>04_embeddings_lab</code> (t-SNE and UMAP).</p>
 `,
   quiz: [
     { q: `What is the difference between Supervised and Unsupervised Learning?`, a: `Supervised learns from examples with a known answer. Unsupervised has no answer and finds structure on its own (groups, important directions).` },
