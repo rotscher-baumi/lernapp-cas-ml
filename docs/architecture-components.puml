@@ -10,13 +10,13 @@ skinparam linetype ortho
 actor "Lernende:r\n(Browser)" as user
 
 package "Seiten (HTML, kein Build)" {
-  [index.html\nHauptseite: Kopf, Überblick,\n#modules, Spielwiese] as index
+  [index.html\nHauptseite: Kopf, Überblick,\n#modules] as index
   [titanic.html\nmathe-kompakt.html\nmathe-ausfuehrlich.html\nUnterseiten: Kopf + ein Modul] as sub
   [notebook.html\nModus lokal: iframe auf JupyterLab\nModus Colab: Links] as nbpage
 }
 
 package "assets/" {
-  [core.js\nLernApp-Kern:\nregister · translate · t\nSprache · Theme · Speicher\nRendern · Navigation\nSpielwiese (Skulpt)] as core
+  [core.js\nLernApp-Kern:\nregister · translate · t\nSprache · Theme · Speicher\nRendern · Navigation] as core
   [style.css\nDesign-Tokens hell/dunkel\n(data-theme, prefers-color-scheme)] as css
   [demos-mathe.js\nMatheDemos] as dm
   [demos-kmeans.js\nKMeansDemo] as dk
@@ -44,7 +44,6 @@ package "Werkzeuge" {
 
 cloud "Externe Dienste" {
   [Google Fonts] as fonts
-  [Skulpt (jsDelivr)\nPython im Browser\nfür die Spielwiese] as skulpt
 }
 
 user --> index
@@ -67,7 +66,6 @@ mods ..> dk
 mods ..> img
 
 core ..> fonts : Schrift
-core ..> skulpt : erster Klick auf «Ausführen»
 
 core --> srv : GET /api/state beim Laden\nPUT /api/state nach jeder Änderung
 srv --> state
