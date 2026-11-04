@@ -298,7 +298,8 @@ scores = cross_val_score(pipe, X, y, cv=10,    # 10 folds
   <div class="demo" id="cvDemo">
     <div class="tag">Demo</div><h4>Cross-validation step by step</h4>
     <p class="hint">30 points (sine curve plus noise). Choose k and the polynomial degree, then step through the runs. In each run a <b>new</b> model (scaler and polynomial) is learned only on the filled points and tested on the hollow points (test fold).</p>
-    <svg class="plot" id="cvStrip" viewBox="0 0 320 44" role="img" aria-label="Split of the data into k folds, the test fold is marked"></svg>
+    <svg class="plot" id="cvStrip" viewBox="0 0 320 34" role="img" aria-label="Split of the data into k folds, the test fold is marked"></svg>
+    <p class="hint" id="cvStripMsg"></p>
     <svg class="plot" id="cvSvg" viewBox="0 0 320 220" role="img" aria-label="Training points, test points and the polynomial learned in this run" style="margin-top:10px"></svg>
     <div class="ctl"><label for="cvK">k (folds)</label><input type="range" id="cvK" min="0" max="2" step="1" value="1"><output id="cvKO"></output></div>
     <div class="ctl"><label for="cvDeg">Degree</label><input type="range" id="cvDeg" min="1" max="9" step="1" value="3"><output id="cvDegO"></output></div>
