@@ -2,7 +2,7 @@
 
 Lernseite zum Kursstoff: Erklärungen, Diagramme, Demos und Selbsttest, auf Deutsch und Englisch, hell und dunkel. Alles Selbsterstellte liegt in diesem Ordner, getrennt von den Kursunterlagen.
 
-Öffnen: `index.html` per Doppelklick im Browser. Es braucht Internet für die Schrift (Google Fonts) und für den Python-Interpreter der Spielwiese (Skulpt über jsDelivr).
+Öffnen: `index.html` per Doppelklick im Browser. Es braucht Internet für die Schrift (Google Fonts).
 
 Oben rechts: **DE / EN** schaltet die Sprache um, **Hell / Dunkel / Auto** das Farbschema (Auto folgt dem System). Beides merkt sich der Browser; mit Server auch über Browser hinweg. Für Links und Tests: `?lang=en`, `?theme=dark`.
 
@@ -12,10 +12,10 @@ Architektur, Diagramme (PlantUML) und Datenobjektmodell: [docs/ARCHITECTURE.md](
 
 ```
 lernapp/
-  index.html        Kern: Kopf, Überblick, Spielwiese, Liste der Module
+  index.html        Kern: Kopf, Überblick, Liste der Module
   assets/
     style.css       Design (hell und dunkel)
-    core.js         Navigation, Sprache, Theme, Selbsttest, Spielwiese
+    core.js         Navigation, Sprache, Theme, Selbsttest
     demos-*.js      geteilte Demos (Mathe, k-Means)
   modules/          ein Kapitel pro Datei
     ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js uebersicht.js titanic.js
