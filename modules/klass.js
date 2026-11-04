@@ -370,14 +370,15 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
         function make(n){const a=[];for(let i=0;i<n;i++){const c=i%2;const cx=c?0.6:0.4,cy=c?0.55:0.45;a.push({x:cx+0.2*gauss(r),y:cy+0.2*gauss(r),c:c})}return a}
         const tr=make(60),te=make(200),q={x:0.5,y:0.5};
         const W=320,H=220,sx=x=>x*W,sy=y=>H-y*H,G=32,GY=22;
-        function pred(x,y,k){const d=tr.map(p=>({d:(p.x-x)*(p.x-x)+(p.y-y)*(p.y-y),c:p.c})).sort((a,b)=>a.d-b.d);let s=0;for(let i=0;i<k;i++)s+=d[i].c;return s*2>k?1:0}
+        function dist(ax,ay,bx,by){return Math.hypot((ax-bx)*W,(ay-by)*H)} // distance in drawn pixels: what you see is what kNN measures
+        function pred(x,y,k){const d=tr.map(p=>({d:dist(p.x,p.y,x,y),c:p.c})).sort((a,b)=>a.d-b.d);let s=0;for(let i=0;i<k;i++)s+=d[i].c;return s*2>k?1:0}
         function draw(){const k=+$('knK').value;$('knKO').textContent=k;
           let s='';const cw=W/G,ch=H/GY;
           for(let i=0;i<G;i++)for(let j=0;j<GY;j++){const x=(i+0.5)/G,y=1-(j+0.5)/GY;s+='<rect x="'+(i*cw)+'" y="'+(j*ch)+'" width="'+(cw+0.5)+'" height="'+(ch+0.5)+'" style="fill:'+(pred(x,y,k)?'var(--accent)':'var(--warn)')+';opacity:.25"/>'}
           tr.forEach(p=>{s+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="3.5" style="fill:'+(p.c?'var(--accent)':'var(--warn)')+';stroke:var(--fg);stroke-width:1"/>'});
-          const nb=tr.map(p=>({p:p,d:Math.hypot(p.x-q.x,p.y-q.y)})).sort((u,v)=>u.d-v.d).slice(0,k);
+          const nb=tr.map(p=>({p:p,d:dist(p.x,p.y,q.x,q.y)})).sort((u,v)=>u.d-v.d).slice(0,k);
           const dk=nb[nb.length-1].d;
-          s+='<ellipse cx="'+sx(q.x)+'" cy="'+sy(q.y)+'" rx="'+dk*W+'" ry="'+dk*H+'" style="fill:none;stroke:var(--fg);stroke-width:1;stroke-dasharray:4 3"/>';
+          s+='<circle cx="'+sx(q.x)+'" cy="'+sy(q.y)+'" r="'+dk+'" style="fill:none;stroke:var(--fg);stroke-width:1;stroke-dasharray:4 3"/>';
           nb.forEach(n=>{s+='<line x1="'+sx(q.x)+'" y1="'+sy(q.y)+'" x2="'+sx(n.p.x)+'" y2="'+sy(n.p.y)+'" style="stroke:var(--fg);stroke-width:1;opacity:.5"/>'});
           s+='<path d="M'+sx(q.x)+' '+(sy(q.y)-9)+' L'+(sx(q.x)+9)+' '+sy(q.y)+' L'+sx(q.x)+' '+(sy(q.y)+9)+' L'+(sx(q.x)-9)+' '+sy(q.y)+' Z" style="fill:var(--fg);stroke:var(--bg);stroke-width:2"/>';
           s+='<text x="'+(sx(q.x)+12)+'" y="'+(sy(q.y)-12)+'" style="fill:var(--fg);font-size:13px;font-weight:700;paint-order:stroke;stroke:var(--bg);stroke-width:3px">'+LernApp.t('Startpunkt','Start point')+'</text>';
