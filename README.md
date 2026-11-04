@@ -18,7 +18,7 @@ lernapp/
     core.js         Navigation, Sprache, Theme, Selbsttest
     demos-*.js      geteilte Demos (Mathe, k-Means)
   modules/          ein Kapitel pro Datei
-    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js uebersicht.js titanic.js
+    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js ablauf.js klass.js unsup.js uebersicht.js titanic.js
     en/             englische Texte je Kapitel
     _vorlage.js     Vorlage für ein neues Kapitel
   notebooks/        Übungs-Notebooks (Jupyter / VS Code)
