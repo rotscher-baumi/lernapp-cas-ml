@@ -38,19 +38,19 @@ col + row   # [[ 1, 2, 3],
     <tr><th>Code</th><th>Ergebnis</th><th>Warum</th></tr>
     <tr><td><code>a[1:4]</code></td><td>View</td><td>normaler Ausschnitt</td></tr>
     <tr><td><code>a[::2]</code></td><td>View</td><td>Schrittweite ist auch ein Ausschnitt</td></tr>
-    <tr><td><code>a[[0, 2, 4]]</code></td><td>Copy</td><td>Indexliste, kein einheitlicher Abstand</td></tr>
+    <tr><td><code>a[[0, 2, 4]]</code></td><td>Copy</td><td>Indexliste (Fancy Indexing) kopiert immer, egal welche Positionen</td></tr>
     <tr><td><code>a[a &gt; 2]</code></td><td>Copy</td><td>Maske sammelt Werte neu ein</td></tr>
-    <tr><td><code>a.reshape(2, 3)</code></td><td>View</td><td>nur andere Form, gleiche Bytes</td></tr>
+    <tr><td><code>a[:4].reshape(2, 2)</code></td><td>View</td><td>nur andere Form, gleiche Bytes (wenn möglich, sonst Copy)</td></tr>
   </table></div>
   <p>In Pandas 3 gilt <b>Copy-on-Write</b>: Jedes Ergebnis verhält sich wie eine Kopie. Darum ändert verkettetes Zuweisen wie <code>df["preis"][0] = 100</code> das <code>df</code> nicht mehr. Schreibe mit einem einzigen <code>loc</code>:</p>
   <pre><code>df.loc[0, "preis"] = 100</code></pre>
 
   <h3>Strings und Arrow</h3>
-  <p>Früher waren Textspalten <code>object</code>: eine Liste von Pointern auf einzelne Python-Strings (langsam, viel Speicher). Pandas 3 speichert Text mit <b>Apache Arrow</b> in drei Blöcken: ein Bitfeld für «fehlt», Positionen, wo jeder Text beginnt, und alle Buchstaben hintereinander. Im Kursbeispiel brauchte das für eine Million Strings 13.5 MB statt 58.3 MB.</p>
+  <p>Früher waren Textspalten <code>object</code>: eine Liste von Pointern auf einzelne Python-Strings (langsam, viel Speicher). Pandas 3 speichert Text (wenn pyarrow installiert ist) mit <b>Apache Arrow</b> in drei Blöcken: ein Bitfeld für «fehlt», Positionen, wo jeder Text beginnt, und alle Buchstaben hintereinander. Im Kursbeispiel brauchte das für eine Million Strings 13.5 MB statt 58.3 MB.</p>
   <p><b>Parquet</b> ist das passende Dateiformat auf der Festplatte: spaltenweise gespeichert, komprimiert, mit Schema. Man liest nur die Spalten, die man braucht.</p>`,
     quiz: [
       { q: `Warum ist <code>x * 2</code> auf einem NumPy-Array so viel schneller als eine Python-Schleife?`, a: `Kompilierte Schleife, zusammenhängender Speicher mit festem Typ und SIMD. Es gibt keine Objekte und keine Typprüfung pro Element.` },
-      { q: `Ist <code>a[[0, 2, 4]]</code> ein View oder eine Copy?`, a: `Eine Copy, weil eine Indexliste keinen einheitlichen Abstand beschreibt. <code>a[::2]</code> dagegen ist ein View.` },
+      { q: `Ist <code>a[[0, 2, 4]]</code> ein View oder eine Copy?`, a: `Eine Copy: Indexieren mit einer Liste (Fancy Indexing) kopiert immer, auch wenn die Positionen gleichmässig verteilt sind. <code>a[::2]</code> dagegen ist ein View.` },
     ],
   });
 })();

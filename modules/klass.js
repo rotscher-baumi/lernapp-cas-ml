@@ -32,13 +32,41 @@
     <div class="stats"><span>Grenze bei x = <b id="sgBd"></b></span><span>richtig klassifiziert <b id="sgAcc"></b></span></div>
     <p class="hint">Gefüllte Punkte sind Klasse 1, leere Klasse 0. Die Kurve ist die vorhergesagte Wahrscheinlichkeit für Klasse 1. Eine grosse Steilheit macht das Modell «sicherer», aber auch härter bei den zwei durchmischten Punkten um x = 0. Trainiert wird nicht mit MSE, sondern mit der <b>Cross-Entropy</b> (bestraft sichere falsche Antworten sehr stark) und Gradient Descent wie am Tag 1.</p>
   </div>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Weitergeführt: die 10 Wohnungen von Tag 1</h4>
+  <p>Gleiche Wohnungen, gleiche Achse (qm), nur die Frage ändert sich. Tag 1: <i>Wie viel kostet die Wohnung?</i> Jetzt: <i>Ist sie teuer?</i> Dazu legst du eine Preisschwelle fest, <code>teuer = 1</code> wenn der Preis darüber liegt, sonst 0. Beide Modelle rechnen dasselbe <code>z = b + w·qm</code>. Der einzige Unterschied ist, was mit z passiert:</p>
+  <div class="tablewrap"><table>
+    <tr><th></th><th>Lineare Regression</th><th>Logistische Regression</th></tr>
+    <tr><td>Frage</td><td>Wie teuer?</td><td>Teuer ja/nein?</td></tr>
+    <tr><td>Ausgabe</td><td><code>Preis = z</code></td><td><code>P(teuer) = 1 / (1 + e^(-z))</code></td></tr>
+    <tr><td>Wertebereich</td><td>beliebig, auch negativ</td><td>immer zwischen 0 und 1</td></tr>
+    <tr><td>Ziel in den Daten</td><td>echter Preis</td><td>0 oder 1</td></tr>
+    <tr><td>Fehlermass</td><td>MSE (Abstand zur Geraden)</td><td>Cross-Entropy</td></tr>
+  </table></div>
+  <div class="demo" id="lgDemo">
+    <div class="tag">Demo</div><h4>Von der Preisgeraden zur Wahrscheinlichkeit</h4>
+    <svg class="plot" id="lgSvg" viewBox="0 0 320 230" role="img" aria-label="10 Wohnungen: qm gegen Preis mit Gerade oder qm gegen Wahrscheinlichkeit teuer mit Sigmoid-Kurve"></svg>
+    <div class="btnrow"><button class="pri" id="lgLin">Preis (linear)</button><button id="lgLog">Teuer ja/nein (logistisch)</button></div>
+    <div class="ctl"><label for="lgT">Preisschwelle «teuer»</label><input type="range" id="lgT" min="1500" max="2300" step="50" value="1800"><output id="lgTO"></output></div>
+    <div class="stats"><span id="lgForm"></span></div>
+    <div class="stats"><span>Grenze bei <b id="lgBd"></b> qm</span><span id="lgOdds"></span></div>
+    <p class="hint">Gefüllte Punkte sind «teuer». <b>Linear:</b> Die Gerade ist das Modell von Tag 1, die gestrichelte Linie die Preisschwelle. Dort, wo die Gerade die Schwelle kreuzt, liegt eine Art Grenze, aber die Gerade sagt dir nur einen Preis, keine Wahrscheinlichkeit. <b>Logistisch:</b> Dasselbe z geht durch die Sigmoid-Funktion, und die Kurve ist P(teuer). Die Grenze ist da, wo P = 0,5 ist (z = 0). Verschiebst du die Schwelle, wandern Klassen und Grenze mit. Die Gewichte kommen aus Gradient Descent mit leichter Regularisierung (ohne sie würde w bei sauber trennbaren Daten ins Unendliche wachsen).</p>
+  </div>
+  <div class="falle"><b>Falle (Gerade auf 0/1 legen)</b><p>Man könnte auch eine lineare Regression direkt auf die Werte 0 und 1 legen. Sie liefert dann Werte unter 0 und über 1, die sich nicht als Wahrscheinlichkeit lesen lassen, und einzelne extreme Wohnungen ziehen die Gerade und damit die Grenze weg. Die Sigmoid-Kurve bleibt zwischen 0 und 1.</p></div>
+  <p><b>Was bedeutet das Gewicht w?</b> Bei der linearen Regression: «10 qm mehr, im Schnitt w·10 CHF mehr». Bei der logistischen Regression wirkt w auf die <b>Log-Odds</b>: <code>ln(p / (1 - p)) = z</code>. Diese sind linear in qm. 10 qm mehr erhöhen z um 10·w, und die Odds (p gegen 1-p) werden mit dem Faktor <code>e^(10·w)</code> multipliziert.</p>
+  <div class="demo" id="lsDemo">
+    <div class="tag">Demo</div><h4>Warum Cross-Entropy statt MSE?</h4>
+    <svg class="plot" id="lsSvg" viewBox="0 0 320 190" role="img" aria-label="Fehler in Abhängigkeit der vorhergesagten Wahrscheinlichkeit für eine Wohnung, die wirklich teuer ist"></svg>
+    <div class="ctl"><label for="lsP">Vorhergesagte P(teuer)</label><input type="range" id="lsP" min="1" max="99" step="1" value="10"><output id="lsPO"></output></div>
+    <div class="stats"><span>Cross-Entropy <b id="lsCE"></b></span><span>MSE <b id="lsMS"></b></span></div>
+    <p class="hint">Die Wohnung ist wirklich teuer (y = 1). Sagt das Modell nur 1 % Wahrscheinlichkeit, ist es sicher und falsch. Die Cross-Entropy (−ln p, durchgezogen) schiesst dann steil nach oben und zwingt das Modell zur Korrektur. Der quadratische Fehler ((1−p)², gestrichelt) bleibt bei maximal 1. Zusammen mit der Sigmoid wird sein Gradient bei sicher falschen Vorhersagen fast 0, das Modell korrigiert kaum.</p>
+  </div>
   <pre><code>from sklearn.linear_model import LogisticRegression
 clf = LogisticRegression().fit(X_train, y_train)
 clf.predict(X_test)          # Klassen (0/1)
 clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
   <div class="merk"><b>Merksatz</b><p>Logistische Regression = lineare Regression + Sigmoid. Das Modell liefert zuerst eine Wahrscheinlichkeit, die Klasse entsteht erst durch die Schwelle. Die Schwelle ist deine Entscheidung, nicht die des Modells.</p></div>
 
-  <h3>2 · Wie gut ist ein Klassifikator? Confusion Matrix und Metriken</h3>
+  <h3 id="klass-metriken">2 · Wie gut ist ein Klassifikator? Confusion Matrix und Metriken</h3>
   <p>Jede Vorhersage fällt in eines von vier Fächern. Eselsbrücke: Der zweite Buchstabe ist, was das Modell sagt (positiv/negativ), der erste, ob es stimmt (True/False).</p>
   <div class="tablewrap"><table>
     <tr><th></th><th>Modell sagt positiv</th><th>Modell sagt negativ</th></tr>
@@ -55,7 +83,7 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
   <div class="falle"><b>Falle (Accuracy)</b><p>Bei seltenen Klassen ist Accuracy irreführend. Ein Modell, das immer «kein Betrug» sagt, hat bei 1 Betrug auf 100 Fällen 99 % Accuracy, findet aber nie einen Betrug (Recall 0, F1 0). Schau bei unausgewogenen Daten auf Precision, Recall, F1 und AUC.</p></div>
 
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Die Schwelle verschieben: Precision gegen Recall</h4>
-  <p>Senkst du die Schwelle, sagt das Modell öfter «positiv»: mehr TP, aber auch mehr FP. Recall steigt, Precision sinkt. Es ist ein <b>Kompromiss</b>, und welche Seite wichtiger ist, hängt vom Problem ab. Bei einer Krebs-Früherkennung willst du kaum etwas übersehen (hoher Recall), bei einer Spam-Sperre willst du keine echte Mail löschen (hohe Precision).</p>
+  <p>Senkst du die Schwelle, sagt das Modell öfter «positiv»: mehr TP, aber auch mehr FP. Recall steigt (oder bleibt gleich), Precision sinkt meist. Es ist ein <b>Kompromiss</b>, und welche Seite wichtiger ist, hängt vom Problem ab. Bei einer Krebs-Früherkennung willst du kaum etwas übersehen (hoher Recall), bei einer Spam-Sperre willst du keine echte Mail löschen (hohe Precision).</p>
   <p>Die <b>ROC-Kurve</b> trägt für alle Schwellen die Trefferquote (TPR = Recall) gegen die Rate falscher Alarme (FPR) auf. Ein perfektes Modell liegt oben links, Raten liegt auf der Diagonalen. Die <b>AUC</b> ist die Fläche unter der Kurve: 1 ist perfekt, 0,5 ist Zufall.</p>
   <div class="demo" id="thDemo">
     <div class="tag">Demo</div><h4>Schwelle, Confusion Matrix und ROC</h4>
@@ -71,6 +99,11 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
     <svg class="plot" id="thRoc" viewBox="0 0 320 210" role="img" aria-label="ROC-Kurve mit aktuellem Schwellenpunkt" style="margin-top:12px"></svg>
     <p class="hint">Oben: Kreis = echt positiv, Quadrat = echt negativ. Alles rechts der Linie wird als positiv vorhergesagt. Unten: Der orange Punkt wandert beim Schieben der Schwelle auf der ROC-Kurve.</p>
   </div>
+  <div class="merk"><b>Zusammenfassung: Schwelle, ROC, AUC</b><ul>
+    <li><b>Schwelle:</b> Das Modell liefert Wahrscheinlichkeiten, erst die Schwelle macht daraus Klassen. Tiefere Schwelle = mehr Recall, mehr falsche Alarme.</li>
+    <li><b>ROC:</b> Jede Schwelle ergibt einen Punkt (FPR, TPR). Die ROC-Kurve verbindet alle Punkte.</li>
+    <li><b>AUC:</b> Fläche unter der ROC-Kurve, unabhängig von der Schwelle. 1 = perfekt, 0,5 = Zufall. Die Schwelle wählst du danach nach den Kosten der Fehler.</li>
+  </ul></div>
 
   <h3>3 · Mehr als zwei Klassen</h3>
   <ul>
@@ -79,8 +112,9 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
   </ul>
   <p>Bewertet wird pro Klasse: Du betrachtest jede Klasse der Reihe nach als «positiv» und alle anderen als «negativ» und bekommst so TP, FP, FN, TN und Precision/Recall/F1 je Klasse. Zusammenfassen kannst du das auf zwei Arten:</p>
   <ul>
-    <li><b>Micro</b>: Zuerst alle TP, FP, FN über alle Klassen addieren, dann die Masse berechnen. Bei Einzelklassen-Problemen ist micro-Precision = micro-Recall = Accuracy.</li>
-    <li><b>Macro</b>: Die Masse pro Klasse berechnen und mitteln (ungewichtet), oder <b>gewichtet</b> nach Klassengrösse, damit grosse Klassen mehr zählen.</li>
+    <li><b>Micro</b>: Zuerst alle TP, FP, FN über alle Klassen addieren, dann die Masse berechnen. Hat jeder Fall genau ein Label (normales Multiclass), ist micro-Precision = micro-Recall = micro-F1 = Accuracy.</li>
+    <li><b>Macro</b>: Die Masse pro Klasse berechnen und ungewichtet mitteln, jede Klasse zählt gleich.</li>
+    <li><b>Weighted</b>: Wie macro, aber gewichtet nach Klassengrösse, damit grosse Klassen mehr zählen.</li>
   </ul>
   <pre><code>from sklearn.metrics import classification_report, confusion_matrix
 print(confusion_matrix(y_test, pred))
@@ -104,11 +138,11 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
     <tr><td>Downsampling</td><td>Von der Mehrheitsklasse zufällig nur so viele nehmen wie die Minderheit hat</td><td>Wirft Information weg</td></tr>
     <tr><td>Upsampling</td><td>Minderheits-Fälle zufällig duplizieren (mit Zurücklegen)</td><td>Overfitting auf die Duplikate</td></tr>
     <tr><td>SMOTE</td><td>Neue künstliche Minderheits-Fälle zwischen echten Nachbarn erzeugen: <code>s = x + (x' − x) · Zufall</code></td><td>Kann Rauschen erzeugen; braucht <code>imblearn</code></td></tr>
-    <tr><td>Kostengewichtung</td><td>Fehler bei der Minderheit zählen mehr (<code>class_weight="balanced"</code>)</td><td>Wenig, oft die einfachste Wahl</td></tr>
+    <tr><td>Kostengewichtung</td><td>Fehler bei der Minderheit zählen mehr (<code>class_weight="balanced"</code>)</td><td>Wahrscheinlichkeiten sind danach verzerrt (nicht mehr kalibriert); sonst oft die einfachste Wahl</td></tr>
   </table></div>
   <div class="falle"><b>Falle</b><p>Resampling (Up/Downsampling, SMOTE) gehört <b>nur auf die Trainingsdaten</b>, nie auf das Test-Set. Sonst bewertest du auf künstlichen Daten und bekommst zu schöne Zahlen.</p></div>
 
-  <h3>5 · Nicht-lineare Klassifikatoren</h3>
+  <h3 id="klass-modelle">5 · Nicht-lineare Klassifikatoren</h3>
   <p>Logistische Regression zieht eine <b>gerade</b> Grenze. Wenn die Klassen nicht so sauber trennbar sind, brauchst du flexiblere Modelle.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">k-nächste Nachbarn (kNN)</h4>
   <p>Für einen neuen Punkt suchst du die k nächsten Trainingspunkte und nimmst die Mehrheitsklasse (bei Regression den Durchschnitt). Es gibt kein Training, dafür ist die Vorhersage bei vielen Daten langsam. k steuert Bias und Variance: <b>k = 1</b> folgt jedem Punkt (Overfitting), <b>k = N</b> sagt für alle die Mehrheitsklasse (Underfitting).</p>
@@ -118,29 +152,56 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
     <div class="ctl"><label for="knK">k</label><input type="range" id="knK" min="1" max="59" step="2" value="1"><output id="knKO"></output></div>
     <div class="stats"><span>Trainings-Accuracy <b id="knTr"></b></span><span>Test-Accuracy (neue Punkte) <b id="knTe"></b></span></div>
     <p class="hint" id="knMsg"></p>
+    <p class="hint">Die Raute «Startpunkt» = der neue Punkt, dessen Klasse gesucht ist (Klick ins Bild verschiebt ihn). Die Linien führen zu seinen k nächsten Nachbarn, der gestrichelte Kreis zeigt die Reichweite.</p>
   </div>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Eine neue Wohnung mit 76 qm. Die nächsten Nachbarn auf der qm-Achse sind 78 qm (teuer), 70 qm (nicht teuer) und 85 qm (teuer). Mit <b>k = 1</b> entscheidet allein die 78er: teuer. Mit <b>k = 3</b> stimmen 2 von 3 für teuer. Mit <b>k = 10</b> (alle) steht es 5 zu 5, es gibt keinen Mehrheitsentscheid mehr.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Naive Bayes</h4>
   <p>Berechnet mit dem Satz von Bayes, wie wahrscheinlich eine Klasse bei den beobachteten Merkmalen ist, und tut «naiv» so, als wären die Merkmale voneinander unabhängig. Beispiel aus den Folien: Spielen wir bei Sonne? Von 14 Tagen waren 9 Spieltage und 5 sonnig; an 3 der 9 Spieltage schien die Sonne.</p>
   <pre><code>P(Ja | sonnig) = P(sonnig | Ja) * P(Ja) / P(sonnig)
                = (3/9) * (9/14) / (5/14) = 0.60</code></pre>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Merkmal «gross» = mehr als 74 qm. 5 von 10 Wohnungen sind teuer, und alle 5 sind gross, keine der 5 anderen. Also <code>P(gross | teuer) = 5/5 = 1</code> und <code>P(gross | nicht teuer) = 0/5 = 0</code>. Das ergibt <code>P(teuer | gross) = 1</code>: sicher, nur weil wir eine Kombination nie gesehen haben. Das ist das <b>Nullfrequenz-Problem</b>. Die Abhilfe ist Glättung (Laplace: überall +1 zählen): <code>P(gross | teuer) = 6/7</code>, <code>P(gross | nicht teuer) = 1/7</code>, also <code>P(teuer | gross) = 6/7 ≈ 0,86</code>.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Support Vector Machine (SVM)</h4>
   <p>Sucht die Trennlinie mit dem <b>breitesten Abstand</b> zu beiden Klassen. Nur die Punkte am Rand (Support Vectors) bestimmen sie. Mit <b>Kernels</b> werden die Daten gedanklich in einen höheren Raum gehoben, wo sie sich gerade trennen lassen. Stark bei vielen Merkmalen.</p>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Die grösste nicht teure Wohnung hat 70 qm, die kleinste teure 78 qm. Diese zwei sind die <b>Support Vectors</b>. Die Trennlinie mit dem breitesten Abstand liegt in der Mitte bei <b>74 qm</b>, je 4 qm von beiden Seiten entfernt. Die anderen acht Wohnungen könntest du löschen, die Grenze bliebe gleich.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Entscheidungsbaum</h4>
   <p>Eine Kette von Ja/Nein-Fragen. An jedem Knoten wird die Frage gewählt, die die Klassen am besten trennt (Mass: Gini oder Informationsgewinn), bis die Blätter «rein» sind oder die maximale Tiefe erreicht ist. Gut lesbar, aber ein tiefer Baum lernt die Trainingsdaten auswendig. Gegenmittel: <code>max_depth</code> begrenzen oder zurückschneiden.</p>
+  <p>Ein Entscheidungsbaum braucht <b>keine lineare Regression</b> und keine Sigmoid-Funktion: Er schätzt keine Gewichte, sondern teilt die Daten mit Schwellen auf einzelne Merkmale auf. Er ist damit eine <b>Alternative</b> zur logistischen Regression, kein Ersatz. Vorteile: nicht lineare Zusammenhänge, kein Skalieren der Merkmale nötig. Nachteile: Die Grenzen verlaufen achsenparallel (treppenförmig), tiefe Bäume overfitten schnell, und die Wahrscheinlichkeiten aus den Blättern sind grob.</p>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Am Anfang sind 5 teure und 5 nicht teure Wohnungen gemischt (Gini = 0,5, maximal unrein). Die beste Frage ist «Mehr als 74 qm?»: Links landen 5 nicht teure, rechts 5 teure, beide Blätter sind sofort rein (Gini = 0). Ein einziger Schnitt genügt, der Baum hat Tiefe 1. Die SVM legt ihre Grenze ebenfalls genau in die Mitte (74 qm), die logistische Regression etwa dorthin (zwischen 70 und 78 qm), nur mit anderem Weg.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Neuronale Netze</h4>
   <p>Schichten aus künstlichen Neuronen mit gewichteten Verbindungen, die per Backpropagation trainiert werden (Gradient Descent über alle Schichten). Mit sehr vielen Schichten spricht man von Deep Learning, das kommt im nächsten Modul.</p>
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Ein einzelnes Neuron mit Sigmoid, <code>P(teuer) = sigmoid(w·qm + b)</code>, <i>ist</i> die logistische Regression von oben. Weitere Schichten brauchst du hier nicht, denn die Klassen sind mit einem Schnitt bei 74 qm trennbar. Mehr Schichten lohnen sich erst bei Mustern, die keine einzelne Grenze beschreiben kann.</p>
 
   <h3>6 · Ensembles: viele schwache Modelle ergeben ein starkes</h3>
   <p>Ein einzelnes Modell macht Fehler. Mehrere Modelle, die unterschiedlich irren, gleichen sich im Mittel aus.</p>
   <div class="grid2">
-    <div><h4>Bagging (Random Forest)</h4><p>Viele Bäume, jeder auf einer zufälligen Stichprobe der Daten und einer zufälligen Auswahl an Merkmalen, <b>parallel</b> trainiert. Mehrheitsentscheid (oder Mittelwert). Senkt die Varianz.</p></div>
-    <div><h4>Boosting (Gradient Boosting)</h4><p>Bäume werden <b>nacheinander</b> trainiert, jeder korrigiert die Restfehler des vorherigen. Oft genauer, aber empfindlicher für Rauschen und bei zu hoher Lernrate überangepasst.</p></div>
+    <div><h4>Bagging (Random Forest)</h4><p>Viele Bäume, jeder auf einer zufälligen Stichprobe der Daten, bei jedem Split mit einer zufälligen Auswahl an Merkmalen, <b>parallel</b> trainiert. Mehrheitsentscheid (oder Mittelwert). Senkt die Varianz.</p></div>
+    <div><h4>Boosting (Gradient Boosting)</h4><p>Bäume werden <b>nacheinander</b> trainiert, jeder korrigiert die Restfehler aller bisherigen Bäume zusammen. Oft genauer, aber empfindlicher für Rauschen und bei zu hoher Lernrate überangepasst.</p></div>
   </div>
-  <pre><code>from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-rf = RandomForestClassifier(n_estimators=200, random_state=0).fit(X_train, y_train)
-gb = GradientBoostingClassifier(learning_rate=0.1).fit(X_train, y_train)</code></pre>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Beispiel: die 10 Wohnungen</h4>
+  <p>Bei der Klasse «teuer» reicht der eine Schnitt bei 74 qm, da gibt es für ein Ensemble nichts zu verbessern. Deshalb gehen wir hier zurück zur Frage von Tag 1, dem <b>Preis</b> (Ensembles gibt es genauso für Regression). Der Preis steigt nicht sauber mit den qm: die 70-qm-Wohnung (1620) ist billiger als die 62-qm-Wohnung (1770), die 85-qm-Wohnung (1850) billiger als die 78-qm-Wohnung (1890). Ein tiefer Baum lernt diese Ausreisser auswendig.</p>
+  <ul>
+    <li><b>Einzelbaum:</b> Mit Tiefe 3 hat fast jede Wohnung ihr eigenes Blatt. Auf den bekannten Wohnungen ist der Fehler klein (etwa 35 CHF), lässt du eine Wohnung weg, ist er viel grösser (etwa 240 CHF). Dieser Abstand ist das Overfitting.</li>
+    <li><b>Bagging:</b> Jeder Baum bekommt 10 Wohnungen, die <i>mit Zurücklegen</i> gezogen werden. Manche kommen doppelt vor, andere gar nicht (im Schnitt sind etwa 65 % verschiedene dabei, bei vielen Daten 63 %). Jeder Baum irrt anders, der Mittelwert ist glatter und merkt sich weniger auswendig. Bei nur 10 Wohnungen bleibt der Fehler bei einer fehlenden Wohnung trotzdem ähnlich, der Vorteil zeigt sich erst bei mehr Daten.</li>
+    <li><b>Boosting:</b> Start ist der Durchschnittspreis (1841 CHF). Dann passt ein flacher Baum (Tiefe 1) die <i>Restfehler</i> an, ein Bruchteil davon (Lernrate) wird addiert, und das wiederholt sich Runde für Runde.</li>
+  </ul>
+  <div class="demo" id="enDemo">
+    <div class="tag">Demo</div><h4>Einzelbaum, Bagging und Boosting auf den 10 Wohnungen</h4>
+    <svg class="plot" id="enSvg" viewBox="0 0 320 230" role="img" aria-label="10 Wohnungen: qm gegen Preis mit der Vorhersage eines Einzelbaums, von Bagging oder von Boosting"></svg>
+    <div class="btnrow"><button class="pri" id="enM1">Einzelbaum</button><button id="enM2">Bagging</button><button id="enM3">Boosting</button></div>
+    <div class="ctl"><label for="enD">Tiefe der Bäume</label><input type="range" id="enD" min="1" max="4" step="1" value="3"><output id="enDO"></output></div>
+    <div class="ctl" id="enNW"><label for="enN">Anzahl Bäume</label><input type="range" id="enN" min="1" max="50" step="1" value="20"><output id="enNO"></output></div>
+    <div class="ctl" id="enLW"><label for="enL">Lernrate</label><input type="range" id="enL" min="0.05" max="1" step="0.05" value="0.3"><output id="enLO"></output></div>
+    <div class="stats"><span>Fehler auf den bekannten Wohnungen <b id="enTr"></b> CHF</span><span>Fehler, wenn die Wohnung fehlt <b id="enLo"></b> CHF</span></div>
+    <p class="hint" id="enMsg"></p>
+  </div>
+  <p class="hint">Der zweite Fehler ist «Leave-one-out»: Für jede Wohnung wird das Modell ohne sie neu trainiert und dann auf sie angewendet. Er zeigt, wie gut das Modell auf eine <i>neue</i> Wohnung passt (RMSE). Er bleibt überall hoch, weil kein Baum über die Randwohnungen (35 und 130 qm) hinaus extrapolieren kann: ausserhalb der bekannten qm ist die Vorhersage einfach der letzte Stufenwert. Zum Vergleich: Die einfache Gerade von Tag 1 hat bei fehlender Wohnung nur etwa 123 CHF Fehler. Sind die Daten fast linear, gewinnt das einfachere Modell, Ensembles lohnen sich erst bei komplizierteren Mustern und mehr Daten.</p>
+  <pre><code>from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+# X = qm der 10 Wohnungen (Spalte), y = Preis
+rf = RandomForestRegressor(n_estimators=200, random_state=0).fit(X, y)
+gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).fit(X, y)
+# Für «teuer ja/nein»: RandomForestClassifier / GradientBoostingClassifier</code></pre>
 
-  <h3>7 · Data Leakage</h3>
+  <h3 id="klass-leakage">7 · Data Leakage</h3>
   <p>Leakage heisst: Das Modell sieht beim Training Information, die es bei der echten Vorhersage nicht hätte. Folge: wunderbare Testwerte und ein Modell, das im Einsatz versagt.</p>
   <ul>
     <li><b>Target Leakage</b>: Ein Merkmal enthält die Antwort schon. Beispiel aus der Vorlesung: Ein Kündigungsmodell mit 100 % Treffer, weil Anrufe beim Kundendienst («ich möchte kündigen») erst <i>nach</i> der Kündigung entstehen.</li>
@@ -148,37 +209,7 @@ gb = GradientBoostingClassifier(learning_rate=0.1).fit(X_train, y_train)</code><
     <li><b>Vorverarbeitung vor dem Split</b>: Skalieren, Imputieren oder Feature-Auswahl auf allen Daten, bevor getrennt wird. Lösung: <code>Pipeline</code>.</li>
     <li><b>Zeitreihen</b>: Zukunft im Training. Immer nach Zeit trennen.</li>
   </ul>
-  <div class="merk"><b>Merksatz</b><p>Misstraue zu guten Zahlen. Frage bei jedem Merkmal: «Hätte ich diesen Wert zum Zeitpunkt der Vorhersage wirklich?» Verdächtig sind ein riesiger Unterschied Training zu Validation und ein einzelnes Merkmal mit enormem Gewicht.</p></div>
-
-  <h3>8 · Der ganze Ablauf (Titanic-Aufgabe)</h3>
-  <p>Am Nachmittag baut ihr in Gruppen ein Modell, das vorhersagt, wer die Titanic überlebt hat (Spalten: <code>Pclass</code>, <code>Sex</code>, <code>Age</code>, <code>SibSp</code>, <code>Parch</code>, <code>Fare</code>, <code>Embarked</code>; Ziel <code>Survived</code>). Der Ablauf passt auf jedes Klassifikationsproblem:</p>
-  <ol>
-    <li>Daten ansehen (Struktur, Verteilungen, Anteil der Klassen).</li>
-    <li>Aufräumen und Kategorien in Zahlen umwandeln (One-Hot).</li>
-    <li>Neue Merkmale bauen (z. B. Familiengrösse = <code>SibSp + Parch + 1</code>).</li>
-    <li>Fehlende Werte füllen (z. B. Alter mit dem Median).</li>
-    <li>Merkmale auswählen.</li>
-    <li>Klassenverhältnis prüfen, bei Bedarf Resampling oder <code>class_weight</code>.</li>
-    <li>Train/Test trennen, Cross-Validation auf dem Training.</li>
-    <li>Mit passenden Metriken bewerten (F1, AUC, nicht nur Accuracy).</li>
-    <li>Auf Leakage prüfen.</li>
-    <li>Regularisierung und Hyperparameter-Suche.</li>
-    <li>Bestes Modell <b>einmal</b> auf dem Test-Set prüfen.</li>
-  </ol>
-  <pre><code>from sklearn.compose import ColumnTransformer
-from sklearn.impute import SimpleImputer
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score, train_test_split
-
-X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, stratify=y, random_state=0)
-num = Pipeline([("imp", SimpleImputer(strategy="median")), ("sc", StandardScaler())])
-cat = OneHotEncoder(handle_unknown="ignore")
-prep = ColumnTransformer([("num", num, ["Age", "Fare"]), ("cat", cat, ["Sex", "Pclass"])])
-model = Pipeline([("prep", prep), ("clf", RandomForestClassifier(random_state=0))])
-cross_val_score(model, X_tr, y_tr, cv=5, scoring="f1").mean()</code></pre>
-  <p class="note"><code>stratify=y</code> sorgt dafür, dass Train und Test das gleiche Klassenverhältnis haben. Die Pipeline lernt Imputer und Scaler in jedem Fold nur auf dem Trainingsteil und verhindert so Leakage. Die Vorlage des Dozenten liegt im Kursordner unter <code>02 - SUPERVISED-ML/code/CAS_ML_Supervised_Learning_2.ipynb</code>.</p>
+  <div class="merk"><b>Merksatz</b><p>Misstraue zu guten Zahlen. Frage bei jedem Merkmal: «Hätte ich diesen Wert zum Zeitpunkt der Vorhersage wirklich?» Verdächtig sind auffällig gute Validierungs- oder Testwerte (die im Einsatz einbrechen) und ein einzelnes Merkmal mit enormem Gewicht. Ein grosser Abstand Training zu Validation ist dagegen Overfitting, nicht Leakage.</p></div>
 `,
     exercises: [
       {
@@ -208,7 +239,7 @@ cross_val_score(model, X_tr, y_tr, cv=5, scoring="f1").mean()</code></pre>
       { q: `Du senkst die Schwelle von 0,5 auf 0,2. Was passiert mit Recall und Precision?`, a: `Mehr Fälle werden positiv: Recall steigt (oder bleibt gleich), Precision sinkt meist, weil mehr falsche Alarme dazukommen.` },
       { q: `Was bedeutet eine AUC von 0,5, was von 1?`, a: `0,5 ist Zufall (ROC-Kurve auf der Diagonalen), 1 ist ein perfekter Klassifikator (alle Positiven vor allen Negativen).` },
       { q: `Was passiert bei kNN mit k = 1 und mit k = N?`, a: `k = 1 folgt jedem Trainingspunkt (Overfitting, trainings-perfekt). k = N sagt immer die Mehrheitsklasse (Underfitting).` },
-      { q: `Worin unterscheiden sich Bagging und Boosting?`, a: `Bagging trainiert viele Modelle parallel auf Zufallsstichproben und mittelt (senkt Varianz). Boosting trainiert nacheinander, jedes Modell korrigiert die Fehler des vorherigen (senkt Bias, anfälliger für Rauschen).` },
+      { q: `Worin unterscheiden sich Bagging und Boosting?`, a: `Bagging trainiert viele Modelle parallel auf Zufallsstichproben und mittelt (senkt Varianz). Boosting trainiert nacheinander, jedes Modell korrigiert die Restfehler des bisherigen Gesamtmodells (senkt Bias, anfälliger für Rauschen).` },
       { q: `Wie entsteht Data Leakage, und wie verhinderst du es bei Skalierung und Imputation?`, a: `Information aus Test- oder Zukunftsdaten fliesst ins Training. Alle lernenden Vorverarbeitungsschritte nur auf den Trainingsdaten fitten, am einfachsten mit einer Pipeline in der Cross-Validation.` },
       { q: `Wann darfst du ein Resampling (z. B. SMOTE) anwenden?`, a: `Nur auf die Trainingsdaten, nie auf Validation oder Test. Sonst wird auf künstlichen Daten bewertet.` },
     ],
@@ -228,8 +259,69 @@ cross_val_score(model, X_tr, y_tr, cv=5, scoring="f1").mean()</code></pre>
           const bd=-b/w;if(bd>-6&&bd<6)s+='<line class="res" x1="'+sx(bd)+'" y1="12" x2="'+sx(bd)+'" y2="'+sy(0)+'"/>';
           let ok=0;xs.forEach((x,i)=>{const pr=sigmoid(w*x+b);if((pr>=0.5?1:0)===ys[i])ok++;
             s+='<circle cx="'+sx(x)+'" cy="'+sy(ys[i])+'" r="5" style="fill:'+(ys[i]?'var(--accent)':'var(--surface)')+';stroke:var(--accent);stroke-width:2"/>'});
-          $('sgSvg').innerHTML=s;$('sgBd').textContent=fmt(bd,2).replace('-',MU);$('sgAcc').textContent=ok+' von '+xs.length}
+          $('sgSvg').innerHTML=s;$('sgBd').textContent=fmt(bd,2).replace('-',MU);$('sgAcc').textContent=ok+LernApp.t(' von ',' of ')+xs.length}
         $('sgW').addEventListener('input',draw);$('sgB').addEventListener('input',draw);draw()})();
+
+      // Demo 1b: 10 apartments, linear price vs. logistic P(expensive), same z = b + w*qm
+      (function(){
+        const qm=[35,48,55,62,70,78,85,95,110,130],pr=[1200,1510,1540,1770,1620,1890,1850,2280,2170,2580],n=10;
+        const W=320,H=230,PX=40,PY=22,XA=25,XB=140;
+        const sx=x=>PX+((x-XA)/(XB-XA))*(W-PX-12);
+        const mean=a=>a.reduce((p,c)=>p+c,0)/a.length;
+        let mode='lin';
+        function ols(){const mx=mean(qm),my=mean(pr);let sxy=0,sxx=0;qm.forEach((x,i)=>{sxy+=(x-mx)*(pr[i]-my);sxx+=(x-mx)*(x-mx)});const w=sxy/sxx;return{w,b:my-w*mx}}
+        function logfit(y){const mx=mean(qm),sd=Math.sqrt(mean(qm.map(x=>(x-mx)*(x-mx)))),xs=qm.map(x=>(x-mx)/sd);
+          let w=0,b=0;const lam=0.05,lr=0.5;
+          for(let k=0;k<3000;k++){let gw=lam*w,gb=0;xs.forEach((x,i)=>{const e=sigmoid(w*x+b)-y[i];gw+=e*x/n;gb+=e/n});w-=lr*gw;b-=lr*gb}
+          return{w:w/sd,b:b-w*mx/sd}}
+        function draw(){
+          const T=+$('lgT').value;$('lgTO').textContent=T+' CHF';
+          const y=pr.map(p=>p>=T?1:0),ln=ols(),lg=logfit(y),lin=mode==='lin';
+          $('lgLin').className=lin?'pri':'';$('lgLog').className=lin?'':'pri';
+          const sy=lin?(v=>H-PY-((v-1000)/(2800-1000))*(H-PY-12)):(p=>H-PY-p*(H-PY-12));
+          let s='<line class="ax" x1="'+PX+'" y1="'+(H-PY)+'" x2="'+(W-8)+'" y2="'+(H-PY)+'"/>';
+          for(let t=40;t<=140;t+=20)s+='<text class="lbl" x="'+(sx(t)-8)+'" y="'+(H-6)+'">'+t+'</text>';
+          s+='<text class="lbl" x="'+(W-24)+'" y="'+(H-PY-4)+'">'+LernApp.t('qm','m²')+'</text>';
+          let bd;
+          if(lin){
+            for(const t of[1000,1500,2000,2500])s+='<text class="lbl" x="2" y="'+(sy(t)+3)+'">'+t+'</text>';
+            s+='<line class="dash" x1="'+PX+'" y1="'+sy(T)+'" x2="'+(W-8)+'" y2="'+sy(T)+'"/>';
+            s+='<path class="ln" d="M'+sx(XA)+' '+sy(ln.b+ln.w*XA)+'L'+sx(XB)+' '+sy(ln.b+ln.w*XB)+'"/>';
+            bd=(T-ln.b)/ln.w;
+            pr.forEach((p,i)=>{s+='<line class="res" x1="'+sx(qm[i])+'" y1="'+sy(p)+'" x2="'+sx(qm[i])+'" y2="'+sy(ln.b+ln.w*qm[i])+'"/>'});
+            pr.forEach((p,i)=>{s+='<circle cx="'+sx(qm[i])+'" cy="'+sy(p)+'" r="4.5" style="fill:'+(y[i]?'var(--accent)':'var(--surface)')+';stroke:var(--accent);stroke-width:2"/>'});
+            $('lgForm').innerHTML=LernApp.t('Preis = z = <b>','Price = z = <b>')+fmt(ln.b,0)+'</b> + <b>'+fmt(ln.w,1)+LernApp.t('</b>·qm','</b>·m²');
+            $('lgOdds').innerHTML=LernApp.t('10 qm mehr = <b>+','10 m² more = <b>+')+fmt(ln.w*10,0)+'</b> CHF';
+          }else{
+            for(const t of[0,0.5,1])s+='<text class="lbl" x="2" y="'+(sy(t)+3)+'">'+t+'</text>';
+            s+='<line class="dash" x1="'+PX+'" y1="'+sy(0.5)+'" x2="'+(W-8)+'" y2="'+sy(0.5)+'"/>';
+            let p='';for(let i=0;i<=115;i++){const x=XA+i;p+=(i?'L':'M')+sx(x).toFixed(1)+' '+sy(sigmoid(lg.b+lg.w*x)).toFixed(1)}
+            s+='<path class="ln" d="'+p+'"/>';
+            bd=-lg.b/lg.w;
+            pr.forEach((q,i)=>{s+='<circle cx="'+sx(qm[i])+'" cy="'+sy(y[i])+'" r="4.5" style="fill:'+(y[i]?'var(--accent)':'var(--surface)')+';stroke:var(--accent);stroke-width:2"/>'});
+            $('lgForm').innerHTML='z = <b>'+fmt(lg.b,2).replace('-',MU)+'</b> + <b>'+fmt(lg.w,3)+LernApp.t('</b>·qm &nbsp;→&nbsp; P(teuer) = 1/(1+e<sup>−z</sup>)','</b>·m² &nbsp;→&nbsp; P(expensive) = 1/(1+e<sup>−z</sup>)');
+            $('lgOdds').innerHTML=LernApp.t('10 qm mehr = Odds ×<b>','10 m² more = odds ×<b>')+fmt(Math.exp(lg.w*10),1)+'</b>';
+          }
+          if(bd>XA&&bd<XB)s+='<line class="res" x1="'+sx(bd)+'" y1="12" x2="'+sx(bd)+'" y2="'+(H-PY)+'"/>';
+          $('lgSvg').innerHTML=s;$('lgBd').textContent=fmt(bd,0);
+        }
+        $('lgLin').addEventListener('click',()=>{mode='lin';draw()});
+        $('lgLog').addEventListener('click',()=>{mode='log';draw()});
+        $('lgT').addEventListener('input',draw);draw()})();
+
+      // Demo 1c: cross-entropy vs. MSE for a true positive
+      (function(){
+        const W=320,H=190,PX=30,PY=20,sx=p=>PX+p*(W-PX-10),sy=v=>H-PY-Math.min(v,5)/5*(H-PY-12);
+        function draw(){
+          const p=+$('lsP').value/100;$('lsPO').textContent=fmt(p,2);
+          let s='<line class="ax" x1="'+PX+'" y1="'+sy(0)+'" x2="'+(W-10)+'" y2="'+sy(0)+'"/>';
+          for(const t of[0,1,2,3,4,5])s+='<text class="lbl" x="6" y="'+(sy(t)+3)+'">'+t+'</text>';
+          for(const t of[0,0.5,1])s+='<text class="lbl" x="'+(sx(t)-6)+'" y="'+(H-4)+'">'+t+'</text>';
+          let a='',b='';for(let i=0;i<=100;i++){const q=Math.max(i/100,0.007);a+=(i?'L':'M')+sx(i/100).toFixed(1)+' '+sy(-Math.log(q)).toFixed(1);b+=(i?'L':'M')+sx(i/100).toFixed(1)+' '+sy((1-i/100)*(1-i/100)).toFixed(1)}
+          s+='<path class="ln" d="'+a+'"/><path class="ln2" d="'+b+'" style="stroke-dasharray:5 4"/>';
+          s+='<circle cx="'+sx(p)+'" cy="'+sy(-Math.log(p))+'" r="5" style="fill:var(--accent)"/><circle cx="'+sx(p)+'" cy="'+sy((1-p)*(1-p))+'" r="5" style="fill:var(--warn)"/>';
+          $('lsSvg').innerHTML=s;$('lsCE').textContent=fmt(-Math.log(p),2);$('lsMS').textContent=fmt((1-p)*(1-p),2)}
+        $('lsP').addEventListener('input',draw);draw()})();
 
       // Demo 2: threshold, confusion matrix, ROC
       (function(){
@@ -246,7 +338,7 @@ cross_val_score(model, X_tr, y_tr, cv=5, scoring="f1").mean()</code></pre>
           for(const v of[0,0.5,1])s+='<text class="lbl" x="'+(sx(v)-6)+'" y="165">'+v+'</text>';
           pos.forEach((p,i)=>{const col=p>=t?'var(--ok)':'var(--bad)';s+='<circle cx="'+sx(p)+'" cy="'+(40+(i%3)*10)+'" r="5" style="fill:'+col+';stroke:var(--fg);stroke-width:1"/>'});
           neg.forEach((p,i)=>{const col=p>=t?'var(--bad)':'var(--ok)';s+='<rect x="'+(sx(p)-5)+'" y="'+(112+(i%3)*10-5)+'" width="10" height="10" style="fill:'+col+';stroke:var(--fg);stroke-width:1"/>'});
-          s+='<text class="lbl" x="'+PX+'" y="18">echt positiv (Kreis)</text><text class="lbl" x="'+PX+'" y="150">echt negativ (Quadrat)</text>';
+          s+='<text class="lbl" x="'+PX+'" y="18">'+LernApp.t('echt positiv (Kreis)','actually positive (circle)')+'</text><text class="lbl" x="'+PX+'" y="150">'+LernApp.t('echt negativ (Quadrat)','actually negative (square)')+'</text>';
           s+='<line class="ln2" x1="'+sx(t)+'" y1="24" x2="'+sx(t)+'" y2="148"/>';
           $('thSvg').innerHTML=s;
           $('thTP').textContent=c.tp;$('thFN').textContent=c.fn;$('thFP').textContent=c.fp;$('thTN').textContent=c.tn;
@@ -255,7 +347,7 @@ cross_val_score(model, X_tr, y_tr, cv=5, scoring="f1").mean()</code></pre>
           let g='<line class="ax" x1="'+RX+'" y1="'+ry(0)+'" x2="'+rx(1)+'" y2="'+ry(0)+'"/><line class="ax" x1="'+RX+'" y1="'+ry(0)+'" x2="'+RX+'" y2="'+ry(1)+'"/>';
           g+='<line class="dash" x1="'+rx(0)+'" y1="'+ry(0)+'" x2="'+rx(1)+'" y2="'+ry(1)+'"/>';
           g+='<path class="ln" d="'+roc.map((p,i)=>(i?'L':'M')+rx(p[0]).toFixed(1)+' '+ry(p[1]).toFixed(1)).join('')+'"/>';
-          g+='<text class="lbl" x="'+(RX+60)+'" y="'+(RH-6)+'">Rate falscher Alarme (FPR)</text><text class="lbl" x="2" y="10">Recall (TPR)</text>';
+          g+='<text class="lbl" x="'+(RX+60)+'" y="'+(RH-6)+'">'+LernApp.t('Rate falscher Alarme (FPR)','False alarm rate (FPR)')+'</text><text class="lbl" x="2" y="10">Recall (TPR)</text>';
           g+='<circle cx="'+rx(c.fp/10)+'" cy="'+ry(c.tp/10)+'" r="6" style="fill:var(--warn)"/>';
           $('thRoc').innerHTML=g}
         $('thT').addEventListener('input',draw);draw()})();
@@ -269,25 +361,84 @@ cross_val_score(model, X_tr, y_tr, cv=5, scoring="f1").mean()</code></pre>
           const pre=tp/(tp+fp),f2=2*tp/(2*tp+fp+fn);
           $('imA1').textContent=fmt(a1,3);$('imP1').textContent='–';$('imR1').textContent='0.000';$('imF1').textContent='0.000';
           $('imA2').textContent=fmt((tp+tn)/1000,3);$('imP2').textContent=fmt(pre,3);$('imR2').textContent=fmt(0.8,3);$('imF2').textContent=fmt(f2,3);
-          $('imMsg').textContent='Bei '+fmt(pp,1)+' % Positiven hat «Immer negativ» '+fmt(a1*100,1)+' % Accuracy und findet nichts. '+((tp+tn)/1000<a1?'Das echte Modell hat eine tiefere Accuracy, ist aber das nützliche. ':'Hier sind die Klassen ausgeglichen genug, dass Accuracy das bessere Modell auch zeigt. ')+'Beachte auch: Bei seltener Klasse sinkt die Precision des echten Modells, weil die vielen Negativen auch bei 10 % falschem Alarm viele FP liefern.'}
+          $('imMsg').textContent=LernApp.t('Bei ','With ')+fmt(pp,1)+LernApp.t(' % Positiven hat «Immer negativ» ',' % positives, «Always negative» has ')+fmt(a1*100,1)+LernApp.t(' % Accuracy und findet nichts. ',' % accuracy and finds nothing. ')+((tp+tn)/1000<a1?LernApp.t('Das echte Modell hat eine tiefere Accuracy, ist aber das nützliche. ','The real model has a lower accuracy, but it is the useful one. '):LernApp.t('Hier sind die Klassen ausgeglichen genug, dass Accuracy das bessere Modell auch zeigt. ','Here the classes are balanced enough for accuracy to show the better model too. '))+LernApp.t('Beachte auch: Bei seltener Klasse sinkt die Precision des echten Modells, weil die vielen Negativen auch bei 10 % falschem Alarm viele FP liefern.','Note also: with a rare class the precision of the real model drops, because the many negatives produce many FP even at 10 % false alarms.')}
         $('imP').addEventListener('input',draw);draw()})();
 
       // Demo 4: kNN
       (function(){
         const r=mulberry32(11);
         function make(n){const a=[];for(let i=0;i<n;i++){const c=i%2;const cx=c?0.6:0.4,cy=c?0.55:0.45;a.push({x:cx+0.2*gauss(r),y:cy+0.2*gauss(r),c:c})}return a}
-        const tr=make(60),te=make(200);
+        const tr=make(60),te=make(200),q={x:0.5,y:0.5};
         const W=320,H=220,sx=x=>x*W,sy=y=>H-y*H,G=32,GY=22;
         function pred(x,y,k){const d=tr.map(p=>({d:(p.x-x)*(p.x-x)+(p.y-y)*(p.y-y),c:p.c})).sort((a,b)=>a.d-b.d);let s=0;for(let i=0;i<k;i++)s+=d[i].c;return s*2>k?1:0}
         function draw(){const k=+$('knK').value;$('knKO').textContent=k;
           let s='';const cw=W/G,ch=H/GY;
           for(let i=0;i<G;i++)for(let j=0;j<GY;j++){const x=(i+0.5)/G,y=1-(j+0.5)/GY;s+='<rect x="'+(i*cw)+'" y="'+(j*ch)+'" width="'+(cw+0.5)+'" height="'+(ch+0.5)+'" style="fill:'+(pred(x,y,k)?'var(--accent)':'var(--warn)')+';opacity:.25"/>'}
           tr.forEach(p=>{s+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="3.5" style="fill:'+(p.c?'var(--accent)':'var(--warn)')+';stroke:var(--fg);stroke-width:1"/>'});
+          const nb=tr.map(p=>({p:p,d:Math.hypot(p.x-q.x,p.y-q.y)})).sort((u,v)=>u.d-v.d).slice(0,k);
+          const dk=nb[nb.length-1].d;
+          s+='<ellipse cx="'+sx(q.x)+'" cy="'+sy(q.y)+'" rx="'+dk*W+'" ry="'+dk*H+'" style="fill:none;stroke:var(--fg);stroke-width:1;stroke-dasharray:4 3"/>';
+          nb.forEach(n=>{s+='<line x1="'+sx(q.x)+'" y1="'+sy(q.y)+'" x2="'+sx(n.p.x)+'" y2="'+sy(n.p.y)+'" style="stroke:var(--fg);stroke-width:1;opacity:.5"/>'});
+          s+='<path d="M'+sx(q.x)+' '+(sy(q.y)-9)+' L'+(sx(q.x)+9)+' '+sy(q.y)+' L'+sx(q.x)+' '+(sy(q.y)+9)+' L'+(sx(q.x)-9)+' '+sy(q.y)+' Z" style="fill:var(--fg);stroke:var(--bg);stroke-width:2"/>';
+          s+='<text x="'+(sx(q.x)+12)+'" y="'+(sy(q.y)-12)+'" style="fill:var(--fg);font-size:13px;font-weight:700;paint-order:stroke;stroke:var(--bg);stroke-width:3px">'+LernApp.t('Startpunkt','Start point')+'</text>';
           $('knSvg').innerHTML=s;
           const acc=set=>set.filter(p=>pred(p.x,p.y,k)===p.c).length/set.length;
           const a=acc(tr),b=acc(te);$('knTr').textContent=fmt(a,2);$('knTe').textContent=fmt(b,2);
-          $('knMsg').textContent=k===1?'k = 1: Jeder Punkt zieht seine eigene Insel. Trainings-Accuracy ist perfekt, aber auf neuen Punkten schlechter (Overfitting).':k>=55?'Sehr grosses k: Die Fläche wird fast einfarbig, das Modell ignoriert die Struktur (Underfitting).':'Mittleres k: Eine glatte Grenze, Training und Test liegen nahe beieinander.'}
-        $('knK').addEventListener('input',draw);draw()})();
+          $('knMsg').textContent=k===1?LernApp.t('k = 1: Jeder Punkt zieht seine eigene Insel. Trainings-Accuracy ist perfekt, aber auf neuen Punkten schlechter (Overfitting).','k = 1: Every point draws its own island. Training accuracy is perfect, but worse on new points (overfitting).'):k>=55?LernApp.t('Sehr grosses k: Die Fläche wird fast einfarbig, das Modell ignoriert die Struktur (Underfitting).','Very large k: The area becomes almost one colour, the model ignores the structure (underfitting).'):k<15?LernApp.t('Kleines k: Die Grenze ist noch zackig, Training ist deutlich besser als Test (noch etwas Overfitting).','Small k: The boundary is still jagged, training is clearly better than test (still some overfitting).'):LernApp.t('Mittleres k: Eine glatte Grenze, Training und Test liegen nahe beieinander.','Medium k: A smooth boundary, training and test are close together.')}
+        $('knK').addEventListener('input',draw);
+        $('knSvg').addEventListener('click',e=>{const b=e.currentTarget.getBoundingClientRect();q.x=Math.min(1,Math.max(0,(e.clientX-b.left)/b.width));q.y=Math.min(1,Math.max(0,1-(e.clientY-b.top)/b.height));draw()});
+        draw()})();
+
+      // Demo 6: 10 apartments, single tree vs bagging vs boosting (price regression on qm)
+      (function(){
+        const qm=[35,48,55,62,70,78,85,95,110,130],pr=[1200,1510,1540,1770,1620,1890,1850,2280,2170,2580];
+        const W=320,H=230,PX=40,PY=22,XA=25,XB=140,YA=1000,YB=2800;
+        const sx=x=>PX+((x-XA)/(XB-XA))*(W-PX-12),sy=v=>H-PY-((v-YA)/(YB-YA))*(H-PY-12);
+        const mean=a=>a.reduce((p,c)=>p+c,0)/a.length;
+        function fit(xs,ys,d){
+          if(d===0||xs.length<2)return{v:mean(ys)};
+          const o=xs.map((x,i)=>i).sort((a,b)=>xs[a]-xs[b]);let best=null;
+          for(let k=1;k<o.length;k++){const a=xs[o[k-1]],b=xs[o[k]];if(a===b)continue;
+            const L=o.slice(0,k).map(i=>ys[i]),R=o.slice(k).map(i=>ys[i]),ml=mean(L),mr=mean(R);
+            const e=L.reduce((p,c)=>p+(c-ml)*(c-ml),0)+R.reduce((p,c)=>p+(c-mr)*(c-mr),0);
+            if(!best||e<best.e)best={e:e,t:(a+b)/2}}
+          if(!best)return{v:mean(ys)};
+          const li=xs.map((x,i)=>i).filter(i=>xs[i]<=best.t),ri=xs.map((x,i)=>i).filter(i=>xs[i]>best.t);
+          return{t:best.t,l:fit(li.map(i=>xs[i]),li.map(i=>ys[i]),d-1),r:fit(ri.map(i=>xs[i]),ri.map(i=>ys[i]),d-1)}}
+        const pt=(nd,x)=>nd.t===undefined?nd.v:pt(x<=nd.t?nd.l:nd.r,x);
+        function boot(xs,ys,b){const r=mulberry32(100+b),ix=[];for(let i=0;i<xs.length;i++)ix.push(Math.floor(r()*xs.length));return[ix.map(i=>xs[i]),ix.map(i=>ys[i])]}
+        function model(xs,ys,mode,d,n,lr){
+          if(mode===1){const t=fit(xs,ys,d);return{f:x=>pt(t,x),parts:[]}}
+          if(mode===2){const ts=[];for(let b=0;b<n;b++){const bs=boot(xs,ys,b);ts.push(fit(bs[0],bs[1],d))}
+            return{f:x=>mean(ts.map(t=>pt(t,x))),parts:ts}}
+          const base=mean(ys),ts=[];let res=ys.map(y=>y-base);
+          for(let m=0;m<n;m++){const t=fit(xs,res,d);ts.push(t);res=res.map((r,i)=>r-lr*pt(t,xs[i]))}
+          return{f:x=>base+lr*ts.reduce((p,t)=>p+pt(t,x),0),parts:[]}}
+        let mode=1;
+        function rmse(e){return Math.sqrt(mean(e.map(v=>v*v)))}
+        function draw(){
+          const d=+$('enD').value,n=+$('enN').value,lr=+$('enL').value;
+          $('enDO').textContent=d;$('enNO').textContent=n;$('enLO').textContent=fmt(lr,2);
+          [1,2,3].forEach(k=>{$('enM'+k).className=k===mode?'pri':''});
+          $('enNW').style.display=mode===1?'none':'';$('enLW').style.display=mode===3?'':'none';
+          const m=model(qm,pr,mode,d,n,lr);
+          let s='<line class="ax" x1="'+PX+'" y1="'+(H-PY)+'" x2="'+(W-8)+'" y2="'+(H-PY)+'"/>';
+          for(let t=40;t<=140;t+=20)s+='<text class="lbl" x="'+(sx(t)-8)+'" y="'+(H-6)+'">'+t+'</text>';
+          for(const t of[1000,1500,2000,2500])s+='<text class="lbl" x="2" y="'+(sy(t)+3)+'">'+t+'</text>';
+          s+='<text class="lbl" x="'+(W-24)+'" y="'+(H-PY-4)+'">'+LernApp.t('qm','m²')+'</text>';
+          const path=f=>{let q='';for(let x=XA;x<=XB;x+=0.5)q+=(x===XA?'M':'L')+sx(x).toFixed(1)+' '+sy(f(x)).toFixed(1);return q};
+          m.parts.slice(0,20).forEach(t=>{s+='<path d="'+path(x=>pt(t,x))+'" style="fill:none;stroke:var(--warn);stroke-width:1;opacity:.3"/>'});
+          s+='<path class="ln" d="'+path(m.f)+'"/>';
+          qm.forEach((x,i)=>{s+='<circle cx="'+sx(x)+'" cy="'+sy(pr[i])+'" r="4" style="fill:var(--fg)"/>'});
+          $('enSvg').innerHTML=s;
+          const tr=qm.map((x,i)=>m.f(x)-pr[i]);
+          const lo=qm.map((x,i)=>{const xs=qm.filter((v,j)=>j!==i),ys=pr.filter((v,j)=>j!==i);return model(xs,ys,mode,d,n,lr).f(x)-pr[i]});
+          $('enTr').textContent=fmt(rmse(tr),0);$('enLo').textContent=fmt(rmse(lo),0);
+          $('enMsg').textContent=mode===1?(d>=3?LernApp.t('Tiefer Einzelbaum: Fast jede Wohnung hat ihr eigenes Blatt, die Stufen folgen den Ausreissern. Der Fehler auf bekannten Wohnungen ist klein, der Fehler bei fehlender Wohnung viel grösser (Overfitting).','Deep single tree: Almost every apartment has its own leaf, the steps follow the outliers. The error on known apartments is small, the error for a left-out apartment much larger (overfitting).'):LernApp.t('Flacher Einzelbaum: Wenige grobe Stufen. Der Fehler ist schon auf den bekannten Wohnungen hoch (Underfitting).','Shallow single tree: A few coarse steps. The error is already high on the known apartments (underfitting).'))
+            :mode===2?LernApp.t('Bagging: Die orangen Linien sind einzelne Bäume (je auf einer anderen Stichprobe der 10 Wohnungen), die blaue Linie ist ihr Mittelwert. Mit mehr Bäumen wird sie glatter. Bei flachen Bäumen (Tiefe 1 und 2) senkt Bagging beide Fehler etwas. Ab Tiefe 3 steigt der Fehler auf bekannten Wohnungen gegenüber dem Einzelbaum (weniger Auswendiglernen), der Fehler bei fehlender Wohnung bleibt bei nur 10 Wohnungen etwa gleich.','Bagging: The orange lines are single trees (each on a different sample of the 10 apartments), the blue line is their mean. With more trees it gets smoother. With shallow trees (depth 1 and 2) bagging lowers both errors a little. From depth 3 the error on known apartments rises compared with the single tree (less memorising), the error for a left-out apartment stays about the same with only 10 apartments.')
+            :LernApp.t('Boosting: Die Linie startet beim Durchschnitt (1841 CHF) und nähert sich pro Runde den Preisen. Mit Tiefe 1 und wenigen Runden ist sie grob. Mit mehr Runden oder höherer Lernrate liegt sie näher an den Preisen (Fehler auf bekannten Wohnungen sinkt), lernt aber irgendwann nur noch die Ausreisser: Der Fehler bei fehlender Wohnung sinkt anfangs deutlich, bleibt dann aber bei rund 230 CHF stehen.','Boosting: The line starts at the average (1841 CHF) and gets closer to the prices with each round. With depth 1 and few rounds it is coarse. With more rounds or a higher learning rate it lies closer to the prices (error on known apartments falls), but at some point it only learns the outliers: the error for a left-out apartment falls clearly at first, then levels off at about 230 CHF.')}
+        [1,2,3].forEach(k=>{$('enM'+k).addEventListener('click',()=>{mode=k;$('enD').value=k===3?1:3;$('enN').value=k===3?30:20;draw()})});
+        ['enD','enN','enL'].forEach(id=>$(id).addEventListener('input',draw));draw()})();
     },
   });
 })();

@@ -1,0 +1,111 @@
+@startuml data-object-model
+' Datenobjektmodell der Lernapp: was ein Kapitel, eine Übersetzung und der
+' gespeicherte Zustand enthalten. Stand 2026-11-01.
+title Lernapp CAS ML – Datenobjektmodell
+
+skinparam classAttributeIconSize 0
+hide circle
+
+package "Kapitel (modules/<id>.js)" {
+  class Module {
+    +id : string  <<Pflicht, eindeutig, Anker #id>>
+    +title : string  <<Pflicht, HTML erlaubt>>
+    +order : number = 100  <<Sortierung, klein = früh>>
+    +nav : string  <<Kurzname in der Kapitel-Leiste>>
+    +kicker : string  <<Zeile über dem Titel>>
+    +summary : string  <<ein Satz für die Übersichtskarte>>
+    +html : string  <<Inhalt als HTML-Template>>
+    +quiz : QuizItem[0..*]
+    +notebooks : NotebookRef[0..*]
+    +init() : void  <<Demos verdrahten, nach dem Einfügen>>
+    --
+    ~exercises : Exercise[0..*]  <<veraltet, wird nicht mehr gezeigt>>
+    ~nbExercises : string  <<veraltet, Notebook-Dateiname>>
+  }
+
+  class QuizItem {
+    +q : string  <<Frage, HTML erlaubt>>
+    +a : string  <<Antwort, aufklappbar>>
+  }
+
+  class NotebookRef {
+    +file : string  <<Dateiname in notebooks/>>
+    +desc : string  <<Beschreibung>>
+  }
+
+  class Exercise <<veraltet>> {
+    +t : string  <<Titel>>
+    +task : string  <<Aufgabe, HTML>>
+    +start : string  <<Startcode>>
+    +check : string  <<assert-Zeilen>>
+    +sol : string  <<Lösung>>
+  }
+
+  Module "1" *-- "0..*" QuizItem
+  Module "1" *-- "0..*" NotebookRef
+  Module "1" *-- "0..*" Exercise
+}
+
+package "Übersetzung (modules/en/<id>.js)" {
+  class Translation {
+    +id : string  <<verweist auf Module.id>>
+    +nav : string
+    +title : string
+    +kicker : string
+    +summary : string
+    +html : string  <<ersetzt das ganze Kapitel-HTML>>
+    +quiz : QuizItem[0..*]
+    +notebooks : NotebookRef[0..*]
+    --
+    Jedes angegebene Feld ersetzt das deutsche.
+    Leeres Objekt = Kapitel ist im Code selbst
+    zweisprachig (LernApp.t('de', 'en')).
+  }
+  Translation "0..1" --> "1" Module : überlagert bei lang = en
+}
+
+package "Laufzeit (assets/core.js)" {
+  class LernApp <<global>> {
+    +modules : Module[]
+    +lang : 'de' | 'en'
+    +register(m : Module)
+    +translate(id, fields : Translation)
+    +t(de, en) : string
+    +$(id) : Element
+    +fmt(v, d) : string
+  }
+  LernApp "1" o-- "0..*" Module : Reihenfolge nach order
+}
+
+package "Gespeicherter Zustand" {
+  class BrowserState <<localStorage>> {
+    +cas-ml-lang : 'de' | 'en'
+    +cas-ml-theme : 'light' | 'dark' | 'auto'
+    --
+    Nur Einstellungen. Ältere Schlüssel aus den
+    entfernten Übungen können noch vorhanden sein.
+  }
+
+  class ServerState <<data/state.json>> {
+    +<schlüssel> : string  <<ein Eintrag pro localStorage-Schlüssel>>
+    --
+    Flache Kopie aller localStorage-Schlüssel.
+    GET beim Laden, PUT nach jeder Änderung.
+    Nur mit server.py, nicht in git.
+  }
+  BrowserState "1" <--> "0..1" ServerState : spiegelt
+}
+
+package "Generierte Übungsdaten (assets/notebook-data.js, veraltet)" {
+  class NbData <<window.NbData>> {
+    +<notebookDatei> : NbNotebook
+  }
+  class NbNotebook {
+    +setup : string  <<Python-Vorspann (Imports, Daten, ok())>>
+    +exercises : Exercise[1..*]  <<gleiche Felder wie Exercise>>
+  }
+  NbData "1" *-- "1..*" NbNotebook
+  NbNotebook "1" *-- "1..*" Exercise
+}
+
+@enduml

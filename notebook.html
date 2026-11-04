@@ -3,33 +3,200 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Übungs-Notebook · CAS ML</title>
+<title data-en="Exercise notebook · CAS ML">Übungs-Notebook · CAS ML</title>
 <link rel="stylesheet" href="assets/style.css">
+<script>try{var t=(location.search.match(/[?&]theme=(light|dark|auto)\b/)||[])[1]||localStorage.getItem("cas-ml-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <style>
+  [hidden]{display:none !important}
   .nbbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:12px 0}
   .nbbar a{min-height:44px;display:inline-flex;align-items:center}
-  #nbframe{width:100%;height:calc(100vh - 150px);min-height:480px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
-  #nbmiss{display:none}
+  .nbmodes{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  .nbmodes button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .nbmodes button:disabled{opacity:.55;cursor:not-allowed}
+  #nbframe{width:100%;height:calc(100vh - 190px);min-height:480px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+  #nbmiss button{margin:8px 0}
+  #nbmiss details{margin-top:8px;font-size:14px}
+  #nbmiss code{overflow-wrap:anywhere}
+  .nblist{list-style:none;padding:0;margin:8px 0 16px;display:grid;gap:8px}
+  .nblist li{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px}
+  .nblist li.pick{border-color:var(--accent)}
+  .nblist a{font-weight:600}
+  .nblist span{display:block;font-size:14px;color:var(--muted)}
 </style>
 </head>
 <body>
 <div class="wrap">
-<div class="nbbar"><a href="index.html">← Zurück zur Lernhilfe</a><a id="nbopen" target="_blank" rel="noopener">In eigenem Tab öffnen</a></div>
-<iframe id="nbframe" title="Jupyter-Notebook mit den Python-Übungen"></iframe>
-<div id="nbmiss" class="merk"><b>Jupyter läuft nicht</b><p>Starte im Ordner der Lernapp:<br><code>jupyter-lab --no-browser --ip=127.0.0.1 --port=8899 --ServerApp.base_url=/jupyter/ --ServerApp.token=lernapp-local</code></p></div>
+<div class="nbbar"><a href="index.html" data-en="← Back to the study guide">← Zurück zur Lernhilfe</a></div>
+
+<div class="nbmodes" role="group" aria-label="Modus" data-en-label="Mode">
+  <button type="button" id="modeLocal" aria-pressed="false" data-en="Local (Jupyter on this computer)">Lokal (Jupyter auf diesem Rechner)</button>
+  <button type="button" id="modeColab" aria-pressed="false" data-en="Google Colab (in the browser)">Google Colab (im Browser)</button>
+</div>
+<p id="modeHint" class="note"></p>
+
+<section id="paneLocal" hidden>
+  <iframe id="nbframe" title="Jupyter-Notebook mit den Python-Übungen" data-en-title="Jupyter notebook with the Python exercises" hidden></iframe>
+  <div id="nbmiss" class="merk" hidden>
+    <b data-en="Jupyter is not running">Jupyter läuft nicht</b>
+    <p data-en="The study app can start it for you. This takes a few seconds.">Die Lernapp kann es für dich starten. Das dauert ein paar Sekunden.</p>
+    <button class="pri" id="nbstart" data-en="Start Jupyter">Jupyter starten</button>
+    <p id="nbmsg" role="status"></p>
+    <details><summary data-en="Start it by hand instead">Lieber von Hand starten</summary>
+    <p data-en="In a terminal:">Im Terminal:</p>
+    <p><code>jupyter-lab --no-browser --ip=127.0.0.1 --port=8899 --ServerApp.base_url=/jupyter/ --IdentityProvider.token=lernapp-local --ServerApp.root_dir=C:\Studium\CAS_ML\lernapp-cas-ml</code></p></details>
+  </div>
+</section>
+
+<section id="paneColab" hidden>
+  <div id="colabPick" class="merk" hidden>
+    <b data-en="Open this notebook">Dieses Notebook öffnen</b>
+    <p><a id="colabPickLink" class="pri" target="_blank" rel="noopener"></a></p>
+  </div>
+  <p data-en="Colab runs the notebooks in your browser on Google's servers, without installing anything. You need a Google account. Changes stay in your copy in Colab (save it to Drive). The notebooks load their own data; UMAP and SMOTE are installed when needed.">Colab führt die Notebooks im Browser auf Servern von Google aus, ohne Installation. Du brauchst ein Google-Konto. Änderungen bleiben in deiner Kopie in Colab (in Drive speichern). Die Notebooks laden ihre Daten selbst; UMAP und SMOTE werden bei Bedarf installiert.</p>
+  <h3 data-en="Examples for every model">Beispiele zu jedem Modell</h3>
+  <ul class="nblist" id="listExamples"></ul>
+  <h3 data-en="Exercises and study guide">Übungen und Lernhilfe</h3>
+  <ul class="nblist" id="listOthers"></ul>
+</section>
 </div>
 <script>
 (function () {
-  var url = '/jupyter/lab/tree/notebooks/Lernapp_Lernhilfe.ipynb?token=lernapp-local';
-  var frame = document.getElementById('nbframe');
-  frame.src = url;
-  document.getElementById('nbopen').href = url;
-  fetch('/jupyter/api/status?token=lernapp-local').then(function (r) {
-    if (!r.ok) throw new Error(r.status);
-  }).catch(function () {
-    frame.style.display = 'none';
-    document.getElementById('nbmiss').style.display = 'block';
-  });
+  // English: ?lang=en or the stored choice from the main page swaps the [data-en] texts
+  var en = /[?&]lang=en\b/.test(location.search);
+  try { if (!/[?&]lang=de\b/.test(location.search) && localStorage.getItem('cas-ml-lang') === 'en') en = true; } catch (e) {}
+  if (en) {
+    document.documentElement.lang = 'en';
+    document.querySelectorAll('[data-en]').forEach(function (el) { el.innerHTML = el.getAttribute('data-en'); });
+    document.querySelectorAll('[data-en-title]').forEach(function (el) { el.title = el.getAttribute('data-en-title'); });
+    document.querySelectorAll('[data-en-label]').forEach(function (el) { el.setAttribute('aria-label', el.getAttribute('data-en-label')); });
+  }
+})();
+(function () {
+  var en = document.documentElement.lang === 'en';
+  function T(de, e) { return en ? e : de; }
+  var COLAB = 'https://colab.research.google.com/github/rotscher-baumi/lernapp-cas-ml/blob/main/notebooks/';
+  // [file under notebooks/, group (e = example, o = other), German, English]; a test keeps this list in step with the folder
+  var NOTEBOOKS = [
+    ['beispiele/01_Regression.ipynb', 'e', 'Regression: Gradient Descent, linear, Polynom, Ridge, Lasso, ElasticNet', 'Regression: gradient descent, linear, polynomial, ridge, lasso, elastic net'],
+    ['beispiele/02_Klassifikation.ipynb', 'e', 'Klassifikation: logistische Regression, kNN, Naive Bayes, SVM, Baum, unausgewogene Klassen', 'Classification: logistic regression, kNN, naive Bayes, SVM, tree, imbalanced classes'],
+    ['beispiele/03_Ensembles.ipynb', 'e', 'Ensembles: Random Forest und Gradient Boosting', 'Ensembles: random forest and gradient boosting'],
+    ['beispiele/04_Clustering_Anomalien.ipynb', 'e', 'Clustering und Anomalien: k-Means, hierarchisch, DBSCAN, GMM, Isolation Forest', 'Clustering and anomalies: k-means, hierarchical, DBSCAN, GMM, isolation forest'],
+    ['beispiele/05_Dimensionsreduktion.ipynb', 'e', 'Dimensionsreduktion: PCA, t-SNE, UMAP', 'Dimensionality reduction: PCA, t-SNE, UMAP'],
+    ['beispiele/06_Strategien.ipynb', 'e', 'Strategien: Vorbereitung, Cross-Validation, Feature Selection, Metriken, Data Leakage', 'Strategies: preparation, cross-validation, feature selection, metrics, data leakage'],
+    ['beispiele/07_Titanic.ipynb', 'e', 'Titanic komplett: einfaches Modell und Random Forest mit EDA', 'Titanic in full: simple model and random forest with EDA'],
+    ['Lernapp_Lernhilfe.ipynb', 'o', 'Alle Kapitel der Lernhilfe als Notebook', 'All chapters of the study guide as a notebook'],
+    ['Lernapp_Uebungen.ipynb', 'o', 'Python-Übungen mit Prüfzellen', 'Python exercises with check cells'],
+    ['Python_Pandas_Uebungen_own.ipynb', 'o', 'Python und Pandas: 12 Aufgaben', 'Python and pandas: 12 tasks'],
+    ['Supervised_Learning_1_Uebungen_own.ipynb', 'o', 'Supervised Learning 1: 10 Aufgaben', 'Supervised learning 1: 10 tasks'],
+    ['Workflow_Train_Val_Test_CV.ipynb', 'o', 'Train, Validation, Test und Cross-Validation Schritt für Schritt', 'Train, validation, test and cross-validation step by step'],
+    ['Fehlende_Werte_Imputation.ipynb', 'o', 'Fehlende Werte ohne Data Leakage ergänzen', 'Filling missing values without data leakage'],
+    ['PCA_gewichtete_Summen_own.ipynb', 'o', 'PCA: Hauptkomponenten als gewichtete Summen', 'PCA: principal components as weighted sums']
+  ];
+  var DEFAULT_NB = 'Lernapp_Lernhilfe.ipynb';
+  // ?nb=beispiele/01_Regression.ipynb opens that notebook (no '..', only .ipynb)
+  var nb = (location.search.match(/[?&]nb=([\w\/-]+\.ipynb)(?:&|$)/) || [])[1] || null;
+  // Jupyter exists only when this page is served from the own computer; a hosted copy has no server behind it
+  var isLocal = ['localhost', '127.0.0.1', '[::1]', '::1'].indexOf(location.hostname) >= 0;
+  var KEY = 'cas-ml-nbmode';
+
+  var btnLocal = document.getElementById('modeLocal'), btnColab = document.getElementById('modeColab');
+  var paneLocal = document.getElementById('paneLocal'), paneColab = document.getElementById('paneColab');
+  var hint = document.getElementById('modeHint');
+
+  function colabUrl(file) { return COLAB + file; }
+
+  // ---- Colab mode
+  function renderColab() {
+    NOTEBOOKS.forEach(function (n) {
+      var li = document.createElement('li'), a = document.createElement('a'), s = document.createElement('span');
+      a.href = colabUrl(n[0]); a.target = '_blank'; a.rel = 'noopener';
+      a.textContent = n[0].replace(/^beispiele\//, '').replace(/\.ipynb$/, '').replace(/_/g, ' ');
+      s.textContent = T(n[2], n[3]);
+      li.appendChild(a); li.appendChild(s);
+      if (n[0] === nb) li.className = 'pick';
+      document.getElementById(n[1] === 'e' ? 'listExamples' : 'listOthers').appendChild(li);
+    });
+    var picked = NOTEBOOKS.filter(function (n) { return n[0] === nb; })[0];
+    if (picked) {
+      var link = document.getElementById('colabPickLink');
+      link.href = colabUrl(picked[0]);
+      link.textContent = T('In Colab öffnen: ', 'Open in Colab: ') + T(picked[2], picked[3]);
+      document.getElementById('colabPick').hidden = false;
+    }
+  }
+
+  // ---- local mode (Jupyter behind the server's /jupyter/ proxy)
+  var localStarted = false;
+  function initLocal() {
+    if (localStarted) return;
+    localStarted = true;
+    var url = '/jupyter/lab/tree/notebooks/' + (nb || DEFAULT_NB) + '?token=lernapp-local';
+    var frame = document.getElementById('nbframe'), miss = document.getElementById('nbmiss');
+    var btn = document.getElementById('nbstart'), msg = document.getElementById('nbmsg');
+    function up() {
+      return fetch('/jupyter/api/status?token=lernapp-local').then(function (r) { return r.ok; }, function () { return false; });
+    }
+    function show() { miss.hidden = true; frame.hidden = false; frame.src = url; }
+    up().then(function (ok) { if (ok) show(); else miss.hidden = false; });
+
+    btn.addEventListener('click', function () {
+      btn.disabled = true;
+      msg.textContent = T('Jupyter startet …', 'Starting Jupyter …');
+      fetch('/api/jupyter/start', { method: 'POST', headers: { 'X-Lernapp': '1' } }).then(function (r) {
+        return r.json().catch(function () { return { status: r.status === 405 ? 'old' : 'error' }; });
+      }, function () { return { status: 'error' }; }).then(function (res) {
+        if (res.status === 'missing') {
+          msg.innerHTML = T('JupyterLab ist für das Python, das den Server ausführt, nicht installiert. Installiere es mit:',
+            'JupyterLab is not installed for the Python that runs the server. Install it with:') +
+            '<br><code>"' + res.python + '" -m pip install jupyterlab</code>';
+        } else if (res.status === 'old') {
+          msg.textContent = T('Der Server ist eine ältere Version. Starte ihn neu mit python server.py.', 'The server is an older version. Restart it with python server.py.');
+        } else if (res.status !== 'running' && res.status !== 'starting') {
+          msg.textContent = T('Jupyter konnte nicht starten. Läuft die Lernapp über python server.py?', 'Could not start Jupyter. Is the study app running via python server.py?');
+        } else {
+          var tries = 0;
+          (function poll() {
+            up().then(function (ok) {
+              if (ok) return show();
+              if (++tries > 60) {
+                msg.textContent = T('Jupyter hat nach einer Minute nicht geantwortet. Siehe data/jupyter.log.', 'Jupyter did not answer within a minute. See data/jupyter.log.');
+                btn.disabled = false;
+                return;
+              }
+              setTimeout(poll, 1000);
+            });
+          })();
+          return;
+        }
+        btn.disabled = false;
+      });
+    });
+  }
+
+  // ---- mode switch
+  function setMode(mode, remember) {
+    if (mode === 'local' && !isLocal) mode = 'colab';
+    btnLocal.setAttribute('aria-pressed', String(mode === 'local'));
+    btnColab.setAttribute('aria-pressed', String(mode === 'colab'));
+    paneLocal.hidden = mode !== 'local';
+    paneColab.hidden = mode !== 'colab';
+    hint.textContent = mode === 'local'
+      ? T('Echtes Python auf diesem Rechner, nichts verlässt ihn. Die Änderungen speichert Jupyter direkt in den Notebook-Dateien.', 'Real Python on this computer, nothing leaves it. Jupyter saves changes straight into the notebook files.')
+      : T('Läuft bei Google, ohne Installation. Funktioniert auch auf einem anderen PC oder dem Handy.', 'Runs at Google, no installation. Also works on another PC or a phone.');
+    if (mode === 'local') initLocal();
+    if (remember) { try { localStorage.setItem(KEY, mode); } catch (e) { /* storage may be blocked */ } }
+  }
+
+  renderColab();
+  if (!isLocal) {
+    btnLocal.disabled = true;
+    btnLocal.title = T('Nur verfügbar, wenn die Lernapp auf deinem Rechner läuft (python server.py).', 'Only available when the study app runs on your computer (python server.py).');
+  }
+  btnLocal.addEventListener('click', function () { setMode('local', true); });
+  btnColab.addEventListener('click', function () { setMode('colab', true); });
+  var stored = null;
+  try { stored = localStorage.getItem(KEY); } catch (e) { /* storage may be blocked */ }
+  setMode(stored === 'colab' || stored === 'local' ? stored : (isLocal ? 'local' : 'colab'), false);
 })();
 </script>
 </body>

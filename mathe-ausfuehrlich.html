@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Mathe ausführlich</title>
+<title data-en="Maths in detail">Mathe ausführlich</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="assets/style.css">
+<script>try{var t=(location.search.match(/[?&]theme=(light|dark|auto)\b/)||[])[1]||localStorage.getItem("cas-ml-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 </head>
 <body>
 <div class="wrap">
@@ -15,12 +16,12 @@
 </defs></svg>
 
 <header class="top">
-  <div class="eyebrow"><a href="index.html#mathe">← Zurück zur Lernapp</a> · <a href="mathe-kompakt.html">Zum Spickzettel</a></div>
-  <h1>Mathe-Grundlagen ausführlich</h1>
-  <p class="lead">Alle Erklärungen, Diagramme und Python-Übungen zur Mathematik im Kurs.</p>
+  <div class="eyebrow" data-en="&lt;a href=&quot;index.html#mathe&quot;&gt;← Back to the study app&lt;/a&gt; · &lt;a href=&quot;mathe-kompakt.html&quot;&gt;To the cheat sheet&lt;/a&gt;"><a href="index.html#mathe">← Zurück zur Lernapp</a> · <a href="mathe-kompakt.html">Zum Spickzettel</a></div>
+  <h1 data-en="Maths basics in detail">Mathe-Grundlagen ausführlich</h1>
+  <p class="lead" data-en="All explanations and interactive diagrams for the maths in the course.">Alle Erklärungen und interaktiven Diagramme zur Mathematik im Kurs.</p>
 </header>
 
-<nav class="chips" id="chips" aria-label="Kapitel"></nav>
+<nav class="chips" id="chips" aria-label="Kapitel" data-en-label="Chapters"></nav>
 
 <div id="modules"></div>
 </div>
@@ -28,5 +29,6 @@
 <script src="assets/core.js"></script>
 <script src="assets/demos-mathe.js"></script>
 <script src="modules/mathe-lang.js"></script>
+<script src="modules/en/mathe-lang.js"></script>
 </body>
 </html>
