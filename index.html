@@ -21,7 +21,7 @@
   <p class="lead" data-en="Each chapter explains the idea first, then shows code and ends with the key takeaway and the most common pitfall. You can try the demos right away.">Jedes Kapitel erklärt zuerst die Idee, zeigt dann Code und endet mit dem Merksatz und der häufigsten Falle. Die Demos kannst du direkt ausprobieren.</p>
 </header>
 
-<p class="note" data-en="&lt;a href=&quot;notebook.html&quot;&gt;▶ Everything as an editable Jupyter notebook (real Python, local or in Colab)&lt;/a&gt;"><a href="notebook.html">▶ Alles als bearbeitbares Jupyter-Notebook (echtes Python, lokal oder in Colab)</a></p>
+<div class="linkbar"><a class="linkbtn" href="notebook.html" data-en="▶ Jupyter notebooks (local or Colab)">▶ Jupyter-Notebooks (lokal oder Colab)</a><a class="linkbtn" href="https://github.com/rotscher-baumi/lernapp-cas-ml" target="_blank" rel="noopener" data-en="⌥ Repository on GitHub">⌥ Repository auf GitHub</a></div>
 
 <nav class="chips" id="chips" aria-label="Kapitel" data-en-label="Chapters"></nav>
 
@@ -53,29 +53,9 @@
 
 <div id="modules"></div>
 
-<section id="spielwiese">
-  <div class="kicker" data-en="Code yourself">Selbst coden</div>
-  <h2 data-en="Practice: playground and notebooks">Üben: Spielwiese und Notebooks</h2>
-  <p data-en="Here is a free field to try things out, and the guide for the notebooks with real Pandas and scikit-learn.">Hier ist ein freies Feld zum Ausprobieren und die Anleitung für die Notebooks mit echtem Pandas und scikit-learn.</p>
-  <div class="merk" data-en="&lt;b&gt;Starting the notebooks (Windows)&lt;/b&gt;&lt;p&gt;The notebooks are in the repo under &lt;code&gt;lernapp/notebooks/&lt;/code&gt;, separate from the course material. Open them in VS Code with your Python environment from the course. They need &lt;code&gt;pandas&lt;/code&gt;, &lt;code&gt;numpy&lt;/code&gt;, &lt;code&gt;matplotlib&lt;/code&gt;, &lt;code&gt;scikit-learn&lt;/code&gt;. Run the cells from top to bottom, replace &lt;code&gt;...&lt;/code&gt; and run the check cell. The solution is below, collapsible.&lt;/p&gt;"><b>Notebooks starten (Windows)</b><p>Die Notebooks liegen im Repo unter <code>lernapp/notebooks/</code>, getrennt von den Kursunterlagen. Öffne sie in VS Code mit deiner Python-Umgebung aus dem Kurs. Es braucht <code>pandas</code>, <code>numpy</code>, <code>matplotlib</code>, <code>scikit-learn</code>. Führe die Zellen von oben nach unten aus, ersetze <code>...</code> und lasse die Prüfzelle laufen. Die Lösung steht darunter, aufklappbar.</p></div>
-  <div class="demo">
-    <div class="tag" data-en="Playground">Spielwiese</div><h4 data-en="Free field">Freies Feld</h4>
-    <p class="hint" data-en="Try out anything you saw in the Python chapter.">Probiere alles aus, was du im Kapitel Python gesehen hast.</p>
-    <label for="freeCode" class="hint" style="display:block" data-en="Python code">Python-Code</label>
-    <textarea id="freeCode" class="code" rows="8" data-en="fruits = [&quot;Apple&quot;, &quot;Pear&quot;, &quot;Cherry&quot;]
-for i, f in enumerate(fruits):
-    print(i, f.upper())
-print([len(f) for f in fruits])" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off">fruechte = ["Apfel", "Birne", "Kirsche"]
-for i, f in enumerate(fruechte):
-    print(i, f.upper())
-print([len(f) for f in fruechte])</textarea>
-    <div class="btnrow"><button class="pri" id="freeRun" data-en="Run">Ausführen</button></div>
-    <pre id="freeOut" hidden></pre>
-  </div>
   <footer data-en="Based on the slides and notebooks from the course repository (Dr. D. Mousadakos, Dr. M. Rowan). Numerical examples come from this material. The chapters on classification (30.10.) and unsupervised learning (31.10.) follow the slides by Dr. M. Rowan and Dr. Y. Staudt.">
     Grundlage: Folien und Notebooks aus dem Kurs-Repository (Dr. D. Mousadakos, Dr. M. Rowan). Zahlenbeispiele stammen aus diesen Unterlagen. Die Kapitel zu Klassifikation (30.10.) und Unsupervised Learning (31.10.) folgen den Folien von Dr. M. Rowan und Dr. Y. Staudt.
   </footer>
-</section>
 </div>
 
 <script src="assets/core.js"></script>

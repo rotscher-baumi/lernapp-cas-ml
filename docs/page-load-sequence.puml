@@ -52,7 +52,7 @@ loop pro Modul
   mod -> dom : Demos verdrahten (Slider, Buttons, SVG)
   note right : Fehler in init() werden abgefangen\nund als Hinweis im Kapitel gezeigt
 end
-core -> dom : Spielwiese und Navigation verdrahten,\nzum #anker springen
+core -> dom : Navigation verdrahten,\nzum #anker springen
 
 == Später: Nutzer:in ändert eine Einstellung ==
 b -> core : Klick auf «Dunkel»
