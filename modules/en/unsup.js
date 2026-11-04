@@ -10,7 +10,7 @@ LernApp.translate('unsup', {
     <div><h4>Finding anomalies</h4><p>Find points that do not fit the rest. Example: suspicious payments.</p></div>
     <div><h4>Dimensionality reduction</h4><p>Summarise many features in a few, for example to plot data in 2D.</p></div>
   </div>
-  <p>The course day works with a Lego dataset (scraped from the toy shop's website), the labs with wine measurements, simulated payments and handwritten digits. There is no «right», only useful or not. That is why the <b>interpretation</b> is part of the result.</p>
+  <p>The labs work with wine measurements, simulated payments and handwritten digits. There is no «right», only useful or not. That is why the <b>interpretation</b> is part of the result.</p>
 
   <h3 id="unsup-ablauf">The whole workflow at a glance</h3>
   <p>In Unsupervised Learning there is no right answer to compare against. So the workflow is a loop of trying, checking and interpreting, not a straight path to a test result as in <a href="#ml-ablauf">Supervised Learning</a>.</p>
@@ -61,7 +61,7 @@ LernApp.translate('unsup', {
       <line x1="210" y1="240" x2="210" y2="272" marker-end="url(#ub-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
 
       <g class="ab-step" data-s="4" tabindex="0" role="button" aria-expanded="false" aria-label="Step 4: open explanation">
-      <rect x="60" y="272" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--accent);stroke-width:1.5"/>
+      <rect x="60" y="272" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
       <text x="210" y="294" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">4 · Scale</text>
       <text x="210" y="312" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">StandardScaler, RobustScaler for outliers</text>
       </g>
@@ -133,7 +133,7 @@ LernApp.translate('unsup', {
       <div class="ab-db"></div>
       <div class="ab-dl"></div>
     </div>
-    <figcaption>Scaling (blue) is a must, because almost all methods compute distances. There is no test set (orange): instead of the right answer, you check with the silhouette, stability and domain knowledge. The loops show that you adjust settings and preprocessing several times.</figcaption>
+    <figcaption>Scaling is a must (except for tree methods such as Isolation Forest), because almost all methods compute distances. There is no test set (orange): instead of the right answer, you check with the silhouette, stability and domain knowledge. The loops show that you adjust settings and preprocessing several times.</figcaption>
   </figure>
   <div class="box" id="unsup-titanic">
     <h4>Complete example: Titanic without a target column</h4>
@@ -188,6 +188,30 @@ Cluster
     <p class="note">An ARI of 0.83 between two runs means: the groups are largely, but not completely, stable. Do not treat k = 6 as «the truth», but as one useful partition.</p>
   </div>
   <div class="merk"><b>Key takeaway</b><p>Scale, compare several settings, check stability and explain the clusters in original units. A result is good if it is stable and makes sense in the domain.</p></div>
+
+  <h3 id="unsup-wahl">Which method for what?</h3>
+  <p>Choose the <b>goal</b> first, then the method. The table shows when each one fits and what to watch out for.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Goal</th><th>Method</th><th>Fits when …</th><th>Watch out</th></tr>
+    <tr><td rowspan="4"><b>Find groups</b></td><td><a href="#unsup-kmeans">k-Means</a></td><td>the groups are round and of similar size, k is roughly known, there are many rows; a quick start</td><td>Every point must go into a group, outliers pull the centres; k must be given</td></tr>
+    <tr><td><a href="#unsup-hier">Hierarchical</a> (Ward)</td><td>there are a few up to a few thousand rows and you want to see the tree (dendrogram) and choose k afterwards</td><td>Memory and run time grow quadratically; linkage <code>single</code> builds chains</td></tr>
+    <tr><td><a href="#unsup-dbscan">DBSCAN / HDBSCAN</a></td><td>the groups have any shape, k is unknown and noise should be recognised as such (label −1)</td><td><code>eps</code> is tricky; with varying density HDBSCAN is better; weak with very many features</td></tr>
+    <tr><td><a href="#unsup-dbscan">GMM</a></td><td>the groups are elliptical or overlap and you need probabilities instead of a hard assignment (k via BIC)</td><td>more parameters than k-Means, needs enough rows per group</td></tr>
+    <tr><td><b>Find the unusual</b></td><td><a href="#unsup-anomalie">Isolation Forest</a></td><td>you want a ranked list of unusual rows, even with many features and large data</td><td><code>contamination</code> is an assumption, not a measurement; no scaling needed</td></tr>
+    <tr><td rowspan="3"><b>Shrink or show features</b></td><td><a href="#unsup-pca">PCA</a></td><td>you want to keep computing (before clustering, remove noise) or need to explain the axes</td><td>linear relationships only; scale first</td></tr>
+    <tr><td><a href="#unsup-tsne">t-SNE</a></td><td>you want a 2D picture of the neighbourhoods</td><td>Distances and group sizes in the picture mean nothing; not as input for a model</td></tr>
+    <tr><td><a href="#unsup-tsne">UMAP</a></td><td>like t-SNE, but faster, with the coarse structure better preserved; new points can be placed with <code>transform</code></td><td>the picture depends on the settings</td></tr>
+  </table></div>
+  <p><b>Six questions that decide:</b></p>
+  <ol>
+    <li>What do I want in the end: groups, unusual cases or a picture?</li>
+    <li>Do I roughly know k? If not: hierarchical (dendrogram), DBSCAN or GMM with BIC.</li>
+    <li>Are the groups round, elliptical or curved?</li>
+    <li>Is there noise or are there outliers that should not be forced into a group? Then DBSCAN.</li>
+    <li>Do I need probabilities instead of a hard assignment? Then GMM.</li>
+    <li>How many rows and features do I have? Many rows: k-Means. Very many features: PCA first.</li>
+  </ol>
+  <div class="merk"><b>Key takeaway</b><p>Goal first, then group shape, then data size. All methods here need scaling except the Isolation Forest.</p></div>
 
   <h3 id="unsup-vs">1 · Supervised or unsupervised?</h3>
   <p>The type of problem does not depend on the method, but on the <b>data and the question</b>. What matters is: is there a column with the answer you are looking for (target column <code>y</code>, label)?</p>
@@ -445,7 +469,7 @@ trustworthiness(X_s, Z, n_neighbors=10)  # 1 = neighbours well preserved</code><
   <h3 id="unsup-deep">12 · Deep clustering (outlook)</h3>
   <p>Classical clustering works poorly with very many features (images, text). In deep clustering, an <b>autoencoder</b> (a neural network that reconstructs its input through a narrow bottleneck) learns a compact representation. Clustering is then done in this «latent» representation. Advanced variants train representation and clustering together. Here you only need to be able to place it.</p>
 
-  <p class="note">Lecturer's notebooks (course folder <code>07 - UNSUPERVISED-LEARNING/code</code>): <code>clustering_k_means</code>, <code>clustering_k_means optimizing</code>, <code>hierarchical_clustering</code>, <code>dimension_reduction_pca</code>, <code>dimension_reduction_tsne</code>, each with an <code>_exercise</code> version. Data: <code>lego_daten_one_hot_encoded_cleaned.csv</code>. Labs (folder <code>notebooks</code>): <code>01_clustering_lab</code> (wine: scaling, k, DBSCAN, GMM, ARI), <code>02_anomaly_detection_lab</code> (Isolation Forest), <code>03_pca_lab</code> (components, reconstruction), <code>04_embeddings_lab</code> (t-SNE and UMAP).</p>
+  <p class="note">Lecturer's notebooks (course folder <code>07 - UNSUPERVISED-LEARNING/code</code>): <code>clustering_k_means</code>, <code>clustering_k_means optimizing</code>, <code>hierarchical_clustering</code>, <code>dimension_reduction_pca</code>, <code>dimension_reduction_tsne</code>, each with an <code>_exercise</code> version. Labs (folder <code>notebooks</code>): <code>01_clustering_lab</code> (wine: scaling, k, DBSCAN, GMM, ARI), <code>02_anomaly_detection_lab</code> (Isolation Forest), <code>03_pca_lab</code> (components, reconstruction), <code>04_embeddings_lab</code> (t-SNE and UMAP).</p>
 `,
   quiz: [
     { q: `What is the difference between Supervised and Unsupervised Learning?`, a: `Supervised learns from examples with a known answer. Unsupervised has no answer and finds structure on its own (groups, important directions).` },
