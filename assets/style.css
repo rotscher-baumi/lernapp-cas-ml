@@ -42,6 +42,9 @@ h2{font-family:var(--f-display);font-size:clamp(24px,5vw,31px);line-height:1.2;m
 h3{font-family:var(--f-display);font-size:19px;line-height:1.3;margin:28px 0 8px;text-wrap:balance}
 p{margin:0 0 14px}
 .lead{font-size:18px;color:var(--muted);max-width:60ch}
+.linkbar{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.linkbtn{display:inline-block;font-weight:600;font-size:15px;text-decoration:none;color:var(--accent);background:var(--accent-soft);border:1.5px solid var(--accent);border-radius:10px;padding:9px 16px}
+.linkbtn:hover,.linkbtn:focus-visible{background:var(--accent);color:var(--bg)}
 nav.chips{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);
   margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px));
   border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap;display:flex;gap:8px;scrollbar-width:none}
