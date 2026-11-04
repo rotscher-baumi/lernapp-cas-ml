@@ -3,3 +3,13 @@ __pycache__/
 .venv/
 .env
 .playwright-mcp/
+
+.claude/settings.local.json
+venv/
+.DS_Store
+Thumbs.db
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/

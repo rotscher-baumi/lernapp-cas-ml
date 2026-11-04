@@ -55,8 +55,8 @@ df["stadt"].value_counts()                           # wie oft kommt jeder Wert 
 
   <h3>Fehlende Werte</h3>
   <pre><code>df.isna().sum()                     # leere Werte pro Spalte
-df.dropna(subset=["preis"])         # Zeilen löschen, wo "preis" fehlt
-df["alter"].fillna(df["alter"].median())   # auffüllen</code></pre>
+df = df.dropna(subset=["preis"])    # Zeilen löschen, wo "preis" fehlt
+df["alter"] = df["alter"].fillna(df["alter"].median())   # auffüllen (Ergebnis zuweisen!)</code></pre>
   <div class="falle"><b>Falle aus dem NYC-Notebook</b><p>In jeder Spalte fehlen nur etwa 5 Prozent. Aber in <i>verschiedenen</i> Zeilen. Ein pauschales <code>dropna()</code> wirft dadurch rund 43 Prozent aller Zeilen weg. Besser: nur dort löschen, wo die Spalte wirklich nötig ist.</p></div>
 
   <h3>groupby: Gruppieren und Zusammenfassen</h3>
@@ -113,14 +113,14 @@ df["kategorie"] = pd.cut(df["preis_pro_sqft"], bins=bins, labels=labels)</code><
     ],
     init() {
       (function(){
-        $('mergeTables').innerHTML='<div class="grid2"><div><h4>buildings (links)</h4><div class="tablewrap"><table style="min-width:0"><tr><th>property_id</th><th>NEIGHBORHOOD</th></tr><tr><td>A</td><td>SOHO</td></tr><tr><td>B</td><td>HARLEM</td></tr><tr><td>C</td><td>BUSHWICK</td></tr><tr><td>D</td><td>ASTORIA</td></tr></table></div></div><div><h4>sales (rechts)</h4><div class="tablewrap"><table style="min-width:0"><tr><th>property_id</th><th>SALE PRICE</th></tr><tr><td>C</td><td class="num">850&#8217;000</td></tr><tr><td>D</td><td class="num">1&#8217;200&#8217;000</td></tr><tr><td>E</td><td class="num">640&#8217;000</td></tr><tr><td>F</td><td class="num">2&#8217;300&#8217;000</td></tr></table></div></div></div>';
-        const txt={inner:'Nur C und D sind in beiden Tabellen. Alles andere fällt weg (4 Zeilen auf 2).',
-          left:'Alle Zeilen der linken Tabelle bleiben. A und B haben keinen Preis (NaN). E und F fallen weg.',
-          right:'Alle Zeilen der rechten Tabelle bleiben. E und F haben keinen Stadtteil (NaN). A und B fallen weg.',
-          outer:'Alles bleibt, was fehlt, wird NaN. Gut, um Lücken zu finden.'};
+        $('mergeTables').innerHTML='<div class="grid2"><div><h4>buildings ('+LernApp.t('links','left')+')</h4><div class="tablewrap"><table style="min-width:0"><tr><th>property_id</th><th>NEIGHBORHOOD</th></tr><tr><td>A</td><td>SOHO</td></tr><tr><td>B</td><td>HARLEM</td></tr><tr><td>C</td><td>BUSHWICK</td></tr><tr><td>D</td><td>ASTORIA</td></tr></table></div></div><div><h4>sales ('+LernApp.t('rechts','right')+')</h4><div class="tablewrap"><table style="min-width:0"><tr><th>property_id</th><th>SALE PRICE</th></tr><tr><td>C</td><td class="num">850&#8217;000</td></tr><tr><td>D</td><td class="num">1&#8217;200&#8217;000</td></tr><tr><td>E</td><td class="num">640&#8217;000</td></tr><tr><td>F</td><td class="num">2&#8217;300&#8217;000</td></tr></table></div></div></div>';
+        const txt={inner:LernApp.t('Nur C und D sind in beiden Tabellen. Alles andere fällt weg (4 Zeilen auf 2).','Only C and D are in both tables. Everything else drops out (4 rows down to 2).'),
+          left:LernApp.t('Alle Zeilen der linken Tabelle bleiben. A und B haben keinen Preis (NaN). E und F fallen weg.','All rows of the left table stay. A and B have no price (NaN). E and F drop out.'),
+          right:LernApp.t('Alle Zeilen der rechten Tabelle bleiben. E und F haben keinen Stadtteil (NaN). A und B fallen weg.','All rows of the right table stay. E and F have no neighbourhood (NaN). A and B drop out.'),
+          outer:LernApp.t('Alles bleibt, was fehlt, wird NaN. Gut, um Lücken zu finden.','Everything stays; whatever is missing becomes NaN. Good for finding gaps.')};
         const cls={both:'b',left_only:'l',right_only:'r'};
         function show(how){const rows=mergeRows(how);
-          $('mergeText').textContent="how='"+how+"': "+rows.length+" Zeilen. "+txt[how]+" Farbe: grün = in beiden, blau = nur links, orange = nur rechts.";
+          $('mergeText').textContent="how='"+how+"': "+rows.length+LernApp.t(" Zeilen. "," rows. ")+txt[how]+LernApp.t(" Farbe: grün = in beiden, blau = nur links, orange = nur rechts."," Colour: green = in both, blue = left only, orange = right only.");
           $('mergeResult').innerHTML='<tr><th>property_id</th><th>NEIGHBORHOOD</th><th>SALE PRICE</th><th>_merge</th></tr>'+
             rows.map(r=>{const c=cls[r.src];return '<tr><td class="'+c+'">'+r.key+'</td><td class="'+c+'">'+(r.hood===null?'NaN':r.hood)+'</td><td class="'+c+' num">'+(r.price===null?'NaN':r.price.toLocaleString('de-CH'))+'</td><td class="'+c+'">'+r.src+'</td></tr>'}).join('');
           document.querySelectorAll('#mergeBtns button').forEach(b=>b.classList.toggle('pri',b.dataset.how===how))}

@@ -68,13 +68,14 @@ def markdown_to_html(text: str) -> str:
     for line in text.split("\n"):
         ordered = re.match(r"^\d+\.\s+(.*)$", line)
         bullet = re.match(r"^-\s+(.*)$", line)
-        if ordered or bullet:
+        item = ordered or bullet
+        if item:
             flush_para()
             tag = "ol" if ordered else "ul"
             if list_tag and list_tag != tag:
                 flush_list()
             list_tag = tag
-            items.append((ordered or bullet).group(1))
+            items.append(item.group(1))
         elif line.strip():
             flush_list()
             para.append(line.strip())

@@ -70,6 +70,7 @@ sns.lineplot(data=lang, x="month", y="temperature", hue="city")</code></pre>
     <li>Streudiagramm zeigt: Zusammenhang ist nicht Ursache (<i>Korrelation ≠ Kausalität</i>).</li>
     <li>Histogramm: die Zahl der <code>bins</code> verändert die Geschichte, probiere mehrere.</li>
   </ul>
+
   <div class="merk"><b>Merksatz</b><p>Erst Frage, dann Chart. Danach Titel, Achsen mit Einheit, Null-Basislinie, aufräumen.</p></div>`,
     quiz: [
       { q: `Wann ist ein Kuchendiagramm keine gute Wahl?`, a: `Bei vielen Teilen oder wenn man genau vergleichen oder ranken will. Längen (Balken) lesen wir besser als Winkel.` },
@@ -78,13 +79,13 @@ sns.lineplot(data=lang, x="month", y="temperature", hue="city")</code></pre>
     init() {
       (function(){
         const out=[
-          ['Balkendiagramm','Sortiere die Balken und starte bei Null. Bei langen Beschriftungen waagrecht (barh).'],
-          ['Liniendiagramm','Die x-Achse hat eine natürliche Reihenfolge, meist Zeit. Höchstens 4 bis 5 Linien, mit eigenem Marker oder Linienstil.'],
-          ['Streudiagramm (Scatter)','Ein Punkt pro Beobachtung. Achte auf Richtung, Stärke und Ausreisser. Dritte Variable über Farbe oder Grösse. Zusammenhang ist keine Ursache.'],
-          ['Histogramm','Zeigt, wie oft welcher Wertebereich vorkommt. Probiere verschiedene bins, sie verändern das Bild.'],
-          ['Boxplot','Linie = Median, Box = mittlere 50 Prozent, Striche = Spannweite, Punkte = Ausreisser. Ideal zum Vergleichen von Gruppen.'],
-          ['Gestapelter Balken oder Kuchen','Nur wenn die Teile wirklich ein Ganzes ergeben und es wenige sind (höchstens 5 Kuchenstücke). Zum genauen Vergleichen lieber Balken.']];
-        function upd(){const o=out[+$('qsel').value];$('qout').innerHTML='Nimm ein <b>'+o[0]+'</b>. '+o[1]}
+          [LernApp.t('Balkendiagramm','bar chart'),LernApp.t('Sortiere die Balken und starte bei Null. Bei langen Beschriftungen waagrecht (barh).','Sort the bars and start at zero. With long labels, go horizontal (barh).')],
+          [LernApp.t('Liniendiagramm','line chart'),LernApp.t('Die x-Achse hat eine natürliche Reihenfolge, meist Zeit. Höchstens 4 bis 5 Linien, mit eigenem Marker oder Linienstil.','The x-axis has a natural order, usually time. At most 4 to 5 lines, each with its own marker or line style.')],
+          [LernApp.t('Streudiagramm (Scatter)','scatter plot'),LernApp.t('Ein Punkt pro Beobachtung. Achte auf Richtung, Stärke und Ausreisser. Dritte Variable über Farbe oder Grösse. Zusammenhang ist keine Ursache.','One point per observation. Look at direction, strength and outliers. A third variable via colour or size. Correlation is not causation.')],
+          [LernApp.t('Histogramm','histogram'),LernApp.t('Zeigt, wie oft welcher Wertebereich vorkommt. Probiere verschiedene bins, sie verändern das Bild.','Shows how often each range of values occurs. Try different bins, they change the picture.')],
+          [LernApp.t('Boxplot','boxplot'),LernApp.t('Linie = Median, Box = mittlere 50 Prozent, Striche = bis zum letzten Wert innerhalb von 1,5 × Boxhöhe (IQR), Punkte = Ausreisser jenseits davon. Ideal zum Vergleichen von Gruppen.','Line = median, box = middle 50 percent, whiskers = up to the last value within 1.5 × box height (IQR), points = outliers beyond that. Ideal for comparing groups.')],
+          [LernApp.t('Gestapelter Balken oder Kuchen','stacked bar or pie chart'),LernApp.t('Nur wenn die Teile wirklich ein Ganzes ergeben und es wenige sind (höchstens 5 Kuchenstücke). Zum genauen Vergleichen lieber Balken.','Only if the parts really make up a whole and there are few of them (at most 5 pie slices). For precise comparison, bars are better.')]];
+        function upd(){const o=out[+$('qsel').value];$('qout').innerHTML=LernApp.t('Nimm ein <b>','Use a <b>')+o[0]+'</b>. '+o[1]}
         $('qsel').addEventListener('change',upd);upd()})();
     },
   });

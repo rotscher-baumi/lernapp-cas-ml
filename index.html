@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>CAS ML Lernhilfe</title>
+<title data-en="CAS ML study guide">CAS ML Lernhilfe</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="assets/style.css">
+<script>try{var t=(location.search.match(/[?&]theme=(light|dark|auto)\b/)||[])[1]||localStorage.getItem("cas-ml-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 </head>
 <body>
 <div class="wrap">
@@ -15,28 +16,33 @@
 </defs></svg>
 
 <header class="top">
-  <div class="eyebrow">CAS Machine Learning · HSLU · Herbstsemester 2026</div>
-  <h1>Der Stoff bis jetzt, einfach erklärt</h1>
-  <p class="lead">Modul 1 (Python und Pandas, 16./17. Oktober), Supervised Learning Tag 1 (Regression, 23. Oktober), Tag 2 (Klassifikation, 30. Oktober) und Unsupervised Learning (31. Oktober). Jedes Kapitel erklärt zuerst die Idee, zeigt dann Code und endet mit dem Merksatz und der häufigsten Falle. Die Demos kannst du direkt ausprobieren.</p>
+  <div class="eyebrow" data-en="CAS Machine Learning · HSLU · Autumn semester 2026">CAS Machine Learning · HSLU · Herbstsemester 2026</div>
+  <h1 data-en="The course so far, explained simply">Der Stoff bis jetzt, einfach erklärt</h1>
+  <p class="lead" data-en="Each chapter explains the idea first, then shows code and ends with the key takeaway and the most common pitfall. You can try the demos right away.">Jedes Kapitel erklärt zuerst die Idee, zeigt dann Code und endet mit dem Merksatz und der häufigsten Falle. Die Demos kannst du direkt ausprobieren.</p>
 </header>
 
-<p class="note"><a href="notebook.html">▶ Alles als bearbeitbares Jupyter-Notebook (echtes Python, lokal)</a></p>
+<div class="linkbar"><a class="linkbtn" href="notebook.html" data-en="▶ Jupyter notebooks (local or Colab)">▶ Jupyter-Notebooks (lokal oder Colab)</a><a class="linkbtn" href="https://github.com/rotscher-baumi/lernapp-cas-ml" target="_blank" rel="noopener" data-en="⌥ Repository on GitHub">⌥ Repository auf GitHub</a></div>
 
-<nav class="chips" id="chips" aria-label="Kapitel"></nav>
+<nav class="chips" id="chips" aria-label="Kapitel" data-en-label="Chapters"></nav>
 
 <section id="ueberblick">
-  <div class="kicker">Überblick</div>
-  <h2>Was bisher lief</h2>
-  <p>Der rote Faden: Du holst Daten in Python, räumst sie mit Pandas auf, schaust sie dir in Grafiken an und lässt danach ein Modell daraus lernen. Alles Spätere im CAS baut darauf auf.</p>
+  <div class="kicker" data-en="Overview">Überblick</div>
+  <h2 data-en="What we have covered">Was bisher lief</h2>
+  <p data-en="The common thread: you load data into Python, clean it with Pandas, look at it in charts and then let a model learn from it. Everything later in the CAS builds on this.">Der rote Faden: Du holst Daten in Python, räumst sie mit Pandas auf, schaust sie dir in Grafiken an und lässt danach ein Modell daraus lernen. Alles Spätere im CAS baut darauf auf.</p>
   <div class="steps">
-    <div class="st"><b>1 · Daten verstehen</b><span>Data Science, Git, Python</span></div><div class="ar">→</div>
-    <div class="st"><b>2 · Daten bearbeiten</b><span>Pandas, Merge, Cleaning</span></div><div class="ar">→</div>
-    <div class="st"><b>3 · Daten zeigen</b><span>Matplotlib, Seaborn</span></div><div class="ar">→</div>
-    <div class="st"><b>4 · Daten lernen lassen</b><span>Regression, Overfitting</span></div>
+    <div class="st" data-en="&lt;b&gt;1 · Understand data&lt;/b&gt;&lt;span&gt;Data Science, Git, Python&lt;/span&gt;"><b>1 · Daten verstehen</b><span>Data Science, Git, Python</span></div><div class="ar">→</div>
+    <div class="st" data-en="&lt;b&gt;2 · Process data&lt;/b&gt;&lt;span&gt;Pandas, Merge, Cleaning&lt;/span&gt;"><b>2 · Daten bearbeiten</b><span>Pandas, Merge, Cleaning</span></div><div class="ar">→</div>
+    <div class="st" data-en="&lt;b&gt;3 · Show data&lt;/b&gt;&lt;span&gt;Matplotlib, Seaborn&lt;/span&gt;"><b>3 · Daten zeigen</b><span>Matplotlib, Seaborn</span></div><div class="ar">→</div>
+    <div class="st" data-en="&lt;b&gt;4 · Learn from data&lt;/b&gt;&lt;span&gt;Regression, Overfitting&lt;/span&gt;"><b>4 · Daten lernen lassen</b><span>Regression, Overfitting</span></div>
   </div>
   <div class="toc" id="toc"></div>
-  <div class="merk"><b>Tipp zum Lernen</b><p>Lies ein Kapitel, öffne dann im Repo das passende Notebook (Live Coding) und ändere eine Zahl. Verstehen kommt beim Verändern, nicht beim Lesen.</p></div>
-  <div class="box"><b style="font-family:var(--f-display)">Nächste Termine</b> <span class="note">(Stundenplan, Stand Juni 2026)</span>
+  <div class="merk" data-en="&lt;b&gt;Study tip&lt;/b&gt;&lt;p&gt;Read a chapter, then open the matching notebook in the repo (live coding) and change a number. Understanding comes from changing things, not from reading.&lt;/p&gt;"><b>Tipp zum Lernen</b><p>Lies ein Kapitel, öffne dann im Repo das passende Notebook (Live Coding) und ändere eine Zahl. Verstehen kommt beim Verändern, nicht beim Lesen.</p></div>
+  <div class="box" data-en="&lt;b style=&quot;font-family:var(--f-display)&quot;&gt;Upcoming dates&lt;/b&gt; &lt;span class=&quot;note&quot;&gt;(timetable, as of June 2026)&lt;/span&gt;
+    &lt;ul style=&quot;margin:8px 0 0&quot;&gt;
+      &lt;li&gt;&lt;b&gt;Fri 30.10.&lt;/b&gt; Supervised Learning 2: classification (logistic regression)&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;Sat 31.10.&lt;/b&gt; Unsupervised Learning: clustering, anomalies, dimensionality reduction&lt;/li&gt;
+      &lt;li&gt;&lt;b&gt;Thu 05.11.&lt;/b&gt; Transfer project info evening (online, optional) · &lt;b&gt;22.11.&lt;/b&gt; Transfer project topic submission&lt;/li&gt;
+    &lt;/ul&gt;"><b style="font-family:var(--f-display)">Nächste Termine</b> <span class="note">(Stundenplan, Stand Juni 2026)</span>
     <ul style="margin:8px 0 0">
       <li><b>Fr 30.10.</b> Supervised Learning 2: Klassifikation (logistische Regression)</li>
       <li><b>Sa 31.10.</b> Unsupervised Learning: Clustering, Anomalien, Dimensionsreduktion</li>
@@ -47,30 +53,13 @@
 
 <div id="modules"></div>
 
-<section id="spielwiese">
-  <div class="kicker">Selbst coden</div>
-  <h2>Üben: Spielwiese und Notebooks</h2>
-  <p>Die Python-Aufgaben stehen am Ende des jeweiligen Kapitels. Hier ist ein freies Feld zum Ausprobieren und die Anleitung für die Notebooks mit echtem Pandas und scikit-learn.</p>
-  <div class="merk"><b>Notebooks starten (Windows)</b><p>Die Notebooks liegen im Repo unter <code>lernapp/notebooks/</code>, getrennt von den Kursunterlagen. Öffne sie in VS Code mit deiner Python-Umgebung aus dem Kurs. Es braucht <code>pandas</code>, <code>numpy</code>, <code>matplotlib</code>, <code>scikit-learn</code>. Führe die Zellen von oben nach unten aus, ersetze <code>...</code> und lasse die Prüfzelle laufen. Die Lösung steht darunter, aufklappbar.</p></div>
-  <div class="demo">
-    <div class="tag">Spielwiese</div><h4>Freies Feld</h4>
-    <p class="hint">Probiere alles aus, was du im Kapitel Python gesehen hast.</p>
-    <label for="freeCode" class="hint" style="display:block">Python-Code</label>
-    <textarea id="freeCode" class="code" rows="8" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off">fruechte = ["Apfel", "Birne", "Kirsche"]
-for i, f in enumerate(fruechte):
-    print(i, f.upper())
-print([len(f) for f in fruechte])</textarea>
-    <div class="btnrow"><button class="pri" id="freeRun">Ausführen</button></div>
-    <pre id="freeOut" hidden></pre>
-  </div>
-  <footer>
+  <footer data-en="Based on the slides and notebooks from the course repository (Dr. D. Mousadakos, Dr. M. Rowan). Numerical examples come from this material. The chapters on classification (30.10.) and unsupervised learning (31.10.) follow the slides by Dr. M. Rowan and Dr. Y. Staudt.">
     Grundlage: Folien und Notebooks aus dem Kurs-Repository (Dr. D. Mousadakos, Dr. M. Rowan). Zahlenbeispiele stammen aus diesen Unterlagen. Die Kapitel zu Klassifikation (30.10.) und Unsupervised Learning (31.10.) folgen den Folien von Dr. M. Rowan und Dr. Y. Staudt.
   </footer>
-</section>
 </div>
 
-<script src="assets/notebook-data.js"></script>
 <script src="assets/core.js"></script>
+<script src="assets/demos-kmeans.js"></script>
 <!-- Modules: one script line per chapter. Add new modules here (see README.md). -->
 <script src="modules/ds.js"></script>
 <script src="modules/git.js"></script>
@@ -83,5 +72,18 @@ print([len(f) for f in fruechte])</textarea>
 <script src="modules/ablauf.js"></script>
 <script src="modules/klass.js"></script>
 <script src="modules/unsup.js"></script>
+<script src="modules/uebersicht.js"></script>
+<!-- English texts (LernApp.translate), one file per translated chapter -->
+<script src="modules/en/ds.js"></script>
+<script src="modules/en/git.js"></script>
+<script src="modules/en/python.js"></script>
+<script src="modules/en/pandas.js"></script>
+<script src="modules/en/viz.js"></script>
+<script src="modules/en/hood.js"></script>
+<script src="modules/en/mathe.js"></script>
+<script src="modules/en/ml.js"></script>
+<script src="modules/en/klass.js"></script>
+<script src="modules/en/unsup.js"></script>
+<script src="modules/en/uebersicht.js"></script>
 </body>
 </html>
