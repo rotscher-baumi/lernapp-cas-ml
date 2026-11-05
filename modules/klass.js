@@ -54,7 +54,7 @@
     <div class="stats"><span>Cross-Entropy <b id="lsCE"></b></span><span>MSE <b id="lsMS"></b></span></div>
     <p class="hint"><b>Was du siehst:</b> Die Wohnung ist wirklich teuer (y = 1). Mit dem Regler stellst du ein, wie viel Wahrscheinlichkeit das Modell für «teuer» angibt. Die Linien zeigen die Strafe für diese Vorhersage: Je höher die Linie, desto schlechter.</p>
     <p class="hint"><b>Was passiert:</b> Liegt das Modell richtig (p nahe 1), sind beide Strafen klein. Liegt es sicher falsch (p nahe 0), steigt die Cross-Entropy (−ln p, durchgezogen) ohne Grenze, der MSE ((1−p)², gestrichelt) bleibt bei höchstens 1. Probiere p = 0,01: Cross-Entropy 4,6, MSE nur 0,98.</p>
-    <p class="hint"><b>Warum das zählt:</b> Das Modell lernt, indem es die Gewichte dorthin schiebt, wo die Strafe kleiner wird. Dafür braucht es eine Steigung. Beim MSE ist sie bei sicher falschen Vorhersagen fast null, weil die Sigmoid-Kurve dort flach ist, und das Modell bleibt im Irrtum stecken. Bei der Cross-Entropy bleibt die Steigung gross, und das Modell korrigiert sich schnell.</p>
+    <div class="merk"><b>Warum das zählt</b><p>Das Modell lernt, indem es die Gewichte dorthin schiebt, wo die Strafe kleiner wird. Dafür braucht es eine Steigung. Beim MSE ist sie bei sicher falschen Vorhersagen fast null, weil die Sigmoid-Kurve dort flach ist, und das Modell bleibt im Irrtum stecken. Bei der Cross-Entropy bleibt die Steigung gross, und das Modell korrigiert sich schnell.</p></div>
   </div>
   <pre><code>from sklearn.linear_model import LogisticRegression
 clf = LogisticRegression().fit(X_train, y_train)

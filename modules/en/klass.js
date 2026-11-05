@@ -51,7 +51,7 @@ LernApp.translate('klass', {
     <div class="stats"><span>Cross-entropy <b id="lsCE"></b></span><span>MSE <b id="lsMS"></b></span></div>
     <p class="hint"><b>What you see:</b> The apartment really is expensive (y = 1). The slider sets how much probability the model gives to «expensive». The lines show the penalty for that prediction: the higher the line, the worse.</p>
     <p class="hint"><b>What happens:</b> If the model is right (p near 1), both penalties are small. If it is confidently wrong (p near 0), the cross-entropy (−ln p, solid) grows without limit, while the MSE ((1−p)², dashed) stays at 1 at most. Try p = 0.01: cross-entropy 4.6, MSE only 0.98.</p>
-    <p class="hint"><b>Why it matters:</b> The model learns by moving its weights to where the penalty gets smaller. For that it needs a slope. With MSE the slope is almost zero for confident wrong predictions, because the sigmoid curve is flat there, and the model stays stuck in its mistake. With cross-entropy the slope stays large, and the model corrects itself quickly.</p>
+    <div class="merk"><b>Why it matters</b><p>The model learns by moving its weights to where the penalty gets smaller. For that it needs a slope. With MSE the slope is almost zero for confident wrong predictions, because the sigmoid curve is flat there, and the model stays stuck in its mistake. With cross-entropy the slope stays large, and the model corrects itself quickly.</p></div>
   </div>
   <pre><code>from sklearn.linear_model import LogisticRegression
 clf = LogisticRegression().fit(X_train, y_train)
