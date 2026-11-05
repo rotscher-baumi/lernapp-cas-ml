@@ -289,26 +289,35 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 per class +
   </div>
   <div class="falle"><b>When neither</b><p>If the relationship is almost linear, the simple line or logistic regression wins. With very few rows (under about 100) the effort does not pay off. If you have to explain the result, a single small tree is easier to read. For images and text, neural networks are the choice.</p></div>
   <div class="merk"><b>Rule of thumb</b><p>Start with a Random Forest as a strong baseline. If the accuracy is not enough, try boosting and tune it with validation. Diagnosis: good on training and poor on validation → bagging. Poor on both → boosting.</p></div>
-  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Example: the 10 apartments</h4>
-  <p>For the class «expensive» the one split at 74 m² is enough; there is nothing for an ensemble to improve. So here we go back to the question from day 1, the <b>price</b> (ensembles exist for regression just the same). The price does not rise cleanly with the m²: the 70 m² apartment (1620) is cheaper than the 62 m² apartment (1770), the 85 m² apartment (1850) cheaper than the 78 m² apartment (1890). A deep tree memorises these outliers.</p>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Example: 100 apartments</h4>
+  <p>The 10 apartments from day 1 are too few for ensembles: with 10 points and an almost linear price there is nothing to improve. So this example uses <b>100 apartments</b> (made up, with fixed random numbers, always the same ones). <b>70</b> of them are used for training and <b>30</b> for testing: the model never sees them, and the test error shows how well it fits <i>new</i> apartments. The target is again the <b>price</b> from the m² (ensembles exist for regression just the same). The price rises with the m² and jumps up from about 85 m², because large apartments are more expensive per m². On top comes noise (location, condition) that no model can predict.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Model</th><th class="num">Error training (CHF)</th><th class="num">Error test (CHF)</th></tr>
+    <tr><td>Line from day 1</td><td class="num">131</td><td class="num">154</td></tr>
+    <tr><td>Single tree, depth 3</td><td class="num">76</td><td class="num">126</td></tr>
+    <tr><td>Single tree, depth 6</td><td class="num">55</td><td class="num">128</td></tr>
+    <tr><td>Bagging, 20 trees, depth 3</td><td class="num">72</td><td class="num">107</td></tr>
+    <tr><td>Boosting, 30 rounds, depth 1, learning rate 0.3</td><td class="num">70</td><td class="num">104</td></tr>
+    <tr><td>Boosting, 50 rounds, depth 3, learning rate 1</td><td class="num">40</td><td class="num">131</td></tr>
+  </table></div>
   <ul>
-    <li><b>Single tree:</b> With depth 3 almost every apartment has its own leaf. On the known apartments the error is small (about 35 CHF); if you leave one apartment out, it is much larger (about 240 CHF). This gap is the overfitting.</li>
-    <li><b>Bagging:</b> Each tree gets 10 apartments drawn <i>with replacement</i>. Some appear twice, others not at all (on average about 65 % are distinct, with a lot of data 63 %). Each tree errs differently; the mean is smoother and memorises less. With only 10 apartments the error for a left-out apartment still stays similar; the advantage only shows with more data.</li>
-    <li><b>Boosting, round by round:</b> The start is the average price, <b>1841 CHF</b> for every apartment. But the smallest apartment (35 m²) costs only 1200, so its residual is <b>−641</b>. Round 1: a depth-1 tree splits at 90 m². On the left (7 apartments) the mean residual is −215, on the right (3 apartments) +502. With learning rate 0.3 only a part is added: the 35 m² apartment does not jump to 1626 but to 1841 − 0.3·215 = <b>1776</b>. Its residual shrinks from −641 to <b>−576</b>. Round 2 splits at 74 m² and corrects the new residuals, round 3 at 58.5 m². After three rounds the 35 m² apartment has a residual of −416. Small steps, many rounds: this is how the line in the demo moves towards the prices round by round.</li>
+    <li><b>Single tree:</b> The line cannot reproduce the jump at 85 m² (bias). A deep tree (depth 6), on the other hand, also learns the noise: on the 70 training apartments the error is small (55 CHF), on the 30 new ones clearly larger (128 CHF). This gap is the overfitting.</li>
+    <li><b>Bagging:</b> Each tree gets 70 apartments drawn <i>with replacement</i>. Some appear twice, others not at all (on average about 63 % are distinct). Each tree errs differently; the mean over 20 trees is smoother and memorises less noise: the test error falls from 126 to 107 CHF although the trees are equally deep (variance).</li>
+    <li><b>Boosting, round by round:</b> The start is the average price, <b>1480 CHF</b> for every apartment. But the smallest apartment (30 m²) costs only 940, so its residual is <b>−540</b>. Round 1: a depth-1 tree splits at 86 m². On the left (38 apartments) the mean residual is −396, on the right (32 apartments) +470. With learning rate 0.3 only a part is added: the 30 m² apartment does not jump to 1084 but to 1480 − 0.3·396 ≈ <b>1361</b>. Its residual shrinks from −540 to about <b>−420</b>. Round 2 splits at 80 m² and corrects the new residuals, round 3 at 90 m², after which the residual is about −260. After 3 rounds the test error is still high (204 CHF, underfitting), after 30 rounds it falls to 104 CHF (bias). With depth 3 and learning rate 1, boosting learns the noise as well: training 40, test 131 CHF.</li>
   </ul>
   <div class="demo" id="enDemo">
-    <div class="tag">Demo</div><h4>Single tree, bagging and boosting on the 10 apartments</h4>
-    <svg class="plot" id="enSvg" viewBox="0 0 320 230" role="img" aria-label="10 apartments: m² against price with the prediction of a single tree, of bagging or of boosting"></svg>
+    <div class="tag">Demo</div><h4>Single tree, bagging and boosting on 100 apartments</h4>
+    <svg class="plot" id="enSvg" viewBox="0 0 320 230" role="img" aria-label="100 apartments: m² against price with the prediction of a single tree, of bagging or of boosting. Filled points are training apartments, empty ones test apartments"></svg>
     <div class="btnrow"><button class="pri" id="enM1">Single tree</button><button id="enM2">Bagging</button><button id="enM3">Boosting</button></div>
     <div class="ctl"><label for="enD">Depth of the trees</label><input type="range" id="enD" min="1" max="4" step="1" value="3"><output id="enDO"></output></div>
     <div class="ctl" id="enNW"><label for="enN">Number of trees</label><input type="range" id="enN" min="1" max="50" step="1" value="20"><output id="enNO"></output></div>
     <div class="ctl" id="enLW"><label for="enL">Learning rate</label><input type="range" id="enL" min="0.05" max="1" step="0.05" value="0.3"><output id="enLO"></output></div>
-    <div class="stats"><span>Error on the known apartments <b id="enTr"></b> CHF</span><span>Error when the apartment is left out <b id="enLo"></b> CHF</span></div>
+    <div class="stats"><span>Error training (70, filled) <b id="enTr"></b> CHF</span><span>Error test (30, empty) <b id="enLo"></b> CHF</span></div>
     <p class="hint" id="enMsg"></p>
   </div>
-  <p class="hint">The second error is «leave-one-out»: for each apartment the model is retrained without it and then applied to it. It shows how well the model fits a <i>new</i> apartment (RMSE). It stays high everywhere, because no tree can extrapolate beyond the edge apartments (35 and 130 m²): outside the known m² the prediction is simply the last step value. For comparison: the simple line from day 1 has only about 123 CHF error for a left-out apartment. If the data are almost linear, the simpler model wins; ensembles only pay off with more complicated patterns and more data.</p>
+  <p class="hint">The test error is the honest one: it measures how well the model fits apartments it has never seen (RMSE). It cannot fall below the noise in the data (about 90 CHF here). The line from day 1 is at 154 CHF; the ensembles beat it because the price has a jump. If the relationship were almost linear, the simpler model would win. With 30 test apartments the values fluctuate a bit, so look at the gap between training and test.</p>
   <pre><code>from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-# X = m² of the 10 apartments (column), y = price
+# X = m² of the training apartments (column), y = price
 rf = RandomForestRegressor(n_estimators=200, random_state=0).fit(X, y)
 gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).fit(X, y)
 # For «expensive yes/no»: RandomForestClassifier / GradientBoostingClassifier</code></pre>
