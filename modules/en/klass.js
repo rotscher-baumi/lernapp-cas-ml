@@ -176,11 +176,11 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 per class +
   <p>For a new point you look for the k nearest training points and take the majority class (for regression the average). There is no training, but prediction is slow with a lot of data. k controls bias and variance: <b>k = 1</b> follows every point (overfitting), <b>k = N</b> predicts the majority class for everyone (underfitting).</p>
   <div class="demo" id="knDemo">
     <div class="tag">Demo</div><h4>kNN: effect of k</h4>
-    <svg class="plot" id="knSvg" viewBox="0 0 320 220" role="img" aria-label="Decision regions of kNN with training points"></svg>
-    <div class="ctl"><label for="knK">k</label><input type="range" id="knK" min="1" max="59" step="2" value="1"><output id="knKO"></output></div>
+    <svg class="plot" id="knSvg" viewBox="0 0 320 220" role="img" aria-label="Two groups of training points (blue and orange) and a start point with its k nearest neighbours"></svg>
+    <div class="ctl"><label for="knK">k</label><input type="range" id="knK" min="1" max="39" step="2" value="1"><output id="knKO"></output></div>
     <div class="stats"><span>Training accuracy <b id="knTr"></b></span><span>Test accuracy (new points) <b id="knTe"></b></span></div>
     <p class="hint" id="knMsg"></p>
-    <p class="hint">The diamond «Start point» = the new point whose class you are looking for (a click into the image moves it). The lines lead to its k nearest neighbours, the dashed circle shows the reach.</p>
+    <p class="hint">The diamond «Start point» = the new point whose class you are looking for (a click into the image moves it). The lines lead to its k nearest neighbours, the dashed circle shows the reach. The diamond takes the colour of the majority.</p>
   </div>
   <p class="note"><b>With the 10 apartments:</b> A new apartment with 76 m². The nearest neighbours on the m² axis are 78 m² (expensive), 70 m² (not expensive) and 85 m² (expensive). With <b>k = 1</b> the 78 m² one decides alone: expensive. With <b>k = 3</b>, 2 out of 3 vote for expensive. With <b>k = 10</b> (all) it is 5 to 5; there is no majority decision any more.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Naive Bayes</h4>

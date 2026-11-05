@@ -70,7 +70,7 @@ Ein Kapitel zeigt die Übungen mit `nbExercises: '<datei>.ipynb'` im Modul. Die 
 
 ### Lokale Jupyter-Umgebung unter Windows
 
-Im gemeinsamen HSLU-Ordner liegt eine isolierte Python-3.11-Umgebung
+Im gemeinsamen HSLU-Ordner liegt eine isolierte Python-3.12-Umgebung
 für JupyterLab und die grundlegenden Python-, Pandas- und ML-Übungen.
 Die folgenden Befehle werden im übergeordneten HSLU-Ordner ausgeführt:
 
@@ -83,7 +83,7 @@ powershell -ExecutionPolicy Bypass -File .\Start-Jupyter.ps1
 Die lokalen Hilfsdateien liegen neben den beiden Repositories, nicht im
 Lernapp-Repository; sie sind daher nicht Teil eines eigenständigen Lernapp-Klons.
 Die benötigten Pakete stehen in `..\requirements-jupyter.txt`.
-In Jupyter den Kernel **HSLU CAS ML (Python 3.11)** auswählen; in VS Code
+In Jupyter den Kernel **HSLU CAS ML (Python 3.12)** auswählen; in VS Code
 den Interpreter `..\.venv\Scripts\python.exe`.
 Der Server hört nur auf `127.0.0.1` und behält die Token-Anmeldung bei.
 Beenden mit `Ctrl+C` im Serverterminal oder aus dem HSLU-Ordner mit
