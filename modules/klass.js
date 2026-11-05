@@ -172,17 +172,40 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
   <p class="note"><b>Mit den 10 Wohnungen:</b> Ein einzelnes Neuron mit Sigmoid, <code>P(teuer) = sigmoid(w·qm + b)</code>, <i>ist</i> die logistische Regression von oben. Weitere Schichten brauchst du hier nicht, denn die Klassen sind mit einem Schnitt bei 74 qm trennbar. Mehr Schichten lohnen sich erst bei Mustern, die keine einzelne Grenze beschreiben kann.</p>
 
   <h3>6 · Ensembles: viele schwache Modelle ergeben ein starkes</h3>
-  <p>Ein einzelnes Modell macht Fehler. Mehrere Modelle, die unterschiedlich irren, gleichen sich im Mittel aus.</p>
+  <p>Ein einzelnes Modell macht Fehler, ein tiefer Baum lernt die Trainingsdaten sogar auswendig. Die Idee der Ensembles: Nimm <b>viele einfache Bäume</b> statt eines grossen und kombiniere sie. Es gibt zwei Wege, und der Unterschied ist die wichtigste Frage dieses Abschnitts: Arbeiten die Bäume <i>nebeneinander</i> oder <i>nacheinander</i>?</p>
   <div class="grid2">
-    <div><h4>Bagging (Random Forest)</h4><p>Viele Bäume, jeder auf einer zufälligen Stichprobe der Daten, bei jedem Split mit einer zufälligen Auswahl an Merkmalen, <b>parallel</b> trainiert. Mehrheitsentscheid (oder Mittelwert). Senkt die Varianz.</p></div>
-    <div><h4>Boosting (Gradient Boosting)</h4><p>Bäume werden <b>nacheinander</b> trainiert, jeder korrigiert die Restfehler aller bisherigen Bäume zusammen. Oft genauer, aber empfindlicher für Rauschen und bei zu hoher Lernrate überangepasst.</p></div>
+    <div><h4>Bagging (Random Forest): die Jury</h4>
+      <p>Viele Bäume werden <b>unabhängig voneinander und gleichzeitig</b> trainiert. Jeder bekommt eine etwas andere Version der Daten und kommt darum zu einem etwas anderen Ergebnis. Am Schluss stimmen alle ab (Klasse) oder man bildet den Mittelwert (Zahl).</p>
+      <ol>
+        <li>Zufällige Stichprobe ziehen, <i>mit Zurücklegen</i> (manche Zeilen doppelt, manche fehlen).</li>
+        <li>Darauf einen Baum trainieren. Beim Random Forest darf er bei jedem Split nur eine zufällige Auswahl der Merkmale ansehen.</li>
+        <li>Schritt 1 und 2 viele Male wiederholen (zum Beispiel 100 Bäume).</li>
+        <li>Alle Bäume befragen: Mehrheit oder Mittelwert.</li>
+      </ol>
+      <p><b>Bild:</b> Eine Jury aus vielen Gutachtern, die sich einzeln mal irren, aber nicht alle am selben Ort. Im Mittel heben sich die Fehler auf. Das senkt die <b>Varianz</b>. Gegen zu einfache Bäume (hoher Bias) hilft es nicht.</p></div>
+    <div><h4>Boosting (Gradient Boosting): die Nachhilfe</h4>
+      <p>Die Bäume werden <b>nacheinander</b> trainiert. Jeder neue Baum schaut nur auf das, was die bisherigen noch falsch machen, den <b>Restfehler</b>, und versucht genau diesen zu verkleinern.</p>
+      <ol>
+        <li>Start mit einer groben Vorhersage (Regression: der Durchschnitt).</li>
+        <li>Restfehler ausrechnen: echter Wert minus bisherige Vorhersage.</li>
+        <li>Einen kleinen Baum (oft nur Tiefe 1 bis 3) auf diese Restfehler trainieren.</li>
+        <li>Davon nur einen Bruchteil addieren, die <b>Lernrate</b> (zum Beispiel 0,3). Zurück zu Schritt 2, bis die gewählte Rundenzahl erreicht ist.</li>
+      </ol>
+      <p><b>Bild:</b> Ein Schüler macht eine Übung, der Nachhilfelehrer streicht nur die Fehler an, der Schüler verbessert genau diese, und das Ganze wiederholt sich. Das senkt den <b>Bias</b>. Bei zu vielen Runden oder zu hoher Lernrate lernt es am Ende das Rauschen mit.</p></div>
   </div>
+  <div class="tablewrap"><table>
+    <tr><th></th><th>Bagging</th><th>Boosting</th></tr>
+    <tr><td>Reihenfolge</td><td>parallel, die Bäume wissen nichts voneinander</td><td>nacheinander, jeder baut auf den Fehlern der anderen auf</td></tr>
+    <tr><td>Bäume</td><td>tief und «gross» (jeder allein overfittet)</td><td>flach und «schwach» (einzeln zu einfach)</td></tr>
+    <tr><td>Hilft gegen</td><td>hohe Varianz (Overfitting)</td><td>hohen Bias (Underfitting)</td></tr>
+    <tr><td>Risiko</td><td>wenig, robust ohne viel Einstellen</td><td>Overfitting bei zu vielen Runden oder zu hoher Lernrate</td></tr>
+  </table></div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Beispiel: die 10 Wohnungen</h4>
   <p>Bei der Klasse «teuer» reicht der eine Schnitt bei 74 qm, da gibt es für ein Ensemble nichts zu verbessern. Deshalb gehen wir hier zurück zur Frage von Tag 1, dem <b>Preis</b> (Ensembles gibt es genauso für Regression). Der Preis steigt nicht sauber mit den qm: die 70-qm-Wohnung (1620) ist billiger als die 62-qm-Wohnung (1770), die 85-qm-Wohnung (1850) billiger als die 78-qm-Wohnung (1890). Ein tiefer Baum lernt diese Ausreisser auswendig.</p>
   <ul>
     <li><b>Einzelbaum:</b> Mit Tiefe 3 hat fast jede Wohnung ihr eigenes Blatt. Auf den bekannten Wohnungen ist der Fehler klein (etwa 35 CHF), lässt du eine Wohnung weg, ist er viel grösser (etwa 240 CHF). Dieser Abstand ist das Overfitting.</li>
     <li><b>Bagging:</b> Jeder Baum bekommt 10 Wohnungen, die <i>mit Zurücklegen</i> gezogen werden. Manche kommen doppelt vor, andere gar nicht (im Schnitt sind etwa 65 % verschiedene dabei, bei vielen Daten 63 %). Jeder Baum irrt anders, der Mittelwert ist glatter und merkt sich weniger auswendig. Bei nur 10 Wohnungen bleibt der Fehler bei einer fehlenden Wohnung trotzdem ähnlich, der Vorteil zeigt sich erst bei mehr Daten.</li>
-    <li><b>Boosting:</b> Start ist der Durchschnittspreis (1841 CHF). Dann passt ein flacher Baum (Tiefe 1) die <i>Restfehler</i> an, ein Bruchteil davon (Lernrate) wird addiert, und das wiederholt sich Runde für Runde.</li>
+    <li><b>Boosting, Runde für Runde:</b> Start ist der Durchschnittspreis, <b>1841 CHF</b> für jede Wohnung. Die kleinste Wohnung (35 qm) kostet aber nur 1200, der Restfehler ist also <b>−641</b>. Runde 1: Ein Baum der Tiefe 1 schneidet bei 90 qm. Links (7 Wohnungen) liegt der mittlere Restfehler bei −215, rechts (3 Wohnungen) bei +502. Mit Lernrate 0,3 wird nur ein Teil addiert: die 35-qm-Wohnung steigt nicht auf 1626, sondern auf 1841 − 0,3·215 = <b>1776</b>. Ihr Restfehler schrumpft von −641 auf <b>−576</b>. Runde 2 schneidet bei 74 qm und korrigiert die neuen Restfehler, Runde 3 bei 58,5 qm. Nach drei Runden steht die 35-qm-Wohnung bei einem Restfehler von −416. Kleine Schritte, viele Runden: Die Linie in der Demo wandert dadurch Runde für Runde auf die Preise zu.</li>
   </ul>
   <div class="demo" id="enDemo">
     <div class="tag">Demo</div><h4>Einzelbaum, Bagging und Boosting auf den 10 Wohnungen</h4>

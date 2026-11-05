@@ -163,17 +163,40 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 per class +
   <p class="note"><b>With the 10 apartments:</b> A single neuron with sigmoid, <code>P(expensive) = sigmoid(w·m² + b)</code>, <i>is</i> the logistic regression from above. You do not need more layers here, because the classes can be separated by one split at 74 m². More layers only pay off for patterns that no single boundary can describe.</p>
 
   <h3>6 · Ensembles: many weak models make a strong one</h3>
-  <p>A single model makes mistakes. Several models that err in different ways balance each other out on average.</p>
+  <p>A single model makes mistakes, and a deep tree even memorises the training data. The idea of ensembles: take <b>many simple trees</b> instead of one big one and combine them. There are two ways, and the difference is the key question of this section: do the trees work <i>side by side</i> or <i>one after another</i>?</p>
   <div class="grid2">
-    <div><h4>Bagging (Random Forest)</h4><p>Many trees, each on a random sample of the data, with a random selection of features at each split, trained <b>in parallel</b>. Majority vote (or mean). Reduces the variance.</p></div>
-    <div><h4>Boosting (Gradient Boosting)</h4><p>Trees are trained <b>one after another</b>; each corrects the remaining errors of all previous trees together. Often more accurate, but more sensitive to noise and overfitted if the learning rate is too high.</p></div>
+    <div><h4>Bagging (random forest): the jury</h4>
+      <p>Many trees are trained <b>independently and at the same time</b>. Each gets a slightly different version of the data and therefore arrives at a slightly different result. At the end they all vote (class) or you take the mean (number).</p>
+      <ol>
+        <li>Draw a random sample <i>with replacement</i> (some rows twice, some missing).</li>
+        <li>Train a tree on it. In a random forest it may only look at a random selection of features at each split.</li>
+        <li>Repeat steps 1 and 2 many times (for example 100 trees).</li>
+        <li>Ask all trees: majority vote or mean.</li>
+      </ol>
+      <p><b>Picture:</b> A jury of many experts who each err now and then, but not all in the same place. On average the errors cancel out. This lowers the <b>variance</b>. It does not help against trees that are too simple (high bias).</p></div>
+    <div><h4>Boosting (gradient boosting): the tutor</h4>
+      <p>The trees are trained <b>one after another</b>. Each new tree only looks at what the previous ones still get wrong, the <b>residual error</b>, and tries to shrink exactly that.</p>
+      <ol>
+        <li>Start with a rough prediction (regression: the average).</li>
+        <li>Compute the residual: true value minus current prediction.</li>
+        <li>Train a small tree (often only depth 1 to 3) on these residuals.</li>
+        <li>Add only a fraction of it, the <b>learning rate</b> (for example 0.3). Back to step 2 until the chosen number of rounds is reached.</li>
+      </ol>
+      <p><b>Picture:</b> A student does an exercise, the tutor only marks the mistakes, the student fixes exactly those, and it repeats. This lowers the <b>bias</b>. With too many rounds or too high a learning rate it ends up learning the noise as well.</p></div>
   </div>
+  <div class="tablewrap"><table>
+    <tr><th></th><th>Bagging</th><th>Boosting</th></tr>
+    <tr><td>Order</td><td>parallel, the trees know nothing about each other</td><td>one after another, each builds on the errors of the others</td></tr>
+    <tr><td>Trees</td><td>deep and «big» (each overfits on its own)</td><td>shallow and «weak» (too simple on their own)</td></tr>
+    <tr><td>Helps against</td><td>high variance (overfitting)</td><td>high bias (underfitting)</td></tr>
+    <tr><td>Risk</td><td>low, robust without much tuning</td><td>overfitting with too many rounds or too high a learning rate</td></tr>
+  </table></div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Example: the 10 apartments</h4>
   <p>For the class «expensive» the one split at 74 m² is enough; there is nothing for an ensemble to improve. So here we go back to the question from day 1, the <b>price</b> (ensembles exist for regression just the same). The price does not rise cleanly with the m²: the 70 m² apartment (1620) is cheaper than the 62 m² apartment (1770), the 85 m² apartment (1850) cheaper than the 78 m² apartment (1890). A deep tree memorises these outliers.</p>
   <ul>
     <li><b>Single tree:</b> With depth 3 almost every apartment has its own leaf. On the known apartments the error is small (about 35 CHF); if you leave one apartment out, it is much larger (about 240 CHF). This gap is the overfitting.</li>
     <li><b>Bagging:</b> Each tree gets 10 apartments drawn <i>with replacement</i>. Some appear twice, others not at all (on average about 65 % are distinct, with a lot of data 63 %). Each tree errs differently; the mean is smoother and memorises less. With only 10 apartments the error for a left-out apartment still stays similar; the advantage only shows with more data.</li>
-    <li><b>Boosting:</b> The start is the average price (1841 CHF). Then a shallow tree (depth 1) fits the <i>remaining errors</i>, a fraction of it (learning rate) is added, and this repeats round after round.</li>
+    <li><b>Boosting, round by round:</b> The start is the average price, <b>1841 CHF</b> for every apartment. But the smallest apartment (35 m²) costs only 1200, so its residual is <b>−641</b>. Round 1: a depth-1 tree splits at 90 m². On the left (7 apartments) the mean residual is −215, on the right (3 apartments) +502. With learning rate 0.3 only a part is added: the 35 m² apartment does not jump to 1626 but to 1841 − 0.3·215 = <b>1776</b>. Its residual shrinks from −641 to <b>−576</b>. Round 2 splits at 74 m² and corrects the new residuals, round 3 at 58.5 m². After three rounds the 35 m² apartment has a residual of −416. Small steps, many rounds: this is how the line in the demo moves towards the prices round by round.</li>
   </ul>
   <div class="demo" id="enDemo">
     <div class="tag">Demo</div><h4>Single tree, bagging and boosting on the 10 apartments</h4>
