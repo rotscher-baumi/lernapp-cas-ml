@@ -206,7 +206,7 @@
       // Demo 5c: decision tree (CART, Gini): regions, tree diagram and accuracy by depth
       (function(){
         const r=mulberry32(11);function make(n){const a=[];for(let i=0;i<n;i++){const c=i%2;a.push({x:(c?0.6:0.4)+0.2*gauss(r),y:(c?0.55:0.45)+0.2*gauss(r),c:c})}return a}
-        const tr=make(60),te=make(200),W=320,H=220,sx=x=>x*W,sy=y=>H-y*H,DD=99,cl=c=>c?'var(--accent)':'var(--warn)';
+        const tr=make(60),te=make(200),W=320,H=220,PX=36,PY=30,sx=x=>PX+x*(W-PX-14),sy=y=>H-PY-y*(H-PY-8),DD=99,cl=c=>c?'var(--accent)':'var(--warn)';
         const gini=s=>{const n=s.length;if(!n)return 0;const p=s.filter(q=>q.c).length/n;return 2*p*(1-p)};
         function build(s,d,md,b){const n1=s.filter(q=>q.c).length,n0=s.length-n1,base={n0:n0,n1:n1,g:gini(s),c:n1*2>=s.length?1:0,b:b};
           if(d>=md||n1===0||n0===0||s.length<2)return Object.assign(base,{leaf:1});
@@ -235,9 +235,13 @@
           s+='<path class="ln" d="'+CUR.map((c,i)=>(i?'L':'M')+sxx(i+1)+' '+syy(c[0])).join('')+'"/><path class="ln2" d="'+CUR.map((c,i)=>(i?'L':'M')+sxx(i+1)+' '+syy(c[1])).join('')+'"/>';
           s+='<line x1="'+sxx(md)+'" y1="'+yt+'" x2="'+sxx(md)+'" y2="'+yb+'" style="stroke:var(--fg);stroke-width:1;stroke-dasharray:4 3"/><circle cx="'+sxx(md)+'" cy="'+syy(CUR[md-1][0])+'" r="4.5" style="fill:var(--accent)"/><circle cx="'+sxx(md)+'" cy="'+syy(CUR[md-1][1])+'" r="4.5" style="fill:var(--warn)"/>';
           return s+'<text class="lbl" x="'+(x0+4)+'" y="'+(yt+10)+'" style="fill:var(--accent)">Train</text><text class="lbl" x="'+(x0+50)+'" y="'+(yt+10)+'" style="fill:var(--warn)">Test</text>'}
+        // Axes with values at 0, 0.25, 0.5, 0.75 and 1, and the names x and y.
+        function axes(){let a='<line class="ax" x1="'+PX+'" y1="'+sy(0)+'" x2="'+sx(1)+'" y2="'+sy(0)+'"/><line class="ax" x1="'+PX+'" y1="'+sy(0)+'" x2="'+PX+'" y2="'+sy(1)+'"/>';
+          for(const v of[0,0.25,0.5,0.75,1])a+='<text class="lbl" x="'+sx(v)+'" y="'+(sy(0)+14)+'" text-anchor="middle">'+v+'</text><text class="lbl" x="'+(PX-5)+'" y="'+(sy(v)+3.5)+'" text-anchor="end">'+v+'</text>';
+          return a+'<text class="lbl" x="'+(PX+(W-PX-14)/2)+'" y="'+(H-3)+'" text-anchor="middle">x</text><text class="lbl" transform="rotate(-90 9 '+(sy(0.5))+')" x="9" y="'+sy(0.5)+'" text-anchor="middle">y</text>'}
         function draw(){const md=+$('dtD').value;$('dtDO').textContent=md;const t=build(tr,0,md,[0,0,1,1]);
           let s=regions(t);tr.forEach(p=>{s+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="3.5" style="fill:'+cl(p.c)+';stroke:var(--fg);stroke-width:1"/>'});
-          $('dtSvg').innerHTML=s;$('dtTree').innerHTML=diagram(t);$('dtCurve').innerHTML=curve(md);
+          $('dtSvg').innerHTML=s+axes();$('dtTree').innerHTML=diagram(t);$('dtCurve').innerHTML=curve(md);
           $('dtL').textContent=cnt(t);$('dtTr').textContent=fmt(CUR[md-1][0],2);$('dtTe').textContent=fmt(CUR[md-1][1],2);
           $('dtMsg').textContent=md===1?LernApp.t('Tiefe 1: nur eine Frage, die Fläche hat zwei Rechtecke (Stumpf). Das ist zu einfach.','Depth 1: only one question, the region has two rectangles (a stump). That is too simple.'):md>=6?LernApp.t('Tiefer Baum: Fast jeder Trainingspunkt bekommt sein eigenes Rechteck. Die Trainingskurve steigt weiter, die Testkurve fällt (Overfitting).','Deep tree: almost every training point gets its own rectangle. The training curve keeps rising, the test curve falls (overfitting).'):LernApp.t('Mittlere Tiefe: die groben Bereiche sind erkannt. Beobachte in der Kurve, ab wann die Test-Accuracy nicht mehr steigt.','Medium depth: the rough areas are found. Watch in the curve from which depth the test accuracy stops rising.')}
         $('dtD').addEventListener('input',draw);draw()})();
