@@ -12,7 +12,8 @@
  *   html      chapter content (HTML string)
  *   quiz      optional [{ q, a }] self-test questions (HTML allowed)
  *   notebooks optional [{ file, desc }] files in lernapp/notebooks
- *   init()    optional, called once after the chapter is in the page
+ *   init()    optional, called once after the chapter is in the page; the larger chapters only call
+ *             their demos from assets/demos-<id>.js (LernApp.demos.<id>()), so modules stay content only
  *
  * Language: LernApp.lang is 'de' (default) or 'en', chosen with the DE/EN switch in the
  * header. English texts live in modules/en/<id>.js and call LernApp.translate(id, {...})
@@ -32,10 +33,16 @@
   const EN = {};
   let LANG = 'de';
   const t = (de, en) => (LANG === 'en' && en !== undefined ? en : de);
+  // Seeded random numbers and a normal draw, shared by all demos (same data on every load).
+  const mulberry32 = (a) => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const gauss = (r) => { let u = 0, v = 0; while (u === 0) u = r(); while (v === 0) v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
 
   window.LernApp = {
     $: $,
     fmt: fmt,
+    mulberry32: mulberry32,
+    gauss: gauss,
+    demos: {},
     modules: modules,
     register: function (mod) {
       if (!mod || !mod.id || !mod.title) {

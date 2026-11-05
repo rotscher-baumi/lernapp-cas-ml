@@ -37,7 +37,7 @@ Python 3.12 in the project's own `.venv/` (git-ignored); `server.py` starts Jupy
 
 ## Fast Configuration
 
-- Project focus: learning site; each chapter is one file in `modules/`
+- Project focus: learning site; each chapter is one file in `modules/` (content); the demo code of the large chapters lives in `assets/demos-<id>.js`
 - Forbidden changes: adding a build step, bulk reformatting, copying course material (slides, instructor notebooks) into this repository (not freely distributable; keep the repository private)
 - Test command: `.venv\Scripts\pytest`
 - Format command: `.venv\Scripts\ruff format` on new or changed Python files only (no bulk reformatting); JS and notebooks follow the style of the surrounding files

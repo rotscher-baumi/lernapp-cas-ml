@@ -21,7 +21,8 @@ lernapp/
   requirements.txt, requirements-dev.txt   Laufzeit- und Entwicklungspakete
   assets/
     style.css       Design (hell und dunkel)
-    core.js         Navigation, Sprache, Theme, Selbsttest
+    core.js         Navigation, Sprache, Theme, Selbsttest; gemeinsame Helfer (mulberry32, gauss)
+    demos-<id>.js   Demo-Code der grossen Kapitel (ml, klass, unsup), das Kapitel in modules/ ruft ihn in init() auf
     demos-*.js      geteilte Demos (Mathe, k-Means)
     notebook-data.js  aus den Notebooks erzeugt (nicht von Hand ändern)
   modules/          ein Kapitel pro Datei
@@ -39,7 +40,7 @@ lernapp/
 ## Neues Kapitel hinzufügen
 
 1. `modules/_vorlage.js` nach `modules/<name>.js` kopieren.
-2. `id`, `order`, `nav`, `title`, `kicker`, `summary` und `html` ausfüllen. Optional `quiz` (Selbsttest), `notebooks` und `init()` für Demos.
+2. `id`, `order`, `nav`, `title`, `kicker`, `summary` und `html` ausfüllen. Optional `quiz` (Selbsttest), `notebooks` und `init()` für Demos. Bei grösseren Kapiteln liegt der Demo-Code in `assets/demos-<name>.js` (`LernApp.demos.<name> = function () {...}`), `init()` ruft nur `LernApp.demos.<name>()` auf; die Datei vor dem Kapitel in `index.html` einbinden.
 3. In `index.html` unten eine Zeile ergänzen: `<script src="modules/<name>.js"></script>`. Für Englisch `modules/en/<name>.js` mit `LernApp.translate('<name>', {...})` anlegen und nach den Kapiteln einbinden.
 
 Navigation, Übersichtskarte und Selbsttest erscheinen automatisch. Die Reihenfolge bestimmt `order`.
