@@ -691,10 +691,13 @@ print(&quot;CV-Accuracy:&quot;, round(search.best_score_, 3), &quot;| Test-Accur
           $('cvKO').textContent=k;$('cvDegO').textContent=deg;$('cvRunO').textContent=(sel+1)+' / '+k;
           const runs=[];for(let i=0;i<k;i++)runs.push(run(k,deg,i));const R=runs[sel];
           let a='';const bw=(W-16)/k;
-          for(let i=0;i<k;i++){a+='<rect x="'+(8+i*bw).toFixed(1)+'" y="6" width="'+(bw-2).toFixed(1)+'" height="24" rx="3" style="fill:'+(i===sel?'var(--warn-soft)':'var(--accent-soft)')+';stroke:'+(i===sel?'var(--warn)':'var(--accent)')+'"/>';
-            if(k<=5)a+='<text class="lbl" x="'+(8+i*bw+bw/2-10).toFixed(1)+'" y="22">'+(i===sel?'Test':'Train')+'</text>'}
+          // The test fold always sits at the right end: the training folds come first, the test fold last.
+          const order=[];for(let i=0;i<k;i++)if(i!==sel)order.push(i);order.push(sel);
+          order.forEach((fold,pos)=>{const test=fold===sel;
+            a+='<rect x="'+(8+pos*bw).toFixed(1)+'" y="6" width="'+(bw-2).toFixed(1)+'" height="24" rx="3" style="fill:'+(test?'var(--warn-soft)':'var(--accent-soft)')+';stroke:'+(test?'var(--warn)':'var(--accent)')+'"/>';
+            if(k<=5)a+='<text class="lbl" x="'+(8+pos*bw+bw/2-10).toFixed(1)+'" y="22">'+(test?'Test':'Train')+'</text>'});
           $('cvStrip').innerHTML=a;
-          $('cvStripMsg').textContent='Fold '+(sel+1)+LernApp.t(' von ',' of ')+k+LernApp.t(' ist der Test-Fold (orange), alle anderen trainieren. Die Punkte sind zufällig auf die Folds verteilt, nicht nach x-Position: Darum liegen die hohlen Punkte über die ganze Kurve.',' is the test fold (orange), all others train. The points are assigned to the folds at random, not by x position: that is why the hollow points are spread over the whole curve.');
+          $('cvStripMsg').textContent='Fold '+(sel+1)+LernApp.t(' von ',' of ')+k+LernApp.t(' ist der Test-Fold (orange, in der Reihe immer ganz rechts), alle anderen trainieren. Die Punkte sind zufällig auf die Folds verteilt, nicht nach x-Position: Darum liegen die hohlen Punkte über die ganze Kurve.',' is the test fold (orange, always at the right end of the row), all others train. The points are assigned to the folds at random, not by x position: that is why the hollow points are spread over the whole curve.');
           let g='<line class="ax" x1="0" y1="'+sy(0)+'" x2="'+W+'" y2="'+sy(0)+'"/>';
           let tp='',cp='';for(let i=0;i<=100;i++){const x=-1+i*0.02;tp+=(i?'L':'M')+sx(x).toFixed(1)+' '+sy(f(x)).toFixed(1);cp+=(i?'L':'M')+sx(x).toFixed(1)+' '+sy(polyEval(R.c,R.z(x))).toFixed(1)}
           g+='<path class="dash" d="'+tp+'"/><path class="ln" d="'+cp+'"/>';
