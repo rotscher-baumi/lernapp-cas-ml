@@ -5,6 +5,7 @@
   function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
   function gauss(r){let u=0,v=0;while(u===0)u=r();while(v===0)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
   const sigmoid=z=>1/(1+Math.exp(-z));
+  function gridSvg(W,H,G,GY,f){let s='';const cw=W/G,ch=H/GY;for(let i=0;i<G;i++)for(let j=0;j<GY;j++){const x=(i+0.5)/G,y=1-(j+0.5)/GY;s+='<rect x="'+(i*cw)+'" y="'+(j*ch)+'" width="'+(cw+0.5)+'" height="'+(ch+0.5)+'" style="fill:'+(f(x,y)?'var(--accent)':'var(--warn)')+';opacity:.25"/>'}return s}
 
   LernApp.register({
     id: 'klass',
@@ -87,17 +88,29 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
   <p>Die <b>ROC-Kurve</b> trägt für alle Schwellen die Trefferquote (TPR = Recall) gegen die Rate falscher Alarme (FPR) auf. Ein perfektes Modell liegt oben links, Raten liegt auf der Diagonalen. Die <b>AUC</b> ist die Fläche unter der Kurve: 1 ist perfekt, 0,5 ist Zufall.</p>
   <div class="demo" id="thDemo">
     <div class="tag">Demo</div><h4>Schwelle, Confusion Matrix und ROC</h4>
-    <p class="hint">20 Fälle, 10 echt positiv, 10 echt negativ, mit festen Modell-Wahrscheinlichkeiten.</p>
-    <svg class="plot" id="thSvg" viewBox="0 0 320 170" role="img" aria-label="Wahrscheinlichkeiten der 20 Fälle auf einer Achse mit Schwelle"></svg>
+    <p class="hint">Wähle, wie viele echte Positive und Negative es gibt (Regler logarithmisch, 1 bis 1000). Die Form der Modell-Wahrscheinlichkeiten bleibt gleich: die meisten Fälle sind eindeutig, nur wenige liegen im Grenzbereich (bei 10 und 10 genau 4).</p>
+    <div class="btnrow"><button class="pri" id="thP1">10 : 10 (ausgewogen)</button><button id="thP2">10 : 1000 (selten)</button><button id="thP3">1 : 1000 (sehr selten)</button></div>
+    <div class="ctl"><label for="thNP">Anzahl echt positiv</label><input type="range" id="thNP" min="0" max="3" step="0.05" value="1"><output id="thNPO"></output></div>
+    <div class="ctl"><label for="thNN">Anzahl echt negativ</label><input type="range" id="thNN" min="0" max="3" step="0.05" value="1"><output id="thNNO"></output></div>
+    <svg class="plot" id="thSvg" viewBox="0 0 320 170" role="img" aria-label="Wahrscheinlichkeiten aller Fälle auf einer Achse mit Schwelle"></svg>
     <div class="ctl"><label for="thT">Schwelle</label><input type="range" id="thT" min="0.02" max="0.98" step="0.01" value="0.5"><output id="thTO"></output></div>
     <div class="tablewrap"><table style="min-width:0">
       <tr><th></th><th class="num">sagt positiv</th><th class="num">sagt negativ</th></tr>
       <tr><td>wirklich positiv</td><td class="num b" id="thTP"></td><td class="num r" id="thFN"></td></tr>
       <tr><td>wirklich negativ</td><td class="num r" id="thFP"></td><td class="num b" id="thTN"></td></tr>
     </table></div>
-    <div class="stats"><span>Accuracy <b id="thAcc"></b></span><span>Precision <b id="thPre"></b></span><span>Recall <b id="thRec"></b></span><span>F1 <b id="thF1"></b></span><span>AUC <b id="thAuc"></b></span></div>
+    <div class="tablewrap"><table style="min-width:0">
+      <tr><th>Metric</th><th>Formel</th><th class="num">mit Zahlen</th><th class="num">Wert</th></tr>
+      <tr><td>Accuracy</td><td><code>(TP+TN) / alle</code></td><td class="num" id="thAccF"></td><td class="num b" id="thAcc"></td></tr>
+      <tr><td>Precision</td><td><code>TP / (TP+FP)</code></td><td class="num" id="thPreF"></td><td class="num b" id="thPre"></td></tr>
+      <tr><td>Recall (TPR)</td><td><code>TP / (TP+FN)</code></td><td class="num" id="thRecF"></td><td class="num b" id="thRec"></td></tr>
+      <tr><td>False Alarm Rate (FPR)</td><td><code>FP / (FP+TN)</code></td><td class="num" id="thFprF"></td><td class="num b" id="thFpr"></td></tr>
+      <tr><td>F1</td><td><code>2·TP / (2·TP+FP+FN)</code></td><td class="num" id="thF1F"></td><td class="num b" id="thF1"></td></tr>
+    </table></div>
+    <div class="stats"><span>AUC <b id="thAuc"></b></span><span>Anteil Positive <b id="thPrev"></b></span><span>Accuracy von «immer negativ» <b id="thBase"></b></span></div>
+    <p class="hint" id="thMsg">&nbsp;</p>
     <svg class="plot" id="thRoc" viewBox="0 0 320 210" role="img" aria-label="ROC-Kurve mit aktuellem Schwellenpunkt" style="margin-top:12px"></svg>
-    <p class="hint">Oben: Kreis = echt positiv, Quadrat = echt negativ. Alles rechts der Linie wird als positiv vorhergesagt. Unten: Der orange Punkt wandert beim Schieben der Schwelle auf der ROC-Kurve.</p>
+    <p class="hint">Oben: Kreis = echt positiv, Quadrat = echt negativ (bei vielen Fällen wird nur eine Auswahl gezeichnet). Alles rechts der Linie wird als positiv vorhergesagt. Unten: Der orange Punkt wandert beim Schieben der Schwelle auf der ROC-Kurve: Höhere Schwelle (Linie nach rechts) bewegt ihn nach links unten, tiefere Schwelle nach rechts oben.</p>
   </div>
   <div class="merk"><b>Zusammenfassung: Schwelle, ROC, AUC</b><ul>
     <li><b>Schwelle:</b> Das Modell liefert Wahrscheinlichkeiten, erst die Schwelle macht daraus Klassen. Tiefere Schwelle = mehr Recall, mehr falsche Alarme.</li>
@@ -144,6 +157,31 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
 
   <h3 id="klass-modelle">5 · Nicht-lineare Klassifikatoren</h3>
   <p>Logistische Regression zieht eine <b>gerade</b> Grenze. Wenn die Klassen nicht so sauber trennbar sind, brauchst du flexiblere Modelle.</p>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Wonach optimiert jedes Modell?</h4>
+  <div class="tablewrap"><table>
+    <tr><th>Modell</th><th>Optimiert wird …</th><th>Wie</th></tr>
+    <tr><td><b>Logistische Regression</b></td><td>Log-Loss (Cross-Entropy)</td><td>Gradient Descent auf den Gewichten, optional mit Regularisierung</td></tr>
+    <tr><td><b>kNN</b></td><td>nichts (kein Training)</td><td>Daten werden nur gespeichert. k und das Distanzmass wählst du über die Validation.</td></tr>
+    <tr><td><b>Naive Bayes</b></td><td>Likelihood der Trainingsdaten</td><td>Zählen bzw. Mittelwert und Streuung je Klasse, geschlossene Formel ohne Iteration</td></tr>
+    <tr><td><b>SVM</b></td><td>Hinge Loss + breite Margin (kleines ‖w‖²)</td><td>C gewichtet Fehler gegen Margin. Das Problem ist konvex, es gibt ein globales Optimum.</td></tr>
+    <tr><td><b>Entscheidungsbaum</b></td><td>Impurity (Gini oder Entropie)</td><td>Gierig: In jedem Knoten der Split, der die Impurity am stärksten senkt</td></tr>
+    <tr><td><b>Random Forest</b></td><td>wie der Baum, je Baum</td><td>Bagging: Bäume auf Stichproben, die Mehrheit entscheidet. Keine gemeinsame Optimierung.</td></tr>
+    <tr><td><b>Boosting</b></td><td>Loss (z. B. Log-Loss) über alle Bäume</td><td>Jeder neue Baum folgt dem Gradienten des Loss, korrigiert also den Restfehler</td></tr>
+    <tr><td><b>Neuronales Netz</b></td><td>Cross-Entropy</td><td>Backpropagation und Gradient Descent auf allen Gewichten</td></tr>
+  </table></div>
+  <p class="note"><b>Loss und Metrik sind verschieden:</b> Das Modell optimiert einen Loss, der sich ableiten lässt (Log-Loss, Hinge, Gini). Beurteilt wird es danach mit Precision, Recall, F1 oder AUC. Diese Werte werden beim Training meist nicht direkt optimiert. Den Threshold wählst du erst danach.</p>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Wofür taugt welches Modell, wofür nicht?</h4>
+  <div class="tablewrap"><table>
+    <tr><th>Modell</th><th>Gut für …</th><th>Weniger gut …</th></tr>
+    <tr><td><b>Logistische Regression</b></td><td><ul style="margin:0;padding-left:18px"><li>Wahrscheinlichkeiten und gut erklärbare Gewichte</li><li>schneller, stabiler Startpunkt (Baseline)</li></ul></td><td><ul style="margin:0;padding-left:18px"><li>Nur gerade Grenzen: Krummes braucht zusätzliche Merkmale</li><li>Skalieren nötig, empfindlich auf Ausreisser</li></ul></td></tr>
+    <tr><td><b>kNN</b></td><td><ul style="margin:0;padding-left:18px"><li>Einfach, es gibt kein Training</li><li>folgt auch krummen, lokalen Mustern</li></ul></td><td><ul style="margin:0;padding-left:18px"><li>Langsam bei vielen Daten: jede Vorhersage rechnet gegen alle Punkte</li><li>Schwach bei vielen Merkmalen und ungleichen Skalen</li></ul></td></tr>
+    <tr><td><b>Naive Bayes</b></td><td><ul style="margin:0;padding-left:18px"><li>Sehr schnell, auch mit wenigen Daten</li><li>Viele Merkmale, z. B. Text und Spam</li></ul></td><td><ul style="margin:0;padding-left:18px"><li>Die Annahme unabhängiger Merkmale stimmt selten</li><li>Wahrscheinlichkeiten sind oft schlecht kalibriert</li></ul></td></tr>
+    <tr><td><b>SVM</b></td><td><ul style="margin:0;padding-left:18px"><li>Stark bei kleinen bis mittleren Datenmengen und vielen Merkmalen</li><li>Mit Kernel auch krumme Grenzen</li></ul></td><td><ul style="margin:0;padding-left:18px"><li>Langsam bei sehr vielen Zeilen</li><li>Keine direkten Wahrscheinlichkeiten; Skalieren, C und Kernel abstimmen</li></ul></td></tr>
+    <tr><td><b>Entscheidungsbaum</b></td><td><ul style="margin:0;padding-left:18px"><li>Leicht zu lesen und zu erklären</li><li>Kein Skalieren nötig, mischt Zahlen und Kategorien</li></ul></td><td><ul style="margin:0;padding-left:18px"><li>Overfitting bei grosser Tiefe</li><li>Instabil: Kleine Datenänderungen können einen anderen Baum ergeben</li></ul></td></tr>
+    <tr><td><b>Random Forest</b></td><td><ul style="margin:0;padding-left:18px"><li>Robuster Allrounder mit wenig Tuning</li><li>Zeigt die Wichtigkeit der Merkmale</li></ul></td><td><ul style="margin:0;padding-left:18px"><li>Schlechter erklärbar als ein einzelner Baum</li><li>Grösser und langsamer in der Vorhersage</li></ul></td></tr>
+    <tr><td><b>Boosting</b></td><td><ul style="margin:0;padding-left:18px"><li>Oft die beste Genauigkeit bei Tabellendaten</li><li>Kommt mit gemischten Merkmalen und Lücken gut zurecht</li></ul></td><td><ul style="margin:0;padding-left:18px"><li>Mehr Hyperparameter, Overfitting bei Rauschen möglich</li><li>Bäume entstehen nacheinander, nicht parallel</li></ul></td></tr>
+    <tr><td><b>Neuronales Netz</b></td><td><ul style="margin:0;padding-left:18px"><li>Lernt sehr komplexe Muster, besonders bei Bildern, Text und Audio</li><li>Wächst mit den Daten: Mehr Daten, bessere Ergebnisse</li></ul></td><td><ul style="margin:0;padding-left:18px"><li>Braucht viele Daten und Rechenzeit</li><li>Black Box, viele Einstellungen</li></ul></td></tr>
+  </table></div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">k-nächste Nachbarn (kNN)</h4>
   <p>Für einen neuen Punkt suchst du die k nächsten Trainingspunkte und nimmst die Mehrheitsklasse (bei Regression den Durchschnitt). Es gibt kein Training, dafür ist die Vorhersage bei vielen Daten langsam. k steuert Bias und Variance: <b>k = 1</b> folgt jedem Punkt (Overfitting), <b>k = N</b> sagt für alle die Mehrheitsklasse (Underfitting).</p>
   <div class="demo" id="knDemo">
@@ -160,17 +198,56 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
   <pre><code>P(Ja | sonnig) = P(sonnig | Ja) * P(Ja) / P(sonnig)
                = (3/9) * (9/14) / (5/14) = 0.60</code></pre>
   <p class="note"><b>Mit den 10 Wohnungen:</b> Merkmal «gross» = mehr als 74 qm. 5 von 10 Wohnungen sind teuer, und alle 5 sind gross, keine der 5 anderen. Also <code>P(gross | teuer) = 5/5 = 1</code> und <code>P(gross | nicht teuer) = 0/5 = 0</code>. Das ergibt <code>P(teuer | gross) = 1</code>: sicher, nur weil wir eine Kombination nie gesehen haben. Das ist das <b>Nullfrequenz-Problem</b>. Die Abhilfe ist Glättung (Laplace: überall +1 zählen): <code>P(gross | teuer) = 6/7</code>, <code>P(gross | nicht teuer) = 1/7</code>, also <code>P(teuer | gross) = 6/7 ≈ 0,86</code>.</p>
+  <div class="demo" id="nbDemo">
+    <div class="tag">Demo</div><h4>Naive Bayes: Wohnfläche und Prior</h4>
+    <svg class="plot" id="nbSvg" viewBox="0 0 320 170" role="img" aria-label="Zwei Glockenkurven für teure und nicht teure Wohnungen, mit der Wohnfläche des neuen Falls"></svg>
+    <div class="ctl"><label for="nbX">Wohnfläche des neuen Falls</label><input type="range" id="nbX" min="30" max="150" step="1" value="76"><output id="nbXO"></output></div>
+    <div class="ctl"><label for="nbP">Prior P(teuer)</label><input type="range" id="nbP" min="5" max="95" step="5" value="50"><output id="nbPO"></output></div>
+    <div class="stats"><span>P(teuer | x) <b id="nbPost"></b></span><span>Likelihood teuer <b id="nbLb"></b></span><span>Likelihood nicht teuer <b id="nbLa"></b></span></div>
+    <p class="hint" id="nbMsg">&nbsp;</p>
+    <p class="hint">Blau = teuer, orange = nicht teuer: je eine Glockenkurve, aus den 10 Wohnungen geschätzt und mit dem Prior gewichtet. Die Linie ist der neue Fall. Die Klasse mit der höheren Kurve an dieser Stelle gewinnt.</p>
+  </div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Support Vector Machine (SVM)</h4>
   <p>Sucht die Trennlinie mit dem <b>breitesten Abstand</b> zu beiden Klassen. Nur die Punkte am Rand (Support Vectors) bestimmen sie. Mit <b>Kernels</b> werden die Daten gedanklich in einen höheren Raum gehoben, wo sie sich gerade trennen lassen. Stark bei vielen Merkmalen.</p>
   <p class="note"><b>Mit den 10 Wohnungen:</b> Die grösste nicht teure Wohnung hat 70 qm, die kleinste teure 78 qm. Diese zwei sind die <b>Support Vectors</b>. Die Trennlinie mit dem breitesten Abstand liegt in der Mitte bei <b>74 qm</b>, je 4 qm von beiden Seiten entfernt. Die anderen acht Wohnungen könntest du löschen, die Grenze bliebe gleich.</p>
+  <div class="demo" id="svDemo">
+    <div class="tag">Demo</div><h4>SVM: Wirkung von C</h4>
+    <svg class="plot" id="svSvg" viewBox="0 0 320 220" role="img" aria-label="Zwei Klassen mit Trennlinie, Margin und Support Vectors"></svg>
+    <div class="ctl"><label for="svC">C (Strafe für Fehler)</label><input type="range" id="svC" min="-1" max="2" step="0.25" value="0"><output id="svCO"></output></div>
+    <div class="stats"><span>C <b id="svCv"></b></span><span>Support Vectors <b id="svN"></b></span><span>Breite der Margin <b id="svM"></b></span><span>Accuracy <b id="svA"></b></span></div>
+    <p class="hint" id="svMsg">&nbsp;</p>
+    <p class="hint">Durchgezogene Linie = Trennlinie, gestrichelt = Rand der Margin. Dicke Ringe = Support Vectors: nur sie bestimmen die Linie.</p>
+  </div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Entscheidungsbaum</h4>
   <p>Eine Kette von Ja/Nein-Fragen. An jedem Knoten wird die Frage gewählt, die die Klassen am besten trennt (Mass: Gini oder Informationsgewinn), bis die Blätter «rein» sind oder die maximale Tiefe erreicht ist. Gut lesbar, aber ein tiefer Baum lernt die Trainingsdaten auswendig. Gegenmittel: <code>max_depth</code> begrenzen oder zurückschneiden.</p>
   <p>Ein Entscheidungsbaum braucht <b>keine lineare Regression</b> und keine Sigmoid-Funktion: Er schätzt keine Gewichte, sondern teilt die Daten mit Schwellen auf einzelne Merkmale auf. Er ist damit eine <b>Alternative</b> zur logistischen Regression, kein Ersatz. Vorteile: nicht lineare Zusammenhänge, kein Skalieren der Merkmale nötig. Nachteile: Die Grenzen verlaufen achsenparallel (treppenförmig), tiefe Bäume overfitten schnell, und die Wahrscheinlichkeiten aus den Blättern sind grob.</p>
   <p class="note"><b>Mit den 10 Wohnungen:</b> Am Anfang sind 5 teure und 5 nicht teure Wohnungen gemischt (Gini = 0,5, maximal unrein). Die beste Frage ist «Mehr als 74 qm?»: Links landen 5 nicht teure, rechts 5 teure, beide Blätter sind sofort rein (Gini = 0). Ein einziger Schnitt genügt, der Baum hat Tiefe 1. Die SVM legt ihre Grenze ebenfalls genau in die Mitte (74 qm), die logistische Regression etwa dorthin (zwischen 70 und 78 qm), nur mit anderem Weg.</p>
+  <div class="demo" id="dtDemo">
+    <div class="tag">Demo</div><h4>Entscheidungsbaum: Wirkung der Tiefe</h4>
+    <svg class="plot" id="dtSvg" viewBox="0 0 320 220" role="img" aria-label="Rechtecke des Baums mit Trennlinien und Trainingspunkten"></svg>
+    <div class="ctl"><label for="dtD">Maximale Tiefe</label><input type="range" id="dtD" min="1" max="8" step="1" value="2"><output id="dtDO"></output></div>
+    <svg class="plot" id="dtTree" viewBox="0 0 320 175" role="img" aria-label="Der Baum als Diagramm: Fragen in den Knoten, Klassen in den Blättern" style="margin-top:10px"></svg>
+    <svg class="plot" id="dtCurve" viewBox="0 0 320 125" role="img" aria-label="Accuracy von Training und Test für die Tiefen 1 bis 8" style="margin-top:10px"></svg>
+    <div class="stats"><span>Blätter <b id="dtL"></b></span><span>Trainings-Accuracy <b id="dtTr"></b></span><span>Test-Accuracy (neue Punkte) <b id="dtTe"></b></span></div>
+    <p class="hint" id="dtMsg">&nbsp;</p>
+    <p class="hint">Oben: Jede Frage ist eine Linie, jede Fläche ein Blatt. Je kräftiger die Farbe, desto reiner das Blatt. Mitte: Derselbe Baum als Diagramm (Frage im Knoten, Quadrat = Blatt, vollständig bis zur gewählten Tiefe). Unten: Training (blau) steigt immer, Test (orange) nicht. Gleiche Daten wie bei kNN.</p>
+  </div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Neuronale Netze</h4>
   <p>Schichten aus künstlichen Neuronen mit gewichteten Verbindungen, die per Backpropagation trainiert werden (Gradient Descent über alle Schichten). Mit sehr vielen Schichten spricht man von Deep Learning, das kommt im nächsten Modul.</p>
   <p class="note"><b>Mit den 10 Wohnungen:</b> Ein einzelnes Neuron mit Sigmoid, <code>P(teuer) = sigmoid(w·qm + b)</code>, <i>ist</i> die logistische Regression von oben. Weitere Schichten brauchst du hier nicht, denn die Klassen sind mit einem Schnitt bei 74 qm trennbar. Mehr Schichten lohnen sich erst bei Mustern, die keine einzelne Grenze beschreiben kann.</p>
 
+  <div class="demo" id="nnDemo">
+    <div class="tag">Demo</div><h4>Neuronales Netz: Neuron für Neuron beim Lernen zusehen</h4>
+    <div class="btnrow"><button class="pri" id="nnD1">Kreis</button><button id="nnD2">XOR</button><button id="nnD3">Zwei Gruppen</button></div>
+    <svg class="plot" id="nnSvg" viewBox="0 0 320 220" role="img" aria-label="Entscheidungsfläche des Netzes mit Trainingspunkten"></svg>
+    <div class="ctl"><label for="nnH">Neuronen in der versteckten Schicht</label><input type="range" id="nnH" min="1" max="8" step="1" value="4"><output id="nnHO"></output></div>
+    <div class="btnrow"><button class="pri" id="nnPlay">Training starten</button><button id="nnStep">+100 Runden</button><button id="nnReset">Zurücksetzen</button></div>
+    <svg class="plot" id="nnNeu" viewBox="0 0 320 150" role="img" aria-label="Jedes versteckte Neuron mit seiner eigenen Trennlinie" style="margin-top:10px"></svg>
+    <svg class="plot" id="nnLoss" viewBox="0 0 320 120" role="img" aria-label="Loss von Training und Test über die Trainingsrunden" style="margin-top:10px"></svg>
+    <div class="stats"><span>Runde (Epoche) <b id="nnEp"></b></span><span>Trainings-Accuracy <b id="nnTr"></b></span><span>Test-Accuracy (neue Punkte) <b id="nnTe"></b></span><span>Loss (Train / Test) <b id="nnLs"></b></span></div>
+    <p class="hint" id="nnMsg">&nbsp;</p>
+    <p class="hint">Oben: die Entscheidungsfläche des ganzen Netzes. Mitte: Jedes Neuron schaut für sich auf die Ebene (blau = Aktivierung positiv, orange = negativ); in Klammern sein Gewicht zur Ausgabe. Das Netz kombiniert diese einfachen Bilder zur Form oben. Unten: Der Loss (Fehlermass) sinkt, solange das Netz lernt. «Zwei Gruppen» braucht nur ein Neuron, «Kreis» und XOR mehrere.</p>
+  </div>
   <h3>6 · Ensembles: viele schwache Modelle ergeben ein starkes</h3>
   <p>Ein einzelnes Modell macht Fehler, ein tiefer Baum lernt die Trainingsdaten sogar auswendig. Die Idee der Ensembles: Nimm <b>viele einfache Bäume</b> statt eines grossen und kombiniere sie. Es gibt zwei Wege, und der Unterschied ist die wichtigste Frage dieses Abschnitts: Arbeiten die Bäume <i>nebeneinander</i> oder <i>nacheinander</i>?</p>
   <div class="grid2">
@@ -346,34 +423,47 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
           $('lsSvg').innerHTML=s;$('lsCE').textContent=fmt(-Math.log(p),2);$('lsMS').textContent=fmt((1-p)*(1-p),2)}
         $('lsP').addEventListener('input',draw);draw()})();
 
-      // Demo 2: threshold, confusion matrix, ROC
+      // Demo 2: threshold, confusion matrix, ROC (class sizes adjustable; the score shape comes from a 10 + 10 template)
       (function(){
-        const pos=[0.95,0.9,0.85,0.8,0.72,0.65,0.55,0.45,0.35,0.2],neg=[0.7,0.6,0.5,0.4,0.3,0.25,0.2,0.15,0.1,0.05];
-        function counts(t){let tp=0,fn=0,fp=0,tn=0;pos.forEach(p=>p>=t?tp++:fn++);neg.forEach(p=>p>=t?fp++:tn++);return{tp:tp,fn:fn,fp:fp,tn:tn}}
-        const ths=[1.01].concat(pos.concat(neg).sort((a,b)=>b-a)).concat([0]);
-        const roc=ths.map(t=>{const c=counts(t);return[c.fp/neg.length,c.tp/pos.length]});
-        let auc=0;for(let i=1;i<roc.length;i++)auc+=(roc[i][0]-roc[i-1][0])*(roc[i][1]+roc[i-1][1])/2;
-        $('thAuc').textContent=fmt(auc,2);
-        const W=320,H=170,PX=10,sx=p=>PX+p*(W-2*PX);
+        const TPL_P=[0.42,0.58,0.74,0.78,0.82,0.85,0.88,0.91,0.94,0.97],TPL_N=[0.03,0.06,0.10,0.14,0.18,0.22,0.26,0.30,0.52,0.62];
+        function scores(T,n){const o=[];for(let i=0;i<n;i++){const u=Math.min(9,Math.max(0,(i+0.5)/n*10-0.5)),a=Math.floor(u),b=Math.min(9,a+1);o.push(T[a]+(T[b]-T[a])*(u-a))}return o}
+        const ge=(arr,t)=>{let lo=0,hi=arr.length;while(lo<hi){const m=(lo+hi)>>1;if(arr[m]>=t)hi=m;else lo=m+1}return arr.length-lo};
+        let pos=[],neg=[],roc=[],auc=0;
+        function counts(t){const tp=ge(pos,t),fp=ge(neg,t);return{tp:tp,fn:pos.length-tp,fp:fp,tn:neg.length-fp}}
+        function prep(){pos=scores(TPL_P,Math.round(Math.pow(10,+$('thNP').value)));neg=scores(TPL_N,Math.round(Math.pow(10,+$('thNN').value)));
+          const ths=[1.01].concat(pos.concat(neg).sort((a,b)=>b-a)).concat([0]);roc=ths.map(t=>{const c=counts(t);return[c.fp/neg.length,c.tp/pos.length]});
+          auc=0;for(let i=1;i<roc.length;i++)auc+=(roc[i][0]-roc[i-1][0])*(roc[i][1]+roc[i-1][1])/2;
+          $('thNPO').textContent=pos.length;$('thNNO').textContent=neg.length}
+        const W=320,PX=10,sx=p=>PX+p*(W-2*PX);
         const RW=320,RH=210,RX=34,RY=14,rx=v=>RX+v*(RW-RX-14),ry=v=>RH-24-v*(RH-24-RY);
-        function draw(){const t=+$('thT').value;$('thTO').textContent=fmt(t,2);const c=counts(t);
+        function show(arr,max){const st=Math.max(1,Math.ceil(arr.length/max)),o=[];for(let i=0;i<arr.length;i+=st)o.push(arr[i]);return o}
+        function draw(){const t=+$('thT').value;$('thTO').textContent=fmt(t,2);const c=counts(t),total=pos.length+neg.length;
+          const sp=show(pos,200),sn=show(neg,200),many=sp.length>20||sn.length>20,R=many?6:3,sep=many?5:10,rad=many?2.5:5;
           let s='<line class="ax" x1="'+PX+'" y1="85" x2="'+(W-PX)+'" y2="85"/>';
           for(const v of[0,0.5,1])s+='<text class="lbl" x="'+(sx(v)-6)+'" y="165">'+v+'</text>';
-          pos.forEach((p,i)=>{const col=p>=t?'var(--ok)':'var(--bad)';s+='<circle cx="'+sx(p)+'" cy="'+(40+(i%3)*10)+'" r="5" style="fill:'+col+';stroke:var(--fg);stroke-width:1"/>'});
-          neg.forEach((p,i)=>{const col=p>=t?'var(--bad)':'var(--ok)';s+='<rect x="'+(sx(p)-5)+'" y="'+(112+(i%3)*10-5)+'" width="10" height="10" style="fill:'+col+';stroke:var(--fg);stroke-width:1"/>'});
-          s+='<text class="lbl" x="'+PX+'" y="18">'+LernApp.t('echt positiv (Kreis)','actually positive (circle)')+'</text><text class="lbl" x="'+PX+'" y="150">'+LernApp.t('echt negativ (Quadrat)','actually negative (square)')+'</text>';
+          sp.forEach((p,i)=>{const col=p>=t?'var(--ok)':'var(--bad)';s+='<circle cx="'+sx(p)+'" cy="'+((many?34:40)+(i%R)*sep)+'" r="'+rad+'" style="fill:'+col+';stroke:var(--fg);stroke-width:'+(many?0.5:1)+'"/>'});
+          sn.forEach((p,i)=>{const col=p>=t?'var(--bad)':'var(--ok)',y=(many?112:112)+(i%R)*sep;s+='<rect x="'+(sx(p)-rad)+'" y="'+(y-rad)+'" width="'+(2*rad)+'" height="'+(2*rad)+'" style="fill:'+col+';stroke:var(--fg);stroke-width:'+(many?0.5:1)+'"/>'});
+          s+='<text class="lbl" x="'+PX+'" y="18">'+LernApp.t('echt positiv (Kreis): ','actually positive (circle): ')+pos.length+'</text><text class="lbl" x="'+PX+'" y="150">'+LernApp.t('echt negativ (Quadrat): ','actually negative (square): ')+neg.length+'</text>';
           s+='<line class="ln2" x1="'+sx(t)+'" y1="24" x2="'+sx(t)+'" y2="148"/>';
           $('thSvg').innerHTML=s;
           $('thTP').textContent=c.tp;$('thFN').textContent=c.fn;$('thFP').textContent=c.fp;$('thTN').textContent=c.tn;
-          const pre=c.tp+c.fp?c.tp/(c.tp+c.fp):0,rec=c.tp/(c.tp+c.fn),f1=(2*c.tp+c.fp+c.fn)?2*c.tp/(2*c.tp+c.fp+c.fn):0;
-          $('thAcc').textContent=fmt((c.tp+c.tn)/20,2);$('thPre').textContent=c.tp+c.fp?fmt(pre,2):'–';$('thRec').textContent=fmt(rec,2);$('thF1').textContent=fmt(f1,2);
-          let g='<line class="ax" x1="'+RX+'" y1="'+ry(0)+'" x2="'+rx(1)+'" y2="'+ry(0)+'"/><line class="ax" x1="'+RX+'" y1="'+ry(0)+'" x2="'+RX+'" y2="'+ry(1)+'"/>';
+          const pre=c.tp+c.fp?c.tp/(c.tp+c.fp):0,rec=c.tp/(c.tp+c.fn),f1=(2*c.tp+c.fp+c.fn)?2*c.tp/(2*c.tp+c.fp+c.fn):0,fpr=c.fp/(c.fp+c.tn);
+          $('thAcc').textContent=fmt((c.tp+c.tn)/total,3);$('thPre').textContent=c.tp+c.fp?fmt(pre,3):'–';$('thRec').textContent=fmt(rec,3);$('thF1').textContent=fmt(f1,3);$('thFpr').textContent=fmt(fpr,3);
+          $('thAccF').textContent='('+c.tp+'+'+c.tn+') / '+total;$('thPreF').textContent=c.tp+' / ('+c.tp+'+'+c.fp+')';$('thRecF').textContent=c.tp+' / ('+c.tp+'+'+c.fn+')';$('thFprF').textContent=c.fp+' / ('+c.fp+'+'+c.tn+')';$('thF1F').textContent='2·'+c.tp+' / (2·'+c.tp+'+'+c.fp+'+'+c.fn+')';
+          $('thAuc').textContent=fmt(auc,3);$('thPrev').textContent=fmt(100*pos.length/total,1)+' %';$('thBase').textContent=fmt(neg.length/total,3);
+          const stp=Math.max(1,Math.ceil(roc.length/300));let g='<line class="ax" x1="'+RX+'" y1="'+ry(0)+'" x2="'+rx(1)+'" y2="'+ry(0)+'"/><line class="ax" x1="'+RX+'" y1="'+ry(0)+'" x2="'+RX+'" y2="'+ry(1)+'"/>';
           g+='<line class="dash" x1="'+rx(0)+'" y1="'+ry(0)+'" x2="'+rx(1)+'" y2="'+ry(1)+'"/>';
-          g+='<path class="ln" d="'+roc.map((p,i)=>(i?'L':'M')+rx(p[0]).toFixed(1)+' '+ry(p[1]).toFixed(1)).join('')+'"/>';
+          const pts=roc.filter((p,i)=>i%stp===0||i===roc.length-1);g+='<path class="ln" d="'+pts.map((p,i)=>(i?'L':'M')+rx(p[0]).toFixed(1)+' '+ry(p[1]).toFixed(1)).join('')+'"/>';
           g+='<text class="lbl" x="'+(RX+60)+'" y="'+(RH-6)+'">'+LernApp.t('Rate falscher Alarme (FPR)','False alarm rate (FPR)')+'</text><text class="lbl" x="2" y="10">Recall (TPR)</text>';
-          g+='<circle cx="'+rx(c.fp/10)+'" cy="'+ry(c.tp/10)+'" r="6" style="fill:var(--warn)"/>';
-          $('thRoc').innerHTML=g}
-        $('thT').addEventListener('input',draw);draw()})();
+          g+='<text class="lbl" x="'+(RX-14)+'" y="'+(ry(0)+4)+'">0</text><text class="lbl" x="'+(RX-14)+'" y="'+(ry(1)+4)+'">1</text><text class="lbl" x="'+(rx(0)-3)+'" y="'+(ry(0)+13)+'">0</text><text class="lbl" x="'+(rx(1)-3)+'" y="'+(ry(0)+13)+'">1</text>';
+          g+='<circle cx="'+rx(c.fp/neg.length)+'" cy="'+ry(c.tp/pos.length)+'" r="6" style="fill:var(--warn)"/>';
+          $('thRoc').innerHTML=g;
+          const ratio=neg.length/pos.length;
+          $('thMsg').textContent=ratio>=50?LernApp.t('Seltene Positive: Die AUC bleibt hoch, weil die ROC nur Raten kennt. Die Precision aber bricht ein: Schon eine kleine False Alarm Rate ergibt mehr FP als TP, denn es gibt so viele Negative. Die Accuracy von «immer negativ» ist fast 1.','Rare positives: the AUC stays high, because the ROC only knows rates. The precision collapses though: even a small false alarm rate gives more FP than TP, because there are so many negatives. The accuracy of «always negative» is almost 1.'):ratio<=1/50?LernApp.t('Fast nur Positive: Die Precision ist leicht hoch, die False Alarm Rate wird aus sehr wenigen Negativen berechnet und schwankt stark.','Almost only positives: precision is easily high, the false alarm rate is computed from very few negatives and varies a lot.'):LernApp.t('Ausgewogen: Accuracy, Precision und Recall erzählen etwa dieselbe Geschichte. Setze die Negativen auf 1000 und schau, was passiert.','Balanced: accuracy, precision and recall tell about the same story. Set the negatives to 1000 and watch what happens.')}
+        const act=(a,b)=>{$('thNP').value=a;$('thNN').value=b;[['thP1'],['thP2'],['thP3']].forEach(x=>{$(x[0]).className=''});prep();draw()};
+        ['thNP','thNN'].forEach(id=>$(id).addEventListener('input',()=>{[['thP1'],['thP2'],['thP3']].forEach(x=>{$(x[0]).className=''});prep();draw()}));
+        [['thP1',1,1],['thP2',1,3],['thP3',0,3]].forEach(b=>$(b[0]).addEventListener('click',()=>{act(b[1],b[2]);$(b[0]).className='pri'}));
+        $('thT').addEventListener('input',draw);prep();draw()})();
 
       // Demo 3: imbalance
       (function(){
@@ -412,6 +502,124 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
         $('knK').addEventListener('input',draw);
         $('knSvg').addEventListener('click',e=>{const b=e.currentTarget.getBoundingClientRect();q.x=Math.min(1,Math.max(0,(e.clientX-b.left)/b.width));q.y=Math.min(1,Math.max(0,1-(e.clientY-b.top)/b.height));draw()});
         draw()})();
+
+      // Demo 5a: Naive Bayes, one feature (qm), Gaussian per class
+      (function(){
+        const a=[35,48,55,62,70],b=[78,85,95,110,130],qa=a.concat(b);
+        const mean=v=>v.reduce((s,x)=>s+x,0)/v.length,sd=v=>{const m=mean(v);return Math.sqrt(v.reduce((s,x)=>s+(x-m)*(x-m),0)/(v.length-1))};
+        const ma=mean(a),sa=sd(a),mb=mean(b),sb=sd(b),pdf=(x,m,s)=>Math.exp(-0.5*((x-m)/s)*((x-m)/s))/(s*Math.sqrt(2*Math.PI));
+        const W=320,P=12,X0=20,X1=150,sx=x=>P+(x-X0)/(X1-X0)*(W-2*P);
+        function draw(){const x=+$('nbX').value,pi=+$('nbP').value/100;$('nbXO').textContent=x+' qm';$('nbPO').textContent=Math.round(pi*100)+' %';
+          const fa=v=>pdf(v,ma,sa)*(1-pi),fb=v=>pdf(v,mb,sb)*pi;let mx=0;for(let v=X0;v<=X1;v++)mx=Math.max(mx,fa(v),fb(v));
+          const sy=v=>135-v/mx*100;let s='<line class="ax" x1="'+P+'" y1="135" x2="'+(W-P)+'" y2="135"/>',pa='',pb='';
+          for(const t of[40,60,80,100,120,140])s+='<text class="lbl" x="'+(sx(t)-8)+'" y="165">'+t+'</text>';
+          for(let v=X0;v<=X1;v++){pa+=(v>X0?'L':'M')+sx(v).toFixed(1)+' '+sy(fa(v)).toFixed(1);pb+=(v>X0?'L':'M')+sx(v).toFixed(1)+' '+sy(fb(v)).toFixed(1)}
+          s+='<path class="ln2" d="'+pa+'"/><path class="ln" d="'+pb+'"/>';
+          qa.forEach((q,i)=>{s+='<circle cx="'+sx(q)+'" cy="148" r="3.5" style="fill:'+(i<5?'var(--warn)':'var(--accent)')+';stroke:var(--fg);stroke-width:1"/>'});
+          s+='<line x1="'+sx(x)+'" y1="20" x2="'+sx(x)+'" y2="140" style="stroke:var(--fg);stroke-width:1.5"/><circle cx="'+sx(x)+'" cy="'+sy(fa(x))+'" r="4" style="fill:var(--warn)"/><circle cx="'+sx(x)+'" cy="'+sy(fb(x))+'" r="4" style="fill:var(--accent)"/>';
+          $('nbSvg').innerHTML=s;const post=fb(x)/(fa(x)+fb(x));
+          $('nbPost').textContent=fmt(post,2);$('nbLb').textContent=fmt(fb(x)*1000,2);$('nbLa').textContent=fmt(fa(x)*1000,2);
+          $('nbMsg').textContent=post>0.5?LernApp.t('Die blaue Kurve liegt hier höher: Vorhersage «teuer».','The blue curve is higher here: prediction «expensive».'):LernApp.t('Die orange Kurve liegt hier höher: Vorhersage «nicht teuer».','The orange curve is higher here: prediction «not expensive».')}
+        $('nbX').addEventListener('input',draw);$('nbP').addEventListener('input',draw);draw()})();
+
+      // Demo 5b: linear SVM (soft margin, subgradient descent), slider C
+      (function(){
+        const r=mulberry32(5),pts=[];for(let i=0;i<30;i++){const c=i%2;pts.push({x:(c?0.62:0.38)+0.11*gauss(r),y:(c?0.58:0.42)+0.11*gauss(r),c:c,y2:c?1:-1})}
+        pts.forEach(p=>{p.u=p.x-0.5;p.v=p.y-0.5});
+        const W=320,H=220,sx=x=>x*W,sy=y=>H-y*H;
+        function fit(C){let w=[0,0],b=0;const lr=1/(1+C*pts.length);
+          for(let t=0;t<4000;t++){let gw=[w[0],w[1]],gb=0;pts.forEach(p=>{if(p.y2*(w[0]*p.u+w[1]*p.v+b)<1){gw[0]-=C*p.y2*p.u;gw[1]-=C*p.y2*p.v;gb-=C*p.y2}});w=[w[0]-lr*gw[0],w[1]-lr*gw[1]];b-=lr*gb}
+          return{w:w,b:b}}
+        function line(m,off,main){const a=m.w[0],bb=m.w[1],c=m.b-off;if(Math.abs(bb)<1e-6)return'';const y=x=>-(a*(x-0.5)+c)/bb+0.5;
+          return'<line x1="'+sx(-1)+'" y1="'+sy(y(-1))+'" x2="'+sx(2)+'" y2="'+sy(y(2))+'" style="stroke:var(--fg);stroke-width:'+(main?2:1.2)+(main?'':';stroke-dasharray:5 4')+'"/>'}
+        function draw(){const e=+$('svC').value,C=Math.pow(10,e);$('svCO').textContent=fmt(C,2);const m=fit(C);
+          const f=p=>m.w[0]*p.u+m.w[1]*p.v+m.b;let s=line(m,0,true)+line(m,1,false)+line(m,-1,false);
+          let sv=0,ok=0;pts.forEach(p=>{const isSv=p.y2*f(p)<=1.02;if(isSv)sv++;if(p.y2*f(p)>0)ok++;
+            s+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="'+(isSv?5.5:3.5)+'" style="fill:'+(p.c?'var(--accent)':'var(--warn)')+';stroke:var(--fg);stroke-width:'+(isSv?2.5:1)+'"/>'});
+          $('svSvg').innerHTML=s;const nw=Math.hypot(m.w[0],m.w[1]);
+          $('svCv').textContent=fmt(C,2);$('svN').textContent=sv;$('svM').textContent=nw>0?fmt(2/nw,2):'–';$('svA').textContent=fmt(ok/pts.length,2);
+          $('svMsg').textContent=C<0.5?LernApp.t('Kleines C: breite Margin, einzelne Fehler sind erlaubt. Viele Punkte stützen die Linie. Das Modell ist einfach (Underfitting-Risiko).','Small C: wide margin, single errors are allowed. Many points support the line. The model is simple (underfitting risk).'):C>20?LernApp.t('Grosses C: Fehler sind teuer, die Margin wird schmal und folgt einzelnen Punkten (Overfitting-Risiko).','Large C: errors are expensive, the margin becomes narrow and follows single points (overfitting risk).'):LernApp.t('Mittleres C: ein Kompromiss zwischen breiter Margin und wenigen Fehlern.','Medium C: a compromise between a wide margin and few errors.')}
+        $('svC').addEventListener('input',draw);draw()})();
+
+      // Demo 5c: decision tree (CART, Gini): regions, tree diagram and accuracy by depth
+      (function(){
+        const r=mulberry32(11);function make(n){const a=[];for(let i=0;i<n;i++){const c=i%2;a.push({x:(c?0.6:0.4)+0.2*gauss(r),y:(c?0.55:0.45)+0.2*gauss(r),c:c})}return a}
+        const tr=make(60),te=make(200),W=320,H=220,sx=x=>x*W,sy=y=>H-y*H,DD=99,cl=c=>c?'var(--accent)':'var(--warn)';
+        const gini=s=>{const n=s.length;if(!n)return 0;const p=s.filter(q=>q.c).length/n;return 2*p*(1-p)};
+        function build(s,d,md,b){const n1=s.filter(q=>q.c).length,n0=s.length-n1,base={n0:n0,n1:n1,g:gini(s),c:n1*2>=s.length?1:0,b:b};
+          if(d>=md||n1===0||n0===0||s.length<2)return Object.assign(base,{leaf:1});
+          let best=null;['x','y'].forEach(f=>{const v=s.map(q=>q[f]).sort((a,c)=>a-c);for(let i=1;i<v.length;i++){if(v[i]===v[i-1])continue;const t=(v[i]+v[i-1])/2,L=s.filter(q=>q[f]<=t),R=s.filter(q=>q[f]>t),g=(L.length*gini(L)+R.length*gini(R))/s.length;if(!best||g<best.g)best={f:f,t:t,g:g,L:L,R:R}}});
+          if(!best)return Object.assign(base,{leaf:1});
+          const bl=best.f==='x'?[b[0],b[1],best.t,b[3]]:[b[0],b[1],b[2],best.t],br=best.f==='x'?[best.t,b[1],b[2],b[3]]:[b[0],best.t,b[2],b[3]];
+          return Object.assign(base,{f:best.f,t:best.t,l:build(best.L,d+1,md,bl),r:build(best.R,d+1,md,br)})}
+        const pred=(n,x,y)=>n.leaf?n.c:((n.f==='x'?x:y)<=n.t?pred(n.l,x,y):pred(n.r,x,y)),cnt=n=>n.leaf?1:cnt(n.l)+cnt(n.r);
+        const acc=(t,set)=>set.filter(p=>pred(t,p.x,p.y)===p.c).length/set.length,CUR=[];
+        for(let d=1;d<=8;d++){const t=build(tr,0,d,[0,0,1,1]);CUR.push([acc(t,tr),acc(t,te)])}
+        function regions(t){let s='';(function walk(n,d){if(n.leaf){const pur=Math.max(n.n0,n.n1)/(n.n0+n.n1);s+='<rect x="'+sx(n.b[0])+'" y="'+sy(n.b[3])+'" width="'+(sx(n.b[2])-sx(n.b[0]))+'" height="'+(sy(n.b[1])-sy(n.b[3]))+'" style="fill:'+cl(n.c)+';opacity:'+(0.12+0.5*(2*pur-1))+'"/>';return}
+          const b=n.b,w=Math.max(1,2.8-0.55*d);s+=n.f==='x'?'<line x1="'+sx(n.t)+'" y1="'+sy(b[1])+'" x2="'+sx(n.t)+'" y2="'+sy(b[3])+'" style="stroke:var(--fg);stroke-width:'+w+'"/>':'<line x1="'+sx(b[0])+'" y1="'+sy(n.t)+'" x2="'+sx(b[2])+'" y2="'+sy(n.t)+'" style="stroke:var(--fg);stroke-width:'+w+'"/>';walk(n.l,d+1);walk(n.r,d+1)})(t,0);return s}
+        function diagram(t){let k=0;(function lay(n,d){if(n.leaf||d===DD){n.xi=k++;return}lay(n.l,d+1);lay(n.r,d+1);n.xi=(n.l.xi+n.r.xi)/2})(t,0);
+          const dep=n=>n.leaf?0:1+Math.max(dep(n.l),dep(n.r)),D=Math.max(1,dep(t)),px=n=>k>1?14+n.xi*(292/(k-1)):160,py=d=>20+d*Math.min(34,128/D);let e='',v='';
+          (function walk(n,d){if(n.leaf||d===DD)return;[n.l,n.r].forEach(c=>{e+='<line x1="'+px(n)+'" y1="'+py(d)+'" x2="'+px(c)+'" y2="'+py(d+1)+'" style="stroke:var(--muted);stroke-width:1.2"/>'});walk(n.l,d+1);walk(n.r,d+1)})(t,0);
+          (function walk(n,d){const x=px(n),y=py(d);
+            if(n.leaf){const pur=Math.max(n.n0,n.n1)/(n.n0+n.n1);v+='<rect x="'+(x-6)+'" y="'+(y-6)+'" width="12" height="12" style="fill:'+cl(n.c)+';fill-opacity:'+(0.35+0.65*(2*pur-1))+';stroke:var(--fg);stroke-width:1"/>';return}
+            if(d===DD){v+='<circle cx="'+x+'" cy="'+y+'" r="6" style="fill:var(--bg);stroke:var(--muted);stroke-width:1.2;stroke-dasharray:2 2"/><text class="lbl" x="'+(x-4)+'" y="'+(y+9)+'">…</text>';return}
+            v+='<circle cx="'+x+'" cy="'+y+'" r="6" style="fill:var(--bg);stroke:var(--fg);stroke-width:1.5"/>';
+            if(d<=2)v+='<text class="lbl" x="'+(x-17)+'" y="'+(y-10)+'">'+n.f+'≤'+fmt(n.t,2)+'</text>';
+            walk(n.l,d+1);walk(n.r,d+1)})(t,0);
+          return e+v+'<text class="lbl" x="2" y="170">Gini '+fmt(t.g,2)+' → 0</text>'}
+        function curve(md){const x0=34,x1=308,yt=12,yb=96,sxx=d=>x0+(d-1)/7*(x1-x0),syy=a=>yb-(a-0.4)/0.6*(yb-yt);let s='';
+          for(const g of[0.5,0.75,1])s+='<line x1="'+x0+'" y1="'+syy(g)+'" x2="'+x1+'" y2="'+syy(g)+'" style="stroke:var(--line);stroke-width:1"/><text class="lbl" x="2" y="'+(syy(g)+4)+'">'+g+'</text>';
+          for(let d=1;d<=8;d++)s+='<text class="lbl" x="'+(sxx(d)-3)+'" y="112">'+d+'</text>';
+          s+='<path class="ln" d="'+CUR.map((c,i)=>(i?'L':'M')+sxx(i+1)+' '+syy(c[0])).join('')+'"/><path class="ln2" d="'+CUR.map((c,i)=>(i?'L':'M')+sxx(i+1)+' '+syy(c[1])).join('')+'"/>';
+          s+='<line x1="'+sxx(md)+'" y1="'+yt+'" x2="'+sxx(md)+'" y2="'+yb+'" style="stroke:var(--fg);stroke-width:1;stroke-dasharray:4 3"/><circle cx="'+sxx(md)+'" cy="'+syy(CUR[md-1][0])+'" r="4.5" style="fill:var(--accent)"/><circle cx="'+sxx(md)+'" cy="'+syy(CUR[md-1][1])+'" r="4.5" style="fill:var(--warn)"/>';
+          return s+'<text class="lbl" x="'+(x0+4)+'" y="'+(yt+10)+'" style="fill:var(--accent)">Train</text><text class="lbl" x="'+(x0+50)+'" y="'+(yt+10)+'" style="fill:var(--warn)">Test</text>'}
+        function draw(){const md=+$('dtD').value;$('dtDO').textContent=md;const t=build(tr,0,md,[0,0,1,1]);
+          let s=regions(t);tr.forEach(p=>{s+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="3.5" style="fill:'+cl(p.c)+';stroke:var(--fg);stroke-width:1"/>'});
+          $('dtSvg').innerHTML=s;$('dtTree').innerHTML=diagram(t);$('dtCurve').innerHTML=curve(md);
+          $('dtL').textContent=cnt(t);$('dtTr').textContent=fmt(CUR[md-1][0],2);$('dtTe').textContent=fmt(CUR[md-1][1],2);
+          $('dtMsg').textContent=md===1?LernApp.t('Tiefe 1: nur eine Frage, die Fläche hat zwei Rechtecke (Stumpf). Das ist zu einfach.','Depth 1: only one question, the region has two rectangles (a stump). That is too simple.'):md>=6?LernApp.t('Tiefer Baum: Fast jeder Trainingspunkt bekommt sein eigenes Rechteck. Die Trainingskurve steigt weiter, die Testkurve fällt (Overfitting).','Deep tree: almost every training point gets its own rectangle. The training curve keeps rising, the test curve falls (overfitting).'):LernApp.t('Mittlere Tiefe: die groben Bereiche sind erkannt. Beobachte in der Kurve, ab wann die Test-Accuracy nicht mehr steigt.','Medium depth: the rough areas are found. Watch in the curve from which depth the test accuracy stops rising.')}
+        $('dtD').addEventListener('input',draw);draw()})();
+
+      // Demo 5d: small neural network (1 hidden layer, tanh), trained step by step in the browser
+      (function(){
+        const W=320,H=220,sx=x=>x*W,sy=y=>H-y*H,f=v=>(v-0.5)*3,MAXE=2000,cl=c=>c?'var(--accent)':'var(--warn)';
+        function gen(kind,n,r){const a=[];for(let i=0;i<n;i++){let x,y,c;
+          if(kind==='blobs'){c=i%2;x=Math.min(1,Math.max(0,(c?0.68:0.32)+0.13*gauss(r)));y=Math.min(1,Math.max(0,(c?0.65:0.35)+0.13*gauss(r)))}
+          else{x=r();y=r();c=kind==='xor'?((x>0.5)!==(y>0.5)?1:0):(Math.hypot(x-0.5,y-0.5)<0.3?1:0);if(r()<0.05)c=1-c}
+          a.push({x:x,y:y,c:c})}return a}
+        let kind='circle',tr,te,net,playing=false;
+        const act=(p,j)=>Math.tanh(net.w1[j][0]*f(p.x)+net.w1[j][1]*f(p.y)+net.b1[j]);
+        const z=p=>{let s=net.b2;for(let j=0;j<net.h;j++)s+=act(p,j)*net.w2[j];return s};
+        const loss=set=>set.reduce((s,p)=>{const o=Math.min(1-1e-9,Math.max(1e-9,sigmoid(z(p))));return s-(p.c?Math.log(o):Math.log(1-o))},0)/set.length;
+        const acc=set=>set.filter(p=>(z(p)>0?1:0)===p.c).length/set.length;
+        function record(){net.L.push({e:net.ep,tr:loss(tr),te:loss(te)})}
+        function reset(){playing=false;const r=mulberry32(7);tr=gen(kind,80,r);te=gen(kind,200,r);const h=+$('nnH').value,q=mulberry32(3);net={h:h,w1:[],b1:[],w2:[],b2:0,ep:0,L:[]};
+          for(let j=0;j<h;j++){net.w1.push([gauss(q)*0.8,gauss(q)*0.8]);net.b1.push(0);net.w2.push(gauss(q)*0.8)}record();draw()}
+        function adv(E){const n=tr.length,h=net.h,lr=0.4;E=Math.min(E,MAXE-net.ep);
+          for(let e=0;e<E;e++){const g1=net.w1.map(()=>[0,0]),gb1=net.w1.map(()=>0),g2=net.w2.map(()=>0);let gb2=0;
+            tr.forEach(p=>{const u=f(p.x),v=f(p.y),a=[];for(let j=0;j<h;j++)a.push(act(p,j));const d=sigmoid(a.reduce((s,aj,j)=>s+aj*net.w2[j],net.b2))-p.c;
+              gb2+=d;a.forEach((aj,j)=>{g2[j]+=d*aj;const dh=d*net.w2[j]*(1-aj*aj);g1[j][0]+=dh*u;g1[j][1]+=dh*v;gb1[j]+=dh})});
+            for(let j=0;j<h;j++){net.w1[j][0]-=lr*g1[j][0]/n;net.w1[j][1]-=lr*g1[j][1]/n;net.b1[j]-=lr*gb1[j]/n;net.w2[j]-=lr*g2[j]/n}net.b2-=lr*gb2/n;net.ep++;
+            if(net.ep%10===0)record()}
+          if(net.L[net.L.length-1].e!==net.ep)record()}
+        function neurons(){let s='';for(let j=0;j<net.h;j++){const ox=(j%4)*80+5,oy=Math.floor(j/4)*75+3,cw=7,ch=7.25;
+            for(let a=0;a<10;a++)for(let b=0;b<8;b++){const v=act({x:(a+0.5)/10,y:1-(b+0.5)/8},j);s+='<rect x="'+(ox+a*cw)+'" y="'+(oy+b*ch)+'" width="'+(cw+0.4)+'" height="'+(ch+0.4)+'" style="fill:'+cl(v>0)+';opacity:'+Math.abs(v)*0.85+'"/>'}
+            s+='<rect x="'+ox+'" y="'+oy+'" width="70" height="58" style="fill:none;stroke:var(--line);stroke-width:1"/><text class="lbl" x="'+ox+'" y="'+(oy+69)+'">N'+(j+1)+' ('+(net.w2[j]>=0?'+':'−')+fmt(Math.abs(net.w2[j]),1)+')</text>'}return s}
+        function lossSvg(){const x0=34,x1=312,yt=12,yb=96,ymax=Math.max(0.8,net.L[0].tr,net.L[0].te),X=e=>x0+e/MAXE*(x1-x0),Y=v=>yb-Math.min(v,ymax)/ymax*(yb-yt);
+          let s='<line class="ax" x1="'+x0+'" y1="'+yb+'" x2="'+x1+'" y2="'+yb+'"/><line class="ax" x1="'+x0+'" y1="'+yt+'" x2="'+x0+'" y2="'+yb+'"/><text class="lbl" x="'+(x0-4)+'" y="112">0</text><text class="lbl" x="'+(x1-24)+'" y="112">'+MAXE+'</text><text class="lbl" x="2" y="'+(yt+4)+'">'+fmt(ymax,1)+'</text><text class="lbl" x="2" y="'+(yb+4)+'">0</text>';
+          s+='<path class="ln" d="'+net.L.map((p,i)=>(i?'L':'M')+X(p.e).toFixed(1)+' '+Y(p.tr).toFixed(1)).join('')+'"/><path class="ln2" d="'+net.L.map((p,i)=>(i?'L':'M')+X(p.e).toFixed(1)+' '+Y(p.te).toFixed(1)).join('')+'"/>';
+          return s+'<text class="lbl" x="'+(x0+6)+'" y="'+(yt+10)+'" style="fill:var(--accent)">Train</text><text class="lbl" x="'+(x0+52)+'" y="'+(yt+10)+'" style="fill:var(--warn)">Test</text>'}
+        function draw(){$('nnHO').textContent=net.h;let s=gridSvg(W,H,32,22,(x,y)=>z({x:x,y:y})>0?1:0);tr.forEach(p=>{s+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="3.2" style="fill:'+cl(p.c)+';stroke:var(--fg);stroke-width:1"/>'});
+          $('nnSvg').innerHTML=s;$('nnNeu').innerHTML=neurons();$('nnLoss').innerHTML=lossSvg();
+          const a=acc(tr),b=acc(te),L=net.L[net.L.length-1];$('nnEp').textContent=net.ep;$('nnTr').textContent=fmt(a,2);$('nnTe').textContent=fmt(b,2);$('nnLs').textContent=fmt(L.tr,2)+' / '+fmt(L.te,2);
+          $('nnPlay').textContent=playing?LernApp.t('Pause','Pause'):LernApp.t('Training starten','Start training');
+          $('nnMsg').textContent=net.ep===0?LernApp.t('Start: Die Gewichte sind zufällig, die Fläche sagt nichts. Drücke «Training starten» und schau den Neuronen zu.','Start: the weights are random, the region means nothing. Press «Start training» and watch the neurons.'):net.ep<200&&a<0.85?LernApp.t('Das Netz lernt noch: Der Loss sinkt, die Neuronen drehen ihre Linien in die richtige Richtung.','The network is still learning: the loss falls, the neurons turn their lines into the right direction.'):kind!=='blobs'&&net.h<=2&&net.ep>=300?LernApp.t('Mit 1 bis 2 Neuronen reicht die Form nicht: Zwei Linien können keine geschlossene Form ergeben. Der Loss bleibt hoch.','With 1 to 2 neurons the shape is not enough: two lines cannot make a closed shape. The loss stays high.'):a>=0.85?LernApp.t('Das Netz hat die Form gefunden: Jedes Neuron liefert eine Linie, die Ausgabe kombiniert sie.','The network found the shape: each neuron supplies a line, the output combines them.'):LernApp.t('Weiter trainieren: Der Loss sinkt noch.','Keep training: the loss is still falling.')}
+        function loop(){if(!playing)return;adv(10);draw();if(net.ep>=MAXE){playing=false;draw()}else requestAnimationFrame(loop)}
+        $('nnPlay').addEventListener('click',()=>{if(playing){playing=false;draw();return}if(net.ep>=MAXE)reset();if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches){adv(MAXE);draw();return}playing=true;draw();loop()});
+        $('nnStep').addEventListener('click',()=>{playing=false;adv(100);draw()});
+        $('nnReset').addEventListener('click',reset);$('nnH').addEventListener('input',reset);
+        [['nnD1','circle'],['nnD2','xor'],['nnD3','blobs']].forEach(d=>{$(d[0]).addEventListener('click',()=>{kind=d[1];[['nnD1'],['nnD2'],['nnD3']].forEach(x=>{$(x[0]).className=x[0]===d[0]?'pri':''});reset()})});
+        reset()})();
 
       // Demo 6: 10 apartments, single tree vs bagging vs boosting (price regression on qm)
       (function(){

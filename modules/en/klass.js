@@ -78,17 +78,29 @@ clf.predict_proba(X_test)    # probabilities per class</code></pre>
   <p>The <b>ROC curve</b> plots, for all thresholds, the hit rate (TPR = Recall) against the false alarm rate (FPR). A perfect model lies at the top left, guessing lies on the diagonal. The <b>AUC</b> is the area under the curve: 1 is perfect, 0.5 is chance.</p>
   <div class="demo" id="thDemo">
     <div class="tag">Demo</div><h4>Threshold, Confusion Matrix and ROC</h4>
-    <p class="hint">20 cases, 10 actually positive, 10 actually negative, with fixed model probabilities.</p>
-    <svg class="plot" id="thSvg" viewBox="0 0 320 170" role="img" aria-label="Probabilities of the 20 cases on an axis with threshold"></svg>
+    <p class="hint">Choose how many actual positives and negatives there are (sliders are logarithmic, 1 to 1000). The shape of the model probabilities stays the same: most cases are clear-cut, only a few are borderline (exactly 4 at 10 and 10).</p>
+    <div class="btnrow"><button class="pri" id="thP1">10 : 10 (balanced)</button><button id="thP2">10 : 1000 (rare)</button><button id="thP3">1 : 1000 (very rare)</button></div>
+    <div class="ctl"><label for="thNP">Number of actual positives</label><input type="range" id="thNP" min="0" max="3" step="0.05" value="1"><output id="thNPO"></output></div>
+    <div class="ctl"><label for="thNN">Number of actual negatives</label><input type="range" id="thNN" min="0" max="3" step="0.05" value="1"><output id="thNNO"></output></div>
+    <svg class="plot" id="thSvg" viewBox="0 0 320 170" role="img" aria-label="Probabilities of all cases on one axis with threshold"></svg>
     <div class="ctl"><label for="thT">Threshold</label><input type="range" id="thT" min="0.02" max="0.98" step="0.01" value="0.5"><output id="thTO"></output></div>
     <div class="tablewrap"><table style="min-width:0">
       <tr><th></th><th class="num">says positive</th><th class="num">says negative</th></tr>
       <tr><td>actually positive</td><td class="num b" id="thTP"></td><td class="num r" id="thFN"></td></tr>
       <tr><td>actually negative</td><td class="num r" id="thFP"></td><td class="num b" id="thTN"></td></tr>
     </table></div>
-    <div class="stats"><span>Accuracy <b id="thAcc"></b></span><span>Precision <b id="thPre"></b></span><span>Recall <b id="thRec"></b></span><span>F1 <b id="thF1"></b></span><span>AUC <b id="thAuc"></b></span></div>
+    <div class="tablewrap"><table style="min-width:0">
+      <tr><th>Metric</th><th>Formula</th><th class="num">with numbers</th><th class="num">Value</th></tr>
+      <tr><td>Accuracy</td><td><code>(TP+TN) / all</code></td><td class="num" id="thAccF"></td><td class="num b" id="thAcc"></td></tr>
+      <tr><td>Precision</td><td><code>TP / (TP+FP)</code></td><td class="num" id="thPreF"></td><td class="num b" id="thPre"></td></tr>
+      <tr><td>Recall (TPR)</td><td><code>TP / (TP+FN)</code></td><td class="num" id="thRecF"></td><td class="num b" id="thRec"></td></tr>
+      <tr><td>False Alarm Rate (FPR)</td><td><code>FP / (FP+TN)</code></td><td class="num" id="thFprF"></td><td class="num b" id="thFpr"></td></tr>
+      <tr><td>F1</td><td><code>2·TP / (2·TP+FP+FN)</code></td><td class="num" id="thF1F"></td><td class="num b" id="thF1"></td></tr>
+    </table></div>
+    <div class="stats"><span>AUC <b id="thAuc"></b></span><span>Share of positives <b id="thPrev"></b></span><span>Accuracy of «always negative» <b id="thBase"></b></span></div>
+    <p class="hint" id="thMsg">&nbsp;</p>
     <svg class="plot" id="thRoc" viewBox="0 0 320 210" role="img" aria-label="ROC curve with the current threshold point" style="margin-top:12px"></svg>
-    <p class="hint">Top: circle = actually positive, square = actually negative. Everything to the right of the line is predicted as positive. Bottom: the orange point moves along the ROC curve as you slide the threshold.</p>
+    <p class="hint">Top: circle = actually positive, square = actually negative (with many cases only a selection is drawn). Everything to the right of the line is predicted as positive. Bottom: the orange point moves along the ROC curve as you slide the threshold: a higher threshold (line to the right) moves it down and to the left, a lower threshold up and to the right.</p>
   </div>
   <div class="merk"><b>Summary: threshold, ROC, AUC</b><ul>
     <li><b>Threshold:</b> The model gives probabilities; only the threshold turns them into classes. Lower threshold = more Recall, more false alarms.</li>
@@ -135,6 +147,31 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 per class +
 
   <h3 id="klass-modelle">5 · Non-linear classifiers</h3>
   <p>Logistic regression draws a <b>straight</b> boundary. If the classes cannot be separated that cleanly, you need more flexible models.</p>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">What does each model optimise?</h4>
+  <div class="tablewrap"><table>
+    <tr><th>Model</th><th>It optimises …</th><th>How</th></tr>
+    <tr><td><b>Logistic regression</b></td><td>Log loss (cross-entropy)</td><td>Gradient descent on the weights, optionally with regularisation</td></tr>
+    <tr><td><b>kNN</b></td><td>nothing (no training)</td><td>The data is only stored. You choose k and the distance measure via validation.</td></tr>
+    <tr><td><b>Naive Bayes</b></td><td>Likelihood of the training data</td><td>Counting, or mean and spread per class, closed-form formula without iteration</td></tr>
+    <tr><td><b>SVM</b></td><td>Hinge loss + wide margin (small ‖w‖²)</td><td>C weighs errors against the margin. The problem is convex, there is one global optimum.</td></tr>
+    <tr><td><b>Decision tree</b></td><td>Impurity (Gini or entropy)</td><td>Greedy: at each node the split that lowers the impurity the most</td></tr>
+    <tr><td><b>Random Forest</b></td><td>like the tree, per tree</td><td>Bagging: trees on samples, the majority decides. No joint optimisation.</td></tr>
+    <tr><td><b>Boosting</b></td><td>Loss (e.g. log loss) over all trees</td><td>Each new tree follows the gradient of the loss, so it corrects the remaining error</td></tr>
+    <tr><td><b>Neural network</b></td><td>Cross-entropy</td><td>Backpropagation and gradient descent on all weights</td></tr>
+  </table></div>
+  <p class="note"><b>Loss and metric are different things:</b> the model optimises a loss that can be differentiated (log loss, hinge, Gini). Afterwards it is judged with precision, recall, F1 or AUC. These are usually not optimised directly during training. You choose the threshold only afterwards.</p>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">What is each model good for, and what not?</h4>
+  <div class="tablewrap"><table>
+    <tr><th>Model</th><th>Good for …</th><th>Less good …</th></tr>
+    <tr><td><b>Logistic regression</b></td><td><ul style="margin:0;padding-left:18px"><li>Probabilities and well explainable weights</li><li>a fast, stable starting point (baseline)</li></ul></td><td><ul style="margin:0;padding-left:18px"><li>Straight boundaries only: curved shapes need extra features</li><li>Needs scaling, sensitive to outliers</li></ul></td></tr>
+    <tr><td><b>kNN</b></td><td><ul style="margin:0;padding-left:18px"><li>Simple, there is no training</li><li>follows curved, local patterns too</li></ul></td><td><ul style="margin:0;padding-left:18px"><li>Slow with lots of data: every prediction computes against all points</li><li>Weak with many features and unequal scales</li></ul></td></tr>
+    <tr><td><b>Naive Bayes</b></td><td><ul style="margin:0;padding-left:18px"><li>Very fast, even with little data</li><li>Many features, e.g. text and spam</li></ul></td><td><ul style="margin:0;padding-left:18px"><li>The assumption of independent features rarely holds</li><li>Probabilities are often poorly calibrated</li></ul></td></tr>
+    <tr><td><b>SVM</b></td><td><ul style="margin:0;padding-left:18px"><li>Strong with small to medium data and many features</li><li>Curved boundaries too with a kernel</li></ul></td><td><ul style="margin:0;padding-left:18px"><li>Slow with very many rows</li><li>No direct probabilities; scaling, C and kernel must be tuned</li></ul></td></tr>
+    <tr><td><b>Decision tree</b></td><td><ul style="margin:0;padding-left:18px"><li>Easy to read and explain</li><li>No scaling needed, mixes numbers and categories</li></ul></td><td><ul style="margin:0;padding-left:18px"><li>Overfitting at large depth</li><li>Unstable: small data changes can give a different tree</li></ul></td></tr>
+    <tr><td><b>Random Forest</b></td><td><ul style="margin:0;padding-left:18px"><li>Robust all-rounder with little tuning</li><li>Shows the importance of the features</li></ul></td><td><ul style="margin:0;padding-left:18px"><li>Harder to explain than a single tree</li><li>Larger and slower at prediction</li></ul></td></tr>
+    <tr><td><b>Boosting</b></td><td><ul style="margin:0;padding-left:18px"><li>Often the best accuracy on tabular data</li><li>Copes well with mixed features and gaps</li></ul></td><td><ul style="margin:0;padding-left:18px"><li>More hyperparameters, can overfit noise</li><li>Trees are built one after the other, not in parallel</li></ul></td></tr>
+    <tr><td><b>Neural network</b></td><td><ul style="margin:0;padding-left:18px"><li>Learns very complex patterns, especially in images, text and audio</li><li>Grows with the data: more data, better results</li></ul></td><td><ul style="margin:0;padding-left:18px"><li>Needs lots of data and computing time</li><li>Black box, many settings</li></ul></td></tr>
+  </table></div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">k-nearest neighbours (kNN)</h4>
   <p>For a new point you look for the k nearest training points and take the majority class (for regression the average). There is no training, but prediction is slow with a lot of data. k controls bias and variance: <b>k = 1</b> follows every point (overfitting), <b>k = N</b> predicts the majority class for everyone (underfitting).</p>
   <div class="demo" id="knDemo">
@@ -151,17 +188,56 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 per class +
   <pre><code>P(Ja | sonnig) = P(sonnig | Ja) * P(Ja) / P(sonnig)
                = (3/9) * (9/14) / (5/14) = 0.60</code></pre>
   <p class="note"><b>With the 10 apartments:</b> Feature «large» = more than 74 m². 5 of 10 apartments are expensive, and all 5 are large, none of the other 5. So <code>P(large | expensive) = 5/5 = 1</code> and <code>P(large | not expensive) = 0/5 = 0</code>. This gives <code>P(expensive | large) = 1</code>: certain, only because we have never seen a combination. This is the <b>zero-frequency problem</b>. The remedy is smoothing (Laplace: add 1 to every count): <code>P(large | expensive) = 6/7</code>, <code>P(large | not expensive) = 1/7</code>, so <code>P(expensive | large) = 6/7 ≈ 0.86</code>.</p>
+  <div class="demo" id="nbDemo">
+    <div class="tag">Demo</div><h4>Naive Bayes: floor area and prior</h4>
+    <svg class="plot" id="nbSvg" viewBox="0 0 320 170" role="img" aria-label="Two bell curves for expensive and not expensive flats, with the floor area of the new case"></svg>
+    <div class="ctl"><label for="nbX">Floor area of the new case</label><input type="range" id="nbX" min="30" max="150" step="1" value="76"><output id="nbXO"></output></div>
+    <div class="ctl"><label for="nbP">Prior P(expensive)</label><input type="range" id="nbP" min="5" max="95" step="5" value="50"><output id="nbPO"></output></div>
+    <div class="stats"><span>P(expensive | x) <b id="nbPost"></b></span><span>Likelihood expensive <b id="nbLb"></b></span><span>Likelihood not expensive <b id="nbLa"></b></span></div>
+    <p class="hint" id="nbMsg">&nbsp;</p>
+    <p class="hint">Blue = expensive, orange = not expensive: one bell curve each, estimated from the 10 flats and weighted by the prior. The line is the new case. The class with the higher curve at that point wins.</p>
+  </div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Support Vector Machine (SVM)</h4>
   <p>Looks for the dividing line with the <b>widest margin</b> to both classes. Only the points at the edge (support vectors) determine it. With <b>kernels</b> the data are conceptually lifted into a higher space where they can be separated by a straight line. Strong with many features.</p>
   <p class="note"><b>With the 10 apartments:</b> The largest non-expensive apartment has 70 m², the smallest expensive one 78 m². These two are the <b>support vectors</b>. The dividing line with the widest margin lies in the middle at <b>74 m²</b>, 4 m² away from each side. You could delete the other eight apartments and the boundary would stay the same.</p>
+  <div class="demo" id="svDemo">
+    <div class="tag">Demo</div><h4>SVM: effect of C</h4>
+    <svg class="plot" id="svSvg" viewBox="0 0 320 220" role="img" aria-label="Two classes with decision boundary, margin and support vectors"></svg>
+    <div class="ctl"><label for="svC">C (penalty for errors)</label><input type="range" id="svC" min="-1" max="2" step="0.25" value="0"><output id="svCO"></output></div>
+    <div class="stats"><span>C <b id="svCv"></b></span><span>Support Vectors <b id="svN"></b></span><span>Margin width <b id="svM"></b></span><span>Accuracy <b id="svA"></b></span></div>
+    <p class="hint" id="svMsg">&nbsp;</p>
+    <p class="hint">Solid line = decision boundary, dashed = edge of the margin. Thick rings = support vectors: only they determine the line.</p>
+  </div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Decision tree</h4>
   <p>A chain of yes/no questions. At each node the question that best separates the classes is chosen (measure: Gini or information gain), until the leaves are «pure» or the maximum depth is reached. Easy to read, but a deep tree memorises the training data. Countermeasure: limit <code>max_depth</code> or prune.</p>
   <p>A decision tree needs <b>no linear regression</b> and no sigmoid function: it does not estimate weights but splits the data with thresholds on single features. It is therefore an <b>alternative</b> to logistic regression, not a replacement. Advantages: non-linear relationships, no feature scaling needed. Disadvantages: the boundaries are axis-parallel (step-shaped), deep trees overfit quickly, and the probabilities from the leaves are coarse.</p>
   <p class="note"><b>With the 10 apartments:</b> At the start, 5 expensive and 5 non-expensive apartments are mixed (Gini = 0.5, maximally impure). The best question is «More than 74 m²?»: on the left end up 5 non-expensive, on the right 5 expensive; both leaves are pure straight away (Gini = 0). A single split is enough, the tree has depth 1. The SVM also places its boundary exactly in the middle (74 m²), logistic regression roughly there (between 70 and 78 m²), just by a different route.</p>
+  <div class="demo" id="dtDemo">
+    <div class="tag">Demo</div><h4>Decision tree: effect of depth</h4>
+    <svg class="plot" id="dtSvg" viewBox="0 0 320 220" role="img" aria-label="Rectangles of the tree with split lines and training points"></svg>
+    <div class="ctl"><label for="dtD">Maximum depth</label><input type="range" id="dtD" min="1" max="8" step="1" value="2"><output id="dtDO"></output></div>
+    <svg class="plot" id="dtTree" viewBox="0 0 320 175" role="img" aria-label="The tree as a diagram: questions in the nodes, classes in the leaves" style="margin-top:10px"></svg>
+    <svg class="plot" id="dtCurve" viewBox="0 0 320 125" role="img" aria-label="Training and test accuracy for depths 1 to 8" style="margin-top:10px"></svg>
+    <div class="stats"><span>Leaves <b id="dtL"></b></span><span>Training accuracy <b id="dtTr"></b></span><span>Test accuracy (new points) <b id="dtTe"></b></span></div>
+    <p class="hint" id="dtMsg">&nbsp;</p>
+    <p class="hint">Top: every question is a line, every region a leaf. The stronger the colour, the purer the leaf. Middle: the same tree as a diagram (question in the node, square = leaf, complete down to the chosen depth). Bottom: training (blue) always rises, test (orange) does not. Same data as for kNN.</p>
+  </div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Neural networks</h4>
   <p>Layers of artificial neurons with weighted connections, trained by backpropagation (gradient descent across all layers). With very many layers it is called deep learning, which comes in the next module.</p>
   <p class="note"><b>With the 10 apartments:</b> A single neuron with sigmoid, <code>P(expensive) = sigmoid(w·m² + b)</code>, <i>is</i> the logistic regression from above. You do not need more layers here, because the classes can be separated by one split at 74 m². More layers only pay off for patterns that no single boundary can describe.</p>
 
+  <div class="demo" id="nnDemo">
+    <div class="tag">Demo</div><h4>Neural network: watching it learn neuron by neuron</h4>
+    <div class="btnrow"><button class="pri" id="nnD1">Circle</button><button id="nnD2">XOR</button><button id="nnD3">Two groups</button></div>
+    <svg class="plot" id="nnSvg" viewBox="0 0 320 220" role="img" aria-label="Decision region of the network with training points"></svg>
+    <div class="ctl"><label for="nnH">Neurons in the hidden layer</label><input type="range" id="nnH" min="1" max="8" step="1" value="4"><output id="nnHO"></output></div>
+    <div class="btnrow"><button class="pri" id="nnPlay">Start training</button><button id="nnStep">+100 rounds</button><button id="nnReset">Reset</button></div>
+    <svg class="plot" id="nnNeu" viewBox="0 0 320 150" role="img" aria-label="Each hidden neuron with its own boundary" style="margin-top:10px"></svg>
+    <svg class="plot" id="nnLoss" viewBox="0 0 320 120" role="img" aria-label="Training and test loss over the training rounds" style="margin-top:10px"></svg>
+    <div class="stats"><span>Round (epoch) <b id="nnEp"></b></span><span>Training accuracy <b id="nnTr"></b></span><span>Test accuracy (new points) <b id="nnTe"></b></span><span>Loss (Train / Test) <b id="nnLs"></b></span></div>
+    <p class="hint" id="nnMsg">&nbsp;</p>
+    <p class="hint">Top: the decision region of the whole network. Middle: each neuron looks at the plane on its own (blue = positive activation, orange = negative); in brackets its weight towards the output. The network combines these simple pictures into the shape above. Bottom: the loss (error measure) falls while the network learns. «Two groups» needs just one neuron, «Circle» and XOR need several.</p>
+  </div>
   <h3>6 · Ensembles: many weak models make a strong one</h3>
   <p>A single model makes mistakes, and a deep tree even memorises the training data. The idea of ensembles: take <b>many simple trees</b> instead of one big one and combine them. There are two ways, and the difference is the key question of this section: do the trees work <i>side by side</i> or <i>one after another</i>?</p>
   <div class="grid2">

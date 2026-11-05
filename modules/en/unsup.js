@@ -309,6 +309,15 @@ dendrogram(Z)
 labels = fcluster(Z, t=3, criterion="maxclust")   # 3 clusters</code></pre>
   <p class="note">Small decisions with big consequences: standardising, distance measure, linkage and number of clusters. Change only one at a time and compare.</p>
 
+  <div class="demo" id="hcDemo">
+    <div class="tag">Demo</div><h4>Hierarchical clustering: linkage and cut</h4>
+    <svg class="plot" id="hcSvg" viewBox="0 0 320 220" role="img" aria-label="24 points in groups, coloured by the chosen number of clusters"></svg>
+    <div class="btnrow"><button id="hcL1">Single</button><button id="hcL2">Complete</button><button id="hcL3">Average</button><button class="pri" id="hcL4">Ward</button></div>
+    <div class="ctl"><label for="hcK">Number of clusters (cut)</label><input type="range" id="hcK" min="1" max="8" step="1" value="3"><output id="hcKO"></output></div>
+    <div class="stats"><span>Clusters <b id="hcN"></b></span><span>last merge at <b id="hcLast"></b></span><span>next merge at <b id="hcNext"></b></span></div>
+    <p class="hint" id="hcMsg">&nbsp;</p>
+    <p class="hint">The numbers are distances in the picture (unit: 1 = width). If the distance of the next merge jumps, the cut before it makes sense: that is exactly the gap in the dendrogram.</p>
+  </div>
   <h3 id="unsup-dbscan">6 · Other cluster shapes: DBSCAN and GMM</h3>
   <p>k-Means and Ward look for round groups of similar size. If the groups are curved (moons in the demo above), have different densities or there is noise, other methods help.</p>
   <h4>DBSCAN: groups by density</h4>
@@ -324,12 +333,29 @@ labels = DBSCAN(eps=0.2, min_samples=5).fit_predict(X_s)   # -1 = noise
 (labels == -1).mean()                                        # share of noise
 labels = HDBSCAN(min_cluster_size=15, min_samples=5).fit_predict(X_s)</code></pre>
   <p class="note">Careful: <code>silhouette_score</code> treats noise points (label −1) as a cluster of their own. Drop them first (<code>m = labels != -1; silhouette_score(X_s[m], labels[m])</code>) and always also state how many points were assigned to a cluster at all.</p>
+  <div class="demo" id="dbDemo">
+    <div class="tag">Demo</div><h4>DBSCAN: eps and min_samples</h4>
+    <svg class="plot" id="dbSvg" viewBox="0 0 320 220" role="img" aria-label="Two moons with noise, coloured by DBSCAN cluster"></svg>
+    <div class="ctl"><label for="dbE">eps</label><input type="range" id="dbE" min="0.05" max="0.5" step="0.01" value="0.2"><output id="dbEO"></output></div>
+    <div class="ctl"><label for="dbM">min_samples</label><input type="range" id="dbM" min="2" max="12" step="1" value="5"><output id="dbMO"></output></div>
+    <div class="stats"><span>Clusters <b id="dbN"></b></span><span>Noise points <b id="dbNoise"></b></span><span>Core-Punkte <b id="dbCore"></b></span></div>
+    <p class="hint" id="dbMsg">&nbsp;</p>
+    <p class="hint">Solid dot = core, pale dot = border, grey cross = noise (label −1). The dashed circle shows how far eps reaches.</p>
+  </div>
   <h4 id="unsup-gmm">Gaussian Mixture Model (GMM): probabilities instead of a fixed assignment</h4>
   <p>A GMM describes each cluster as a bell curve, in the 2D picture as an ellipse. Each point gets a <b>probability per cluster</b>; the values of a row add up to 1. A row like 0.60 / 0.35 / 0.05 shows: the point lies between two groups, the assignment is uncertain. You choose the number of components, for example, with the <b>BIC</b> (lower is better).</p>
   <pre><code>from sklearn.mixture import GaussianMixture
 gmm = GaussianMixture(n_components=3, covariance_type="full", n_init=5, random_state=0).fit(X_s)
 gmm.predict_proba(X_s)     # probability per cluster, row sum 1
 gmm.bic(X_s)               # compare for several n_components</code></pre>
+  <div class="demo" id="gmDemo">
+    <div class="tag">Demo</div><h4>GMM: number of components</h4>
+    <svg class="plot" id="gmSvg" viewBox="0 0 320 220" role="img" aria-label="60 points with ellipses of the Gaussian components"></svg>
+    <div class="ctl"><label for="gmK">Components (n_components)</label><input type="range" id="gmK" min="1" max="5" step="1" value="3"><output id="gmKO"></output></div>
+    <div class="stats"><span>Components <b id="gmN"></b></span><span>Log-Likelihood <b id="gmLL"></b></span><span>BIC <b id="gmBic"></b></span></div>
+    <p class="hint" id="gmMsg">&nbsp;</p>
+    <p class="hint">Each ellipse holds about 95 % of a component. Pale points lie between two components: the model is unsure. The BIC punishes too many components, smaller is better.</p>
+  </div>
   <div class="tablewrap"><table>
     <tr><th>Method</th><th>Specify k?</th><th>Cluster shape</th><th>Noise</th><th>Good for</th></tr>
     <tr><td>k-Means</td><td>yes</td><td>round, similar size</td><td>no</td><td>quick start, large data</td></tr>
@@ -366,6 +392,15 @@ top20 = score.argsort()[::-1][:20]       # as many as can be checked</code></pre
   </ul>
   <div class="falle"><b>Pitfall</b><p>The «top 20» always deliver 20 cases, even on a day without any real anomaly. And when normal behaviour changes (all payments become larger or later), the old model suddenly reports many false alarms. Readjust reference values and model regularly.</p></div>
 
+  <div class="demo" id="ifDemo">
+    <div class="tag">Demo</div><h4>Isolation Forest: trees and contamination</h4>
+    <svg class="plot" id="ifSvg" viewBox="0 0 320 220" role="img" aria-label="Point cloud with a few outliers, larger = more unusual"></svg>
+    <div class="ctl"><label for="ifT">Number of trees (n_estimators)</label><input type="range" id="ifT" min="1" max="100" step="1" value="25"><output id="ifTO"></output></div>
+    <div class="ctl"><label for="ifC">contamination</label><input type="range" id="ifC" min="1" max="15" step="1" value="5"><output id="ifCO"></output></div>
+    <div class="stats"><span>Flagged <b id="ifF"></b></span><span>Of which real outliers (of 6) <b id="ifH"></b></span><span>highest score <b id="ifS"></b></span></div>
+    <p class="hint" id="ifMsg">&nbsp;</p>
+    <p class="hint">A large point has a high score: it could be isolated with few random cuts. Red ring = flagged. With few trees the scores still vary a lot.</p>
+  </div>
   <h3 id="unsup-dimred">9 · Dimensionality reduction</h3>
   <p>Real datasets often have hundreds of features. This makes training slow and interpretation hard, and leads to the <b>curse of dimensionality</b>: in many dimensions all points lie far apart, the space is «empty», and predictions for new points become unreliable.</p>
   <div class="tablewrap"><table>
