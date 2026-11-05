@@ -338,6 +338,15 @@ dendrogram(Z)
 labels = fcluster(Z, t=3, criterion="maxclust")   # 3 Cluster</code></pre>
   <p class="note">Kleine Entscheide mit grossen Folgen: Standardisieren, Distanzmass, Linkage und Clusterzahl. Ändere jeweils nur eines und vergleiche.</p>
 
+  <div class="demo" id="hcDemo">
+    <div class="tag">Demo</div><h4>Hierarchisches Clustering: Linkage und Schnitt</h4>
+    <svg class="plot" id="hcSvg" viewBox="0 0 320 220" role="img" aria-label="24 Punkte in Gruppen, gefärbt nach der Zahl der gewählten Cluster"></svg>
+    <div class="btnrow"><button id="hcL1">Single</button><button id="hcL2">Complete</button><button id="hcL3">Average</button><button class="pri" id="hcL4">Ward</button></div>
+    <div class="ctl"><label for="hcK">Anzahl Cluster (Schnitt)</label><input type="range" id="hcK" min="1" max="8" step="1" value="3"><output id="hcKO"></output></div>
+    <div class="stats"><span>Cluster <b id="hcN"></b></span><span>letzte Verschmelzung bei <b id="hcLast"></b></span><span>nächste bei <b id="hcNext"></b></span></div>
+    <p class="hint" id="hcMsg">&nbsp;</p>
+    <p class="hint">Die Zahlen sind Abstände im Bild (Einheit: 1 = Breite). Springt der Abstand der nächsten Verschmelzung stark, ist der Schnitt davor sinnvoll: genau das zeigt die Lücke im Dendrogramm.</p>
+  </div>
   <h3 id="unsup-dbscan">6 · Andere Clusterformen: DBSCAN und GMM</h3>
   <p>k-Means und Ward suchen runde, ähnlich grosse Gruppen. Sind die Gruppen gekrümmt (Monde in der Demo oben), verschieden dicht oder gibt es Rauschen, helfen andere Verfahren.</p>
   <h4>DBSCAN: Gruppen über die Dichte</h4>
@@ -353,12 +362,29 @@ labels = DBSCAN(eps=0.2, min_samples=5).fit_predict(X_s)   # -1 = Rauschen
 (labels == -1).mean()                                        # Anteil Rauschen
 labels = HDBSCAN(min_cluster_size=15, min_samples=5).fit_predict(X_s)</code></pre>
   <p class="note">Achtung: <code>silhouette_score</code> behandelt Rauschpunkte (Label −1) wie einen eigenen Cluster. Lass sie vorher weg (<code>m = labels != -1; silhouette_score(X_s[m], labels[m])</code>) und gib immer auch an, wie viele Punkte überhaupt einem Cluster zugeordnet wurden.</p>
+  <div class="demo" id="dbDemo">
+    <div class="tag">Demo</div><h4>DBSCAN: eps und min_samples</h4>
+    <svg class="plot" id="dbSvg" viewBox="0 0 320 220" role="img" aria-label="Zwei Monde mit Rauschen, gefärbt nach DBSCAN-Cluster"></svg>
+    <div class="ctl"><label for="dbE">eps</label><input type="range" id="dbE" min="0.05" max="0.5" step="0.01" value="0.2"><output id="dbEO"></output></div>
+    <div class="ctl"><label for="dbM">min_samples</label><input type="range" id="dbM" min="2" max="12" step="1" value="5"><output id="dbMO"></output></div>
+    <div class="stats"><span>Cluster <b id="dbN"></b></span><span>Rauschpunkte <b id="dbNoise"></b></span><span>Core-Punkte <b id="dbCore"></b></span></div>
+    <p class="hint" id="dbMsg">&nbsp;</p>
+    <p class="hint">Voller Punkt = Core, blasser Punkt = Rand (Border), graues Kreuz = Rauschen (Label −1). Der gestrichelte Kreis zeigt, wie weit eps reicht.</p>
+  </div>
   <h4 id="unsup-gmm">Gaussian Mixture Model (GMM): Wahrscheinlichkeiten statt fester Zuordnung</h4>
   <p>Ein GMM beschreibt jeden Cluster als Glockenkurve, im 2D-Bild als Ellipse. Jeder Punkt bekommt eine <b>Wahrscheinlichkeit pro Cluster</b>, die Werte einer Zeile ergeben zusammen 1. Eine Zeile wie 0,60 / 0,35 / 0,05 zeigt: Der Punkt liegt zwischen zwei Gruppen, die Zuordnung ist unsicher. Die Anzahl Komponenten wählst du zum Beispiel mit dem <b>BIC</b> (tiefer ist besser).</p>
   <pre><code>from sklearn.mixture import GaussianMixture
 gmm = GaussianMixture(n_components=3, covariance_type="full", n_init=5, random_state=0).fit(X_s)
 gmm.predict_proba(X_s)     # Wahrscheinlichkeit je Cluster, Zeilensumme 1
 gmm.bic(X_s)               # für mehrere n_components vergleichen</code></pre>
+  <div class="demo" id="gmDemo">
+    <div class="tag">Demo</div><h4>GMM: Anzahl Komponenten</h4>
+    <svg class="plot" id="gmSvg" viewBox="0 0 320 220" role="img" aria-label="60 Punkte mit Ellipsen der Gauss-Komponenten"></svg>
+    <div class="ctl"><label for="gmK">Komponenten (n_components)</label><input type="range" id="gmK" min="1" max="5" step="1" value="3"><output id="gmKO"></output></div>
+    <div class="stats"><span>Komponenten <b id="gmN"></b></span><span>Log-Likelihood <b id="gmLL"></b></span><span>BIC <b id="gmBic"></b></span></div>
+    <p class="hint" id="gmMsg">&nbsp;</p>
+    <p class="hint">Die Ellipsen umfassen je etwa 95 % einer Komponente. Blasse Punkte liegen zwischen zwei Komponenten: das Modell ist unsicher. Der BIC bestraft zu viele Komponenten, kleiner ist besser.</p>
+  </div>
   <div class="tablewrap"><table>
     <tr><th>Verfahren</th><th>k vorgeben?</th><th>Clusterform</th><th>Rauschen</th><th>Gut für</th></tr>
     <tr><td>k-Means</td><td>ja</td><td>rund, ähnlich gross</td><td>nein</td><td>schneller Start, grosse Daten</td></tr>
@@ -395,6 +421,15 @@ top20 = score.argsort()[::-1][:20]       # so viele, wie geprüft werden können
   </ul>
   <div class="falle"><b>Falle</b><p>Die «Top 20» liefern immer 20 Fälle, auch an einem Tag ohne echte Auffälligkeit. Und wenn sich das normale Verhalten ändert (alle Zahlungen werden grösser oder später), meldet das alte Modell plötzlich viele Fehlalarme. Referenzwerte und Modell regelmässig neu anpassen.</p></div>
 
+  <div class="demo" id="ifDemo">
+    <div class="tag">Demo</div><h4>Isolation Forest: Bäume und Contamination</h4>
+    <svg class="plot" id="ifSvg" viewBox="0 0 320 220" role="img" aria-label="Punktwolke mit einzelnen Ausreissern, grösser = ungewöhnlicher"></svg>
+    <div class="ctl"><label for="ifT">Anzahl Bäume (n_estimators)</label><input type="range" id="ifT" min="1" max="100" step="1" value="25"><output id="ifTO"></output></div>
+    <div class="ctl"><label for="ifC">contamination</label><input type="range" id="ifC" min="1" max="15" step="1" value="5"><output id="ifCO"></output></div>
+    <div class="stats"><span>Markiert <b id="ifF"></b></span><span>Davon echte Ausreisser (von 6) <b id="ifH"></b></span><span>höchster Score <b id="ifS"></b></span></div>
+    <p class="hint" id="ifMsg">&nbsp;</p>
+    <p class="hint">Ein grosser Punkt hat einen hohen Score, er liess sich mit wenigen zufälligen Schnitten isolieren. Roter Ring = markiert. Mit wenigen Bäumen schwanken die Scores noch stark.</p>
+  </div>
   <h3 id="unsup-dimred">9 · Dimensionsreduktion</h3>
   <p>Echte Datensätze haben oft Hunderte Merkmale. Das macht Training langsam, Interpretation schwer und führt zum <b>Fluch der Dimensionen</b>: In vielen Dimensionen liegen alle Punkte weit auseinander, der Raum ist «leer», und Vorhersagen für neue Punkte werden unzuverlässig.</p>
   <div class="tablewrap"><table>
@@ -598,6 +633,83 @@ trustworthiness(X_s, Z, n_neighbors=10)  # 1 = Nachbarn gut erhalten</code></pre
         box.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
           box.querySelectorAll('button').forEach(x=>x.className=x===b?'pri':'');msg.textContent=C[+b.dataset.i][1]});
       })();
+
+      // Demo 5: hierarchical clustering, linkage and cut (agglomerative, computed in the browser)
+      (function(){
+        const r=mulberry32(4),pts=[];const blob=(cx,cy,sx,sy,n)=>{for(let i=0;i<n;i++)pts.push([cx+sx*gauss(r),cy+sy*gauss(r)])};
+        blob(0.2,0.3,0.05,0.05,8);blob(0.7,0.3,0.05,0.05,8);blob(0.45,0.78,0.13,0.035,8);
+        const n=pts.length,px=p=>30+p[0]*250,py=p=>212-p[1]*250;
+        const dd=(a,b)=>Math.sqrt(d2(a,b));
+        function merges(link){let cl=pts.map((p,i)=>({m:[i],c:[p[0],p[1]]}));const out=[];
+          const dist=(A,B)=>{if(link==='ward'){const k=A.m.length*B.m.length/(A.m.length+B.m.length);return Math.sqrt(2*k*d2(A.c,B.c))}
+            let mn=1e9,mx=0,sm=0;A.m.forEach(i=>B.m.forEach(j=>{const d=dd(pts[i],pts[j]);mn=Math.min(mn,d);mx=Math.max(mx,d);sm+=d}));return link==='single'?mn:link==='complete'?mx:sm/(A.m.length*B.m.length)};
+          while(cl.length>1){let b=null;for(let i=0;i<cl.length;i++)for(let j=i+1;j<cl.length;j++){const d=dist(cl[i],cl[j]);if(!b||d<b.d)b={i:i,j:j,d:d}}
+            const A=cl[b.i],B=cl[b.j],m=A.m.concat(B.m),c=[0,0];m.forEach(i=>{c[0]+=pts[i][0]/m.length;c[1]+=pts[i][1]/m.length});cl.splice(b.j,1);cl.splice(b.i,1,{m:m,c:c});out.push({d:b.d,cl:cl.map(x=>x.m.slice())})}
+          return out}
+        const names=['single','complete','average','ward'],M={};names.forEach(k=>{M[k]=merges(k)});let link='ward';
+        function draw(){const k=+$('hcK').value;$('hcKO').textContent=k;const mg=M[link];
+          const part=k>=n?pts.map((p,i)=>[i]):mg[n-k-1].cl;part.sort((a,b)=>b.length-a.length);const lab=new Array(n);part.forEach((c,ci)=>c.forEach(i=>{lab[i]=ci}));
+          let s='';pts.forEach((p,i)=>{s+='<circle cx="'+px(p)+'" cy="'+py(p)+'" r="5" style="fill:'+COL[lab[i]%COL.length]+';stroke:var(--fg);stroke-width:1"/>'});
+          $('hcSvg').innerHTML=s;$('hcN').textContent=k;
+          $('hcLast').textContent=k>=n?'–':fmt(mg[n-k-1].d,2);$('hcNext').textContent=k>1?fmt(mg[n-k].d,2):'–';
+          const jump=k>1&&k<n?mg[n-k].d/mg[n-k-1].d:0;
+          $('hcMsg').textContent=k===1?LernApp.t('Ein Cluster: alles ist verschmolzen. Die letzte Verschmelzung kostet den grössten Abstand.','One cluster: everything is merged. The last merge costs the largest distance.'):jump>1.6?LernApp.t('Die nächste Verschmelzung ist viel teurer als die letzte: Hier liegt eine natürliche Grenze, k = '+k+' ist plausibel.','The next merge is much more expensive than the last: there is a natural boundary here, k = '+k+' is plausible.'):LernApp.t('Die Abstände wachsen hier kaum: Der Schnitt trennt Punkte, die eigentlich zusammengehören.','The distances hardly grow here: the cut separates points that belong together.')}
+        names.forEach((nm,i)=>{$('hcL'+(i+1)).addEventListener('click',()=>{link=nm;names.forEach((_,j)=>{$('hcL'+(j+1)).className=j===i?'pri':''});draw()})});
+        $('hcK').addEventListener('input',draw);draw()})();
+
+      // Demo 6a: DBSCAN on two moons with noise
+      (function(){
+        const r=mulberry32(9),pts=[];for(let i=0;i<80;i++){const t=Math.PI*i/79;pts.push([Math.cos(t)+0.05*gauss(r),Math.sin(t)+0.05*gauss(r)]);pts.push([1-Math.cos(t)+0.05*gauss(r),0.5-Math.sin(t)+0.05*gauss(r)])}
+        for(let i=0;i<10;i++)pts.push([-1.2+3.4*r(),-0.7+1.9*r()]);
+        const n=pts.length,sc=300/3.4,px=p=>10+(p[0]+1.2)*sc,py=p=>210-(p[1]+0.7)*sc;
+        function run(eps,ms){const nb=pts.map((p,i)=>{const a=[];pts.forEach((q,j)=>{if(Math.sqrt(d2(p,q))<=eps)a.push(j)});return a}),core=nb.map(a=>a.length>=ms),lab=new Array(n).fill(-1);let c=0;
+          for(let i=0;i<n;i++){if(!core[i]||lab[i]>=0)continue;const st=[i];lab[i]=c;while(st.length){const u=st.pop();if(!core[u])continue;nb[u].forEach(v=>{if(lab[v]<0){lab[v]=c;st.push(v)}})}c++}
+          return{lab:lab,core:core,c:c}}
+        function draw(){const eps=+$('dbE').value,ms=+$('dbM').value;$('dbEO').textContent=fmt(eps,2);$('dbMO').textContent=ms;const m=run(eps,ms);let s='';
+          s+='<circle cx="'+px(pts[0])+'" cy="'+py(pts[0])+'" r="'+(eps*sc)+'" style="fill:none;stroke:var(--fg);stroke-width:1;stroke-dasharray:4 3"/>';
+          let noise=0,cores=0;pts.forEach((p,i)=>{if(m.lab[i]<0){noise++;s+='<path d="M'+(px(p)-3.5)+' '+(py(p)-3.5)+' L'+(px(p)+3.5)+' '+(py(p)+3.5)+' M'+(px(p)+3.5)+' '+(py(p)-3.5)+' L'+(px(p)-3.5)+' '+(py(p)+3.5)+'" style="stroke:var(--muted);stroke-width:1.8"/>'}
+            else{if(m.core[i])cores++;s+='<circle cx="'+px(p)+'" cy="'+py(p)+'" r="3.8" style="fill:'+COL[m.lab[i]%COL.length]+';fill-opacity:'+(m.core[i]?1:0.4)+';stroke:var(--fg);stroke-width:1"/>'}});
+          $('dbSvg').innerHTML=s;$('dbN').textContent=m.c;$('dbNoise').textContent=noise;$('dbCore').textContent=cores;
+          $('dbMsg').textContent=m.c===0?LernApp.t('Alles ist Rauschen: eps ist zu klein oder min_samples zu gross, kein Punkt hat genug Nachbarn.','Everything is noise: eps is too small or min_samples too large, no point has enough neighbours.'):m.c===1&&noise<12?LernApp.t('Ein einziger Cluster: eps ist so gross, dass die beiden Monde zusammenwachsen.','A single cluster: eps is so large that the two moons grow together.'):m.c>2?LernApp.t('Zu viele kleine Cluster: eps ist zu klein oder min_samples zu gross, die Monde zerfallen in Stücke.','Too many small clusters: eps is too small or min_samples too large, the moons break into pieces.'):LernApp.t('Zwei Monde gefunden, einzelne Streupunkte sind als Rauschen markiert.','Two moons found, single stray points are marked as noise.')}
+        $('dbE').addEventListener('input',draw);$('dbM').addEventListener('input',draw);draw()})();
+
+      // Demo 6b: Gaussian mixture model fitted with EM for k = 1..5 (computed once)
+      (function(){
+        const r=mulberry32(12),pts=[];function blob(cx,cy,a,b,ang,n){for(let i=0;i<n;i++){const u=a*gauss(r),v=b*gauss(r);pts.push([cx+u*Math.cos(ang)-v*Math.sin(ang),cy+u*Math.sin(ang)+v*Math.cos(ang)])}}
+        blob(0.25,0.3,0.1,0.035,0.5,20);blob(0.72,0.32,0.09,0.04,-0.6,20);blob(0.5,0.75,0.11,0.035,0.05,20);
+        const n=pts.length,SC=215,sx=x=>50+x*SC,sy=y=>212-y*SC;
+        function pdf(p,m,c){const a=c[0]+1e-4,b=c[1],d=c[2]+1e-4,det=a*d-b*b,dx=p[0]-m[0],dy=p[1]-m[1],q=(d*dx*dx-2*b*dx*dy+a*dy*dy)/det;return Math.exp(-0.5*q)/(2*Math.PI*Math.sqrt(det))}
+        function fit(k){const mu=[pts[0].slice()];while(mu.length<k){let bi=0,bd=-1;pts.forEach((p,i)=>{const d=Math.min.apply(null,mu.map(m=>d2(p,m)));if(d>bd){bd=d;bi=i}});mu.push(pts[bi].slice())}
+          const cov=mu.map(()=>[0.02,0,0.02]),w=mu.map(()=>1/k);let R=null,ll=0;
+          for(let it=0;it<80;it++){ll=0;R=pts.map(p=>{const pr=mu.map((m,j)=>w[j]*pdf(p,m,cov[j])),s=pr.reduce((a,b)=>a+b,0)||1e-300;ll+=Math.log(s);return pr.map(v=>v/s)});
+            for(let j=0;j<k;j++){let nj=0,mx=0,my=0;R.forEach((q,i)=>{nj+=q[j];mx+=q[j]*pts[i][0];my+=q[j]*pts[i][1]});nj=Math.max(nj,1e-9);mx/=nj;my/=nj;let a=0,b=0,d=0;R.forEach((q,i)=>{const dx=pts[i][0]-mx,dy=pts[i][1]-my;a+=q[j]*dx*dx;b+=q[j]*dx*dy;d+=q[j]*dy*dy});mu[j]=[mx,my];cov[j]=[a/nj,b/nj,d/nj];w[j]=nj/n}}
+          return{mu:mu,cov:cov,R:R,ll:ll,bic:(6*k-1)*Math.log(n)-2*ll}}
+        const F=[null,1,2,3,4,5].map((k,i)=>i?fit(k):null);let best=1;for(let k=2;k<=5;k++)if(F[k].bic<F[best].bic)best=k;
+        function draw(){const k=+$('gmK').value;$('gmKO').textContent=k;const m=F[k];let s='';
+          m.cov.forEach((c,j)=>{const a=c[0]+1e-4,b=c[1],d=c[2]+1e-4,h=(a+d)/2,q=Math.sqrt(((a-d)/2)*((a-d)/2)+b*b),l1=h+q,l2=Math.max(h-q,1e-8),ang=0.5*Math.atan2(2*b,a-d)*180/Math.PI,cx=sx(m.mu[j][0]),cy=sy(m.mu[j][1]);
+            s+='<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+(2*Math.sqrt(l1)*SC)+'" ry="'+(2*Math.sqrt(l2)*SC)+'" transform="rotate('+(-ang)+' '+cx+' '+cy+')" style="fill:'+COL[j%COL.length]+';fill-opacity:.12;stroke:'+COL[j%COL.length]+';stroke-width:2"/>'});
+          pts.forEach((p,i)=>{let bj=0;m.R[i].forEach((v,j)=>{if(v>m.R[i][bj])bj=j});s+='<circle cx="'+sx(p[0])+'" cy="'+sy(p[1])+'" r="3.8" style="fill:'+COL[bj%COL.length]+';fill-opacity:'+(0.25+0.75*m.R[i][bj])+';stroke:var(--fg);stroke-width:.8"/>'});
+          $('gmSvg').innerHTML=s;$('gmN').textContent=k;$('gmLL').textContent=fmt(m.ll,1);$('gmBic').textContent=fmt(m.bic,1);
+          $('gmMsg').textContent=k===best?LernApp.t('Kleinster BIC bei '+k+' Komponenten: Hier passt das Modell am besten, ohne unnötig komplex zu sein.','Smallest BIC at '+k+' components: here the model fits best without being needlessly complex.'):k<best?LernApp.t('Zu wenige Komponenten: eine Ellipse muss mehrere Gruppen abdecken. Der BIC ist deutlich schlechter.','Too few components: one ellipse has to cover several groups. The BIC is clearly worse.'):LernApp.t('Mehr Komponenten steigern die Log-Likelihood, aber der BIC bestraft die zusätzlichen Parameter.','More components raise the log-likelihood, but the BIC punishes the extra parameters.')}
+        $('gmK').addEventListener('input',draw);draw()})();
+
+      // Demo 8: Isolation Forest (100 random trees built once; the slider uses the first T)
+      (function(){
+        const r=mulberry32(2),P=[];for(let i=0;i<120;i++)P.push([0.5+0.09*gauss(r),0.5+0.09*gauss(r)]);
+        const out=[[0.1,0.9],[0.92,0.12],[0.9,0.85],[0.12,0.12],[0.78,0.97],[0.2,0.55]];out.forEach(o=>P.push(o));
+        const n=P.length,W=320,H=220,sx=x=>10+x*300,sy=y=>H-10-y*200,psi=64,cf=m=>m>2?2*(Math.log(m-1)+0.5772)-2*(m-1)/m:m===2?1:0;
+        function itree(idx,d,q){if(d>=6||idx.length<=1)return{n:idx.length};const f=q()<0.5?0:1;let lo=1e9,hi=-1e9;idx.forEach(i=>{lo=Math.min(lo,P[i][f]);hi=Math.max(hi,P[i][f])});if(lo===hi)return{n:idx.length};
+          const t=lo+q()*(hi-lo);return{f:f,t:t,l:itree(idx.filter(i=>P[i][f]<t),d+1,q),r:itree(idx.filter(i=>P[i][f]>=t),d+1,q)}}
+        const len=(nd,p,d)=>nd.f===undefined?d+cf(nd.n):len(p[nd.f]<nd.t?nd.l:nd.r,p,d+1);
+        const PL=[];for(let t=0;t<100;t++){const q=mulberry32(500+t),all=P.map((_,i)=>i);for(let i=all.length-1;i>0;i--){const j=Math.floor(q()*(i+1));const x=all[i];all[i]=all[j];all[j]=x}
+          const tree=itree(all.slice(0,psi),0,q);PL.push(P.map(p=>len(tree,p,0)))}
+        function draw(){const T=+$('ifT').value,C=+$('ifC').value;$('ifTO').textContent=T;$('ifCO').textContent=C+' %';
+          const sc=P.map((_,i)=>{let m=0;for(let t=0;t<T;t++)m+=PL[t][i];return Math.pow(2,-(m/T)/cf(psi))}),order=sc.map((v,i)=>i).sort((a,b)=>sc[b]-sc[a]),k=Math.max(1,Math.round(n*C/100)),flag=new Set(order.slice(0,k));
+          let s='',hits=0,mx=0;sc.forEach(v=>{mx=Math.max(mx,v)});const lo=Math.min.apply(null,sc);
+          P.forEach((p,i)=>{const z=(sc[i]-lo)/(mx-lo+1e-9),fl=flag.has(i);if(fl&&i>=120)hits++;s+='<circle cx="'+sx(p[0])+'" cy="'+sy(p[1])+'" r="'+(2.5+4.5*z)+'" style="fill:'+(fl?'var(--bad)':'var(--accent)')+';fill-opacity:'+(0.35+0.5*z)+';stroke:'+(fl?'var(--bad)':'var(--fg)')+';stroke-width:'+(fl?2:0.6)+'"/>'});
+          $('ifSvg').innerHTML=s;$('ifF').textContent=k;$('ifH').textContent=hits;$('ifS').textContent=fmt(mx,2);
+          $('ifMsg').textContent=T<5?LernApp.t('Mit so wenigen Bäumen ist der Score fast Zufall: Die Markierung wechselt, wenn du den Regler bewegst.','With so few trees the score is almost random: the flagged points change when you move the slider.'):C<4?LernApp.t('Contamination klein: Es werden nur die auffälligsten Punkte markiert, echte Ausreisser können fehlen.','Small contamination: only the most striking points are flagged, real outliers may be missing.'):C>9?LernApp.t('Contamination gross: Es werden viele normale Punkte aus der Wolke mitmarkiert (Fehlalarme).','Large contamination: many normal points from the cloud are flagged too (false alarms).'):LernApp.t('Die markierten Punkte liegen weit vom dichten Kern. Contamination legt fest, wie viele du prüfst.','The flagged points lie far from the dense core. Contamination sets how many you check.')}
+        $('ifT').addEventListener('input',draw);$('ifC').addEventListener('input',draw);draw()})();
 
       // Demo 1: k-means step by step (shared code in assets/demos-kmeans.js)
       KMeansDemo.init('km');
