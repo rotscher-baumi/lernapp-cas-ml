@@ -78,8 +78,11 @@ clf.predict_proba(X_test)    # probabilities per class</code></pre>
   <p>The <b>ROC curve</b> plots, for all thresholds, the hit rate (TPR = Recall) against the false alarm rate (FPR). A perfect model lies at the top left, guessing lies on the diagonal. The <b>AUC</b> is the area under the curve: 1 is perfect, 0.5 is chance.</p>
   <div class="demo" id="thDemo">
     <div class="tag">Demo</div><h4>Threshold, Confusion Matrix and ROC</h4>
-    <p class="hint">20 cases, 10 actually positive, 10 actually negative, with fixed model probabilities. Most cases are clear-cut, only 4 are borderline (between 0.4 and 0.65).</p>
-    <svg class="plot" id="thSvg" viewBox="0 0 320 170" role="img" aria-label="Probabilities of the 20 cases on an axis with threshold"></svg>
+    <p class="hint">Choose how many actual positives and negatives there are (sliders are logarithmic, 1 to 1000). The shape of the model probabilities stays the same: most cases are clear-cut, only a few are borderline (exactly 4 at 10 and 10).</p>
+    <div class="btnrow"><button class="pri" id="thP1">10 : 10 (balanced)</button><button id="thP2">10 : 1000 (rare)</button><button id="thP3">1 : 1000 (very rare)</button></div>
+    <div class="ctl"><label for="thNP">Number of actual positives</label><input type="range" id="thNP" min="0" max="3" step="0.05" value="1"><output id="thNPO"></output></div>
+    <div class="ctl"><label for="thNN">Number of actual negatives</label><input type="range" id="thNN" min="0" max="3" step="0.05" value="1"><output id="thNNO"></output></div>
+    <svg class="plot" id="thSvg" viewBox="0 0 320 170" role="img" aria-label="Probabilities of all cases on one axis with threshold"></svg>
     <div class="ctl"><label for="thT">Threshold</label><input type="range" id="thT" min="0.02" max="0.98" step="0.01" value="0.5"><output id="thTO"></output></div>
     <div class="tablewrap"><table style="min-width:0">
       <tr><th></th><th class="num">says positive</th><th class="num">says negative</th></tr>
@@ -88,15 +91,16 @@ clf.predict_proba(X_test)    # probabilities per class</code></pre>
     </table></div>
     <div class="tablewrap"><table style="min-width:0">
       <tr><th>Metric</th><th>Formula</th><th class="num">with numbers</th><th class="num">Value</th></tr>
-      <tr><td>Accuracy</td><td><code>(TP+TN) / alle</code></td><td class="num" id="thAccF"></td><td class="num b" id="thAcc"></td></tr>
+      <tr><td>Accuracy</td><td><code>(TP+TN) / all</code></td><td class="num" id="thAccF"></td><td class="num b" id="thAcc"></td></tr>
       <tr><td>Precision</td><td><code>TP / (TP+FP)</code></td><td class="num" id="thPreF"></td><td class="num b" id="thPre"></td></tr>
       <tr><td>Recall (TPR)</td><td><code>TP / (TP+FN)</code></td><td class="num" id="thRecF"></td><td class="num b" id="thRec"></td></tr>
       <tr><td>False Alarm Rate (FPR)</td><td><code>FP / (FP+TN)</code></td><td class="num" id="thFprF"></td><td class="num b" id="thFpr"></td></tr>
       <tr><td>F1</td><td><code>2·TP / (2·TP+FP+FN)</code></td><td class="num" id="thF1F"></td><td class="num b" id="thF1"></td></tr>
     </table></div>
-    <div class="stats"><span>AUC <b id="thAuc"></b></span></div>
+    <div class="stats"><span>AUC <b id="thAuc"></b></span><span>Share of positives <b id="thPrev"></b></span><span>Accuracy of «always negative» <b id="thBase"></b></span></div>
+    <p class="hint" id="thMsg">&nbsp;</p>
     <svg class="plot" id="thRoc" viewBox="0 0 320 210" role="img" aria-label="ROC curve with the current threshold point" style="margin-top:12px"></svg>
-    <p class="hint">Top: circle = actually positive, square = actually negative. Everything to the right of the line is predicted as positive. Bottom: the orange point moves along the ROC curve as you slide the threshold: a higher threshold (line to the right) moves it down and to the left, a lower threshold up and to the right.</p>
+    <p class="hint">Top: circle = actually positive, square = actually negative (with many cases only a selection is drawn). Everything to the right of the line is predicted as positive. Bottom: the orange point moves along the ROC curve as you slide the threshold: a higher threshold (line to the right) moves it down and to the left, a lower threshold up and to the right.</p>
   </div>
   <div class="merk"><b>Summary: threshold, ROC, AUC</b><ul>
     <li><b>Threshold:</b> The model gives probabilities; only the threshold turns them into classes. Lower threshold = more Recall, more false alarms.</li>
@@ -143,6 +147,19 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 per class +
 
   <h3 id="klass-modelle">5 · Non-linear classifiers</h3>
   <p>Logistic regression draws a <b>straight</b> boundary. If the classes cannot be separated that cleanly, you need more flexible models.</p>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">What does each model optimise?</h4>
+  <div class="tablewrap"><table>
+    <tr><th>Model</th><th>It optimises …</th><th>How</th></tr>
+    <tr><td><b>Logistic regression</b></td><td>Log loss (cross-entropy)</td><td>Gradient descent on the weights, optionally with regularisation</td></tr>
+    <tr><td><b>kNN</b></td><td>nothing (no training)</td><td>The data is only stored. You choose k and the distance measure via validation.</td></tr>
+    <tr><td><b>Naive Bayes</b></td><td>Likelihood of the training data</td><td>Counting, or mean and spread per class, closed-form formula without iteration</td></tr>
+    <tr><td><b>SVM</b></td><td>Hinge loss + wide margin (small ‖w‖²)</td><td>C weighs errors against the margin. The problem is convex, there is one global optimum.</td></tr>
+    <tr><td><b>Decision tree</b></td><td>Impurity (Gini or entropy)</td><td>Greedy: at each node the split that lowers the impurity the most</td></tr>
+    <tr><td><b>Random Forest</b></td><td>like the tree, per tree</td><td>Bagging: trees on samples, the majority decides. No joint optimisation.</td></tr>
+    <tr><td><b>Boosting</b></td><td>Loss (e.g. log loss) over all trees</td><td>Each new tree follows the gradient of the loss, so it corrects the remaining error</td></tr>
+    <tr><td><b>Neural network</b></td><td>Cross-entropy</td><td>Backpropagation and gradient descent on all weights</td></tr>
+  </table></div>
+  <p class="note"><b>Loss and metric are different things:</b> the model optimises a loss that can be differentiated (log loss, hinge, Gini). Afterwards it is judged with precision, recall, F1 or AUC. These are usually not optimised directly during training. You choose the threshold only afterwards.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">k-nearest neighbours (kNN)</h4>
   <p>For a new point you look for the k nearest training points and take the majority class (for regression the average). There is no training, but prediction is slow with a lot of data. k controls bias and variance: <b>k = 1</b> follows every point (overfitting), <b>k = N</b> predicts the majority class for everyone (underfitting).</p>
   <div class="demo" id="knDemo">

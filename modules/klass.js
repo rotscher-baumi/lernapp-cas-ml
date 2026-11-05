@@ -88,8 +88,11 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
   <p>Die <b>ROC-Kurve</b> trägt für alle Schwellen die Trefferquote (TPR = Recall) gegen die Rate falscher Alarme (FPR) auf. Ein perfektes Modell liegt oben links, Raten liegt auf der Diagonalen. Die <b>AUC</b> ist die Fläche unter der Kurve: 1 ist perfekt, 0,5 ist Zufall.</p>
   <div class="demo" id="thDemo">
     <div class="tag">Demo</div><h4>Schwelle, Confusion Matrix und ROC</h4>
-    <p class="hint">20 Fälle, 10 echt positiv, 10 echt negativ, mit festen Modell-Wahrscheinlichkeiten. Die meisten Fälle sind eindeutig, nur 4 liegen im Grenzbereich (zwischen 0,4 und 0,65).</p>
-    <svg class="plot" id="thSvg" viewBox="0 0 320 170" role="img" aria-label="Wahrscheinlichkeiten der 20 Fälle auf einer Achse mit Schwelle"></svg>
+    <p class="hint">Wähle, wie viele echte Positive und Negative es gibt (Regler logarithmisch, 1 bis 1000). Die Form der Modell-Wahrscheinlichkeiten bleibt gleich: die meisten Fälle sind eindeutig, nur wenige liegen im Grenzbereich (bei 10 und 10 genau 4).</p>
+    <div class="btnrow"><button class="pri" id="thP1">10 : 10 (ausgewogen)</button><button id="thP2">10 : 1000 (selten)</button><button id="thP3">1 : 1000 (sehr selten)</button></div>
+    <div class="ctl"><label for="thNP">Anzahl echt positiv</label><input type="range" id="thNP" min="0" max="3" step="0.05" value="1"><output id="thNPO"></output></div>
+    <div class="ctl"><label for="thNN">Anzahl echt negativ</label><input type="range" id="thNN" min="0" max="3" step="0.05" value="1"><output id="thNNO"></output></div>
+    <svg class="plot" id="thSvg" viewBox="0 0 320 170" role="img" aria-label="Wahrscheinlichkeiten aller Fälle auf einer Achse mit Schwelle"></svg>
     <div class="ctl"><label for="thT">Schwelle</label><input type="range" id="thT" min="0.02" max="0.98" step="0.01" value="0.5"><output id="thTO"></output></div>
     <div class="tablewrap"><table style="min-width:0">
       <tr><th></th><th class="num">sagt positiv</th><th class="num">sagt negativ</th></tr>
@@ -104,9 +107,10 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
       <tr><td>False Alarm Rate (FPR)</td><td><code>FP / (FP+TN)</code></td><td class="num" id="thFprF"></td><td class="num b" id="thFpr"></td></tr>
       <tr><td>F1</td><td><code>2·TP / (2·TP+FP+FN)</code></td><td class="num" id="thF1F"></td><td class="num b" id="thF1"></td></tr>
     </table></div>
-    <div class="stats"><span>AUC <b id="thAuc"></b></span></div>
+    <div class="stats"><span>AUC <b id="thAuc"></b></span><span>Anteil Positive <b id="thPrev"></b></span><span>Accuracy von «immer negativ» <b id="thBase"></b></span></div>
+    <p class="hint" id="thMsg">&nbsp;</p>
     <svg class="plot" id="thRoc" viewBox="0 0 320 210" role="img" aria-label="ROC-Kurve mit aktuellem Schwellenpunkt" style="margin-top:12px"></svg>
-    <p class="hint">Oben: Kreis = echt positiv, Quadrat = echt negativ. Alles rechts der Linie wird als positiv vorhergesagt. Unten: Der orange Punkt wandert beim Schieben der Schwelle auf der ROC-Kurve: Höhere Schwelle (Linie nach rechts) bewegt ihn nach links unten, tiefere Schwelle nach rechts oben.</p>
+    <p class="hint">Oben: Kreis = echt positiv, Quadrat = echt negativ (bei vielen Fällen wird nur eine Auswahl gezeichnet). Alles rechts der Linie wird als positiv vorhergesagt. Unten: Der orange Punkt wandert beim Schieben der Schwelle auf der ROC-Kurve: Höhere Schwelle (Linie nach rechts) bewegt ihn nach links unten, tiefere Schwelle nach rechts oben.</p>
   </div>
   <div class="merk"><b>Zusammenfassung: Schwelle, ROC, AUC</b><ul>
     <li><b>Schwelle:</b> Das Modell liefert Wahrscheinlichkeiten, erst die Schwelle macht daraus Klassen. Tiefere Schwelle = mehr Recall, mehr falsche Alarme.</li>
@@ -153,6 +157,19 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
 
   <h3 id="klass-modelle">5 · Nicht-lineare Klassifikatoren</h3>
   <p>Logistische Regression zieht eine <b>gerade</b> Grenze. Wenn die Klassen nicht so sauber trennbar sind, brauchst du flexiblere Modelle.</p>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Wonach optimiert jedes Modell?</h4>
+  <div class="tablewrap"><table>
+    <tr><th>Modell</th><th>Optimiert wird …</th><th>Wie</th></tr>
+    <tr><td><b>Logistische Regression</b></td><td>Log-Loss (Cross-Entropy)</td><td>Gradient Descent auf den Gewichten, optional mit Regularisierung</td></tr>
+    <tr><td><b>kNN</b></td><td>nichts (kein Training)</td><td>Daten werden nur gespeichert. k und das Distanzmass wählst du über die Validation.</td></tr>
+    <tr><td><b>Naive Bayes</b></td><td>Likelihood der Trainingsdaten</td><td>Zählen bzw. Mittelwert und Streuung je Klasse, geschlossene Formel ohne Iteration</td></tr>
+    <tr><td><b>SVM</b></td><td>Hinge Loss + breite Margin (kleines ‖w‖²)</td><td>C gewichtet Fehler gegen Margin. Das Problem ist konvex, es gibt ein globales Optimum.</td></tr>
+    <tr><td><b>Entscheidungsbaum</b></td><td>Impurity (Gini oder Entropie)</td><td>Gierig: In jedem Knoten der Split, der die Impurity am stärksten senkt</td></tr>
+    <tr><td><b>Random Forest</b></td><td>wie der Baum, je Baum</td><td>Bagging: Bäume auf Stichproben, die Mehrheit entscheidet. Keine gemeinsame Optimierung.</td></tr>
+    <tr><td><b>Boosting</b></td><td>Loss (z. B. Log-Loss) über alle Bäume</td><td>Jeder neue Baum folgt dem Gradienten des Loss, korrigiert also den Restfehler</td></tr>
+    <tr><td><b>Neuronales Netz</b></td><td>Cross-Entropy</td><td>Backpropagation und Gradient Descent auf allen Gewichten</td></tr>
+  </table></div>
+  <p class="note"><b>Loss und Metrik sind verschieden:</b> Das Modell optimiert einen Loss, der sich ableiten lässt (Log-Loss, Hinge, Gini). Beurteilt wird es danach mit Precision, Recall, F1 oder AUC. Diese Werte werden beim Training meist nicht direkt optimiert. Den Threshold wählst du erst danach.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">k-nächste Nachbarn (kNN)</h4>
   <p>Für einen neuen Punkt suchst du die k nächsten Trainingspunkte und nimmst die Mehrheitsklasse (bei Regression den Durchschnitt). Es gibt kein Training, dafür ist die Vorhersage bei vielen Daten langsam. k steuert Bias und Variance: <b>k = 1</b> folgt jedem Punkt (Overfitting), <b>k = N</b> sagt für alle die Mehrheitsklasse (Underfitting).</p>
   <div class="demo" id="knDemo">
@@ -394,36 +411,47 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
           $('lsSvg').innerHTML=s;$('lsCE').textContent=fmt(-Math.log(p),2);$('lsMS').textContent=fmt((1-p)*(1-p),2)}
         $('lsP').addEventListener('input',draw);draw()})();
 
-      // Demo 2: threshold, confusion matrix, ROC
+      // Demo 2: threshold, confusion matrix, ROC (class sizes adjustable; the score shape comes from a 10 + 10 template)
       (function(){
-        const pos=[0.97,0.94,0.91,0.88,0.85,0.82,0.78,0.74,0.58,0.42],neg=[0.62,0.52,0.30,0.26,0.22,0.18,0.14,0.10,0.06,0.03];
-        function counts(t){let tp=0,fn=0,fp=0,tn=0;pos.forEach(p=>p>=t?tp++:fn++);neg.forEach(p=>p>=t?fp++:tn++);return{tp:tp,fn:fn,fp:fp,tn:tn}}
-        const ths=[1.01].concat(pos.concat(neg).sort((a,b)=>b-a)).concat([0]);
-        const roc=ths.map(t=>{const c=counts(t);return[c.fp/neg.length,c.tp/pos.length]});
-        let auc=0;for(let i=1;i<roc.length;i++)auc+=(roc[i][0]-roc[i-1][0])*(roc[i][1]+roc[i-1][1])/2;
-        $('thAuc').textContent=fmt(auc,2);
-        const W=320,H=170,PX=10,sx=p=>PX+p*(W-2*PX);
+        const TPL_P=[0.42,0.58,0.74,0.78,0.82,0.85,0.88,0.91,0.94,0.97],TPL_N=[0.03,0.06,0.10,0.14,0.18,0.22,0.26,0.30,0.52,0.62];
+        function scores(T,n){const o=[];for(let i=0;i<n;i++){const u=Math.min(9,Math.max(0,(i+0.5)/n*10-0.5)),a=Math.floor(u),b=Math.min(9,a+1);o.push(T[a]+(T[b]-T[a])*(u-a))}return o}
+        const ge=(arr,t)=>{let lo=0,hi=arr.length;while(lo<hi){const m=(lo+hi)>>1;if(arr[m]>=t)hi=m;else lo=m+1}return arr.length-lo};
+        let pos=[],neg=[],roc=[],auc=0;
+        function counts(t){const tp=ge(pos,t),fp=ge(neg,t);return{tp:tp,fn:pos.length-tp,fp:fp,tn:neg.length-fp}}
+        function prep(){pos=scores(TPL_P,Math.round(Math.pow(10,+$('thNP').value)));neg=scores(TPL_N,Math.round(Math.pow(10,+$('thNN').value)));
+          const ths=[1.01].concat(pos.concat(neg).sort((a,b)=>b-a)).concat([0]);roc=ths.map(t=>{const c=counts(t);return[c.fp/neg.length,c.tp/pos.length]});
+          auc=0;for(let i=1;i<roc.length;i++)auc+=(roc[i][0]-roc[i-1][0])*(roc[i][1]+roc[i-1][1])/2;
+          $('thNPO').textContent=pos.length;$('thNNO').textContent=neg.length}
+        const W=320,PX=10,sx=p=>PX+p*(W-2*PX);
         const RW=320,RH=210,RX=34,RY=14,rx=v=>RX+v*(RW-RX-14),ry=v=>RH-24-v*(RH-24-RY);
-        function draw(){const t=+$('thT').value;$('thTO').textContent=fmt(t,2);const c=counts(t);
+        function show(arr,max){const st=Math.max(1,Math.ceil(arr.length/max)),o=[];for(let i=0;i<arr.length;i+=st)o.push(arr[i]);return o}
+        function draw(){const t=+$('thT').value;$('thTO').textContent=fmt(t,2);const c=counts(t),total=pos.length+neg.length;
+          const sp=show(pos,200),sn=show(neg,200),many=sp.length>20||sn.length>20,R=many?6:3,sep=many?5:10,rad=many?2.5:5;
           let s='<line class="ax" x1="'+PX+'" y1="85" x2="'+(W-PX)+'" y2="85"/>';
           for(const v of[0,0.5,1])s+='<text class="lbl" x="'+(sx(v)-6)+'" y="165">'+v+'</text>';
-          pos.forEach((p,i)=>{const col=p>=t?'var(--ok)':'var(--bad)';s+='<circle cx="'+sx(p)+'" cy="'+(40+(i%3)*10)+'" r="5" style="fill:'+col+';stroke:var(--fg);stroke-width:1"/>'});
-          neg.forEach((p,i)=>{const col=p>=t?'var(--bad)':'var(--ok)';s+='<rect x="'+(sx(p)-5)+'" y="'+(112+(i%3)*10-5)+'" width="10" height="10" style="fill:'+col+';stroke:var(--fg);stroke-width:1"/>'});
-          s+='<text class="lbl" x="'+PX+'" y="18">'+LernApp.t('echt positiv (Kreis)','actually positive (circle)')+'</text><text class="lbl" x="'+PX+'" y="150">'+LernApp.t('echt negativ (Quadrat)','actually negative (square)')+'</text>';
+          sp.forEach((p,i)=>{const col=p>=t?'var(--ok)':'var(--bad)';s+='<circle cx="'+sx(p)+'" cy="'+((many?34:40)+(i%R)*sep)+'" r="'+rad+'" style="fill:'+col+';stroke:var(--fg);stroke-width:'+(many?0.5:1)+'"/>'});
+          sn.forEach((p,i)=>{const col=p>=t?'var(--bad)':'var(--ok)',y=(many?112:112)+(i%R)*sep;s+='<rect x="'+(sx(p)-rad)+'" y="'+(y-rad)+'" width="'+(2*rad)+'" height="'+(2*rad)+'" style="fill:'+col+';stroke:var(--fg);stroke-width:'+(many?0.5:1)+'"/>'});
+          s+='<text class="lbl" x="'+PX+'" y="18">'+LernApp.t('echt positiv (Kreis): ','actually positive (circle): ')+pos.length+'</text><text class="lbl" x="'+PX+'" y="150">'+LernApp.t('echt negativ (Quadrat): ','actually negative (square): ')+neg.length+'</text>';
           s+='<line class="ln2" x1="'+sx(t)+'" y1="24" x2="'+sx(t)+'" y2="148"/>';
           $('thSvg').innerHTML=s;
           $('thTP').textContent=c.tp;$('thFN').textContent=c.fn;$('thFP').textContent=c.fp;$('thTN').textContent=c.tn;
-          const pre=c.tp+c.fp?c.tp/(c.tp+c.fp):0,rec=c.tp/(c.tp+c.fn),f1=(2*c.tp+c.fp+c.fn)?2*c.tp/(2*c.tp+c.fp+c.fn):0;
-          $('thAcc').textContent=fmt((c.tp+c.tn)/20,2);$('thPre').textContent=c.tp+c.fp?fmt(pre,2):'–';$('thRec').textContent=fmt(rec,2);$('thF1').textContent=fmt(f1,2);
-          const fpr=c.fp/(c.fp+c.tn);$('thFpr').textContent=fmt(fpr,2);
-          $('thAccF').textContent='('+c.tp+'+'+c.tn+') / 20';$('thPreF').textContent=c.tp+' / ('+c.tp+'+'+c.fp+')';$('thRecF').textContent=c.tp+' / ('+c.tp+'+'+c.fn+')';$('thFprF').textContent=c.fp+' / ('+c.fp+'+'+c.tn+')';$('thF1F').textContent='2·'+c.tp+' / (2·'+c.tp+'+'+c.fp+'+'+c.fn+')';
-          let g='<line class="ax" x1="'+RX+'" y1="'+ry(0)+'" x2="'+rx(1)+'" y2="'+ry(0)+'"/><line class="ax" x1="'+RX+'" y1="'+ry(0)+'" x2="'+RX+'" y2="'+ry(1)+'"/>';
+          const pre=c.tp+c.fp?c.tp/(c.tp+c.fp):0,rec=c.tp/(c.tp+c.fn),f1=(2*c.tp+c.fp+c.fn)?2*c.tp/(2*c.tp+c.fp+c.fn):0,fpr=c.fp/(c.fp+c.tn);
+          $('thAcc').textContent=fmt((c.tp+c.tn)/total,3);$('thPre').textContent=c.tp+c.fp?fmt(pre,3):'–';$('thRec').textContent=fmt(rec,3);$('thF1').textContent=fmt(f1,3);$('thFpr').textContent=fmt(fpr,3);
+          $('thAccF').textContent='('+c.tp+'+'+c.tn+') / '+total;$('thPreF').textContent=c.tp+' / ('+c.tp+'+'+c.fp+')';$('thRecF').textContent=c.tp+' / ('+c.tp+'+'+c.fn+')';$('thFprF').textContent=c.fp+' / ('+c.fp+'+'+c.tn+')';$('thF1F').textContent='2·'+c.tp+' / (2·'+c.tp+'+'+c.fp+'+'+c.fn+')';
+          $('thAuc').textContent=fmt(auc,3);$('thPrev').textContent=fmt(100*pos.length/total,1)+' %';$('thBase').textContent=fmt(neg.length/total,3);
+          const stp=Math.max(1,Math.ceil(roc.length/300));let g='<line class="ax" x1="'+RX+'" y1="'+ry(0)+'" x2="'+rx(1)+'" y2="'+ry(0)+'"/><line class="ax" x1="'+RX+'" y1="'+ry(0)+'" x2="'+RX+'" y2="'+ry(1)+'"/>';
           g+='<line class="dash" x1="'+rx(0)+'" y1="'+ry(0)+'" x2="'+rx(1)+'" y2="'+ry(1)+'"/>';
-          g+='<path class="ln" d="'+roc.map((p,i)=>(i?'L':'M')+rx(p[0]).toFixed(1)+' '+ry(p[1]).toFixed(1)).join('')+'"/>';
+          const pts=roc.filter((p,i)=>i%stp===0||i===roc.length-1);g+='<path class="ln" d="'+pts.map((p,i)=>(i?'L':'M')+rx(p[0]).toFixed(1)+' '+ry(p[1]).toFixed(1)).join('')+'"/>';
           g+='<text class="lbl" x="'+(RX+60)+'" y="'+(RH-6)+'">'+LernApp.t('Rate falscher Alarme (FPR)','False alarm rate (FPR)')+'</text><text class="lbl" x="2" y="10">Recall (TPR)</text>';
-          g+='<circle cx="'+rx(c.fp/10)+'" cy="'+ry(c.tp/10)+'" r="6" style="fill:var(--warn)"/>';
-          $('thRoc').innerHTML=g}
-        $('thT').addEventListener('input',draw);draw()})();
+          g+='<text class="lbl" x="'+(RX-14)+'" y="'+(ry(0)+4)+'">0</text><text class="lbl" x="'+(RX-14)+'" y="'+(ry(1)+4)+'">1</text><text class="lbl" x="'+(rx(0)-3)+'" y="'+(ry(0)+13)+'">0</text><text class="lbl" x="'+(rx(1)-3)+'" y="'+(ry(0)+13)+'">1</text>';
+          g+='<circle cx="'+rx(c.fp/neg.length)+'" cy="'+ry(c.tp/pos.length)+'" r="6" style="fill:var(--warn)"/>';
+          $('thRoc').innerHTML=g;
+          const ratio=neg.length/pos.length;
+          $('thMsg').textContent=ratio>=50?LernApp.t('Seltene Positive: Die AUC bleibt hoch, weil die ROC nur Raten kennt. Die Precision aber bricht ein: Schon eine kleine False Alarm Rate ergibt mehr FP als TP, denn es gibt so viele Negative. Die Accuracy von «immer negativ» ist fast 1.','Rare positives: the AUC stays high, because the ROC only knows rates. The precision collapses though: even a small false alarm rate gives more FP than TP, because there are so many negatives. The accuracy of «always negative» is almost 1.'):ratio<=1/50?LernApp.t('Fast nur Positive: Die Precision ist leicht hoch, die False Alarm Rate wird aus sehr wenigen Negativen berechnet und schwankt stark.','Almost only positives: precision is easily high, the false alarm rate is computed from very few negatives and varies a lot.'):LernApp.t('Ausgewogen: Accuracy, Precision und Recall erzählen etwa dieselbe Geschichte. Setze die Negativen auf 1000 und schau, was passiert.','Balanced: accuracy, precision and recall tell about the same story. Set the negatives to 1000 and watch what happens.')}
+        const act=(a,b)=>{$('thNP').value=a;$('thNN').value=b;[['thP1'],['thP2'],['thP3']].forEach(x=>{$(x[0]).className=''});prep();draw()};
+        ['thNP','thNN'].forEach(id=>$(id).addEventListener('input',()=>{[['thP1'],['thP2'],['thP3']].forEach(x=>{$(x[0]).className=''});prep();draw()}));
+        [['thP1',1,1],['thP2',1,3],['thP3',0,3]].forEach(b=>$(b[0]).addEventListener('click',()=>{act(b[1],b[2]);$(b[0]).className='pri'}));
+        $('thT').addEventListener('input',draw);prep();draw()})();
 
       // Demo 3: imbalance
       (function(){
