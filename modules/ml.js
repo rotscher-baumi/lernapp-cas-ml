@@ -693,11 +693,12 @@ print(&quot;CV-Accuracy:&quot;, round(search.best_score_, 3), &quot;| Test-Accur
           let a='';const bw=(W-16)/k;
           // The test fold always sits at the right end: the training folds come first, the test fold last.
           const order=[];for(let i=0;i<k;i++)if(i!==sel)order.push(i);order.push(sel);
-          order.forEach((fold,pos)=>{const test=fold===sel;
-            a+='<rect x="'+(8+pos*bw).toFixed(1)+'" y="6" width="'+(bw-2).toFixed(1)+'" height="24" rx="3" style="fill:'+(test?'var(--warn-soft)':'var(--accent-soft)')+';stroke:'+(test?'var(--warn)':'var(--accent)')+'"/>';
-            if(k<=5)a+='<text class="lbl" x="'+(8+pos*bw+bw/2-10).toFixed(1)+'" y="22">'+(test?'Test':'Train')+'</text>'});
+          // Each box carries its fold number; the fold that is tested in the current run is orange and thick.
+          order.forEach((fold,pos)=>{const test=fold===sel,bx=8+pos*bw;
+            a+='<rect x="'+bx.toFixed(1)+'" y="6" width="'+(bw-2).toFixed(1)+'" height="24" rx="3" style="fill:'+(test?'var(--warn-soft)':'var(--accent-soft)')+';stroke:'+(test?'var(--warn)':'var(--accent)')+';stroke-width:'+(test?2.5:1)+'"/>';
+            a+='<text class="lbl" x="'+(bx+(bw-2)/2).toFixed(1)+'" y="22" text-anchor="middle"'+(test?' style="fill:var(--fg);font-weight:600"':'')+'>'+(k<=5?(test?'Test ':'Train '):'')+(fold+1)+'</text>'});
           $('cvStrip').innerHTML=a;
-          $('cvStripMsg').textContent='Fold '+(sel+1)+LernApp.t(' von ',' of ')+k+LernApp.t(' ist der Test-Fold (orange, in der Reihe immer ganz rechts), alle anderen trainieren. Die Punkte sind zufällig auf die Folds verteilt, nicht nach x-Position: Darum liegen die hohlen Punkte über die ganze Kurve.',' is the test fold (orange, always at the right end of the row), all others train. The points are assigned to the folds at random, not by x position: that is why the hollow points are spread over the whole curve.');
+          $('cvStripMsg').textContent='Fold '+(sel+1)+LernApp.t(' von ',' of ')+k+LernApp.t(' ist in diesem Lauf der Test-Fold (orange, immer ganz rechts), alle anderen trainieren. Die Nummer in jedem Kästchen ist die Nummer des Folds. Die Punkte sind zufällig auf die Folds verteilt, nicht nach x-Position: Darum liegen die hohlen Punkte über die ganze Kurve.',' is the test fold in this run (orange, always at the right end), all others train. The number in each box is the number of the fold. The points are assigned to the folds at random, not by x position: that is why the hollow points are spread over the whole curve.');
           let g='<line class="ax" x1="0" y1="'+sy(0)+'" x2="'+W+'" y2="'+sy(0)+'"/>';
           let tp='',cp='';for(let i=0;i<=100;i++){const x=-1+i*0.02;tp+=(i?'L':'M')+sx(x).toFixed(1)+' '+sy(f(x)).toFixed(1);cp+=(i?'L':'M')+sx(x).toFixed(1)+' '+sy(polyEval(R.c,R.z(x))).toFixed(1)}
           g+='<path class="dash" d="'+tp+'"/><path class="ln" d="'+cp+'"/>';
