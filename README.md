@@ -13,16 +13,26 @@ Architektur, Diagramme (PlantUML) und Datenobjektmodell: [docs/ARCHITECTURE.md](
 ```
 lernapp/
   index.html        Kern: Kopf, Überblick, Liste der Module
+  notebook.html     Übungs-Notebook (lokal mit Jupyter oder in Colab)
+  titanic.html      Titanic-Seite
+  mathe-kompakt.html, mathe-ausfuehrlich.html   eigene Mathe-Seiten
+  server.py         lokaler Server (Zustand, Jupyter-Start, Proxy)
+  run.sh            Jupyter und Server unter Linux/macOS starten
+  requirements.txt, requirements-dev.txt   Laufzeit- und Entwicklungspakete
   assets/
     style.css       Design (hell und dunkel)
     core.js         Navigation, Sprache, Theme, Selbsttest
     demos-*.js      geteilte Demos (Mathe, k-Means)
+    notebook-data.js  aus den Notebooks erzeugt (nicht von Hand ändern)
   modules/          ein Kapitel pro Datei
     ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js ablauf.js klass.js unsup.js uebersicht.js titanic.js
     en/             englische Texte je Kapitel
     _vorlage.js     Vorlage für ein neues Kapitel
   notebooks/        Übungs-Notebooks (Jupyter / VS Code)
     beispiele/      Beispiel-Notebooks zu allen Modellen und Strategien (01 bis 07)
+  tools/            build_notebook_exercises.py
+  scripts/          Node-Skripte, die Notebooks erzeugen
+  tests/            pytest-Tests
   docs/             Architektur, PlantUML-Diagramme, Design-Dokument
 ```
 
@@ -38,13 +48,13 @@ Die Kapitel sind JavaScript-Dateien (mit dem HTML als Text), weil Browser beim �
 
 ## Notebooks
 
-Die Übungs-Notebooks liegen in `notebooks/`. Sie brauchen `pandas`, `numpy`, `matplotlib` und `scikit-learn`. Das Notebook `Fehlende_Werte_Imputation.ipynb` zeigt separat, wie fehlende Werte ohne Data Leakage anhand der Trainingsmediane ergänzt werden. Die Kursunterlagen in den Modulordnern werden nicht verändert.
+Die Übungs-Notebooks liegen in `notebooks/` (u. a. `Lernapp_Uebungen`, `Lernapp_Lernhilfe`, `Workflow_Train_Val_Test_CV`, `Supervised_Learning_1_Uebungen_own`, `PCA_gewichtete_Summen_own`, `Python_Pandas_Uebungen_own`). Sie brauchen `pandas`, `numpy`, `matplotlib` und `scikit-learn`. Das Notebook `Fehlende_Werte_Imputation.ipynb` zeigt separat, wie fehlende Werte ohne Data Leakage anhand der Trainingsmediane ergänzt werden. Die Kursunterlagen in den Modulordnern werden nicht verändert.
 
 ### Beispiel-Notebooks
 
 `notebooks/beispiele/` hat ein eigenständiges Notebook pro Thema der Übersicht: `01_Regression`, `02_Klassifikation`, `03_Ensembles`, `04_Clustering_Anomalien`, `05_Dimensionsreduktion`, `06_Strategien` und `07_Titanic` (der ganze Ablauf an einem echten Datensatz, derselbe Code wie auf `titanic.html`). Jedes lädt seine Daten selbst (scikit-learn-Datensätze oder erzeugte Daten, nur Titanic nimmt `../../../titanic/data.csv`, falls vorhanden, sonst die öffentliche Kaggle-Kopie aus dem Netz) und hängt von keinem anderen ab. Die Steckbriefe der Übersicht verlinken mit «Beispiele →» darauf, `notebook.html?nb=beispiele/01_Regression.ipynb` öffnet ein Notebook direkt.
 
-**Auf einem anderen PC:** Repo klonen, dann im Lernapp-Ordner `python -m venv .venv`, `.venv\Scripts\pip install -r requirements.txt`, `python server.py`. Der Knopf «Jupyter starten» nimmt automatisch das Python aus `.venv`. Ohne Installation geht es im Browser mit Google Colab: Jedes Beispiel-Notebook hat oben den Link «In Colab öffnen»; ein Google-Konto genügt, solange das Repo öffentlich ist (ist es privat, in Colab mit GitHub anmelden und «Include private repos» anhaken). Die Setup-Zelle installiert dort `umap-learn` und `imbalanced-learn` bei Bedarf selbst.
+**Auf einem anderen PC:** Repo klonen, dann im Lernapp-Ordner `py -3.12 -m venv .venv`, `.venv\Scripts\python -m pip install -r requirements.txt`, `.venv\Scripts\python server.py` (Linux/macOS: `./run.sh`). Der Knopf «Jupyter starten» nimmt automatisch das Python aus `.venv`. Ohne Installation geht es im Browser mit Google Colab: Jedes Beispiel-Notebook hat oben den Link «In Colab öffnen»; ein Google-Konto genügt, solange das Repo öffentlich ist (ist es privat, in Colab mit GitHub anmelden und «Include private repos» anhaken). Die Setup-Zelle installiert dort `umap-learn` und `imbalanced-learn` bei Bedarf selbst.
 
 ### Übungen in der App und im Notebook
 
