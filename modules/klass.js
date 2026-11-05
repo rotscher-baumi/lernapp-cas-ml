@@ -218,7 +218,7 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
     <svg class="plot" id="dtCurve" viewBox="0 0 320 125" role="img" aria-label="Accuracy von Training und Test für die Tiefen 1 bis 8" style="margin-top:10px"></svg>
     <div class="stats"><span>Blätter <b id="dtL"></b></span><span>Trainings-Accuracy <b id="dtTr"></b></span><span>Test-Accuracy (neue Punkte) <b id="dtTe"></b></span></div>
     <p class="hint" id="dtMsg">&nbsp;</p>
-    <p class="hint">Oben: Jede Frage ist eine Linie, jede Fläche ein Blatt. Je kräftiger die Farbe, desto reiner das Blatt. Mitte: Derselbe Baum als Diagramm (Frage im Knoten, Quadrat = Blatt, tiefer als 4 nur angedeutet). Unten: Training (blau) steigt immer, Test (orange) nicht. Gleiche Daten wie bei kNN.</p>
+    <p class="hint">Oben: Jede Frage ist eine Linie, jede Fläche ein Blatt. Je kräftiger die Farbe, desto reiner das Blatt. Mitte: Derselbe Baum als Diagramm (Frage im Knoten, Quadrat = Blatt, vollständig bis zur gewählten Tiefe). Unten: Training (blau) steigt immer, Test (orange) nicht. Gleiche Daten wie bei kNN.</p>
   </div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Neuronale Netze</h4>
   <p>Schichten aus künstlichen Neuronen mit gewichteten Verbindungen, die per Backpropagation trainiert werden (Gradient Descent über alle Schichten). Mit sehr vielen Schichten spricht man von Deep Learning, das kommt im nächsten Modul.</p>
@@ -532,7 +532,7 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
       // Demo 5c: decision tree (CART, Gini): regions, tree diagram and accuracy by depth
       (function(){
         const r=mulberry32(11);function make(n){const a=[];for(let i=0;i<n;i++){const c=i%2;a.push({x:(c?0.6:0.4)+0.2*gauss(r),y:(c?0.55:0.45)+0.2*gauss(r),c:c})}return a}
-        const tr=make(60),te=make(200),W=320,H=220,sx=x=>x*W,sy=y=>H-y*H,DD=4,cl=c=>c?'var(--accent)':'var(--warn)';
+        const tr=make(60),te=make(200),W=320,H=220,sx=x=>x*W,sy=y=>H-y*H,DD=99,cl=c=>c?'var(--accent)':'var(--warn)';
         const gini=s=>{const n=s.length;if(!n)return 0;const p=s.filter(q=>q.c).length/n;return 2*p*(1-p)};
         function build(s,d,md,b){const n1=s.filter(q=>q.c).length,n0=s.length-n1,base={n0:n0,n1:n1,g:gini(s),c:n1*2>=s.length?1:0,b:b};
           if(d>=md||n1===0||n0===0||s.length<2)return Object.assign(base,{leaf:1});
@@ -546,7 +546,7 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
         function regions(t){let s='';(function walk(n,d){if(n.leaf){const pur=Math.max(n.n0,n.n1)/(n.n0+n.n1);s+='<rect x="'+sx(n.b[0])+'" y="'+sy(n.b[3])+'" width="'+(sx(n.b[2])-sx(n.b[0]))+'" height="'+(sy(n.b[1])-sy(n.b[3]))+'" style="fill:'+cl(n.c)+';opacity:'+(0.12+0.5*(2*pur-1))+'"/>';return}
           const b=n.b,w=Math.max(1,2.8-0.55*d);s+=n.f==='x'?'<line x1="'+sx(n.t)+'" y1="'+sy(b[1])+'" x2="'+sx(n.t)+'" y2="'+sy(b[3])+'" style="stroke:var(--fg);stroke-width:'+w+'"/>':'<line x1="'+sx(b[0])+'" y1="'+sy(n.t)+'" x2="'+sx(b[2])+'" y2="'+sy(n.t)+'" style="stroke:var(--fg);stroke-width:'+w+'"/>';walk(n.l,d+1);walk(n.r,d+1)})(t,0);return s}
         function diagram(t){let k=0;(function lay(n,d){if(n.leaf||d===DD){n.xi=k++;return}lay(n.l,d+1);lay(n.r,d+1);n.xi=(n.l.xi+n.r.xi)/2})(t,0);
-          const px=n=>k>1?14+n.xi*(292/(k-1)):160,py=d=>24+d*34;let e='',v='';
+          const dep=n=>n.leaf?0:1+Math.max(dep(n.l),dep(n.r)),D=Math.max(1,dep(t)),px=n=>k>1?14+n.xi*(292/(k-1)):160,py=d=>20+d*Math.min(34,128/D);let e='',v='';
           (function walk(n,d){if(n.leaf||d===DD)return;[n.l,n.r].forEach(c=>{e+='<line x1="'+px(n)+'" y1="'+py(d)+'" x2="'+px(c)+'" y2="'+py(d+1)+'" style="stroke:var(--muted);stroke-width:1.2"/>'});walk(n.l,d+1);walk(n.r,d+1)})(t,0);
           (function walk(n,d){const x=px(n),y=py(d);
             if(n.leaf){const pur=Math.max(n.n0,n.n1)/(n.n0+n.n1);v+='<rect x="'+(x-6)+'" y="'+(y-6)+'" width="12" height="12" style="fill:'+cl(n.c)+';fill-opacity:'+(0.35+0.65*(2*pur-1))+';stroke:var(--fg);stroke-width:1"/>';return}

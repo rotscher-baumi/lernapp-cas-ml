@@ -208,7 +208,7 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 per class +
     <svg class="plot" id="dtCurve" viewBox="0 0 320 125" role="img" aria-label="Training and test accuracy for depths 1 to 8" style="margin-top:10px"></svg>
     <div class="stats"><span>Leaves <b id="dtL"></b></span><span>Training accuracy <b id="dtTr"></b></span><span>Test accuracy (new points) <b id="dtTe"></b></span></div>
     <p class="hint" id="dtMsg">&nbsp;</p>
-    <p class="hint">Top: every question is a line, every region a leaf. The stronger the colour, the purer the leaf. Middle: the same tree as a diagram (question in the node, square = leaf, deeper than 4 only hinted). Bottom: training (blue) always rises, test (orange) does not. Same data as for kNN.</p>
+    <p class="hint">Top: every question is a line, every region a leaf. The stronger the colour, the purer the leaf. Middle: the same tree as a diagram (question in the node, square = leaf, complete down to the chosen depth). Bottom: training (blue) always rises, test (orange) does not. Same data as for kNN.</p>
   </div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Neural networks</h4>
   <p>Layers of artificial neurons with weighted connections, trained by backpropagation (gradient descent across all layers). With very many layers it is called deep learning, which comes in the next module.</p>
