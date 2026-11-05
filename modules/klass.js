@@ -195,24 +195,29 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
   <p class="note"><b>Mit den 10 Wohnungen:</b> Am Anfang sind 5 teure und 5 nicht teure Wohnungen gemischt (Gini = 0,5, maximal unrein). Die beste Frage ist «Mehr als 74 qm?»: Links landen 5 nicht teure, rechts 5 teure, beide Blätter sind sofort rein (Gini = 0). Ein einziger Schnitt genügt, der Baum hat Tiefe 1. Die SVM legt ihre Grenze ebenfalls genau in die Mitte (74 qm), die logistische Regression etwa dorthin (zwischen 70 und 78 qm), nur mit anderem Weg.</p>
   <div class="demo" id="dtDemo">
     <div class="tag">Demo</div><h4>Entscheidungsbaum: Wirkung der Tiefe</h4>
-    <svg class="plot" id="dtSvg" viewBox="0 0 320 220" role="img" aria-label="Entscheidungsflächen eines Baums mit Trainingspunkten"></svg>
+    <svg class="plot" id="dtSvg" viewBox="0 0 320 220" role="img" aria-label="Rechtecke des Baums mit Trennlinien und Trainingspunkten"></svg>
     <div class="ctl"><label for="dtD">Maximale Tiefe</label><input type="range" id="dtD" min="1" max="8" step="1" value="2"><output id="dtDO"></output></div>
+    <svg class="plot" id="dtTree" viewBox="0 0 320 175" role="img" aria-label="Der Baum als Diagramm: Fragen in den Knoten, Klassen in den Blättern" style="margin-top:10px"></svg>
+    <svg class="plot" id="dtCurve" viewBox="0 0 320 125" role="img" aria-label="Accuracy von Training und Test für die Tiefen 1 bis 8" style="margin-top:10px"></svg>
     <div class="stats"><span>Blätter <b id="dtL"></b></span><span>Trainings-Accuracy <b id="dtTr"></b></span><span>Test-Accuracy (neue Punkte) <b id="dtTe"></b></span></div>
     <p class="hint" id="dtMsg">&nbsp;</p>
-    <p class="hint">Jede Fläche ist ein Rechteck, denn jede Frage schneidet entlang einer Achse. Gleiche Daten wie bei kNN.</p>
+    <p class="hint">Oben: Jede Frage ist eine Linie, jede Fläche ein Blatt. Je kräftiger die Farbe, desto reiner das Blatt. Mitte: Derselbe Baum als Diagramm (Frage im Knoten, Quadrat = Blatt, tiefer als 4 nur angedeutet). Unten: Training (blau) steigt immer, Test (orange) nicht. Gleiche Daten wie bei kNN.</p>
   </div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Neuronale Netze</h4>
   <p>Schichten aus künstlichen Neuronen mit gewichteten Verbindungen, die per Backpropagation trainiert werden (Gradient Descent über alle Schichten). Mit sehr vielen Schichten spricht man von Deep Learning, das kommt im nächsten Modul.</p>
   <p class="note"><b>Mit den 10 Wohnungen:</b> Ein einzelnes Neuron mit Sigmoid, <code>P(teuer) = sigmoid(w·qm + b)</code>, <i>ist</i> die logistische Regression von oben. Weitere Schichten brauchst du hier nicht, denn die Klassen sind mit einem Schnitt bei 74 qm trennbar. Mehr Schichten lohnen sich erst bei Mustern, die keine einzelne Grenze beschreiben kann.</p>
 
   <div class="demo" id="nnDemo">
-    <div class="tag">Demo</div><h4>Neuronales Netz: Neuronen und Trainingsrunden</h4>
-    <svg class="plot" id="nnSvg" viewBox="0 0 320 220" role="img" aria-label="Entscheidungsflächen eines kleinen Netzes, eine Klasse liegt als Kreis in der Mitte"></svg>
+    <div class="tag">Demo</div><h4>Neuronales Netz: Neuron für Neuron beim Lernen zusehen</h4>
+    <div class="btnrow"><button class="pri" id="nnD1">Kreis</button><button id="nnD2">XOR</button><button id="nnD3">Zwei Gruppen</button></div>
+    <svg class="plot" id="nnSvg" viewBox="0 0 320 220" role="img" aria-label="Entscheidungsfläche des Netzes mit Trainingspunkten"></svg>
     <div class="ctl"><label for="nnH">Neuronen in der versteckten Schicht</label><input type="range" id="nnH" min="1" max="8" step="1" value="4"><output id="nnHO"></output></div>
-    <div class="ctl"><label for="nnE">Trainingsrunden (Epochen)</label><input type="range" id="nnE" min="0" max="1500" step="50" value="600"><output id="nnEO"></output></div>
-    <div class="stats"><span>Trainings-Accuracy <b id="nnTr"></b></span><span>Test-Accuracy (neue Punkte) <b id="nnTe"></b></span></div>
+    <div class="btnrow"><button class="pri" id="nnPlay">Training starten</button><button id="nnStep">+100 Runden</button><button id="nnReset">Zurücksetzen</button></div>
+    <svg class="plot" id="nnNeu" viewBox="0 0 320 150" role="img" aria-label="Jedes versteckte Neuron mit seiner eigenen Trennlinie" style="margin-top:10px"></svg>
+    <svg class="plot" id="nnLoss" viewBox="0 0 320 120" role="img" aria-label="Loss von Training und Test über die Trainingsrunden" style="margin-top:10px"></svg>
+    <div class="stats"><span>Runde (Epoche) <b id="nnEp"></b></span><span>Trainings-Accuracy <b id="nnTr"></b></span><span>Test-Accuracy (neue Punkte) <b id="nnTe"></b></span><span>Loss (Train / Test) <b id="nnLs"></b></span></div>
     <p class="hint" id="nnMsg">&nbsp;</p>
-    <p class="hint">Die Klasse in der Mitte (blau) ist von der anderen umgeben, das kann keine gerade Linie trennen. Mit wenigen Neuronen oder Runden bleibt die Fläche grob.</p>
+    <p class="hint">Oben: die Entscheidungsfläche des ganzen Netzes. Mitte: Jedes Neuron schaut für sich auf die Ebene (blau = Aktivierung positiv, orange = negativ); in Klammern sein Gewicht zur Ausgabe. Das Netz kombiniert diese einfachen Bilder zur Form oben. Unten: Der Loss (Fehlermass) sinkt, solange das Netz lernt. «Zwei Gruppen» braucht nur ein Neuron, «Kreis» und XOR mehrere.</p>
   </div>
   <h3>6 · Ensembles: viele schwache Modelle ergeben ein starkes</h3>
   <p>Ein einzelnes Modell macht Fehler, ein tiefer Baum lernt die Trainingsdaten sogar auswendig. Die Idee der Ensembles: Nimm <b>viele einfache Bäume</b> statt eines grossen und kombiniere sie. Es gibt zwei Wege, und der Unterschied ist die wichtigste Frage dieses Abschnitts: Arbeiten die Bäume <i>nebeneinander</i> oder <i>nacheinander</i>?</p>
@@ -496,38 +501,85 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
           $('svMsg').textContent=C<0.5?LernApp.t('Kleines C: breite Margin, einzelne Fehler sind erlaubt. Viele Punkte stützen die Linie. Das Modell ist einfach (Underfitting-Risiko).','Small C: wide margin, single errors are allowed. Many points support the line. The model is simple (underfitting risk).'):C>20?LernApp.t('Grosses C: Fehler sind teuer, die Margin wird schmal und folgt einzelnen Punkten (Overfitting-Risiko).','Large C: errors are expensive, the margin becomes narrow and follows single points (overfitting risk).'):LernApp.t('Mittleres C: ein Kompromiss zwischen breiter Margin und wenigen Fehlern.','Medium C: a compromise between a wide margin and few errors.')}
         $('svC').addEventListener('input',draw);draw()})();
 
-      // Demo 5c: decision tree (CART, Gini), slider max depth
+      // Demo 5c: decision tree (CART, Gini): regions, tree diagram and accuracy by depth
       (function(){
         const r=mulberry32(11);function make(n){const a=[];for(let i=0;i<n;i++){const c=i%2;a.push({x:(c?0.6:0.4)+0.2*gauss(r),y:(c?0.55:0.45)+0.2*gauss(r),c:c})}return a}
-        const tr=make(60),te=make(200),W=320,H=220,sx=x=>x*W,sy=y=>H-y*H;
+        const tr=make(60),te=make(200),W=320,H=220,sx=x=>x*W,sy=y=>H-y*H,DD=4,cl=c=>c?'var(--accent)':'var(--warn)';
         const gini=s=>{const n=s.length;if(!n)return 0;const p=s.filter(q=>q.c).length/n;return 2*p*(1-p)};
-        function build(s,d,md){const n1=s.filter(q=>q.c).length,maj=n1*2>=s.length?1:0;if(d>=md||n1===0||n1===s.length||s.length<2)return{leaf:1,c:maj};
-          let best=null;['x','y'].forEach(f=>{const v=s.map(q=>q[f]).sort((a,b)=>a-b);for(let i=1;i<v.length;i++){if(v[i]===v[i-1])continue;const t=(v[i]+v[i-1])/2,L=s.filter(q=>q[f]<=t),R=s.filter(q=>q[f]>t),g=(L.length*gini(L)+R.length*gini(R))/s.length;if(!best||g<best.g)best={f:f,t:t,g:g,L:L,R:R}}});
-          if(!best)return{leaf:1,c:maj};return{f:best.f,t:best.t,l:build(best.L,d+1,md),r:build(best.R,d+1,md)}}
+        function build(s,d,md,b){const n1=s.filter(q=>q.c).length,n0=s.length-n1,base={n0:n0,n1:n1,g:gini(s),c:n1*2>=s.length?1:0,b:b};
+          if(d>=md||n1===0||n0===0||s.length<2)return Object.assign(base,{leaf:1});
+          let best=null;['x','y'].forEach(f=>{const v=s.map(q=>q[f]).sort((a,c)=>a-c);for(let i=1;i<v.length;i++){if(v[i]===v[i-1])continue;const t=(v[i]+v[i-1])/2,L=s.filter(q=>q[f]<=t),R=s.filter(q=>q[f]>t),g=(L.length*gini(L)+R.length*gini(R))/s.length;if(!best||g<best.g)best={f:f,t:t,g:g,L:L,R:R}}});
+          if(!best)return Object.assign(base,{leaf:1});
+          const bl=best.f==='x'?[b[0],b[1],best.t,b[3]]:[b[0],b[1],b[2],best.t],br=best.f==='x'?[best.t,b[1],b[2],b[3]]:[b[0],best.t,b[2],b[3]];
+          return Object.assign(base,{f:best.f,t:best.t,l:build(best.L,d+1,md,bl),r:build(best.R,d+1,md,br)})}
         const pred=(n,x,y)=>n.leaf?n.c:((n.f==='x'?x:y)<=n.t?pred(n.l,x,y):pred(n.r,x,y)),cnt=n=>n.leaf?1:cnt(n.l)+cnt(n.r);
-        function draw(){const md=+$('dtD').value;$('dtDO').textContent=md;const t=build(tr,0,md);
-          let s=gridSvg(W,H,40,28,(x,y)=>pred(t,x,y));tr.forEach(p=>{s+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="3.5" style="fill:'+(p.c?'var(--accent)':'var(--warn)')+';stroke:var(--fg);stroke-width:1"/>'});
-          $('dtSvg').innerHTML=s;const acc=set=>set.filter(p=>pred(t,p.x,p.y)===p.c).length/set.length,a=acc(tr),b=acc(te);
-          $('dtL').textContent=cnt(t);$('dtTr').textContent=fmt(a,2);$('dtTe').textContent=fmt(b,2);
-          $('dtMsg').textContent=md===1?LernApp.t('Tiefe 1: nur eine Frage, die Fläche hat zwei Rechtecke (Stumpf). Das ist zu einfach.','Depth 1: only one question, the region has two rectangles (a stump). That is too simple.'):md>=6?LernApp.t('Tiefer Baum: Fast jeder Trainingspunkt bekommt sein eigenes Rechteck. Training fast perfekt, Test schlechter (Overfitting).','Deep tree: almost every training point gets its own rectangle. Training almost perfect, test worse (overfitting).'):LernApp.t('Mittlere Tiefe: die groben Bereiche sind erkannt. Beobachte, ab wann die Test-Accuracy nicht mehr steigt.','Medium depth: the rough areas are found. Watch from which depth on the test accuracy stops rising.')}
+        const acc=(t,set)=>set.filter(p=>pred(t,p.x,p.y)===p.c).length/set.length,CUR=[];
+        for(let d=1;d<=8;d++){const t=build(tr,0,d,[0,0,1,1]);CUR.push([acc(t,tr),acc(t,te)])}
+        function regions(t){let s='';(function walk(n,d){if(n.leaf){const pur=Math.max(n.n0,n.n1)/(n.n0+n.n1);s+='<rect x="'+sx(n.b[0])+'" y="'+sy(n.b[3])+'" width="'+(sx(n.b[2])-sx(n.b[0]))+'" height="'+(sy(n.b[1])-sy(n.b[3]))+'" style="fill:'+cl(n.c)+';opacity:'+(0.12+0.5*(2*pur-1))+'"/>';return}
+          const b=n.b,w=Math.max(1,2.8-0.55*d);s+=n.f==='x'?'<line x1="'+sx(n.t)+'" y1="'+sy(b[1])+'" x2="'+sx(n.t)+'" y2="'+sy(b[3])+'" style="stroke:var(--fg);stroke-width:'+w+'"/>':'<line x1="'+sx(b[0])+'" y1="'+sy(n.t)+'" x2="'+sx(b[2])+'" y2="'+sy(n.t)+'" style="stroke:var(--fg);stroke-width:'+w+'"/>';walk(n.l,d+1);walk(n.r,d+1)})(t,0);return s}
+        function diagram(t){let k=0;(function lay(n,d){if(n.leaf||d===DD){n.xi=k++;return}lay(n.l,d+1);lay(n.r,d+1);n.xi=(n.l.xi+n.r.xi)/2})(t,0);
+          const px=n=>k>1?14+n.xi*(292/(k-1)):160,py=d=>24+d*34;let e='',v='';
+          (function walk(n,d){if(n.leaf||d===DD)return;[n.l,n.r].forEach(c=>{e+='<line x1="'+px(n)+'" y1="'+py(d)+'" x2="'+px(c)+'" y2="'+py(d+1)+'" style="stroke:var(--muted);stroke-width:1.2"/>'});walk(n.l,d+1);walk(n.r,d+1)})(t,0);
+          (function walk(n,d){const x=px(n),y=py(d);
+            if(n.leaf){const pur=Math.max(n.n0,n.n1)/(n.n0+n.n1);v+='<rect x="'+(x-6)+'" y="'+(y-6)+'" width="12" height="12" style="fill:'+cl(n.c)+';fill-opacity:'+(0.35+0.65*(2*pur-1))+';stroke:var(--fg);stroke-width:1"/>';return}
+            if(d===DD){v+='<circle cx="'+x+'" cy="'+y+'" r="6" style="fill:var(--bg);stroke:var(--muted);stroke-width:1.2;stroke-dasharray:2 2"/><text class="lbl" x="'+(x-4)+'" y="'+(y+9)+'">…</text>';return}
+            v+='<circle cx="'+x+'" cy="'+y+'" r="6" style="fill:var(--bg);stroke:var(--fg);stroke-width:1.5"/>';
+            if(d<=2)v+='<text class="lbl" x="'+(x-17)+'" y="'+(y-10)+'">'+n.f+'≤'+fmt(n.t,2)+'</text>';
+            walk(n.l,d+1);walk(n.r,d+1)})(t,0);
+          return e+v+'<text class="lbl" x="2" y="170">Gini '+fmt(t.g,2)+' → 0</text>'}
+        function curve(md){const x0=34,x1=308,yt=12,yb=96,sxx=d=>x0+(d-1)/7*(x1-x0),syy=a=>yb-(a-0.4)/0.6*(yb-yt);let s='';
+          for(const g of[0.5,0.75,1])s+='<line x1="'+x0+'" y1="'+syy(g)+'" x2="'+x1+'" y2="'+syy(g)+'" style="stroke:var(--line);stroke-width:1"/><text class="lbl" x="2" y="'+(syy(g)+4)+'">'+g+'</text>';
+          for(let d=1;d<=8;d++)s+='<text class="lbl" x="'+(sxx(d)-3)+'" y="112">'+d+'</text>';
+          s+='<path class="ln" d="'+CUR.map((c,i)=>(i?'L':'M')+sxx(i+1)+' '+syy(c[0])).join('')+'"/><path class="ln2" d="'+CUR.map((c,i)=>(i?'L':'M')+sxx(i+1)+' '+syy(c[1])).join('')+'"/>';
+          s+='<line x1="'+sxx(md)+'" y1="'+yt+'" x2="'+sxx(md)+'" y2="'+yb+'" style="stroke:var(--fg);stroke-width:1;stroke-dasharray:4 3"/><circle cx="'+sxx(md)+'" cy="'+syy(CUR[md-1][0])+'" r="4.5" style="fill:var(--accent)"/><circle cx="'+sxx(md)+'" cy="'+syy(CUR[md-1][1])+'" r="4.5" style="fill:var(--warn)"/>';
+          return s+'<text class="lbl" x="'+(x0+4)+'" y="'+(yt+10)+'" style="fill:var(--accent)">Train</text><text class="lbl" x="'+(x0+50)+'" y="'+(yt+10)+'" style="fill:var(--warn)">Test</text>'}
+        function draw(){const md=+$('dtD').value;$('dtDO').textContent=md;const t=build(tr,0,md,[0,0,1,1]);
+          let s=regions(t);tr.forEach(p=>{s+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="3.5" style="fill:'+cl(p.c)+';stroke:var(--fg);stroke-width:1"/>'});
+          $('dtSvg').innerHTML=s;$('dtTree').innerHTML=diagram(t);$('dtCurve').innerHTML=curve(md);
+          $('dtL').textContent=cnt(t);$('dtTr').textContent=fmt(CUR[md-1][0],2);$('dtTe').textContent=fmt(CUR[md-1][1],2);
+          $('dtMsg').textContent=md===1?LernApp.t('Tiefe 1: nur eine Frage, die Fläche hat zwei Rechtecke (Stumpf). Das ist zu einfach.','Depth 1: only one question, the region has two rectangles (a stump). That is too simple.'):md>=6?LernApp.t('Tiefer Baum: Fast jeder Trainingspunkt bekommt sein eigenes Rechteck. Die Trainingskurve steigt weiter, die Testkurve fällt (Overfitting).','Deep tree: almost every training point gets its own rectangle. The training curve keeps rising, the test curve falls (overfitting).'):LernApp.t('Mittlere Tiefe: die groben Bereiche sind erkannt. Beobachte in der Kurve, ab wann die Test-Accuracy nicht mehr steigt.','Medium depth: the rough areas are found. Watch in the curve from which depth the test accuracy stops rising.')}
         $('dtD').addEventListener('input',draw);draw()})();
 
-      // Demo 5d: small neural network (1 hidden layer, tanh), trained in the browser
+      // Demo 5d: small neural network (1 hidden layer, tanh), trained step by step in the browser
       (function(){
-        const r=mulberry32(7);function make(n){const a=[];for(let i=0;i<n;i++){const x=r(),y=r();let c=Math.hypot(x-0.5,y-0.5)<0.3?1:0;if(r()<0.05)c=1-c;a.push({x:x,y:y,c:c})}return a}
-        const tr=make(80),te=make(200),W=320,H=220,sx=x=>x*W,sy=y=>H-y*H,f=v=>(v-0.5)*3;
-        function train(h,E){const q=mulberry32(3),w1=[],b1=[],w2=[];for(let j=0;j<h;j++){w1.push([gauss(q)*0.8,gauss(q)*0.8]);b1.push(0);w2.push(gauss(q)*0.8)}let b2=0;const lr=0.4,n=tr.length;
-          for(let e=0;e<E;e++){const g1=w1.map(()=>[0,0]),gb1=w1.map(()=>0),g2=w2.map(()=>0);let gb2=0;
-            tr.forEach(p=>{const u=f(p.x),v=f(p.y),a=w1.map((w,j)=>Math.tanh(w[0]*u+w[1]*v+b1[j]));const z=a.reduce((s,aj,j)=>s+aj*w2[j],b2),o=sigmoid(z),d=o-p.c;
-              gb2+=d;a.forEach((aj,j)=>{g2[j]+=d*aj;const dh=d*w2[j]*(1-aj*aj);g1[j][0]+=dh*u;g1[j][1]+=dh*v;gb1[j]+=dh})});
-            for(let j=0;j<h;j++){w1[j][0]-=lr*g1[j][0]/n;w1[j][1]-=lr*g1[j][1]/n;b1[j]-=lr*gb1[j]/n;w2[j]-=lr*g2[j]/n}b2-=lr*gb2/n}
-          return(x,y)=>{const u=f(x),v=f(y);return w1.reduce((s,w,j)=>s+Math.tanh(w[0]*u+w[1]*v+b1[j])*w2[j],b2)>0?1:0}}
-        function draw(){const h=+$('nnH').value,E=+$('nnE').value;$('nnHO').textContent=h;$('nnEO').textContent=E;const pr=train(h,E);
-          let s=gridSvg(W,H,32,22,pr);tr.forEach(p=>{s+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="3.2" style="fill:'+(p.c?'var(--accent)':'var(--warn)')+';stroke:var(--fg);stroke-width:1"/>'});
-          $('nnSvg').innerHTML=s;const acc=set=>set.filter(p=>pr(p.x,p.y)===p.c).length/set.length,a=acc(tr),b=acc(te);
-          $('nnTr').textContent=fmt(a,2);$('nnTe').textContent=fmt(b,2);
-          $('nnMsg').textContent=E===0?LernApp.t('Ohne Training sind die Gewichte zufällig: die Fläche sagt nichts.','Without training the weights are random: the region means nothing.'):h<=2?LernApp.t('Mit 1 bis 2 Neuronen reicht die Form nicht für einen Kreis. Die Grenze bleibt fast gerade (Underfitting).','With 1 to 2 neurons the shape is not enough for a circle. The boundary stays almost straight (underfitting).'):E<200?LernApp.t('Zu wenige Runden: das Netz hat noch nicht gelernt. Mehr Runden ziehen die Grenze zum Kreis.','Too few rounds: the network has not learned yet. More rounds pull the boundary towards a circle.'):LernApp.t('Genug Neuronen und Runden: die Grenze folgt dem Kreis. Mit noch mehr Neuronen und Runden kann sie auch dem Rauschen folgen.','Enough neurons and rounds: the boundary follows the circle. With even more neurons and rounds it can also follow the noise.')}
-        $('nnH').addEventListener('input',draw);$('nnE').addEventListener('input',draw);draw()})();
+        const W=320,H=220,sx=x=>x*W,sy=y=>H-y*H,f=v=>(v-0.5)*3,MAXE=2000,cl=c=>c?'var(--accent)':'var(--warn)';
+        function gen(kind,n,r){const a=[];for(let i=0;i<n;i++){let x,y,c;
+          if(kind==='blobs'){c=i%2;x=Math.min(1,Math.max(0,(c?0.68:0.32)+0.13*gauss(r)));y=Math.min(1,Math.max(0,(c?0.65:0.35)+0.13*gauss(r)))}
+          else{x=r();y=r();c=kind==='xor'?((x>0.5)!==(y>0.5)?1:0):(Math.hypot(x-0.5,y-0.5)<0.3?1:0);if(r()<0.05)c=1-c}
+          a.push({x:x,y:y,c:c})}return a}
+        let kind='circle',tr,te,net,playing=false;
+        const act=(p,j)=>Math.tanh(net.w1[j][0]*f(p.x)+net.w1[j][1]*f(p.y)+net.b1[j]);
+        const z=p=>{let s=net.b2;for(let j=0;j<net.h;j++)s+=act(p,j)*net.w2[j];return s};
+        const loss=set=>set.reduce((s,p)=>{const o=Math.min(1-1e-9,Math.max(1e-9,sigmoid(z(p))));return s-(p.c?Math.log(o):Math.log(1-o))},0)/set.length;
+        const acc=set=>set.filter(p=>(z(p)>0?1:0)===p.c).length/set.length;
+        function record(){net.L.push({e:net.ep,tr:loss(tr),te:loss(te)})}
+        function reset(){playing=false;const r=mulberry32(7);tr=gen(kind,80,r);te=gen(kind,200,r);const h=+$('nnH').value,q=mulberry32(3);net={h:h,w1:[],b1:[],w2:[],b2:0,ep:0,L:[]};
+          for(let j=0;j<h;j++){net.w1.push([gauss(q)*0.8,gauss(q)*0.8]);net.b1.push(0);net.w2.push(gauss(q)*0.8)}record();draw()}
+        function adv(E){const n=tr.length,h=net.h,lr=0.4;E=Math.min(E,MAXE-net.ep);
+          for(let e=0;e<E;e++){const g1=net.w1.map(()=>[0,0]),gb1=net.w1.map(()=>0),g2=net.w2.map(()=>0);let gb2=0;
+            tr.forEach(p=>{const u=f(p.x),v=f(p.y),a=[];for(let j=0;j<h;j++)a.push(act(p,j));const d=sigmoid(a.reduce((s,aj,j)=>s+aj*net.w2[j],net.b2))-p.c;
+              gb2+=d;a.forEach((aj,j)=>{g2[j]+=d*aj;const dh=d*net.w2[j]*(1-aj*aj);g1[j][0]+=dh*u;g1[j][1]+=dh*v;gb1[j]+=dh})});
+            for(let j=0;j<h;j++){net.w1[j][0]-=lr*g1[j][0]/n;net.w1[j][1]-=lr*g1[j][1]/n;net.b1[j]-=lr*gb1[j]/n;net.w2[j]-=lr*g2[j]/n}net.b2-=lr*gb2/n;net.ep++;
+            if(net.ep%10===0)record()}
+          if(net.L[net.L.length-1].e!==net.ep)record()}
+        function neurons(){let s='';for(let j=0;j<net.h;j++){const ox=(j%4)*80+5,oy=Math.floor(j/4)*75+3,cw=7,ch=7.25;
+            for(let a=0;a<10;a++)for(let b=0;b<8;b++){const v=act({x:(a+0.5)/10,y:1-(b+0.5)/8},j);s+='<rect x="'+(ox+a*cw)+'" y="'+(oy+b*ch)+'" width="'+(cw+0.4)+'" height="'+(ch+0.4)+'" style="fill:'+cl(v>0)+';opacity:'+Math.abs(v)*0.85+'"/>'}
+            s+='<rect x="'+ox+'" y="'+oy+'" width="70" height="58" style="fill:none;stroke:var(--line);stroke-width:1"/><text class="lbl" x="'+ox+'" y="'+(oy+69)+'">N'+(j+1)+' ('+(net.w2[j]>=0?'+':'−')+fmt(Math.abs(net.w2[j]),1)+')</text>'}return s}
+        function lossSvg(){const x0=34,x1=312,yt=12,yb=96,ymax=Math.max(0.8,net.L[0].tr,net.L[0].te),X=e=>x0+e/MAXE*(x1-x0),Y=v=>yb-Math.min(v,ymax)/ymax*(yb-yt);
+          let s='<line class="ax" x1="'+x0+'" y1="'+yb+'" x2="'+x1+'" y2="'+yb+'"/><line class="ax" x1="'+x0+'" y1="'+yt+'" x2="'+x0+'" y2="'+yb+'"/><text class="lbl" x="'+(x0-4)+'" y="112">0</text><text class="lbl" x="'+(x1-24)+'" y="112">'+MAXE+'</text><text class="lbl" x="2" y="'+(yt+4)+'">'+fmt(ymax,1)+'</text><text class="lbl" x="2" y="'+(yb+4)+'">0</text>';
+          s+='<path class="ln" d="'+net.L.map((p,i)=>(i?'L':'M')+X(p.e).toFixed(1)+' '+Y(p.tr).toFixed(1)).join('')+'"/><path class="ln2" d="'+net.L.map((p,i)=>(i?'L':'M')+X(p.e).toFixed(1)+' '+Y(p.te).toFixed(1)).join('')+'"/>';
+          return s+'<text class="lbl" x="'+(x0+6)+'" y="'+(yt+10)+'" style="fill:var(--accent)">Train</text><text class="lbl" x="'+(x0+52)+'" y="'+(yt+10)+'" style="fill:var(--warn)">Test</text>'}
+        function draw(){$('nnHO').textContent=net.h;let s=gridSvg(W,H,32,22,(x,y)=>z({x:x,y:y})>0?1:0);tr.forEach(p=>{s+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="3.2" style="fill:'+cl(p.c)+';stroke:var(--fg);stroke-width:1"/>'});
+          $('nnSvg').innerHTML=s;$('nnNeu').innerHTML=neurons();$('nnLoss').innerHTML=lossSvg();
+          const a=acc(tr),b=acc(te),L=net.L[net.L.length-1];$('nnEp').textContent=net.ep;$('nnTr').textContent=fmt(a,2);$('nnTe').textContent=fmt(b,2);$('nnLs').textContent=fmt(L.tr,2)+' / '+fmt(L.te,2);
+          $('nnPlay').textContent=playing?LernApp.t('Pause','Pause'):LernApp.t('Training starten','Start training');
+          $('nnMsg').textContent=net.ep===0?LernApp.t('Start: Die Gewichte sind zufällig, die Fläche sagt nichts. Drücke «Training starten» und schau den Neuronen zu.','Start: the weights are random, the region means nothing. Press «Start training» and watch the neurons.'):net.ep<200&&a<0.85?LernApp.t('Das Netz lernt noch: Der Loss sinkt, die Neuronen drehen ihre Linien in die richtige Richtung.','The network is still learning: the loss falls, the neurons turn their lines into the right direction.'):kind!=='blobs'&&net.h<=2&&net.ep>=300?LernApp.t('Mit 1 bis 2 Neuronen reicht die Form nicht: Zwei Linien können keine geschlossene Form ergeben. Der Loss bleibt hoch.','With 1 to 2 neurons the shape is not enough: two lines cannot make a closed shape. The loss stays high.'):a>=0.85?LernApp.t('Das Netz hat die Form gefunden: Jedes Neuron liefert eine Linie, die Ausgabe kombiniert sie.','The network found the shape: each neuron supplies a line, the output combines them.'):LernApp.t('Weiter trainieren: Der Loss sinkt noch.','Keep training: the loss is still falling.')}
+        function loop(){if(!playing)return;adv(10);draw();if(net.ep>=MAXE){playing=false;draw()}else requestAnimationFrame(loop)}
+        $('nnPlay').addEventListener('click',()=>{if(playing){playing=false;draw();return}if(net.ep>=MAXE)reset();if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches){adv(MAXE);draw();return}playing=true;draw();loop()});
+        $('nnStep').addEventListener('click',()=>{playing=false;adv(100);draw()});
+        $('nnReset').addEventListener('click',reset);$('nnH').addEventListener('input',reset);
+        [['nnD1','circle'],['nnD2','xor'],['nnD3','blobs']].forEach(d=>{$(d[0]).addEventListener('click',()=>{kind=d[1];[['nnD1'],['nnD2'],['nnD3']].forEach(x=>{$(x[0]).className=x[0]===d[0]?'pri':''});reset()})});
+        reset()})();
 
       // Demo 6: 10 apartments, single tree vs bagging vs boosting (price regression on qm)
       (function(){

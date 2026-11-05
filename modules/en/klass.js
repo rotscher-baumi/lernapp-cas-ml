@@ -185,24 +185,29 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 per class +
   <p class="note"><b>With the 10 apartments:</b> At the start, 5 expensive and 5 non-expensive apartments are mixed (Gini = 0.5, maximally impure). The best question is «More than 74 m²?»: on the left end up 5 non-expensive, on the right 5 expensive; both leaves are pure straight away (Gini = 0). A single split is enough, the tree has depth 1. The SVM also places its boundary exactly in the middle (74 m²), logistic regression roughly there (between 70 and 78 m²), just by a different route.</p>
   <div class="demo" id="dtDemo">
     <div class="tag">Demo</div><h4>Decision tree: effect of depth</h4>
-    <svg class="plot" id="dtSvg" viewBox="0 0 320 220" role="img" aria-label="Decision regions of a tree with training points"></svg>
+    <svg class="plot" id="dtSvg" viewBox="0 0 320 220" role="img" aria-label="Rectangles of the tree with split lines and training points"></svg>
     <div class="ctl"><label for="dtD">Maximum depth</label><input type="range" id="dtD" min="1" max="8" step="1" value="2"><output id="dtDO"></output></div>
+    <svg class="plot" id="dtTree" viewBox="0 0 320 175" role="img" aria-label="The tree as a diagram: questions in the nodes, classes in the leaves" style="margin-top:10px"></svg>
+    <svg class="plot" id="dtCurve" viewBox="0 0 320 125" role="img" aria-label="Training and test accuracy for depths 1 to 8" style="margin-top:10px"></svg>
     <div class="stats"><span>Leaves <b id="dtL"></b></span><span>Training accuracy <b id="dtTr"></b></span><span>Test accuracy (new points) <b id="dtTe"></b></span></div>
     <p class="hint" id="dtMsg">&nbsp;</p>
-    <p class="hint">Every region is a rectangle, because every question cuts along one axis. Same data as for kNN.</p>
+    <p class="hint">Top: every question is a line, every region a leaf. The stronger the colour, the purer the leaf. Middle: the same tree as a diagram (question in the node, square = leaf, deeper than 4 only hinted). Bottom: training (blue) always rises, test (orange) does not. Same data as for kNN.</p>
   </div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Neural networks</h4>
   <p>Layers of artificial neurons with weighted connections, trained by backpropagation (gradient descent across all layers). With very many layers it is called deep learning, which comes in the next module.</p>
   <p class="note"><b>With the 10 apartments:</b> A single neuron with sigmoid, <code>P(expensive) = sigmoid(w·m² + b)</code>, <i>is</i> the logistic regression from above. You do not need more layers here, because the classes can be separated by one split at 74 m². More layers only pay off for patterns that no single boundary can describe.</p>
 
   <div class="demo" id="nnDemo">
-    <div class="tag">Demo</div><h4>Neural network: neurons and training rounds</h4>
-    <svg class="plot" id="nnSvg" viewBox="0 0 320 220" role="img" aria-label="Decision regions of a small network, one class is a circle in the middle"></svg>
+    <div class="tag">Demo</div><h4>Neural network: watching it learn neuron by neuron</h4>
+    <div class="btnrow"><button class="pri" id="nnD1">Circle</button><button id="nnD2">XOR</button><button id="nnD3">Two groups</button></div>
+    <svg class="plot" id="nnSvg" viewBox="0 0 320 220" role="img" aria-label="Decision region of the network with training points"></svg>
     <div class="ctl"><label for="nnH">Neurons in the hidden layer</label><input type="range" id="nnH" min="1" max="8" step="1" value="4"><output id="nnHO"></output></div>
-    <div class="ctl"><label for="nnE">Training rounds (epochs)</label><input type="range" id="nnE" min="0" max="1500" step="50" value="600"><output id="nnEO"></output></div>
-    <div class="stats"><span>Training accuracy <b id="nnTr"></b></span><span>Test accuracy (new points) <b id="nnTe"></b></span></div>
+    <div class="btnrow"><button class="pri" id="nnPlay">Start training</button><button id="nnStep">+100 rounds</button><button id="nnReset">Reset</button></div>
+    <svg class="plot" id="nnNeu" viewBox="0 0 320 150" role="img" aria-label="Each hidden neuron with its own boundary" style="margin-top:10px"></svg>
+    <svg class="plot" id="nnLoss" viewBox="0 0 320 120" role="img" aria-label="Training and test loss over the training rounds" style="margin-top:10px"></svg>
+    <div class="stats"><span>Round (epoch) <b id="nnEp"></b></span><span>Training accuracy <b id="nnTr"></b></span><span>Test accuracy (new points) <b id="nnTe"></b></span><span>Loss (Train / Test) <b id="nnLs"></b></span></div>
     <p class="hint" id="nnMsg">&nbsp;</p>
-    <p class="hint">The class in the middle (blue) is surrounded by the other, which no straight line can separate. With few neurons or rounds the region stays coarse.</p>
+    <p class="hint">Top: the decision region of the whole network. Middle: each neuron looks at the plane on its own (blue = positive activation, orange = negative); in brackets its weight towards the output. The network combines these simple pictures into the shape above. Bottom: the loss (error measure) falls while the network learns. «Two groups» needs just one neuron, «Circle» and XOR need several.</p>
   </div>
   <h3>6 · Ensembles: many weak models make a strong one</h3>
   <p>A single model makes mistakes, and a deep tree even memorises the training data. The idea of ensembles: take <b>many simple trees</b> instead of one big one and combine them. There are two ways, and the difference is the key question of this section: do the trees work <i>side by side</i> or <i>one after another</i>?</p>
