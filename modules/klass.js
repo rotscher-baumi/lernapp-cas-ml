@@ -87,7 +87,7 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
   <p>Die <b>ROC-Kurve</b> trägt für alle Schwellen die Trefferquote (TPR = Recall) gegen die Rate falscher Alarme (FPR) auf. Ein perfektes Modell liegt oben links, Raten liegt auf der Diagonalen. Die <b>AUC</b> ist die Fläche unter der Kurve: 1 ist perfekt, 0,5 ist Zufall.</p>
   <div class="demo" id="thDemo">
     <div class="tag">Demo</div><h4>Schwelle, Confusion Matrix und ROC</h4>
-    <p class="hint">20 Fälle, 10 echt positiv, 10 echt negativ, mit festen Modell-Wahrscheinlichkeiten.</p>
+    <p class="hint">20 Fälle, 10 echt positiv, 10 echt negativ, mit festen Modell-Wahrscheinlichkeiten. Die meisten Fälle sind eindeutig, nur 4 liegen im Grenzbereich (zwischen 0,4 und 0,65).</p>
     <svg class="plot" id="thSvg" viewBox="0 0 320 170" role="img" aria-label="Wahrscheinlichkeiten der 20 Fälle auf einer Achse mit Schwelle"></svg>
     <div class="ctl"><label for="thT">Schwelle</label><input type="range" id="thT" min="0.02" max="0.98" step="0.01" value="0.5"><output id="thTO"></output></div>
     <div class="tablewrap"><table style="min-width:0">
@@ -97,7 +97,7 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
     </table></div>
     <div class="stats"><span>Accuracy <b id="thAcc"></b></span><span>Precision <b id="thPre"></b></span><span>Recall <b id="thRec"></b></span><span>F1 <b id="thF1"></b></span><span>AUC <b id="thAuc"></b></span></div>
     <svg class="plot" id="thRoc" viewBox="0 0 320 210" role="img" aria-label="ROC-Kurve mit aktuellem Schwellenpunkt" style="margin-top:12px"></svg>
-    <p class="hint">Oben: Kreis = echt positiv, Quadrat = echt negativ. Alles rechts der Linie wird als positiv vorhergesagt. Unten: Der orange Punkt wandert beim Schieben der Schwelle auf der ROC-Kurve.</p>
+    <p class="hint">Oben: Kreis = echt positiv, Quadrat = echt negativ. Alles rechts der Linie wird als positiv vorhergesagt. Unten: Der orange Punkt wandert beim Schieben der Schwelle auf der ROC-Kurve: Höhere Schwelle (Linie nach rechts) bewegt ihn nach links unten, tiefere Schwelle nach rechts oben.</p>
   </div>
   <div class="merk"><b>Zusammenfassung: Schwelle, ROC, AUC</b><ul>
     <li><b>Schwelle:</b> Das Modell liefert Wahrscheinlichkeiten, erst die Schwelle macht daraus Klassen. Tiefere Schwelle = mehr Recall, mehr falsche Alarme.</li>
@@ -348,7 +348,7 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
 
       // Demo 2: threshold, confusion matrix, ROC
       (function(){
-        const pos=[0.95,0.9,0.85,0.8,0.72,0.65,0.55,0.45,0.35,0.2],neg=[0.7,0.6,0.5,0.4,0.3,0.25,0.2,0.15,0.1,0.05];
+        const pos=[0.97,0.94,0.91,0.88,0.85,0.82,0.78,0.74,0.58,0.42],neg=[0.62,0.52,0.30,0.26,0.22,0.18,0.14,0.10,0.06,0.03];
         function counts(t){let tp=0,fn=0,fp=0,tn=0;pos.forEach(p=>p>=t?tp++:fn++);neg.forEach(p=>p>=t?fp++:tn++);return{tp:tp,fn:fn,fp:fp,tn:tn}}
         const ths=[1.01].concat(pos.concat(neg).sort((a,b)=>b-a)).concat([0]);
         const roc=ths.map(t=>{const c=counts(t);return[c.fp/neg.length,c.tp/pos.length]});

@@ -78,7 +78,7 @@ clf.predict_proba(X_test)    # probabilities per class</code></pre>
   <p>The <b>ROC curve</b> plots, for all thresholds, the hit rate (TPR = Recall) against the false alarm rate (FPR). A perfect model lies at the top left, guessing lies on the diagonal. The <b>AUC</b> is the area under the curve: 1 is perfect, 0.5 is chance.</p>
   <div class="demo" id="thDemo">
     <div class="tag">Demo</div><h4>Threshold, Confusion Matrix and ROC</h4>
-    <p class="hint">20 cases, 10 actually positive, 10 actually negative, with fixed model probabilities.</p>
+    <p class="hint">20 cases, 10 actually positive, 10 actually negative, with fixed model probabilities. Most cases are clear-cut, only 4 are borderline (between 0.4 and 0.65).</p>
     <svg class="plot" id="thSvg" viewBox="0 0 320 170" role="img" aria-label="Probabilities of the 20 cases on an axis with threshold"></svg>
     <div class="ctl"><label for="thT">Threshold</label><input type="range" id="thT" min="0.02" max="0.98" step="0.01" value="0.5"><output id="thTO"></output></div>
     <div class="tablewrap"><table style="min-width:0">
@@ -88,7 +88,7 @@ clf.predict_proba(X_test)    # probabilities per class</code></pre>
     </table></div>
     <div class="stats"><span>Accuracy <b id="thAcc"></b></span><span>Precision <b id="thPre"></b></span><span>Recall <b id="thRec"></b></span><span>F1 <b id="thF1"></b></span><span>AUC <b id="thAuc"></b></span></div>
     <svg class="plot" id="thRoc" viewBox="0 0 320 210" role="img" aria-label="ROC curve with the current threshold point" style="margin-top:12px"></svg>
-    <p class="hint">Top: circle = actually positive, square = actually negative. Everything to the right of the line is predicted as positive. Bottom: the orange point moves along the ROC curve as you slide the threshold.</p>
+    <p class="hint">Top: circle = actually positive, square = actually negative. Everything to the right of the line is predicted as positive. Bottom: the orange point moves along the ROC curve as you slide the threshold: a higher threshold (line to the right) moves it down and to the left, a lower threshold up and to the right.</p>
   </div>
   <div class="merk"><b>Summary: threshold, ROC, AUC</b><ul>
     <li><b>Threshold:</b> The model gives probabilities; only the threshold turns them into classes. Lower threshold = more Recall, more false alarms.</li>
