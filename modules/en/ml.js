@@ -354,7 +354,8 @@ sns.heatmap(data.corr(), annot=True, cmap="Reds")</code></pre>
   <p>Degree 9 goes exactly through all 10 points, and the error on the known apartments is 0, but for a new apartment the prediction is useless. That is overfitting in its purest form. Degree 1 is by far the best here, because the data is almost linear.</p>
   <div class="demo" id="bvDemo">
     <div class="tag">Demo</div><h4>Model complexity: polynomial degree</h4>
-    <svg class="plot" id="bvSvg" viewBox="0 0 320 220" role="img" aria-label="Data points, true curve and fitted polynomial"></svg>
+    <svg class="plot" id="bvSvg" viewBox="0 0 320 220" role="img" aria-label="Training points, test points (orange), true curve and fitted polynomial"></svg>
+    <div class="stats" id="bvLeg"></div>
     <div class="ctl"><label for="bvDeg">Degree</label><input type="range" id="bvDeg" min="1" max="9" step="1" value="1"><output id="bvDegO"></output></div>
     <div class="stats"><span>Training error <b id="bvTr"></b></span><span>Test error <b id="bvTe"></b></span></div>
     <p class="hint" id="bvMsg"></p>

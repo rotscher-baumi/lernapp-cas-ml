@@ -375,7 +375,8 @@ sns.heatmap(data.corr(), annot=True, cmap="Reds")</code></pre>
   <p>Grad 9 geht exakt durch alle 10 Punkte, der Fehler auf den bekannten Wohnungen ist 0, aber für eine neue Wohnung ist die Vorhersage unbrauchbar. Das ist Overfitting in Reinform. Grad 1 ist hier mit Abstand am besten, weil die Daten fast linear sind.</p>
   <div class="demo" id="bvDemo">
     <div class="tag">Demo</div><h4>Modellkomplexität: Polynomgrad</h4>
-    <svg class="plot" id="bvSvg" viewBox="0 0 320 220" role="img" aria-label="Datenpunkte, wahre Kurve und angepasstes Polynom"></svg>
+    <svg class="plot" id="bvSvg" viewBox="0 0 320 220" role="img" aria-label="Trainingspunkte, Testpunkte (orange), wahre Kurve und angepasstes Polynom"></svg>
+    <div class="stats" id="bvLeg"></div>
     <div class="ctl"><label for="bvDeg">Grad</label><input type="range" id="bvDeg" min="1" max="9" step="1" value="1"><output id="bvDegO"></output></div>
     <div class="stats"><span>Trainingsfehler <b id="bvTr"></b></span><span>Testfehler <b id="bvTe"></b></span></div>
     <p class="hint" id="bvMsg"></p>
@@ -645,18 +646,24 @@ print(&quot;CV-Accuracy:&quot;, round(search.best_score_, 3), &quot;| Test-Accur
         const tx=[],ty=[];for(let i=0;i<10;i++){const x=i/9;tx.push(x*2-1);ty.push(f(x)+0.3*gauss(r))}
         const ex=[],ey=[];for(let i=0;i<60;i++){const x=r();ex.push(x*2-1);ey.push(f(x)+0.3*gauss(r))}
         const coefs=[],tr=[],te=[];for(let d=1;d<=9;d++){const c=polyFit(tx,ty,d);coefs.push(c);tr.push(mse(c,tx,ty));te.push(mse(c,ex,ey))}
+        const big=v=>v<1000?fmt(v,3):fmt(v,0);
+        // All three messages sit on top of each other so the box keeps the height of the longest one and nothing below it jumps.
+        const SUFFIX=LernApp.t(' Gestrichelt: die wahre Sinuskurve (sieht das Modell nicht).',' Dashed: the true sine curve (the model does not see it).');
+        const msgs=[LernApp.t('Zu einfach: Die Kurve verpasst das Muster. Beide Fehler sind hoch (Underfitting, hoher Bias).','Too simple: the curve misses the pattern. Both errors are high (Underfitting, high bias).'),LernApp.t('Zu komplex: Die Kurve folgt dem Rauschen der 10 Punkte. Trainingsfehler tief, Testfehler deutlich höher (Overfitting, hohe Variance).','Too complex: the curve follows the noise of the 10 points. Training error low, test error clearly higher (Overfitting, high variance).'),LernApp.t('Guter Bereich: Die Kurve fängt das Muster, ohne dem Rauschen nachzulaufen.','Good range: the curve captures the pattern without chasing the noise.')].map(x=>x+SUFFIX);
+        $('bvMsg').style.display='grid';$('bvMsg').innerHTML=msgs.map(()=>'<span style="grid-area:1/1"></span>').join('');
+        const msgEls=[].slice.call($('bvMsg').children);msgEls.forEach((el,i)=>{el.textContent=msgs[i]});
+        $('bvLeg').innerHTML='<span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4" style="fill:var(--fg)"/></svg> '+LernApp.t('Training (10 Punkte)','Training (10 points)')+'</span><span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="3" style="fill:var(--warn);opacity:.7"/></svg> '+LernApp.t('Test (60 neue Punkte, orange)','Test (60 new points, orange)')+'</span><span><svg width="22" height="12" aria-hidden="true"><line class="dash" x1="0" y1="6" x2="22" y2="6"/></svg> '+LernApp.t('wahre Kurve','true curve')+'</span>';
         const W=320,H=220,YMIN=-2,YMAX=2;const sx=x=>8+((x+1)/2)*(W-16),sy=y=>H-8-((Math.max(YMIN,Math.min(YMAX,y))-YMIN)/(YMAX-YMIN))*(H-16);
         function draw(){const d=+$('bvDeg').value;$('bvDegO').textContent=d;const c=coefs[d-1];
           let s='<line class="ax" x1="0" y1="'+sy(0)+'" x2="'+W+'" y2="'+sy(0)+'"/>';
           let tp='',cp='';for(let i=0;i<=100;i++){const x=-1+i*0.02,xo=(x+1)/2;tp+=(i?'L':'M')+sx(x).toFixed(1)+' '+sy(f(xo)).toFixed(1);cp+=(i?'L':'M')+sx(x).toFixed(1)+' '+sy(polyEval(c,x)).toFixed(1)}
           s+='<path class="dash" d="'+tp+'"/><path class="ln" d="'+cp+'"/>';
+          for(let i=0;i<ex.length;i++)s+='<circle cx="'+sx(ex[i])+'" cy="'+sy(ey[i])+'" r="2.5" style="fill:var(--warn);opacity:.6"/>';
           for(let i=0;i<tx.length;i++)s+='<circle class="pt" cx="'+sx(tx[i])+'" cy="'+sy(ty[i])+'" r="4"/>';
-          $('bvSvg').innerHTML=s;$('bvTr').textContent=fmt(tr[d-1],3);$('bvTe').textContent=fmt(te[d-1],3);
-          const minTe=Math.min.apply(null,te),bestD=te.indexOf(minTe)+1;let m;
-          if(d<bestD&&te[d-1]>2*minTe)m=LernApp.t('Zu einfach: Die Kurve verpasst das Muster. Beide Fehler sind hoch (Underfitting, hoher Bias).','Too simple: the curve misses the pattern. Both errors are high (Underfitting, high bias).');
-          else if(d>bestD&&te[d-1]>1.5*minTe)m=LernApp.t('Zu komplex: Die Kurve folgt dem Rauschen der 10 Punkte. Trainingsfehler tief, Testfehler deutlich höher (Overfitting, hohe Variance).','Too complex: the curve follows the noise of the 10 points. Training error low, test error clearly higher (Overfitting, high variance).');
-          else m=LernApp.t('Guter Bereich: Die Kurve fängt das Muster, ohne dem Rauschen nachzulaufen.','Good range: the curve captures the pattern without chasing the noise.');
-          $('bvMsg').textContent=m+LernApp.t(' Gestrichelt: die wahre Sinuskurve (sieht das Modell nicht).',' Dashed: the true sine curve (the model does not see it).');
+          $('bvSvg').innerHTML=s;$('bvTr').textContent=big(tr[d-1]);$('bvTe').textContent=big(te[d-1]);
+          const minTe=Math.min.apply(null,te),bestD=te.indexOf(minTe)+1;
+          const k=d<bestD&&te[d-1]>2*minTe?0:d>bestD&&te[d-1]>1.5*minTe?1:2;
+          msgEls.forEach((el,i)=>{el.style.visibility=i===k?'visible':'hidden'});
           const EW=320,EH=150,EM=Math.max.apply(null,te.concat(tr).filter(v=>v<1.0).concat([0.5])),ex2=i=>30+(i/8)*(EW-45),ey2=v=>EH-22-(Math.min(v,EM)/EM)*(EH-36);
           let g='<line class="ax" x1="30" y1="'+(EH-22)+'" x2="'+(EW-10)+'" y2="'+(EH-22)+'"/>';
           for(let k=1;k<=9;k++)g+='<text class="lbl" x="'+(ex2(k-1)-3)+'" y="'+(EH-8)+'">'+k+'</text>';

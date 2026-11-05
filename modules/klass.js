@@ -59,7 +59,9 @@
     <svg class="plot" id="lsSvg" viewBox="0 0 320 190" role="img" aria-label="Fehler in Abhängigkeit der vorhergesagten Wahrscheinlichkeit für eine Wohnung, die wirklich teuer ist"></svg>
     <div class="ctl"><label for="lsP">Vorhergesagte P(teuer)</label><input type="range" id="lsP" min="1" max="99" step="1" value="10"><output id="lsPO"></output></div>
     <div class="stats"><span>Cross-Entropy <b id="lsCE"></b></span><span>MSE <b id="lsMS"></b></span></div>
-    <p class="hint">Die Wohnung ist wirklich teuer (y = 1). Sagt das Modell nur 1 % Wahrscheinlichkeit, ist es sicher und falsch. Die Cross-Entropy (−ln p, durchgezogen) schiesst dann steil nach oben und zwingt das Modell zur Korrektur. Der quadratische Fehler ((1−p)², gestrichelt) bleibt bei maximal 1. Zusammen mit der Sigmoid wird sein Gradient bei sicher falschen Vorhersagen fast 0, das Modell korrigiert kaum.</p>
+    <p class="hint"><b>Was du siehst:</b> Die Wohnung ist wirklich teuer (y = 1). Mit dem Regler stellst du ein, wie viel Wahrscheinlichkeit das Modell für «teuer» angibt. Die Linien zeigen die Strafe für diese Vorhersage: Je höher die Linie, desto schlechter.</p>
+    <p class="hint"><b>Was passiert:</b> Liegt das Modell richtig (p nahe 1), sind beide Strafen klein. Liegt es sicher falsch (p nahe 0), steigt die Cross-Entropy (−ln p, durchgezogen) ohne Grenze, der MSE ((1−p)², gestrichelt) bleibt bei höchstens 1. Probiere p = 0,01: Cross-Entropy 4,6, MSE nur 0,98.</p>
+    <p class="hint"><b>Warum das zählt:</b> Das Modell lernt, indem es die Gewichte dorthin schiebt, wo die Strafe kleiner wird. Dafür braucht es eine Steigung. Beim MSE ist sie bei sicher falschen Vorhersagen fast null, weil die Sigmoid-Kurve dort flach ist, und das Modell bleibt im Irrtum stecken. Bei der Cross-Entropy bleibt die Steigung gross, und das Modell korrigiert sich schnell.</p>
   </div>
   <pre><code>from sklearn.linear_model import LogisticRegression
 clf = LogisticRegression().fit(X_train, y_train)
@@ -277,26 +279,55 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
     <tr><td>Hilft gegen</td><td>hohe Varianz (Overfitting)</td><td>hohen Bias (Underfitting)</td></tr>
     <tr><td>Risiko</td><td>wenig, robust ohne viel Einstellen</td><td>Overfitting bei zu vielen Runden oder zu hoher Lernrate</td></tr>
   </table></div>
-  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Beispiel: die 10 Wohnungen</h4>
-  <p>Bei der Klasse «teuer» reicht der eine Schnitt bei 74 qm, da gibt es für ein Ensemble nichts zu verbessern. Deshalb gehen wir hier zurück zur Frage von Tag 1, dem <b>Preis</b> (Ensembles gibt es genauso für Regression). Der Preis steigt nicht sauber mit den qm: die 70-qm-Wohnung (1620) ist billiger als die 62-qm-Wohnung (1770), die 85-qm-Wohnung (1850) billiger als die 78-qm-Wohnung (1890). Ein tiefer Baum lernt diese Ausreisser auswendig.</p>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Wann nehme ich was?</h4>
+  <p>Die erste Frage ist nicht «welches ist besser?», sondern «was fehlt meinem Modell?». Vergleiche dazu den Score auf dem Training mit dem auf der Validierung.</p>
+  <div class="grid2">
+    <div><h4>Bagging (Random Forest), wenn …</h4>
+      <ul>
+        <li>der einzelne Baum <b>overfittet</b>: Training sehr gut, Validierung deutlich schlechter.</li>
+        <li>du einen <b>starken ersten Wurf ohne viel Einstellen</b> willst. Die Standardwerte reichen oft.</li>
+        <li>die Daten <b>verrauscht</b> sind oder Ausreisser haben. Der Mittelwert über viele Bäume glättet das.</li>
+        <li>du schnell trainieren willst: Die Bäume sind unabhängig und laufen parallel (<code>n_jobs=-1</code>).</li>
+      </ul></div>
+    <div><h4>Boosting (Gradient Boosting), wenn …</h4>
+      <ul>
+        <li>das Modell <b>zu einfach</b> ist: Training und Validierung sind beide schlecht (Underfitting).</li>
+        <li>du auf Tabellendaten die <b>bestmögliche Genauigkeit</b> brauchst und Zeit zum Einstellen hast.</li>
+        <li>du Lernrate, Rundenzahl und Tiefe mit Validierung abstimmen kannst, am besten mit <i>Early Stopping</i> (aufhören, wenn der Validierungsfehler wieder steigt).</li>
+        <li>die Daten sauber sind: Boosting richtet sich nach den Restfehlern und versucht darum auch, falsche Labels und Ausreisser zu lernen.</li>
+      </ul></div>
+  </div>
+  <div class="falle"><b>Wann keines von beiden</b><p>Wenn der Zusammenhang fast linear ist, gewinnt die einfache Gerade oder die logistische Regression. Bei sehr wenigen Zeilen (etwa unter 100) lohnt sich der Aufwand nicht. Wenn du das Ergebnis erklären musst, ist ein einzelner kleiner Baum besser lesbar. Bei Bildern und Text sind neuronale Netze die Wahl.</p></div>
+  <div class="merk"><b>Faustregel</b><p>Starte mit einem Random Forest als starker Baseline. Reicht die Genauigkeit nicht, probiere Boosting und stimme es mit der Validierung ab. Diagnose: Training gut und Validierung schlecht → Bagging. Beide schlecht → Boosting.</p></div>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Beispiel: 100 Wohnungen</h4>
+  <p>Die 10 Wohnungen von Tag 1 sind für Ensembles zu wenig: Bei 10 Punkten und einem fast linearen Preis gibt es nichts zu verbessern. Darum nimmt dieses Beispiel <b>100 Wohnungen</b> (erfunden, mit festen Zufallszahlen, es sind immer dieselben). <b>70</b> davon dienen zum Trainieren, <b>30</b> zum Testen: Das Modell sieht sie nie, und der Test-Fehler zeigt, wie gut es auf <i>neue</i> Wohnungen passt. Gesucht ist wieder der <b>Preis</b> aus den qm (Ensembles gibt es genauso für Regression). Der Preis steigt mit den qm und springt ab etwa 85 qm nach oben, weil grosse Wohnungen pro qm teurer sind. Dazu kommt Rauschen (Lage, Zustand), das kein Modell vorhersagen kann.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Modell</th><th class="num">Fehler Training (CHF)</th><th class="num">Fehler Test (CHF)</th></tr>
+    <tr><td>Gerade von Tag 1</td><td class="num">131</td><td class="num">154</td></tr>
+    <tr><td>Einzelbaum, Tiefe 3</td><td class="num">76</td><td class="num">126</td></tr>
+    <tr><td>Einzelbaum, Tiefe 6</td><td class="num">55</td><td class="num">128</td></tr>
+    <tr><td>Bagging, 20 Bäume, Tiefe 3</td><td class="num">72</td><td class="num">107</td></tr>
+    <tr><td>Boosting, 30 Runden, Tiefe 1, Lernrate 0,3</td><td class="num">70</td><td class="num">104</td></tr>
+    <tr><td>Boosting, 50 Runden, Tiefe 3, Lernrate 1</td><td class="num">40</td><td class="num">131</td></tr>
+  </table></div>
   <ul>
-    <li><b>Einzelbaum:</b> Mit Tiefe 3 hat fast jede Wohnung ihr eigenes Blatt. Auf den bekannten Wohnungen ist der Fehler klein (etwa 35 CHF), lässt du eine Wohnung weg, ist er viel grösser (etwa 240 CHF). Dieser Abstand ist das Overfitting.</li>
-    <li><b>Bagging:</b> Jeder Baum bekommt 10 Wohnungen, die <i>mit Zurücklegen</i> gezogen werden. Manche kommen doppelt vor, andere gar nicht (im Schnitt sind etwa 65 % verschiedene dabei, bei vielen Daten 63 %). Jeder Baum irrt anders, der Mittelwert ist glatter und merkt sich weniger auswendig. Bei nur 10 Wohnungen bleibt der Fehler bei einer fehlenden Wohnung trotzdem ähnlich, der Vorteil zeigt sich erst bei mehr Daten.</li>
-    <li><b>Boosting, Runde für Runde:</b> Start ist der Durchschnittspreis, <b>1841 CHF</b> für jede Wohnung. Die kleinste Wohnung (35 qm) kostet aber nur 1200, der Restfehler ist also <b>−641</b>. Runde 1: Ein Baum der Tiefe 1 schneidet bei 90 qm. Links (7 Wohnungen) liegt der mittlere Restfehler bei −215, rechts (3 Wohnungen) bei +502. Mit Lernrate 0,3 wird nur ein Teil addiert: die 35-qm-Wohnung steigt nicht auf 1626, sondern auf 1841 − 0,3·215 = <b>1776</b>. Ihr Restfehler schrumpft von −641 auf <b>−576</b>. Runde 2 schneidet bei 74 qm und korrigiert die neuen Restfehler, Runde 3 bei 58,5 qm. Nach drei Runden steht die 35-qm-Wohnung bei einem Restfehler von −416. Kleine Schritte, viele Runden: Die Linie in der Demo wandert dadurch Runde für Runde auf die Preise zu.</li>
+    <li><b>Einzelbaum:</b> Die Gerade kann den Sprung bei 85 qm nicht abbilden (Bias). Ein tiefer Baum (Tiefe 6) lernt dagegen auch das Rauschen: Auf den 70 Trainings-Wohnungen ist der Fehler klein (55 CHF), auf den 30 neuen deutlich grösser (128 CHF). Dieser Abstand ist das Overfitting.</li>
+    <li><b>Bagging:</b> Jeder Baum bekommt 70 Wohnungen, die <i>mit Zurücklegen</i> gezogen werden. Manche kommen doppelt vor, andere gar nicht (im Schnitt sind etwa 63 % verschiedene dabei). Jeder Baum irrt anders, der Mittelwert über 20 Bäume ist glatter und merkt sich weniger Rauschen: Der Test-Fehler sinkt von 126 auf 107 CHF, obwohl die Bäume gleich tief sind (Varianz).</li>
+    <li><b>Boosting, Runde für Runde:</b> Start ist der Durchschnittspreis, <b>1480 CHF</b> für jede Wohnung. Die kleinste Wohnung (30 qm) kostet aber nur 940, der Restfehler ist also <b>−540</b>. Runde 1: Ein Baum der Tiefe 1 schneidet bei 86 qm. Links (38 Wohnungen) liegt der mittlere Restfehler bei −396, rechts (32 Wohnungen) bei +470. Mit Lernrate 0,3 wird nur ein Teil addiert: die 30-qm-Wohnung steigt nicht auf 1084, sondern auf 1480 − 0,3·396 ≈ <b>1361</b>. Ihr Restfehler schrumpft von −540 auf etwa <b>−420</b>. Runde 2 schneidet bei 80 qm und korrigiert die neuen Restfehler, Runde 3 bei 90 qm, danach liegt der Restfehler bei etwa −260. Nach 3 Runden ist der Test-Fehler noch hoch (204 CHF, Underfitting), nach 30 Runden sinkt er auf 104 CHF (Bias). Mit Tiefe 3 und Lernrate 1 lernt Boosting dagegen auch das Rauschen: Training 40, Test 131 CHF.</li>
   </ul>
   <div class="demo" id="enDemo">
-    <div class="tag">Demo</div><h4>Einzelbaum, Bagging und Boosting auf den 10 Wohnungen</h4>
-    <svg class="plot" id="enSvg" viewBox="0 0 320 230" role="img" aria-label="10 Wohnungen: qm gegen Preis mit der Vorhersage eines Einzelbaums, von Bagging oder von Boosting"></svg>
+    <div class="tag">Demo</div><h4>Einzelbaum, Bagging und Boosting auf 100 Wohnungen</h4>
+    <svg class="plot" id="enSvg" viewBox="0 0 320 230" role="img" aria-label="100 Wohnungen: qm gegen Preis mit der Vorhersage eines Einzelbaums, von Bagging oder von Boosting. Gefüllte Punkte sind Trainings-, leere Testwohnungen"></svg>
     <div class="btnrow"><button class="pri" id="enM1">Einzelbaum</button><button id="enM2">Bagging</button><button id="enM3">Boosting</button></div>
     <div class="ctl"><label for="enD">Tiefe der Bäume</label><input type="range" id="enD" min="1" max="4" step="1" value="3"><output id="enDO"></output></div>
     <div class="ctl" id="enNW"><label for="enN">Anzahl Bäume</label><input type="range" id="enN" min="1" max="50" step="1" value="20"><output id="enNO"></output></div>
     <div class="ctl" id="enLW"><label for="enL">Lernrate</label><input type="range" id="enL" min="0.05" max="1" step="0.05" value="0.3"><output id="enLO"></output></div>
-    <div class="stats"><span>Fehler auf den bekannten Wohnungen <b id="enTr"></b> CHF</span><span>Fehler, wenn die Wohnung fehlt <b id="enLo"></b> CHF</span></div>
+    <div class="stats"><span>Fehler Training (70, gefüllt) <b id="enTr"></b> CHF</span><span>Fehler Test (30, leer) <b id="enLo"></b> CHF</span></div>
     <p class="hint" id="enMsg"></p>
   </div>
-  <p class="hint">Der zweite Fehler ist «Leave-one-out»: Für jede Wohnung wird das Modell ohne sie neu trainiert und dann auf sie angewendet. Er zeigt, wie gut das Modell auf eine <i>neue</i> Wohnung passt (RMSE). Er bleibt überall hoch, weil kein Baum über die Randwohnungen (35 und 130 qm) hinaus extrapolieren kann: ausserhalb der bekannten qm ist die Vorhersage einfach der letzte Stufenwert. Zum Vergleich: Die einfache Gerade von Tag 1 hat bei fehlender Wohnung nur etwa 123 CHF Fehler. Sind die Daten fast linear, gewinnt das einfachere Modell, Ensembles lohnen sich erst bei komplizierteren Mustern und mehr Daten.</p>
+  <p class="hint">Der Test-Fehler ist der ehrliche: Er misst, wie gut das Modell auf Wohnungen passt, die es nie gesehen hat (RMSE). Er kann nicht unter das Rauschen in den Daten sinken (hier etwa 90 CHF). Die Gerade von Tag 1 liegt bei 154 CHF, die Ensembles schlagen sie, weil der Preis einen Sprung hat. Wäre der Zusammenhang fast linear, würde das einfachere Modell gewinnen. Mit 30 Test-Wohnungen schwanken die Werte etwas, achte auf den Abstand zwischen Training und Test.</p>
   <pre><code>from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-# X = qm der 10 Wohnungen (Spalte), y = Preis
+# X = qm der Trainings-Wohnungen (Spalte), y = Preis
 rf = RandomForestRegressor(n_estimators=200, random_state=0).fit(X, y)
 gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).fit(X, y)
 # Für «teuer ja/nein»: RandomForestClassifier / GradientBoostingClassifier</code></pre>
@@ -622,10 +653,12 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
         [['nnD1','circle'],['nnD2','xor'],['nnD3','blobs']].forEach(d=>{$(d[0]).addEventListener('click',()=>{kind=d[1];[['nnD1'],['nnD2'],['nnD3']].forEach(x=>{$(x[0]).className=x[0]===d[0]?'pri':''});reset()})});
         reset()})();
 
-      // Demo 6: 10 apartments, single tree vs bagging vs boosting (price regression on qm)
+      // Demo 6: 100 generated apartments (70 train, 30 test), single tree vs bagging vs boosting (price regression on qm)
       (function(){
-        const qm=[35,48,55,62,70,78,85,95,110,130],pr=[1200,1510,1540,1770,1620,1890,1850,2280,2170,2580];
-        const W=320,H=230,PX=40,PY=22,XA=25,XB=140,YA=1000,YB=2800;
+        const NTR=70,rg=mulberry32(42),all=[];
+        for(let i=0;i<100;i++){const q=Math.round(30+110*rg());all.push({q:q,p:Math.round((700+6*q+600/(1+Math.exp(-(q-85)/3))+90*gauss(rg))/10)*10})}
+        const qm=all.slice(0,NTR).map(a=>a.q),pr=all.slice(0,NTR).map(a=>a.p),qt=all.slice(NTR).map(a=>a.q),pt2=all.slice(NTR).map(a=>a.p);
+        const W=320,H=230,PX=40,PY=22,XA=25,XB=145,YA=600,YB=2400;
         const sx=x=>PX+((x-XA)/(XB-XA))*(W-PX-12),sy=v=>H-PY-((v-YA)/(YB-YA))*(H-PY-12);
         const mean=a=>a.reduce((p,c)=>p+c,0)/a.length;
         function fit(xs,ys,d){
@@ -657,19 +690,20 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
           const m=model(qm,pr,mode,d,n,lr);
           let s='<line class="ax" x1="'+PX+'" y1="'+(H-PY)+'" x2="'+(W-8)+'" y2="'+(H-PY)+'"/>';
           for(let t=40;t<=140;t+=20)s+='<text class="lbl" x="'+(sx(t)-8)+'" y="'+(H-6)+'">'+t+'</text>';
-          for(const t of[1000,1500,2000,2500])s+='<text class="lbl" x="2" y="'+(sy(t)+3)+'">'+t+'</text>';
+          for(const t of[1000,1500,2000])s+='<text class="lbl" x="2" y="'+(sy(t)+3)+'">'+t+'</text>';
           s+='<text class="lbl" x="'+(W-24)+'" y="'+(H-PY-4)+'">'+LernApp.t('qm','m²')+'</text>';
           const path=f=>{let q='';for(let x=XA;x<=XB;x+=0.5)q+=(x===XA?'M':'L')+sx(x).toFixed(1)+' '+sy(f(x)).toFixed(1);return q};
           m.parts.slice(0,20).forEach(t=>{s+='<path d="'+path(x=>pt(t,x))+'" style="fill:none;stroke:var(--warn);stroke-width:1;opacity:.3"/>'});
           s+='<path class="ln" d="'+path(m.f)+'"/>';
-          qm.forEach((x,i)=>{s+='<circle cx="'+sx(x)+'" cy="'+sy(pr[i])+'" r="4" style="fill:var(--fg)"/>'});
+          qm.forEach((x,i)=>{s+='<circle cx="'+sx(x)+'" cy="'+sy(pr[i])+'" r="3" style="fill:var(--fg)"/>'});
+          qt.forEach((x,i)=>{s+='<circle cx="'+sx(x)+'" cy="'+sy(pt2[i])+'" r="3" style="fill:none;stroke:var(--fg);stroke-width:1.5"/>'});
           $('enSvg').innerHTML=s;
           const tr=qm.map((x,i)=>m.f(x)-pr[i]);
-          const lo=qm.map((x,i)=>{const xs=qm.filter((v,j)=>j!==i),ys=pr.filter((v,j)=>j!==i);return model(xs,ys,mode,d,n,lr).f(x)-pr[i]});
+          const lo=qt.map((x,i)=>m.f(x)-pt2[i]);
           $('enTr').textContent=fmt(rmse(tr),0);$('enLo').textContent=fmt(rmse(lo),0);
-          $('enMsg').textContent=mode===1?(d>=3?LernApp.t('Tiefer Einzelbaum: Fast jede Wohnung hat ihr eigenes Blatt, die Stufen folgen den Ausreissern. Der Fehler auf bekannten Wohnungen ist klein, der Fehler bei fehlender Wohnung viel grösser (Overfitting).','Deep single tree: Almost every apartment has its own leaf, the steps follow the outliers. The error on known apartments is small, the error for a left-out apartment much larger (overfitting).'):LernApp.t('Flacher Einzelbaum: Wenige grobe Stufen. Der Fehler ist schon auf den bekannten Wohnungen hoch (Underfitting).','Shallow single tree: A few coarse steps. The error is already high on the known apartments (underfitting).'))
-            :mode===2?LernApp.t('Bagging: Die orangen Linien sind einzelne Bäume (je auf einer anderen Stichprobe der 10 Wohnungen), die blaue Linie ist ihr Mittelwert. Mit mehr Bäumen wird sie glatter. Bei flachen Bäumen (Tiefe 1 und 2) senkt Bagging beide Fehler etwas. Ab Tiefe 3 steigt der Fehler auf bekannten Wohnungen gegenüber dem Einzelbaum (weniger Auswendiglernen), der Fehler bei fehlender Wohnung bleibt bei nur 10 Wohnungen etwa gleich.','Bagging: The orange lines are single trees (each on a different sample of the 10 apartments), the blue line is their mean. With more trees it gets smoother. With shallow trees (depth 1 and 2) bagging lowers both errors a little. From depth 3 the error on known apartments rises compared with the single tree (less memorising), the error for a left-out apartment stays about the same with only 10 apartments.')
-            :LernApp.t('Boosting: Die Linie startet beim Durchschnitt (1841 CHF) und nähert sich pro Runde den Preisen. Mit Tiefe 1 und wenigen Runden ist sie grob. Mit mehr Runden oder höherer Lernrate liegt sie näher an den Preisen (Fehler auf bekannten Wohnungen sinkt), lernt aber irgendwann nur noch die Ausreisser: Der Fehler bei fehlender Wohnung sinkt anfangs deutlich, bleibt dann aber bei rund 230 CHF stehen.','Boosting: The line starts at the average (1841 CHF) and gets closer to the prices with each round. With depth 1 and few rounds it is coarse. With more rounds or a higher learning rate it lies closer to the prices (error on known apartments falls), but at some point it only learns the outliers: the error for a left-out apartment falls clearly at first, then levels off at about 230 CHF.')}
+          $('enMsg').textContent=mode===1?(d>=3?LernApp.t('Tiefer Einzelbaum: Er folgt auch dem Rauschen. Der Fehler im Training ist klein, auf den leeren Test-Wohnungen deutlich grösser (Overfitting).','Deep single tree: It also follows the noise. The error in training is small, on the empty test apartments clearly larger (overfitting).'):LernApp.t('Flacher Einzelbaum: Wenige grobe Stufen. Der Fehler ist schon im Training hoch (Underfitting).','Shallow single tree: A few coarse steps. The error is already high in training (underfitting).'))
+            :mode===2?LernApp.t('Bagging: Die orangen Linien sind einzelne Bäume (je auf einer anderen Stichprobe der 70 Trainings-Wohnungen), die blaue Linie ist ihr Mittelwert. Sie ist glatter als ein Einzelbaum, und der Test-Fehler ist tiefer als beim Einzelbaum gleicher Tiefe: Bagging senkt die Varianz. Stelle die Anzahl Bäume auf 1, dann hast du wieder einen einzelnen Baum auf einer Stichprobe.','Bagging: The orange lines are single trees (each on a different sample of the 70 training apartments), the blue line is their mean. It is smoother than a single tree, and the test error is lower than for a single tree of the same depth: bagging lowers the variance. Set the number of trees to 1 and you have a single tree on one sample again.')
+            :LernApp.t('Boosting: Die Linie startet beim Durchschnitt (1480 CHF) und nähert sich pro Runde den Preisen. Mit Tiefe 1 und wenigen Runden ist sie grob und im Training noch weit weg. Mit mehr Runden sinkt der Test-Fehler zuerst deutlich. Mit tieferen Bäumen und hoher Lernrate sinkt der Training-Fehler weiter, der Test-Fehler steigt aber wieder: Boosting lernt dann das Rauschen (Overfitting).','Boosting: The line starts at the average (1480 CHF) and gets closer to the prices with each round. With depth 1 and few rounds it is coarse and still far off in training. With more rounds the test error first falls clearly. With deeper trees and a high learning rate the training error keeps falling, but the test error rises again: boosting then learns the noise (overfitting).')}
         [1,2,3].forEach(k=>{$('enM'+k).addEventListener('click',()=>{mode=k;$('enD').value=k===3?1:3;$('enN').value=k===3?30:20;draw()})});
         ['enD','enN','enL'].forEach(id=>$(id).addEventListener('input',draw));draw()})();
     },
