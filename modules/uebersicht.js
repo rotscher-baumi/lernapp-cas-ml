@@ -318,7 +318,6 @@
       <li>${t('Merkmale, die die Antwort schon verraten, entfernen', 'Remove features that already give away the answer')}</li>
     </ul><div class="sb-f"><a href="#klass-leakage">${MEHR}</a> ${bsp('06_Strategien')}</div></div>
   </div>
-  <p class="note">${t('Alles zusammen an einem echten Datensatz: <a href="notebook.html?nb=beispiele/07_Titanic.ipynb">Titanic-Notebook</a> (einfaches Modell und Random Forest, mit EDA und Feature Engineering), dazu die Seite <a href="titanic.html">Titanic in der Lernapp</a>.', 'Everything together on a real dataset: <a href="notebook.html?nb=beispiele/07_Titanic.ipynb">Titanic notebook</a> (simple model and random forest, with EDA and feature engineering), plus the page <a href="titanic.html">Titanic in the study app</a>.')}</p>
   <div class="falle">${t('<b>Falle</b><p>Das Test-Set mehrfach zum Vergleichen benutzen. Dann wird es zur zweiten Validierung, und die Endzahl ist zu optimistisch.</p>', '<b>Pitfall</b><p>Using the test set several times for comparisons. It then becomes a second validation set, and the final number is too optimistic.</p>')}</div>
 `,
     quiz: [
