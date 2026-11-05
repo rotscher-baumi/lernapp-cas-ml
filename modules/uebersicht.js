@@ -71,9 +71,9 @@
 
   NB = '02_Klassifikation';
   const klass = [
-    card(t('Logistische Regression', 'Logistic regression'), t('Gewichtete Summe der Merkmale, durch die Sigmoid-Funktion in eine Wahrscheinlichkeit zwischen 0 und 1 umgerechnet. Ab einer Schwelle (Standard 0,5) gilt «Klasse 1».', 'Weighted sum of the features, converted by the sigmoid function into a probability between 0 and 1. Above a threshold (default 0.5) it counts as “class 1”.'), [
+    card(t('Logistische Regression', 'Logistic regression'), t('Gewichtete Summe der Merkmale, durch die Sigmoid-Funktion in eine Wahrscheinlichkeit zwischen 0 und 1 umgerechnet. Ab einem Threshold (Standard 0,5) gilt «Klasse 1».', 'Weighted sum of the features, converted by the sigmoid function into a probability between 0 and 1. Above a threshold (default 0.5) it counts as “class 1”.'), [
       [WANN, t('Ja/Nein-Fragen, erste Baseline für Klassifikation', 'yes/no questions, first baseline for classification')],
-      [HP, t('<code>C</code> (klein = stärker regularisiert), <code>class_weight</code>; die Schwelle wählst du danach', '<code>C</code> (small = stronger regularisation), <code>class_weight</code>; you choose the threshold afterwards')],
+      [HP, t('<code>C</code> (klein = stärker regularisiert), <code>class_weight</code>; den Threshold wählst du danach', '<code>C</code> (small = stronger regularisation), <code>class_weight</code>; you choose the threshold afterwards')],
       [SKAL, JA],
       ['+', t('liefert Wahrscheinlichkeiten, Gewichte deutbar', 'gives probabilities, weights interpretable')],
       ['−', t('nur gerade Grenzen', 'straight boundaries only')],
@@ -99,7 +99,7 @@
       ['+', t('oft sehr genau, robust bei vielen Merkmalen', 'often very accurate, robust with many features')],
       ['−', t('langsam bei grossen Daten, schwer zu deuten', 'slow with large data, hard to interpret')],
     ], 'SVC', '#klass-modelle'),
-    card(t('Entscheidungsbaum', 'Decision tree'), t('Stellt nacheinander Ja/Nein-Fragen mit Schwellen («mehr als 74 qm?»). Jeder Split macht die Gruppen möglichst rein (Gini, bei Regression MSE).', 'Asks yes/no questions with thresholds one after another (“more than 74 m²?”). Each split makes the groups as pure as possible (Gini, MSE for regression).'), [
+    card(t('Entscheidungsbaum', 'Decision tree'), t('Stellt nacheinander Ja/Nein-Fragen mit Thresholds («mehr als 74 qm?»). Jeder Split macht die Gruppen möglichst rein (Gini, bei Regression MSE).', 'Asks yes/no questions with thresholds one after another (“more than 74 m²?”). Each split makes the groups as pure as possible (Gini, MSE for regression).'), [
       [WANN, t('erklärbare Regeln gefragt, gemischte Merkmalstypen', 'explainable rules needed, mixed feature types')],
       [HP, '<code>max_depth</code>, <code>min_samples_leaf</code>'],
       [SKAL, NEIN],
@@ -163,10 +163,10 @@
   const ano = [
     card('Isolation Forest', t('Teilt die Daten mit zufälligen Schnitten. Ausreisser sind nach wenigen Schnitten allein, normale Punkte brauchen viele. Kurzer Weg = verdächtig.', 'Splits the data with random cuts. Outliers are isolated after a few cuts, normal points need many. Short path = suspicious.'), [
       [WANN, t('auffällige Fälle finden (Betrug, Defekte), viele Merkmale', 'finding unusual cases (fraud, defects), many features')],
-      [HP, t('<code>n_estimators</code>; <code>contamination</code> setzt nur die Schwelle für <code>predict</code>, die Rangliste der Scores ändert sich nicht', '<code>n_estimators</code>; <code>contamination</code> only sets the threshold for <code>predict</code>, the ranking of the scores does not change')],
+      [HP, t('<code>n_estimators</code>; <code>contamination</code> setzt nur den Threshold für <code>predict</code>, die Rangliste der Scores ändert sich nicht', '<code>n_estimators</code>; <code>contamination</code> only sets the threshold for <code>predict</code>, the ranking of the scores does not change')],
       [SKAL, NEIN],
       ['+', t('schnell, braucht keine Labels', 'fast, needs no labels')],
-      ['−', t('Schwelle oder Prüf-Budget (Top-N) musst du selbst festlegen; ein Score ist ein Hinweis, kein Beweis', 'you have to set the threshold or review budget (top N) yourself; a score is a hint, not proof')],
+      ['−', t('Threshold oder Prüf-Budget (Top-N) musst du selbst festlegen; ein Score ist ein Hinweis, kein Beweis', 'you have to set the threshold or review budget (top N) yourself; a score is a hint, not proof')],
     ], 'IsolationForest', '#unsup-anomalie'),
   ];
 
@@ -231,7 +231,7 @@
     <tr>${t('<th>Modell</th><th>Aufgabe</th><th>Skalieren?</th><th>Erklärbar?</th><th>Wichtigster Regler</th>', '<th>Model</th><th>Task</th><th>Scaling?</th><th>Explainable?</th><th>Most important knob</th>')}</tr>
     <tr><td>${t('Lineare Regression', 'Linear regression')}</td><td>${REGR}</td><td>${NEIN}*</td><td>${JA}</td><td>–</td></tr>
     <tr><td>Ridge / Lasso</td><td>${REGR}</td><td>${JA}</td><td>${JA}</td><td><code>alpha</code></td></tr>
-    <tr><td>${t('Logistische Regression', 'Logistic regression')}</td><td>${KLASS}</td><td>${JA}</td><td>${JA}</td><td><code>C</code>, ${t('Schwelle', 'threshold')}</td></tr>
+    <tr><td>${t('Logistische Regression', 'Logistic regression')}</td><td>${KLASS}</td><td>${JA}</td><td>${JA}</td><td><code>C</code>, ${t('Threshold', 'threshold')}</td></tr>
     <tr><td>kNN</td><td>${BEIDES}</td><td>${JA}</td><td>${MITTEL}</td><td><code>n_neighbors</code></td></tr>
     <tr><td>Naive Bayes</td><td>${KLASS}</td><td>${NEIN}</td><td>${MITTEL}</td><td>–</td></tr>
     <tr><td>SVM</td><td>${BEIDES}</td><td>${JA}</td><td>${NEIN}</td><td><code>C</code>, <code>kernel</code></td></tr>
@@ -309,7 +309,7 @@
       <li>${t('Einfachste Lösung: <code>class_weight="balanced"</code>', 'Simplest solution: <code>class_weight="balanced"</code>')}</li>
       <li>${t('Sonst Down- oder Upsampling, SMOTE', 'Otherwise downsampling or upsampling, SMOTE')}</li>
       <li>${t('Resampling nur auf den Trainingsdaten', 'Resampling only on the training data')}</li>
-      <li>${t('Schwelle an die Kosten von falschem Alarm und verpassten Fällen anpassen', 'Adjust the threshold to the cost of false alarms and missed cases')}</li>
+      <li>${t('Threshold an die Kosten von falschem Alarm und verpassten Fällen anpassen', 'Adjust the threshold to the cost of false alarms and missed cases')}</li>
     </ul><div class="sb-f"><a href="#klass">${MEHR}</a> ${bsp('06_Strategien')}</div></div>
     <div class="sb"><h4>${t('Data Leakage vermeiden', 'Avoiding data leakage')}</h4><ul>
       <li>${t('Keine Information aus dem Test-Set ins Training lassen', 'Let no information from the test set into training')}</li>
@@ -324,7 +324,7 @@
     quiz: [
       { q: t(`Train-Fehler klein, Validierungsfehler gross. Was liegt vor und was hilft?`, `Training error small, validation error large. What is going on and what helps?`), a: t(`Overfitting (hohe Variance). Einfacheres Modell, mehr Regularisierung, mehr Daten oder weniger Merkmale.`, `Overfitting (high variance). Simpler model, more regularisation, more data or fewer features.`) },
       { q: t(`Ridge oder Lasso, wenn du am Ende nur wenige Merkmale behalten willst?`, `Ridge or Lasso, if you want to keep only a few features in the end?`), a: t(`Lasso: Die L1-Strafe setzt unwichtige Gewichte genau auf 0. Ridge schrumpft nur.`, `Lasso: the L1 penalty sets unimportant weights to exactly 0. Ridge only shrinks.`) },
-      { q: t(`Welche Modelle brauchen keine Skalierung, und warum?`, `Which models need no scaling, and why?`), a: t(`Baum-Modelle (Entscheidungsbaum, Random Forest, Gradient Boosting, Isolation Forest). Sie vergleichen jedes Merkmal nur mit einer Schwelle, die Grössenordnung spielt keine Rolle.`, `Tree models (decision tree, Random Forest, Gradient Boosting, Isolation Forest). They only compare each feature with a threshold, so the order of magnitude does not matter.`) },
+      { q: t(`Welche Modelle brauchen keine Skalierung, und warum?`, `Which models need no scaling, and why?`), a: t(`Baum-Modelle (Entscheidungsbaum, Random Forest, Gradient Boosting, Isolation Forest). Sie vergleichen jedes Merkmal nur mit einem Threshold, die Grössenordnung spielt keine Rolle.`, `Tree models (decision tree, Random Forest, Gradient Boosting, Isolation Forest). They only compare each feature with a threshold, so the order of magnitude does not matter.`) },
       { q: t(`Was unterscheidet Bagging von Boosting?`, `What distinguishes bagging from boosting?`), a: t(`Bagging (Random Forest) trainiert parallel auf Zufallsstichproben und mittelt, das senkt die Variance. Boosting trainiert nacheinander auf den Restfehlern, das senkt den Bias.`, `Bagging (Random Forest) trains in parallel on random samples and averages, which lowers the variance. Boosting trains one after another on the remaining errors, which lowers the bias.`) },
       { q: t(`99 % der Fälle sind negativ. Warum ist Accuracy 99 % nichtssagend?`, `99 % of the cases are negative. Why is an accuracy of 99 % meaningless?`), a: t(`«Immer negativ» erreicht das auch, findet aber keinen einzigen positiven Fall. Recall, Precision und F1 zeigen das.`, `“Always negative” achieves that too, but finds not a single positive case. Recall, precision and F1 show this.`) },
       { q: t(`Wann DBSCAN statt k-Means?`, `When DBSCAN instead of k-Means?`), a: t(`Wenn die Cluster nicht rund sind, du k nicht kennst oder Ausreisser erwartest. DBSCAN markiert sie als Rauschen (−1).`, `When the clusters are not round, you do not know k or you expect outliers. DBSCAN marks them as noise (−1).`) },

@@ -120,7 +120,7 @@ plt.show()
 print(&quot;Überlebensrate unter 10 Jahren:&quot;, round(eda.loc[eda[&quot;Age&quot;] &lt; 10, &quot;Survived&quot;].mean(), 2))</code></pre>
     <pre class="out">Überlebensrate unter 10 Jahren: 0.57</pre>
     <figure class="fig"><img style="max-width:560px;margin:0 auto" src="assets/img/titanic-eda-4.png" alt="Zwei überlagerte Histogramme des Alters: gestorben und überlebt" loading="lazy"><figcaption>Bei kleinen Kindern überwiegen die Überlebenden, bei den 20- bis 30-Jährigen die Toten.</figcaption></figure>
-    <p>Kinder unter 10 Jahren überlebten zu 57 %, deutlich mehr als der Durchschnitt (38 %). Zwischen 20 und 30 überwiegen die Toten, das sind vor allem junge Männer in der 3. Klasse. Über alle Alter gesehen ist der Zusammenhang aber nicht gerade: Ein lineares Modell kann «unter 10 ist gut» nur schlecht abbilden, ein Baum lernt so eine Schwelle direkt.</p>
+    <p>Kinder unter 10 Jahren überlebten zu 57 %, deutlich mehr als der Durchschnitt (38 %). Zwischen 20 und 30 überwiegen die Toten, das sind vor allem junge Männer in der 3. Klasse. Über alle Alter gesehen ist der Zusammenhang aber nicht gerade: Ein lineares Modell kann «unter 10 ist gut» nur schlecht abbilden, ein Baum lernt so einen Threshold direkt.</p>
     <h4 style="margin:18px 0 4px;font-family:var(--f-display)">3f · Korrelations-Heatmap</h4>
     <pre><code># 3f · Korrelations-Heatmap (Geschlecht als 0/1)
 num_eda = eda[[&quot;Survived&quot;, &quot;Pclass&quot;, &quot;Age&quot;, &quot;SibSp&quot;, &quot;Parch&quot;, &quot;Fare&quot;]].assign(Frau=(eda[&quot;Sex&quot;] == &quot;female&quot;).astype(int))

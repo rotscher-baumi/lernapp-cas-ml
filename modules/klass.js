@@ -24,7 +24,7 @@
   <h3>1 · Logistische Regression</h3>
   <p>Trotz des Namens ein Klassifikator. Die Idee: Rechne wie bei der linearen Regression <code>z = w·x + b</code>. Dieses z kann beliebig gross oder klein sein. Die <b>Sigmoid-Funktion</b> presst es in den Bereich 0 bis 1 und macht daraus eine <b>Wahrscheinlichkeit</b>:</p>
   <pre><code>p = 1 / (1 + e^(-z))      z = w1*x1 + w2*x2 + ... + b</code></pre>
-  <p>Aus der Wahrscheinlichkeit wird eine Klasse über eine <b>Schwelle</b> (Standard 0,5): p über der Schwelle heisst «positiv», sonst «negativ». Die Stelle, wo p genau 0,5 ist (z = 0), ist die <b>Entscheidungsgrenze</b>.</p>
+  <p>Aus der Wahrscheinlichkeit wird eine Klasse über einen <b>Threshold</b> (Standard 0,5): p über dem Threshold heisst «positiv», sonst «negativ». Die Stelle, wo p genau 0,5 ist (z = 0), ist die <b>Entscheidungsgrenze</b>.</p>
   <div class="demo" id="sgDemo">
     <div class="tag">Demo</div><h4>Sigmoid und Entscheidungsgrenze</h4>
     <svg class="plot" id="sgSvg" viewBox="0 0 320 190" role="img" aria-label="Sigmoid-Kurve mit Datenpunkten der Klassen 0 und 1"></svg>
@@ -34,7 +34,7 @@
     <p class="hint">Gefüllte Punkte sind Klasse 1, leere Klasse 0. Die Kurve ist die vorhergesagte Wahrscheinlichkeit für Klasse 1. Eine grosse Steilheit macht das Modell «sicherer», aber auch härter bei den zwei durchmischten Punkten um x = 0. Trainiert wird nicht mit MSE, sondern mit der <b>Cross-Entropy</b> (bestraft sichere falsche Antworten sehr stark) und Gradient Descent wie am Tag 1.</p>
   </div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Weitergeführt: die 10 Wohnungen von Tag 1</h4>
-  <p>Gleiche Wohnungen, gleiche Achse (qm), nur die Frage ändert sich. Tag 1: <i>Wie viel kostet die Wohnung?</i> Jetzt: <i>Ist sie teuer?</i> Dazu legst du eine Preisschwelle fest, <code>teuer = 1</code> wenn der Preis darüber liegt, sonst 0. Beide Modelle rechnen dasselbe <code>z = b + w·qm</code>. Der einzige Unterschied ist, was mit z passiert:</p>
+  <p>Gleiche Wohnungen, gleiche Achse (qm), nur die Frage ändert sich. Tag 1: <i>Wie viel kostet die Wohnung?</i> Jetzt: <i>Ist sie teuer?</i> Dazu legst du einen Preis-Threshold fest, <code>teuer = 1</code> wenn der Preis darüber liegt, sonst 0. Beide Modelle rechnen dasselbe <code>z = b + w·qm</code>. Der einzige Unterschied ist, was mit z passiert:</p>
   <div class="tablewrap"><table>
     <tr><th></th><th>Lineare Regression</th><th>Logistische Regression</th></tr>
     <tr><td>Frage</td><td>Wie teuer?</td><td>Teuer ja/nein?</td></tr>
@@ -47,10 +47,10 @@
     <div class="tag">Demo</div><h4>Von der Preisgeraden zur Wahrscheinlichkeit</h4>
     <svg class="plot" id="lgSvg" viewBox="0 0 320 230" role="img" aria-label="10 Wohnungen: qm gegen Preis mit Gerade oder qm gegen Wahrscheinlichkeit teuer mit Sigmoid-Kurve"></svg>
     <div class="btnrow"><button class="pri" id="lgLin">Preis (linear)</button><button id="lgLog">Teuer ja/nein (logistisch)</button></div>
-    <div class="ctl"><label for="lgT">Preisschwelle «teuer»</label><input type="range" id="lgT" min="1500" max="2300" step="50" value="1800"><output id="lgTO"></output></div>
+    <div class="ctl"><label for="lgT">Preis-Threshold «teuer»</label><input type="range" id="lgT" min="1500" max="2300" step="50" value="1800"><output id="lgTO"></output></div>
     <div class="stats"><span id="lgForm"></span></div>
     <div class="stats"><span>Grenze bei <b id="lgBd"></b> qm</span><span id="lgOdds"></span></div>
-    <p class="hint">Gefüllte Punkte sind «teuer». <b>Linear:</b> Die Gerade ist das Modell von Tag 1, die gestrichelte Linie die Preisschwelle. Dort, wo die Gerade die Schwelle kreuzt, liegt eine Art Grenze, aber die Gerade sagt dir nur einen Preis, keine Wahrscheinlichkeit. <b>Logistisch:</b> Dasselbe z geht durch die Sigmoid-Funktion, und die Kurve ist P(teuer). Die Grenze ist da, wo P = 0,5 ist (z = 0). Verschiebst du die Schwelle, wandern Klassen und Grenze mit. Die Gewichte kommen aus Gradient Descent mit leichter Regularisierung (ohne sie würde w bei sauber trennbaren Daten ins Unendliche wachsen).</p>
+    <p class="hint">Gefüllte Punkte sind «teuer». <b>Linear:</b> Die Gerade ist das Modell von Tag 1, die gestrichelte Linie der Preis-Threshold. Dort, wo die Gerade den Threshold kreuzt, liegt eine Art Grenze, aber die Gerade sagt dir nur einen Preis, keine Wahrscheinlichkeit. <b>Logistisch:</b> Dasselbe z geht durch die Sigmoid-Funktion, und die Kurve ist P(teuer). Die Grenze ist da, wo P = 0,5 ist (z = 0). Verschiebst du den Threshold, wandern Klassen und Grenze mit. Die Gewichte kommen aus Gradient Descent mit leichter Regularisierung (ohne sie würde w bei sauber trennbaren Daten ins Unendliche wachsen).</p>
   </div>
   <div class="falle"><b>Falle (Gerade auf 0/1 legen)</b><p>Man könnte auch eine lineare Regression direkt auf die Werte 0 und 1 legen. Sie liefert dann Werte unter 0 und über 1, die sich nicht als Wahrscheinlichkeit lesen lassen, und einzelne extreme Wohnungen ziehen die Gerade und damit die Grenze weg. Die Sigmoid-Kurve bleibt zwischen 0 und 1.</p></div>
   <p><b>Was bedeutet das Gewicht w?</b> Bei der linearen Regression: «10 qm mehr, im Schnitt w·10 CHF mehr». Bei der logistischen Regression wirkt w auf die <b>Log-Odds</b>: <code>ln(p / (1 - p)) = z</code>. Diese sind linear in qm. 10 qm mehr erhöhen z um 10·w, und die Odds (p gegen 1-p) werden mit dem Faktor <code>e^(10·w)</code> multipliziert.</p>
@@ -65,7 +65,7 @@
 clf = LogisticRegression().fit(X_train, y_train)
 clf.predict(X_test)          # Klassen (0/1)
 clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
-  <div class="merk"><b>Merksatz</b><p>Logistische Regression = lineare Regression + Sigmoid. Das Modell liefert zuerst eine Wahrscheinlichkeit, die Klasse entsteht erst durch die Schwelle. Die Schwelle ist deine Entscheidung, nicht die des Modells.</p></div>
+  <div class="merk"><b>Merksatz</b><p>Logistische Regression = lineare Regression + Sigmoid. Das Modell liefert zuerst eine Wahrscheinlichkeit, die Klasse entsteht erst durch den Threshold. Der Threshold ist deine Entscheidung, nicht die des Modells.</p></div>
 
   <h3 id="klass-metriken">2 · Wie gut ist ein Klassifikator? Confusion Matrix und Metriken</h3>
   <p>Jede Vorhersage fällt in eines von vier Fächern. Eselsbrücke: Der zweite Buchstabe ist, was das Modell sagt (positiv/negativ), der erste, ob es stimmt (True/False).</p>
@@ -83,17 +83,17 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
   </table></div>
   <div class="falle"><b>Falle (Accuracy)</b><p>Bei seltenen Klassen ist Accuracy irreführend. Ein Modell, das immer «kein Betrug» sagt, hat bei 1 Betrug auf 100 Fällen 99 % Accuracy, findet aber nie einen Betrug (Recall 0, F1 0). Schau bei unausgewogenen Daten auf Precision, Recall, F1 und AUC.</p></div>
 
-  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Die Schwelle verschieben: Precision gegen Recall</h4>
-  <p>Senkst du die Schwelle, sagt das Modell öfter «positiv»: mehr TP, aber auch mehr FP. Recall steigt (oder bleibt gleich), Precision sinkt meist. Es ist ein <b>Kompromiss</b>, und welche Seite wichtiger ist, hängt vom Problem ab. Bei einer Krebs-Früherkennung willst du kaum etwas übersehen (hoher Recall), bei einer Spam-Sperre willst du keine echte Mail löschen (hohe Precision).</p>
-  <p>Die <b>ROC-Kurve</b> trägt für alle Schwellen die Trefferquote (TPR = Recall) gegen die Rate falscher Alarme (FPR) auf. Ein perfektes Modell liegt oben links, Raten liegt auf der Diagonalen. Die <b>AUC</b> ist die Fläche unter der Kurve: 1 ist perfekt, 0,5 ist Zufall.</p>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Den Threshold verschieben: Precision gegen Recall</h4>
+  <p>Senkst du den Threshold, sagt das Modell öfter «positiv»: mehr TP, aber auch mehr FP. Recall steigt (oder bleibt gleich), Precision sinkt meist. Es ist ein <b>Kompromiss</b>, und welche Seite wichtiger ist, hängt vom Problem ab. Bei einer Krebs-Früherkennung willst du kaum etwas übersehen (hoher Recall), bei einer Spam-Sperre willst du keine echte Mail löschen (hohe Precision).</p>
+  <p>Die <b>ROC-Kurve</b> trägt für alle Thresholds den Recall (TPR) gegen die False Alarm Rate (FPR) auf. Ein perfektes Modell liegt oben links, Raten liegt auf der Diagonalen. Die <b>AUC</b> ist die Fläche unter der Kurve: 1 ist perfekt, 0,5 ist Zufall.</p>
   <div class="demo" id="thDemo">
-    <div class="tag">Demo</div><h4>Schwelle, Confusion Matrix und ROC</h4>
+    <div class="tag">Demo</div><h4>Threshold, Confusion Matrix und ROC</h4>
     <p class="hint">Wähle, wie viele echte Positive und Negative es gibt (Regler logarithmisch, 1 bis 1000). Die Form der Modell-Wahrscheinlichkeiten bleibt gleich: die meisten Fälle sind eindeutig, nur wenige liegen im Grenzbereich (bei 10 und 10 genau 4).</p>
     <div class="btnrow"><button class="pri" id="thP1">10 : 10 (ausgewogen)</button><button id="thP2">10 : 1000 (selten)</button><button id="thP3">1 : 1000 (sehr selten)</button></div>
     <div class="ctl"><label for="thNP">Anzahl echt positiv</label><input type="range" id="thNP" min="0" max="3" step="0.05" value="1"><output id="thNPO"></output></div>
     <div class="ctl"><label for="thNN">Anzahl echt negativ</label><input type="range" id="thNN" min="0" max="3" step="0.05" value="1"><output id="thNNO"></output></div>
-    <svg class="plot" id="thSvg" viewBox="0 0 320 170" role="img" aria-label="Wahrscheinlichkeiten aller Fälle auf einer Achse mit Schwelle"></svg>
-    <div class="ctl"><label for="thT">Schwelle</label><input type="range" id="thT" min="0.02" max="0.98" step="0.01" value="0.5"><output id="thTO"></output></div>
+    <svg class="plot" id="thSvg" viewBox="0 0 320 170" role="img" aria-label="Wahrscheinlichkeiten aller Fälle auf einer Achse mit Threshold"></svg>
+    <div class="ctl"><label for="thT">Threshold</label><input type="range" id="thT" min="0.02" max="0.98" step="0.01" value="0.5"><output id="thTO"></output></div>
     <div class="tablewrap"><table style="min-width:0">
       <tr><th></th><th class="num">sagt positiv</th><th class="num">sagt negativ</th></tr>
       <tr><td>wirklich positiv</td><td class="num b" id="thTP"></td><td class="num r" id="thFN"></td></tr>
@@ -109,13 +109,13 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
     </table></div>
     <div class="stats"><span>AUC <b id="thAuc"></b></span><span>Anteil Positive <b id="thPrev"></b></span><span>Accuracy von «immer negativ» <b id="thBase"></b></span></div>
     <p class="hint" id="thMsg">&nbsp;</p>
-    <svg class="plot" id="thRoc" viewBox="0 0 320 210" role="img" aria-label="ROC-Kurve mit aktuellem Schwellenpunkt" style="margin-top:12px"></svg>
-    <p class="hint">Oben: Kreis = echt positiv, Quadrat = echt negativ (bei vielen Fällen wird nur eine Auswahl gezeichnet). Alles rechts der Linie wird als positiv vorhergesagt. Unten: Der orange Punkt wandert beim Schieben der Schwelle auf der ROC-Kurve: Höhere Schwelle (Linie nach rechts) bewegt ihn nach links unten, tiefere Schwelle nach rechts oben.</p>
+    <svg class="plot" id="thRoc" viewBox="0 0 320 210" role="img" aria-label="ROC-Kurve mit aktuellem Threshold-Punkt" style="margin-top:12px"></svg>
+    <p class="hint">Oben: Kreis = echt positiv, Quadrat = echt negativ (bei vielen Fällen wird nur eine Auswahl gezeichnet). Alles rechts der Linie wird als positiv vorhergesagt. Unten: Der orange Punkt wandert beim Schieben des Thresholds auf der ROC-Kurve: Höherer Threshold (Linie nach rechts) bewegt ihn nach links unten, tieferer Threshold nach rechts oben.</p>
   </div>
-  <div class="merk"><b>Zusammenfassung: Schwelle, ROC, AUC</b><ul>
-    <li><b>Schwelle:</b> Das Modell liefert Wahrscheinlichkeiten, erst die Schwelle macht daraus Klassen. Tiefere Schwelle = mehr Recall, mehr falsche Alarme.</li>
-    <li><b>ROC:</b> Jede Schwelle ergibt einen Punkt (FPR, TPR). Die ROC-Kurve verbindet alle Punkte.</li>
-    <li><b>AUC:</b> Fläche unter der ROC-Kurve, unabhängig von der Schwelle. 1 = perfekt, 0,5 = Zufall. Die Schwelle wählst du danach nach den Kosten der Fehler.</li>
+  <div class="merk"><b>Zusammenfassung: Threshold, ROC, AUC</b><ul>
+    <li><b>Threshold:</b> Das Modell liefert Wahrscheinlichkeiten, erst der Threshold macht daraus Klassen. Tieferer Threshold = mehr Recall, mehr falsche Alarme.</li>
+    <li><b>ROC:</b> Jeder Threshold ergibt einen Punkt (FPR, TPR). Die ROC-Kurve verbindet alle Punkte.</li>
+    <li><b>AUC:</b> Fläche unter der ROC-Kurve, unabhängig vom Threshold. 1 = perfekt, 0,5 = Zufall. Den Threshold wählst du danach nach den Kosten der Fehler.</li>
   </ul></div>
 
   <h3>3 · Mehr als zwei Klassen</h3>
@@ -220,7 +220,7 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
   </div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Entscheidungsbaum</h4>
   <p>Eine Kette von Ja/Nein-Fragen. An jedem Knoten wird die Frage gewählt, die die Klassen am besten trennt (Mass: Gini oder Informationsgewinn), bis die Blätter «rein» sind oder die maximale Tiefe erreicht ist. Gut lesbar, aber ein tiefer Baum lernt die Trainingsdaten auswendig. Gegenmittel: <code>max_depth</code> begrenzen oder zurückschneiden.</p>
-  <p>Ein Entscheidungsbaum braucht <b>keine lineare Regression</b> und keine Sigmoid-Funktion: Er schätzt keine Gewichte, sondern teilt die Daten mit Schwellen auf einzelne Merkmale auf. Er ist damit eine <b>Alternative</b> zur logistischen Regression, kein Ersatz. Vorteile: nicht lineare Zusammenhänge, kein Skalieren der Merkmale nötig. Nachteile: Die Grenzen verlaufen achsenparallel (treppenförmig), tiefe Bäume overfitten schnell, und die Wahrscheinlichkeiten aus den Blättern sind grob.</p>
+  <p>Ein Entscheidungsbaum braucht <b>keine lineare Regression</b> und keine Sigmoid-Funktion: Er schätzt keine Gewichte, sondern teilt die Daten mit Thresholds auf einzelne Merkmale auf. Er ist damit eine <b>Alternative</b> zur logistischen Regression, kein Ersatz. Vorteile: nicht lineare Zusammenhänge, kein Skalieren der Merkmale nötig. Nachteile: Die Grenzen verlaufen achsenparallel (treppenförmig), tiefe Bäume overfitten schnell, und die Wahrscheinlichkeiten aus den Blättern sind grob.</p>
   <p class="note"><b>Mit den 10 Wohnungen:</b> Am Anfang sind 5 teure und 5 nicht teure Wohnungen gemischt (Gini = 0,5, maximal unrein). Die beste Frage ist «Mehr als 74 qm?»: Links landen 5 nicht teure, rechts 5 teure, beide Blätter sind sofort rein (Gini = 0). Ein einziger Schnitt genügt, der Baum hat Tiefe 1. Die SVM legt ihre Grenze ebenfalls genau in die Mitte (74 qm), die logistische Regression etwa dorthin (zwischen 70 und 78 qm), nur mit anderem Weg.</p>
   <div class="demo" id="dtDemo">
     <div class="tag">Demo</div><h4>Entscheidungsbaum: Wirkung der Tiefe</h4>
@@ -327,16 +327,16 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
         sol: `import math\n\ndef sigmoid(z):\n    return 1 / (1 + math.exp(-z))`,
       },
       {
-        t: 'Schwelle anwenden',
-        task: `Das Modell liefert Wahrscheinlichkeiten. Mach daraus eine Liste <code>labels</code> aus 0 und 1: 1, wenn die Wahrscheinlichkeit <b>mindestens</b> <code>schwelle</code> ist. Zähle dann mit <code>tp</code>, wie viele Positive du richtig erkannt hast.`,
-        start: `probs = [0.9, 0.4, 0.65, 0.2, 0.55, 0.1]\nechte = [1, 1, 1, 0, 0, 0]\nschwelle = 0.5\nlabels = []  # TODO: Liste mit 0/1\ntp = 0  # TODO\nprint(labels, tp)`,
+        t: 'Threshold anwenden',
+        task: `Das Modell liefert Wahrscheinlichkeiten. Mach daraus eine Liste <code>labels</code> aus 0 und 1: 1, wenn die Wahrscheinlichkeit <b>mindestens</b> <code>threshold</code> ist. Zähle dann mit <code>tp</code>, wie viele Positive du richtig erkannt hast.`,
+        start: `probs = [0.9, 0.4, 0.65, 0.2, 0.55, 0.1]\nechte = [1, 1, 1, 0, 0, 0]\nthreshold = 0.5\nlabels = []  # TODO: Liste mit 0/1\ntp = 0  # TODO\nprint(labels, tp)`,
         check: `assert labels == [1, 0, 1, 0, 1, 0], "labels stimmt nicht"\nassert tp == 2, "tp: Positive, die richtig als 1 vorhergesagt wurden"`,
-        sol: `labels = [1 if p >= schwelle else 0 for p in probs]\ntp = sum(1 for l, e in zip(labels, echte) if l == 1 and e == 1)`,
+        sol: `labels = [1 if p >= threshold else 0 for p in probs]\ntp = sum(1 for l, e in zip(labels, echte) if l == 1 and e == 1)`,
       },
     ],
     quiz: [
       { q: `Warum ist Accuracy bei 1 % Betrugsfällen ein schlechtes Mass?`, a: `Ein Modell, das nie Betrug meldet, hat 99 % Accuracy und ist trotzdem nutzlos. Precision, Recall, F1 und AUC zeigen, wie gut die seltene Klasse erkannt wird.` },
-      { q: `Du senkst die Schwelle von 0,5 auf 0,2. Was passiert mit Recall und Precision?`, a: `Mehr Fälle werden positiv: Recall steigt (oder bleibt gleich), Precision sinkt meist, weil mehr falsche Alarme dazukommen.` },
+      { q: `Du senkst den Threshold von 0,5 auf 0,2. Was passiert mit Recall und Precision?`, a: `Mehr Fälle werden positiv: Recall steigt (oder bleibt gleich), Precision sinkt meist, weil mehr falsche Alarme dazukommen.` },
       { q: `Was bedeutet eine AUC von 0,5, was von 1?`, a: `0,5 ist Zufall (ROC-Kurve auf der Diagonalen), 1 ist ein perfekter Klassifikator (alle Positiven vor allen Negativen).` },
       { q: `Was passiert bei kNN mit k = 1 und mit k = N?`, a: `k = 1 folgt jedem Trainingspunkt (Overfitting, trainings-perfekt). k = N sagt immer die Mehrheitsklasse (Underfitting).` },
       { q: `Worin unterscheiden sich Bagging und Boosting?`, a: `Bagging trainiert viele Modelle parallel auf Zufallsstichproben und mittelt (senkt Varianz). Boosting trainiert nacheinander, jedes Modell korrigiert die Restfehler des bisherigen Gesamtmodells (senkt Bias, anfälliger für Rauschen).` },

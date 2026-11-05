@@ -419,7 +419,7 @@ top20 = score.argsort()[::-1][:20]       # so viele, wie geprüft werden können
     <li>Das Ergebnis ist eine <b>Rangliste für Menschen</b>, kein automatisches Urteil. Wer prüft, braucht Betrag, Verlauf und den Grund, warum der Fall auffällt.</li>
     <li>Werden später echte Befunde bekannt, misst du die <b>Precision</b> bei deinem Prüf-Budget (von 20 geprüften Fällen, wie viele waren echt?).</li>
   </ul>
-  <div class="falle"><b>Falle</b><p>Die «Top 20» liefern immer 20 Fälle, auch an einem Tag ohne echte Auffälligkeit. Und wenn sich das normale Verhalten ändert (alle Zahlungen werden grösser oder später), meldet das alte Modell plötzlich viele Fehlalarme. Referenzwerte und Modell regelmässig neu anpassen.</p></div>
+  <div class="falle"><b>Falle</b><p>Die «Top 20» liefern immer 20 Fälle, auch an einem Tag ohne echte Auffälligkeit. Und wenn sich das normale Verhalten ändert (alle Zahlungen werden grösser oder später), meldet das alte Modell plötzlich viele False Alarms. Referenzwerte und Modell regelmässig neu anpassen.</p></div>
 
   <div class="demo" id="ifDemo">
     <div class="tag">Demo</div><h4>Isolation Forest: Bäume und Contamination</h4>
@@ -473,7 +473,7 @@ pca.explained_variance_ratio_             # Anteil Varianz je Komponente</code><
   <h4 id="unsup-pca-k">Wie viele Komponenten?</h4>
   <ul>
     <li><b>Für ein Bild</b>: 2 Komponenten. Schreib dazu, wie viel Varianz fehlt.</li>
-    <li><b>Zum Weiterrechnen</b>: so viele, dass die <b>kumulierte</b> erklärte Varianz eine Schwelle erreicht, zum Beispiel 90 %. Oder dort, wo die Kurve abflacht (wie beim Ellbogen).</li>
+    <li><b>Zum Weiterrechnen</b>: so viele, dass die <b>kumulierte</b> erklärte Varianz einen Threshold erreicht, zum Beispiel 90 %. Oder dort, wo die Kurve abflacht (wie beim Ellbogen).</li>
   </ul>
   <p><b>Rekonstruktion</b>: Mit <code>inverse_transform</code> baust du aus den behaltenen Komponenten eine Näherung der Originaldaten. Je weniger Komponenten, desto grösser der Unterschied zum Original. So siehst du direkt, was verloren geht (im Lab: Ziffernbilder mit 2, 10 und 30 Komponenten).</p>
   <pre><code>import numpy as np
@@ -571,7 +571,7 @@ trustworthiness(X_s, Z, n_neighbors=10)  # 1 = Nachbarn gut erhalten</code></pre
       { q: `Wann ist DBSCAN besser als k-Means?`, a: `Bei gekrümmten oder unregelmässigen Gruppen und wenn es Rauschen gibt. DBSCAN braucht kein k und markiert Ausreisser mit -1. Dafür muss eps passen, und bei sehr unterschiedlicher Dichte hilft eher HDBSCAN.` },
       { q: `Was liefert ein GMM, was k-Means nicht liefert?`, a: `Eine Wahrscheinlichkeit pro Cluster für jeden Punkt (Zeilensumme 1). So sieht man, welche Zuordnungen unsicher sind. Die Cluster dürfen zudem elliptisch sein.` },
       { q: `Wie findet der Isolation Forest Ausreisser?`, a: `Er teilt die Daten mit zufälligen Splits. Auffällige Punkte sind schon nach wenigen Splits allein, normale brauchen viele. Kurzer Weg heisst hoher Anomalie-Score. Das Ergebnis ist eine Rangliste zum Prüfen, kein Urteil.` },
-      { q: `Wie wählst du die Anzahl PCA-Komponenten?`, a: `Für ein Bild 2. Zum Weiterrechnen so viele, bis die kumulierte erklärte Varianz eine Schwelle wie 90 % erreicht (PCA(n_components=0.90)) oder die Kurve abflacht.` },
+      { q: `Wie wählst du die Anzahl PCA-Komponenten?`, a: `Für ein Bild 2. Zum Weiterrechnen so viele, bis die kumulierte erklärte Varianz einen Threshold wie 90 % erreicht (PCA(n_components=0.90)) oder die Kurve abflacht.` },
     ],
     init() {
       // Workflow figure: click a step to open its explanation (same pattern as the ml chapter)
@@ -708,7 +708,7 @@ trustworthiness(X_s, Z, n_neighbors=10)  # 1 = Nachbarn gut erhalten</code></pre
           let s='',hits=0,mx=0;sc.forEach(v=>{mx=Math.max(mx,v)});const lo=Math.min.apply(null,sc);
           P.forEach((p,i)=>{const z=(sc[i]-lo)/(mx-lo+1e-9),fl=flag.has(i);if(fl&&i>=120)hits++;s+='<circle cx="'+sx(p[0])+'" cy="'+sy(p[1])+'" r="'+(2.5+4.5*z)+'" style="fill:'+(fl?'var(--bad)':'var(--accent)')+';fill-opacity:'+(0.35+0.5*z)+';stroke:'+(fl?'var(--bad)':'var(--fg)')+';stroke-width:'+(fl?2:0.6)+'"/>'});
           $('ifSvg').innerHTML=s;$('ifF').textContent=k;$('ifH').textContent=hits;$('ifS').textContent=fmt(mx,2);
-          $('ifMsg').textContent=T<5?LernApp.t('Mit so wenigen Bäumen ist der Score fast Zufall: Die Markierung wechselt, wenn du den Regler bewegst.','With so few trees the score is almost random: the flagged points change when you move the slider.'):C<4?LernApp.t('Contamination klein: Es werden nur die auffälligsten Punkte markiert, echte Ausreisser können fehlen.','Small contamination: only the most striking points are flagged, real outliers may be missing.'):C>9?LernApp.t('Contamination gross: Es werden viele normale Punkte aus der Wolke mitmarkiert (Fehlalarme).','Large contamination: many normal points from the cloud are flagged too (false alarms).'):LernApp.t('Die markierten Punkte liegen weit vom dichten Kern. Contamination legt fest, wie viele du prüfst.','The flagged points lie far from the dense core. Contamination sets how many you check.')}
+          $('ifMsg').textContent=T<5?LernApp.t('Mit so wenigen Bäumen ist der Score fast Zufall: Die Markierung wechselt, wenn du den Regler bewegst.','With so few trees the score is almost random: the flagged points change when you move the slider.'):C<4?LernApp.t('Contamination klein: Es werden nur die auffälligsten Punkte markiert, echte Ausreisser können fehlen.','Small contamination: only the most striking points are flagged, real outliers may be missing.'):C>9?LernApp.t('Contamination gross: Es werden viele normale Punkte aus der Wolke mitmarkiert (False Alarms).','Large contamination: many normal points from the cloud are flagged too (false alarms).'):LernApp.t('Die markierten Punkte liegen weit vom dichten Kern. Contamination legt fest, wie viele du prüfst.','The flagged points lie far from the dense core. Contamination sets how many you check.')}
         $('ifT').addEventListener('input',draw);$('ifC').addEventListener('input',draw);draw()})();
 
       // Demo 1: k-means step by step (shared code in assets/demos-kmeans.js)
