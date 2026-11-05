@@ -24,10 +24,11 @@ lernapp-cas-ml/
   mathe-ausfuehrlich.html    Unterseite: Mathe ausführlich
   notebook.html              zwei Modi: lokal (JupyterLab im iframe, nur mit Server auf dem eigenen Rechner) oder Colab (Links)
   assets/
-    core.js                  Kern: LernApp-API, Sprache, Theme, Speicher, Rendern
+    core.js                  Kern: LernApp-API, Sprache, Theme, Speicher, Rendern, gemeinsame Helfer (mulberry32, gauss)
     style.css                Design-Tokens hell/dunkel und alle Komponenten
     demos-mathe.js           MatheDemos: Demos, die beide Mathe-Seiten teilen
-    demos-kmeans.js          KMeansDemo: k-Means-Demo
+    demos-kmeans.js          KMeansDemo: k-Means-Demo und gemeinsame k-Means-Helfer (`KMeansDemo.lib`)
+    demos-ml.js, demos-klass.js, demos-unsup.js   Demo-Code der Kapitel ml, klass und unsup (`LernApp.demos.<id>`)
     img/                     Grafiken, aus echten Läufen erzeugt (Titanic)
     notebook-data.js         generiert aus den Notebooks (zurzeit von keiner Seite geladen)
   modules/

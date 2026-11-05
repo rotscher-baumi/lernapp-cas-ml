@@ -297,18 +297,19 @@ scores = cross_val_score(pipe, X, y, cv=10,    # 10 folds
   <p><b>How many runs?</b> With k folds there are k runs; each row is validation exactly once and training k−1 times. In each run a <b>new</b> model (and with a pipeline also a new imputer/scaler) is trained from scratch, evaluated and discarded. Nothing is «optimised further 4 times». The mean of the k scores rates the <b>setup</b> (model type, hyperparameters, preprocessing), the spread shows its stability. The test set is not part of the CV. You then train the final model once on all development data (training + validation) and test it once. A search over n candidates means n × k trainings (<code>GridSearchCV</code> with <code>refit=True</code> retrains by itself at the end).</p>
   <div class="demo" id="cvDemo">
     <div class="tag">Demo</div><h4>Cross-validation step by step</h4>
-    <p class="hint">30 points (sine curve plus noise). Choose k and the polynomial degree, then step through the runs. In each run a <b>new</b> model (scaler and polynomial) is learned only on the filled points and tested on the hollow points (test fold).</p>
-    <svg class="plot" id="cvStrip" viewBox="0 0 320 34" role="img" aria-label="Split of the data into k folds, the test fold is marked"></svg>
+    <p class="hint">40 points (sine curve plus noise): 10 of them are the <b>test</b> (orange, fixed, locked), the other 30 are split into k folds. Choose k and the polynomial degree, then step through the runs with «Run». In each run a different fold is the <b>validation</b> (green), and a <b>new</b> model (scaler and polynomial) learns from the rest. The test is used once, after the last run.</p>
+    <svg class="plot" id="cvStrip" viewBox="0 0 320 34" role="img" aria-label="All data: training with k folds and a fixed test. One row per run with a green validation fold, the final evaluation once on the test at the bottom"></svg>
     <p class="hint" id="cvStripMsg"></p>
-    <svg class="plot" id="cvSvg" viewBox="0 0 320 220" role="img" aria-label="Training points, test points and the polynomial learned in this run" style="margin-top:10px"></svg>
+    <svg class="plot" id="cvSvg" viewBox="0 0 320 220" role="img" aria-label="Training points, validation points, fixed test points and the polynomial learned in this run" style="margin-top:10px"></svg>
+    <div class="stats" id="cvLeg"></div>
     <div class="ctl"><label for="cvK">k (folds)</label><input type="range" id="cvK" min="0" max="2" step="1" value="1"><output id="cvKO"></output></div>
     <div class="ctl"><label for="cvDeg">Degree</label><input type="range" id="cvDeg" min="1" max="9" step="1" value="3"><output id="cvDegO"></output></div>
     <div class="ctl"><label for="cvRun">Run</label><input type="range" id="cvRun" min="1" max="5" step="1" value="1"><output id="cvRunO"></output></div>
-    <div class="stats"><span>Scaler (train only): mean <b id="cvMu"></b>, std <b id="cvSd"></b></span><span>Error of this run (MSE) <b id="cvMse"></b></span></div>
-    <svg class="plot" id="cvBars" viewBox="0 0 320 150" role="img" aria-label="Error per run and mean" style="margin-top:12px"></svg>
-    <div class="stats"><span>CV error (mean) <b id="cvMean"></b></span><span>Spread (std) <b id="cvStd"></b></span></div>
+    <div class="stats"><span>Scaler (train only): mean <b id="cvMu"></b>, std <b id="cvSd"></b></span><span>Validation error of this run (MSE) <b id="cvMse"></b></span></div>
+    <svg class="plot" id="cvBars" viewBox="0 0 320 150" role="img" aria-label="Validation error per run and mean" style="margin-top:12px"></svg>
+    <div class="stats"><span>CV error (mean so far) <b id="cvMean"></b></span><span>Spread (std) <b id="cvStd"></b></span><span>Test error (once, at the end) <b id="cvTest"></b></span></div>
     <p class="hint" id="cvMsg"></p>
-    <p class="hint">Bars: error per run, the selected run is blue. Dashed: the mean, which is the CV estimate. Each run has a different scaler mean and a different curve, because it sees different training points. The bars show how much a single split depends on chance.</p>
+    <p class="hint">Bars: validation error per run, the selected run is blue, later runs are still open (faint). Dashed: the mean of the runs so far, at the end the CV estimate. Each run has a different scaler mean and a different curve, because it sees different training points. The test error only appears in the last run.</p>
   </div>
   <div class="merk" id="ml-pipeline"><b>Key takeaway</b><p>Pipeline = steps (scaling, model) are handled together, and in each fold they are learned only from that fold's training part. This prevents leakage and keeps the code clean.</p></div>
 

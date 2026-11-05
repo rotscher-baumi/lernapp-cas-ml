@@ -1,11 +1,9 @@
 /* Interactive k-means demo (shared by the Unsupervised and Grafiken chapters).
  * KMeansDemo.html(p) returns the markup, KMeansDemo.init(p) wires it; p is the id prefix, so several copies can live on one page. */
 (function () {
-  const { $, fmt } = LernApp;
+  const { $, fmt, mulberry32, gauss } = LernApp;
   const t = LernApp.t;
 
-  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-  function gauss(r){let u=0,v=0;while(u===0)u=r();while(v===0)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
   const COL=['var(--accent)','var(--warn)','var(--ok)','var(--bad)','#8A5CD0','#C0527A','#3A9AA8','#8A8A3A'];
   const d2=(a,b)=>(a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1]);
   // One k-means half-step each: assign to nearest centre (returns true if labels changed), move centres to the mean.
@@ -35,6 +33,8 @@
     return p}
 
   window.KMeansDemo = {
+    // Shared with the Unsupervised demos (assets/demos-unsup.js).
+    lib: { COL, d2, assign, update, wss, dot },
     html: function (p) {
       return `<p class="hint">${t('Wähle die Form der Daten, k und wie die Startzentren gesetzt werden. «Bis fertig» lässt den Algorithmus laufen, bis sich nichts mehr ändert.','Choose the shape of the data, k and how the start centres are placed. «Run to end» lets the algorithm run until nothing changes any more.')}</p>
     <div class="btnrow" id="${p}Shape" role="group" aria-label="${t('Datenform','Data shape')}">${LBL}${t('Daten','Data')}</span><button data-v="gauss">${t('3 Haufen','3 blobs')}</button><button data-v="circles">${t('Gepackte Kreise','Packed circles')}</button><button data-v="smiley">Smiley</button><button data-v="moons">${t('Monde','Moons')}</button><button data-v="rings">${t('Ringe','Rings')}</button><button data-v="uniform">${t('Gleichverteilt','Uniform')}</button><button data-v="draw">${t('Selber zeichnen','Draw yourself')}</button></div>

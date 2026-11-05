@@ -20,6 +20,7 @@ package "assets/" {
   [style.css\nDesign-Tokens hell/dunkel\n(data-theme, prefers-color-scheme)] as css
   [demos-mathe.js\nMatheDemos] as dm
   [demos-kmeans.js\nKMeansDemo] as dk
+  [demos-ml.js · demos-klass.js\ndemos-unsup.js\nLernApp.demos.<id>] as dd
   [img/\nGrafiken aus echten Läufen] as img
   [notebook-data.js\n(generiert, zurzeit\nvon keiner Seite geladen)] as nbdata
 }
