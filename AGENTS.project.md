@@ -8,7 +8,7 @@
 - **Check before changing:** read existing code, conventions and the current state (`git status`, pull, re-read the file) before editing.
 - **Workflow overview first:** a chapter's workflow overview («Der ganze Ablauf auf einen Blick», clickable figure) sits at the start of the chapter, right after the intro and before section 1.
 - **Keep docs current:** update `README.md` (layout, commands, notebooks) in the same change whenever files, structure or commands change.
-- **English technical terms stay English:** never translate them in German text (e.g. `fare`, `feature`, `overfitting`).
+- **English technical terms stay English:** never translate them in German text (e.g. `fare`, `feature`, `overfitting`, `threshold`, `recall`, `false alarm rate`; not Schwelle, Trefferquote, Fehlalarm).
 - **Keep course dates current:** when editing the course overview or upcoming appointments, verify dates and deadlines (including the transfer-work topic submission) against the latest authoritative timetable, show when the information was last checked, and update or remove entries that have changed or passed. Never guess dates.
 
 ## Purpose and stack
