@@ -59,7 +59,9 @@
     <svg class="plot" id="lsSvg" viewBox="0 0 320 190" role="img" aria-label="Fehler in Abhängigkeit der vorhergesagten Wahrscheinlichkeit für eine Wohnung, die wirklich teuer ist"></svg>
     <div class="ctl"><label for="lsP">Vorhergesagte P(teuer)</label><input type="range" id="lsP" min="1" max="99" step="1" value="10"><output id="lsPO"></output></div>
     <div class="stats"><span>Cross-Entropy <b id="lsCE"></b></span><span>MSE <b id="lsMS"></b></span></div>
-    <p class="hint">Die Wohnung ist wirklich teuer (y = 1). Sagt das Modell nur 1 % Wahrscheinlichkeit, ist es sicher und falsch. Die Cross-Entropy (−ln p, durchgezogen) schiesst dann steil nach oben und zwingt das Modell zur Korrektur. Der quadratische Fehler ((1−p)², gestrichelt) bleibt bei maximal 1. Zusammen mit der Sigmoid wird sein Gradient bei sicher falschen Vorhersagen fast 0, das Modell korrigiert kaum.</p>
+    <p class="hint"><b>Was du siehst:</b> Die Wohnung ist wirklich teuer (y = 1). Mit dem Regler stellst du ein, wie viel Wahrscheinlichkeit das Modell für «teuer» angibt. Die Linien zeigen die Strafe für diese Vorhersage: Je höher die Linie, desto schlechter.</p>
+    <p class="hint"><b>Was passiert:</b> Liegt das Modell richtig (p nahe 1), sind beide Strafen klein. Liegt es sicher falsch (p nahe 0), steigt die Cross-Entropy (−ln p, durchgezogen) ohne Grenze, der MSE ((1−p)², gestrichelt) bleibt bei höchstens 1. Probiere p = 0,01: Cross-Entropy 4,6, MSE nur 0,98.</p>
+    <p class="hint"><b>Warum das zählt:</b> Das Modell lernt, indem es die Gewichte dorthin schiebt, wo die Strafe kleiner wird. Dafür braucht es eine Steigung. Beim MSE ist sie bei sicher falschen Vorhersagen fast null, weil die Sigmoid-Kurve dort flach ist, und das Modell bleibt im Irrtum stecken. Bei der Cross-Entropy bleibt die Steigung gross, und das Modell korrigiert sich schnell.</p>
   </div>
   <pre><code>from sklearn.linear_model import LogisticRegression
 clf = LogisticRegression().fit(X_train, y_train)
@@ -277,6 +279,26 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
     <tr><td>Hilft gegen</td><td>hohe Varianz (Overfitting)</td><td>hohen Bias (Underfitting)</td></tr>
     <tr><td>Risiko</td><td>wenig, robust ohne viel Einstellen</td><td>Overfitting bei zu vielen Runden oder zu hoher Lernrate</td></tr>
   </table></div>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Wann nehme ich was?</h4>
+  <p>Die erste Frage ist nicht «welches ist besser?», sondern «was fehlt meinem Modell?». Vergleiche dazu den Score auf dem Training mit dem auf der Validierung.</p>
+  <div class="grid2">
+    <div><h4>Bagging (Random Forest), wenn …</h4>
+      <ul>
+        <li>der einzelne Baum <b>overfittet</b>: Training sehr gut, Validierung deutlich schlechter.</li>
+        <li>du einen <b>starken ersten Wurf ohne viel Einstellen</b> willst. Die Standardwerte reichen oft.</li>
+        <li>die Daten <b>verrauscht</b> sind oder Ausreisser haben. Der Mittelwert über viele Bäume glättet das.</li>
+        <li>du schnell trainieren willst: Die Bäume sind unabhängig und laufen parallel (<code>n_jobs=-1</code>).</li>
+      </ul></div>
+    <div><h4>Boosting (Gradient Boosting), wenn …</h4>
+      <ul>
+        <li>das Modell <b>zu einfach</b> ist: Training und Validierung sind beide schlecht (Underfitting).</li>
+        <li>du auf Tabellendaten die <b>bestmögliche Genauigkeit</b> brauchst und Zeit zum Einstellen hast.</li>
+        <li>du Lernrate, Rundenzahl und Tiefe mit Validierung abstimmen kannst, am besten mit <i>Early Stopping</i> (aufhören, wenn der Validierungsfehler wieder steigt).</li>
+        <li>die Daten sauber sind: Boosting richtet sich nach den Restfehlern und versucht darum auch, falsche Labels und Ausreisser zu lernen.</li>
+      </ul></div>
+  </div>
+  <div class="falle"><b>Wann keines von beiden</b><p>Wenn der Zusammenhang fast linear ist, gewinnt die einfache Gerade oder die logistische Regression. Bei sehr wenigen Zeilen (etwa unter 100) lohnt sich der Aufwand nicht. Wenn du das Ergebnis erklären musst, ist ein einzelner kleiner Baum besser lesbar. Bei Bildern und Text sind neuronale Netze die Wahl.</p></div>
+  <div class="merk"><b>Faustregel</b><p>Starte mit einem Random Forest als starker Baseline. Reicht die Genauigkeit nicht, probiere Boosting und stimme es mit der Validierung ab. Diagnose: Training gut und Validierung schlecht → Bagging. Beide schlecht → Boosting.</p></div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Beispiel: die 10 Wohnungen</h4>
   <p>Bei der Klasse «teuer» reicht der eine Schnitt bei 74 qm, da gibt es für ein Ensemble nichts zu verbessern. Deshalb gehen wir hier zurück zur Frage von Tag 1, dem <b>Preis</b> (Ensembles gibt es genauso für Regression). Der Preis steigt nicht sauber mit den qm: die 70-qm-Wohnung (1620) ist billiger als die 62-qm-Wohnung (1770), die 85-qm-Wohnung (1850) billiger als die 78-qm-Wohnung (1890). Ein tiefer Baum lernt diese Ausreisser auswendig.</p>
   <ul>

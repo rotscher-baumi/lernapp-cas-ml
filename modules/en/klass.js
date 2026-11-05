@@ -49,7 +49,9 @@ LernApp.translate('klass', {
     <svg class="plot" id="lsSvg" viewBox="0 0 320 190" role="img" aria-label="Error as a function of the predicted probability for an apartment that really is expensive"></svg>
     <div class="ctl"><label for="lsP">Predicted P(expensive)</label><input type="range" id="lsP" min="1" max="99" step="1" value="10"><output id="lsPO"></output></div>
     <div class="stats"><span>Cross-entropy <b id="lsCE"></b></span><span>MSE <b id="lsMS"></b></span></div>
-    <p class="hint">The apartment really is expensive (y = 1). If the model says only 1 % probability, it is confident and wrong. The cross-entropy (−ln p, solid) then shoots up steeply and forces the model to correct itself. The squared error ((1−p)², dashed) stays at most 1. Combined with the sigmoid, its gradient becomes almost 0 for confident wrong predictions, so the model hardly corrects itself.</p>
+    <p class="hint"><b>What you see:</b> The apartment really is expensive (y = 1). The slider sets how much probability the model gives to «expensive». The lines show the penalty for that prediction: the higher the line, the worse.</p>
+    <p class="hint"><b>What happens:</b> If the model is right (p near 1), both penalties are small. If it is confidently wrong (p near 0), the cross-entropy (−ln p, solid) grows without limit, while the MSE ((1−p)², dashed) stays at 1 at most. Try p = 0.01: cross-entropy 4.6, MSE only 0.98.</p>
+    <p class="hint"><b>Why it matters:</b> The model learns by moving its weights to where the penalty gets smaller. For that it needs a slope. With MSE the slope is almost zero for confident wrong predictions, because the sigmoid curve is flat there, and the model stays stuck in its mistake. With cross-entropy the slope stays large, and the model corrects itself quickly.</p>
   </div>
   <pre><code>from sklearn.linear_model import LogisticRegression
 clf = LogisticRegression().fit(X_train, y_train)
@@ -267,6 +269,26 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 per class +
     <tr><td>Helps against</td><td>high variance (overfitting)</td><td>high bias (underfitting)</td></tr>
     <tr><td>Risk</td><td>low, robust without much tuning</td><td>overfitting with too many rounds or too high a learning rate</td></tr>
   </table></div>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">When do I use which?</h4>
+  <p>The first question is not «which is better?» but «what is my model missing?». Compare the training score with the validation score.</p>
+  <div class="grid2">
+    <div><h4>Bagging (Random Forest), when …</h4>
+      <ul>
+        <li>the single tree <b>overfits</b>: very good on training, clearly worse on validation.</li>
+        <li>you want a <b>strong first attempt without much tuning</b>. The defaults are often enough.</li>
+        <li>the data is <b>noisy</b> or has outliers. The average over many trees smooths that out.</li>
+        <li>you want fast training: the trees are independent and run in parallel (<code>n_jobs=-1</code>).</li>
+      </ul></div>
+    <div><h4>Boosting (Gradient Boosting), when …</h4>
+      <ul>
+        <li>the model is <b>too simple</b>: training and validation are both poor (underfitting).</li>
+        <li>you need the <b>best possible accuracy</b> on tabular data and have time to tune.</li>
+        <li>you can tune learning rate, number of rounds and depth with validation, ideally with <i>early stopping</i> (stop when the validation error rises again).</li>
+        <li>the data is clean: boosting follows the residuals, so it also tries to learn wrong labels and outliers.</li>
+      </ul></div>
+  </div>
+  <div class="falle"><b>When neither</b><p>If the relationship is almost linear, the simple line or logistic regression wins. With very few rows (under about 100) the effort does not pay off. If you have to explain the result, a single small tree is easier to read. For images and text, neural networks are the choice.</p></div>
+  <div class="merk"><b>Rule of thumb</b><p>Start with a Random Forest as a strong baseline. If the accuracy is not enough, try boosting and tune it with validation. Diagnosis: good on training and poor on validation → bagging. Poor on both → boosting.</p></div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Example: the 10 apartments</h4>
   <p>For the class «expensive» the one split at 74 m² is enough; there is nothing for an ensemble to improve. So here we go back to the question from day 1, the <b>price</b> (ensembles exist for regression just the same). The price does not rise cleanly with the m²: the 70 m² apartment (1620) is cheaper than the 62 m² apartment (1770), the 85 m² apartment (1850) cheaper than the 78 m² apartment (1890). A deep tree memorises these outliers.</p>
   <ul>
