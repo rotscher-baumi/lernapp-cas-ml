@@ -202,13 +202,17 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 per class +
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Support Vector Machine (SVM)</h4>
   <p>Looks for the dividing line with the <b>widest margin</b> to both classes. Only the points at the edge (support vectors) determine it. With <b>kernels</b> the data are conceptually lifted into a higher space where they can be separated by a straight line. Strong with many features.</p>
   <p class="note"><b>With the 10 apartments:</b> The largest non-expensive apartment has 70 m², the smallest expensive one 78 m². These two are the <b>support vectors</b>. The dividing line with the widest margin lies in the middle at <b>74 m²</b>, 4 m² away from each side. You could delete the other eight apartments and the boundary would stay the same.</p>
+  <p><b>What does C do?</b> An SVM looks for a line with the widest possible «street» (margin) between the classes. With overlapping data this cannot be perfect: some points lie inside the street or on the wrong side. <b>C is the fine per such error.</b> Formally the SVM minimises <code>½·‖w‖² + C · Σ errors</code>: the first part wants a wide margin, the second few and small violations. Small C = cheap errors, so a wide margin that may be violated by many points. Large C = expensive errors, so a narrow margin that hardly any point violates.</p>
   <div class="demo" id="svDemo">
     <div class="tag">Demo</div><h4>SVM: effect of C</h4>
-    <svg class="plot" id="svSvg" viewBox="0 0 320 220" role="img" aria-label="Two classes with decision boundary, margin and support vectors"></svg>
-    <div class="ctl"><label for="svC">C (penalty for errors)</label><input type="range" id="svC" min="-1" max="2" step="0.25" value="0"><output id="svCO"></output></div>
-    <div class="stats"><span>C <b id="svCv"></b></span><span>Support Vectors <b id="svN"></b></span><span>Margin width <b id="svM"></b></span><span>Accuracy <b id="svA"></b></span></div>
+    <p class="hint">40 apartments with living area and location. Blue = expensive, orange = not expensive. The price depends on both, plus noise. Move C and watch the street (dashed) and the red lines: they show how far an apartment violates the margin.</p>
+    <div class="btnrow"><button class="pri" id="svD0">Clean data</button><button id="svD1">Noisy data</button></div>
+    <svg class="plot" id="svSvg" viewBox="0 0 320 240" role="img" aria-label="Living area against location with the separating line, margin, red violations and support vectors"></svg>
+    <div class="ctl"><label for="svC">C (fine per error)</label><input type="range" id="svC" min="-1" max="3" step="0.25" value="0"><output id="svCO"></output></div>
+    <div class="stats"><span>Support vectors <b id="svN"></b></span><span>Violations <b id="svV"></b></span><span>Margin width (plot width = 100 %) <b id="svM"></b></span></div>
+    <div class="stats"><span>Accuracy training (40) <b id="svTr"></b></span><span>Accuracy test (2000 new) <b id="svTe"></b></span></div>
     <p class="hint" id="svMsg">&nbsp;</p>
-    <p class="hint">Solid line = decision boundary, dashed = edge of the margin. Thick rings = support vectors: only they determine the line.</p>
+    <p class="hint">Solid = separating line, dashed = edge of the margin. Thick rings = support vectors (on or inside the margin, only they determine the line). Red lines = violation: the distance an apartment is short of its margin edge. Violations also count apartments on the right side that only lie inside the margin. The test accuracy shows how well the line holds on new apartments. With clean data a large C helps, with noisy data a medium C is best.</p>
   </div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Decision tree</h4>
   <p>A chain of yes/no questions. At each node the question that best separates the classes is chosen (measure: Gini or information gain), until the leaves are «pure» or the maximum depth is reached. Easy to read, but a deep tree memorises the training data. Countermeasure: limit <code>max_depth</code> or prune.</p>

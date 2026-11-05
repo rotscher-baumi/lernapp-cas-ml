@@ -205,13 +205,17 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Support Vector Machine (SVM)</h4>
   <p>Sucht die Trennlinie mit dem <b>breitesten Abstand</b> zu beiden Klassen. Nur die Punkte am Rand (Support Vectors) bestimmen sie. Mit <b>Kernels</b> werden die Daten gedanklich in einen höheren Raum gehoben, wo sie sich gerade trennen lassen. Stark bei vielen Merkmalen.</p>
   <p class="note"><b>Mit den 10 Wohnungen:</b> Die grösste nicht teure Wohnung hat 70 qm, die kleinste teure 78 qm. Diese zwei sind die <b>Support Vectors</b>. Die Trennlinie mit dem breitesten Abstand liegt in der Mitte bei <b>74 qm</b>, je 4 qm von beiden Seiten entfernt. Die anderen acht Wohnungen könntest du löschen, die Grenze bliebe gleich.</p>
+  <p><b>Was macht C?</b> Eine SVM sucht eine Linie mit einer möglichst breiten «Strasse» (Margin) zwischen den Klassen. Bei überlappenden Daten geht das nicht perfekt: Einzelne Punkte liegen in der Strasse oder auf der falschen Seite. <b>C ist das Bussgeld pro solchem Fehler.</b> Formal minimiert die SVM <code>½·‖w‖² + C · Σ Fehler</code>: Der erste Teil will eine breite Margin, der zweite wenige und kleine Verletzungen. Kleines C = billige Fehler, also eine breite Margin, die viele Punkte verletzen darf. Grosses C = teure Fehler, also eine schmale Margin, die kaum Punkte verletzt.</p>
   <div class="demo" id="svDemo">
     <div class="tag">Demo</div><h4>SVM: Wirkung von C</h4>
-    <svg class="plot" id="svSvg" viewBox="0 0 320 220" role="img" aria-label="Zwei Klassen mit Trennlinie, Margin und Support Vectors"></svg>
-    <div class="ctl"><label for="svC">C (Strafe für Fehler)</label><input type="range" id="svC" min="-1" max="2" step="0.25" value="0"><output id="svCO"></output></div>
-    <div class="stats"><span>C <b id="svCv"></b></span><span>Support Vectors <b id="svN"></b></span><span>Breite der Margin <b id="svM"></b></span><span>Accuracy <b id="svA"></b></span></div>
+    <p class="hint">40 Wohnungen mit Wohnfläche und Lage. Blau = teuer, orange = nicht teuer. Der Preis hängt von beiden ab, dazu kommt Rauschen. Schiebe C und beobachte die Strasse (gestrichelt) und die roten Striche: Sie zeigen, wie weit eine Wohnung die Margin verletzt.</p>
+    <div class="btnrow"><button class="pri" id="svD0">Saubere Daten</button><button id="svD1">Verrauschte Daten</button></div>
+    <svg class="plot" id="svSvg" viewBox="0 0 320 240" role="img" aria-label="Wohnfläche gegen Lage mit Trennlinie, Margin, roten Verletzungen und Support Vectors"></svg>
+    <div class="ctl"><label for="svC">C (Bussgeld pro Fehler)</label><input type="range" id="svC" min="-1" max="3" step="0.25" value="0"><output id="svCO"></output></div>
+    <div class="stats"><span>Support Vectors <b id="svN"></b></span><span>Verletzungen <b id="svV"></b></span><span>Breite der Margin (Grafikbreite = 100 %) <b id="svM"></b></span></div>
+    <div class="stats"><span>Accuracy Training (40) <b id="svTr"></b></span><span>Accuracy Test (2000 neue) <b id="svTe"></b></span></div>
     <p class="hint" id="svMsg">&nbsp;</p>
-    <p class="hint">Durchgezogene Linie = Trennlinie, gestrichelt = Rand der Margin. Dicke Ringe = Support Vectors: nur sie bestimmen die Linie.</p>
+    <p class="hint">Durchgezogen = Trennlinie, gestrichelt = Rand der Margin. Dicke Ringe = Support Vectors (auf oder in der Margin, nur sie bestimmen die Linie). Rote Striche = Verletzung: der Abstand, den die Wohnung bis zu ihrem Margin-Rand fehlt. Verletzungen zählen auch Wohnungen auf der richtigen Seite, die nur in der Margin liegen. Die Test-Accuracy zeigt, wie gut die Linie auf neuen Wohnungen hält. Bei sauberen Daten hilft ein grosses C, bei verrauschten ist ein mittleres C am besten.</p>
   </div>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Entscheidungsbaum</h4>
   <p>Eine Kette von Ja/Nein-Fragen. An jedem Knoten wird die Frage gewählt, die die Klassen am besten trennt (Mass: Gini oder Informationsgewinn), bis die Blätter «rein» sind oder die maximale Tiefe erreicht ist. Gut lesbar, aber ein tiefer Baum lernt die Trainingsdaten auswendig. Gegenmittel: <code>max_depth</code> begrenzen oder zurückschneiden.</p>

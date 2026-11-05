@@ -184,24 +184,54 @@
           $('nbMsg').textContent=post>0.5?LernApp.t('Die blaue Kurve liegt hier höher: Vorhersage «teuer».','The blue curve is higher here: prediction «expensive».'):LernApp.t('Die orange Kurve liegt hier höher: Vorhersage «nicht teuer».','The orange curve is higher here: prediction «not expensive».')}
         $('nbX').addEventListener('input',draw);$('nbP').addEventListener('input',draw);draw()})();
 
-      // Demo 5b: linear SVM (soft margin, subgradient descent), slider C
+      // Demo 5b: linear soft-margin SVM on 40 apartments (qm and location score), slider C.
+      // Solver: dual coordinate descent (Hsieh et al. 2008) with the bias as a third weight.
       (function(){
-        const r=mulberry32(5),pts=[];for(let i=0;i<30;i++){const c=i%2;pts.push({x:(c?0.62:0.38)+0.11*gauss(r),y:(c?0.58:0.42)+0.11*gauss(r),c:c,y2:c?1:-1})}
-        pts.forEach(p=>{p.u=p.x-0.5;p.v=p.y-0.5});
-        const W=320,H=220,sx=x=>x*W,sy=y=>H-y*H;
-        function fit(C){let w=[0,0],b=0;const lr=1/(1+C*pts.length);
-          for(let t=0;t<4000;t++){let gw=[w[0],w[1]],gb=0;pts.forEach(p=>{if(p.y2*(w[0]*p.u+w[1]*p.v+b)<1){gw[0]-=C*p.y2*p.u;gw[1]-=C*p.y2*p.v;gb-=C*p.y2}});w=[w[0]-lr*gw[0],w[1]-lr*gw[1]];b-=lr*gb}
-          return{w:w,b:b}}
-        function line(m,off,main){const a=m.w[0],bb=m.w[1],c=m.b-off;if(Math.abs(bb)<1e-6)return'';const y=x=>-(a*(x-0.5)+c)/bb+0.5;
-          return'<line x1="'+sx(-1)+'" y1="'+sy(y(-1))+'" x2="'+sx(2)+'" y2="'+sy(y(2))+'" style="stroke:var(--fg);stroke-width:'+(main?2:1.2)+(main?'':';stroke-dasharray:5 4')+'"/>'}
-        function draw(){const e=+$('svC').value,C=Math.pow(10,e);$('svCO').textContent=fmt(C,2);const m=fit(C);
-          const f=p=>m.w[0]*p.u+m.w[1]*p.v+m.b;let s=line(m,0,true)+line(m,1,false)+line(m,-1,false);
-          let sv=0,ok=0;pts.forEach(p=>{const isSv=p.y2*f(p)<=1.02;if(isSv)sv++;if(p.y2*f(p)>0)ok++;
-            s+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="'+(isSv?5.5:3.5)+'" style="fill:'+(p.c?'var(--accent)':'var(--warn)')+';stroke:var(--fg);stroke-width:'+(isSv?2.5:1)+'"/>'});
-          $('svSvg').innerHTML=s;const nw=Math.hypot(m.w[0],m.w[1]);
-          $('svCv').textContent=fmt(C,2);$('svN').textContent=sv;$('svM').textContent=nw>0?fmt(2/nw,2):'–';$('svA').textContent=fmt(ok/pts.length,2);
-          $('svMsg').textContent=C<0.5?LernApp.t('Kleines C: breite Margin, einzelne Fehler sind erlaubt. Viele Punkte stützen die Linie. Das Modell ist einfach (Underfitting-Risiko).','Small C: wide margin, single errors are allowed. Many points support the line. The model is simple (underfitting risk).'):C>20?LernApp.t('Grosses C: Fehler sind teuer, die Margin wird schmal und folgt einzelnen Punkten (Overfitting-Risiko).','Large C: errors are expensive, the margin becomes narrow and follows single points (overfitting risk).'):LernApp.t('Mittleres C: ein Kompromiss zwischen breiter Margin und wenigen Fehlern.','Medium C: a compromise between a wide margin and few errors.')}
-        $('svC').addEventListener('input',draw);draw()})();
+        const t=LernApp.t,NOISE=[0.03,0.07],KEEP=2000;
+        const apt=(r,noise)=>{const u=r(),v=r(),s=0.5*u+0.5*v+noise*gauss(r);return{u:u-0.5,v:v-0.5,y2:s>0.5?1:-1}};
+        // The same 40 apartments in both data sets, only the price noise differs (so a few labels change).
+        const make=(n,seed,noise)=>{const r=mulberry32(seed);return[...Array(n)].map(()=>apt(r,noise))};
+        const sets=NOISE.map(nz=>({tr:make(40,3,nz),te:make(KEEP,999,nz)}));
+        const cache={};
+        function fit(pts,key,C){if(cache[key+C])return cache[key+C];
+          const w=[0,0,0],al=pts.map(()=>0),Q=pts.map(p=>p.u*p.u+p.v*p.v+1);
+          for(let ep=0;ep<20000;ep++){let ch=0;
+            pts.forEach((p,i)=>{const G=p.y2*(w[0]*p.u+w[1]*p.v+w[2])-1,an=Math.min(C,Math.max(0,al[i]-G/Q[i])),d=(an-al[i])*p.y2;
+              w[0]+=d*p.u;w[1]+=d*p.v;w[2]+=d;ch=Math.max(ch,Math.abs(an-al[i]));al[i]=an});
+            if(ch<1e-7)break}
+          return cache[key+C]={w:[w[0],w[1]],b:w[2]}}
+        const f=(m,p)=>m.w[0]*p.u+m.w[1]*p.v+m.b,acc=(m,ps)=>ps.filter(p=>p.y2*f(m,p)>0).length/ps.length;
+        // Plot: x = living area (30 to 140 m²), y = location score (1 to 10).
+        const W=320,H=240,PX=36,PY=30,sx=u=>PX+(u+0.5)*(W-PX-14),sy=v=>H-PY-(v+0.5)*(H-PY-8);
+        const QM=u=>Math.round(30+110*(u+0.5)),LG=v=>1+9*(v+0.5);
+        // Line n·p + c = 0 as a long segment (clipped to the plot).
+        const seg=(m,off,style)=>{const n=Math.hypot(...m.w),c=m.b-off,px=-c*m.w[0]/(n*n),py=-c*m.w[1]/(n*n),dx=-m.w[1]/n*3,dy=m.w[0]/n*3;
+          return'<line x1="'+sx(px-dx)+'" y1="'+sy(py-dy)+'" x2="'+sx(px+dx)+'" y2="'+sy(py+dy)+'" style="'+style+'"/>'};
+        function axes(){let a='<line class="ax" x1="'+PX+'" y1="'+sy(-0.5)+'" x2="'+sx(0.5)+'" y2="'+sy(-0.5)+'"/><line class="ax" x1="'+PX+'" y1="'+sy(-0.5)+'" x2="'+PX+'" y2="'+sy(0.5)+'"/>';
+          [30,60,90,120,140].forEach(q=>{a+='<text class="lbl" x="'+sx((q-30)/110-0.5)+'" y="'+(sy(-0.5)+14)+'" text-anchor="middle">'+q+'</text>'});
+          [1,4,7,10].forEach(l=>{a+='<text class="lbl" x="'+(PX-5)+'" y="'+(sy((l-1)/9-0.5)+3.5)+'" text-anchor="end">'+l+'</text>'});
+          return a+'<text class="lbl" x="'+(PX+(W-PX-14)/2)+'" y="'+(H-3)+'" text-anchor="middle">'+t('Wohnfläche (qm)','Living area (m²)')+'</text><text class="lbl" transform="rotate(-90 9 '+sy(0)+')" x="9" y="'+sy(0)+'" text-anchor="middle">'+t('Lage (1 bis 10)','Location (1 to 10)')+'</text>'}
+        let ds=0;
+        function draw(){
+          const C=Math.pow(10,+$('svC').value),tr=sets[ds].tr,m=fit(tr,'d'+ds+'_',C),nw=Math.hypot(...m.w);
+          $('svD0').className=ds===0?'pri':'';$('svD1').className=ds===1?'pri':'';
+          const margin=tr.filter(p=>p.y2*f(m,p)<1-1e-6),sv=tr.filter(p=>p.y2*f(m,p)<=1+1e-6);
+          let s='<defs><clipPath id="svClip"><rect x="'+PX+'" y="'+sy(0.5)+'" width="'+(sx(0.5)-PX)+'" height="'+(sy(-0.5)-sy(0.5))+'"/></clipPath></defs><g clip-path="url(#svClip)">';
+          // The two dashed margin edges and the separating line.
+          s+=seg(m,1,'stroke:var(--fg);stroke-width:1.2;stroke-dasharray:5 4')+seg(m,-1,'stroke:var(--fg);stroke-width:1.2;stroke-dasharray:5 4')+seg(m,0,'stroke:var(--fg);stroke-width:2.2');
+          // Slack: a short red line from each point that violates the margin to the margin edge it should be behind.
+          margin.forEach(p=>{const k=(1-p.y2*f(m,p))/(nw*nw);s+='<line x1="'+sx(p.u)+'" y1="'+sy(p.v)+'" x2="'+sx(p.u+p.y2*m.w[0]*k)+'" y2="'+sy(p.v+p.y2*m.w[1]*k)+'" style="stroke:var(--bad);stroke-width:1.6"/>'});
+          s+='</g>';
+          tr.forEach(p=>{const isSv=sv.indexOf(p)>=0;
+            s+='<circle cx="'+sx(p.u)+'" cy="'+sy(p.v)+'" r="'+(isSv?5.5:3.5)+'" style="fill:'+(p.y2>0?'var(--accent)':'var(--warn)')+';stroke:var(--fg);stroke-width:'+(isSv?2.2:1)+'"/>'});
+          $('svSvg').innerHTML=s+axes();
+          $('svCO').textContent=fmt(C,C<10?2:0);
+          $('svN').textContent=sv.length;$('svV').textContent=margin.length;
+          $('svM').textContent=fmt(2/nw*100,0)+' %';$('svTr').textContent=fmt(acc(m,tr)*100,0)+' %';$('svTe').textContent=fmt(acc(m,sets[ds].te)*100,1)+' %';
+          $('svMsg').textContent=C<0.5?t('Sehr kleines C: Fehler kosten fast nichts, die Margin ist riesig (breiter als die Grafik), fast jede Wohnung verletzt sie. Die Linie ist grob und die Genauigkeit schlecht (Underfitting).','Very small C: errors cost almost nothing, the margin is huge (wider than the plot), almost every apartment violates it. The line is crude and the accuracy poor (underfitting).')
+            :C>200?t('Sehr grosses C: Jede Verletzung ist teuer, die Margin wird schmal und die Linie richtet sich nach einzelnen Wohnungen. Bei verrauschten Daten sinkt dadurch die Test-Accuracy wieder (Overfitting).','Very large C: every violation is expensive, the margin gets narrow and the line follows single apartments. With noisy data the test accuracy falls again (overfitting).')
+            :t('Mittleres C: Ein Kompromiss. Einige Wohnungen dürfen die Margin verletzen, die Margin bleibt breit genug, um auf neuen Wohnungen zu halten.','Medium C: a compromise. Some apartments may violate the margin, and the margin stays wide enough to hold on new apartments.')}
+        $('svC').addEventListener('input',draw);[0,1].forEach(i=>$('svD'+i).addEventListener('click',()=>{ds=i;draw()}));draw()})();
 
       // Demo 5c: decision tree (CART, Gini): regions, tree diagram and accuracy by depth
       (function(){
