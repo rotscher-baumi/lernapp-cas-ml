@@ -28,7 +28,7 @@ lernapp-cas-ml/
     style.css                Design-Tokens hell/dunkel und alle Komponenten
     demos-mathe.js           MatheDemos: Demos, die beide Mathe-Seiten teilen
     demos-kmeans.js          KMeansDemo: k-Means-Demo und gemeinsame k-Means-Helfer (`KMeansDemo.lib`)
-    demos-ml.js, demos-klass.js, demos-unsup.js   Demo-Code der Kapitel ml, klass und unsup (`LernApp.demos.<id>`)
+    demos-ml.js, demos-klass.js, demos-unsup.js, demos-nn.js   Demo-Code der Kapitel ml, klass, unsup und nn (`LernApp.demos.<id>`)
     img/                     Grafiken, aus echten Läufen erzeugt (Titanic)
     notebook-data.js         generiert aus den Notebooks (zurzeit von keiner Seite geladen)
   modules/
@@ -36,7 +36,7 @@ lernapp-cas-ml/
     en/<id>.js               englische Texte desselben Kapitels
     _vorlage.js              Vorlage für ein neues Kapitel
   notebooks/                 Jupyter-Notebooks (Übungen, Lernhilfe)
-    beispiele/               je ein eigenständiges Beispiel-Notebook pro Thema der Übersicht (01 bis 07, Titanic = 07)
+    beispiele/               je ein eigenständiges Beispiel-Notebook pro Thema der Übersicht (01 bis 08, Titanic = 07)
   tools/                     build_notebook_exercises.py: Notebooks → notebook-data.js
   scripts/                   build_notebook.js, build_lernhilfe_notebook.js: Module → Notebooks
   server.py                  statischer Server, /api/state, Proxy /jupyter/*
