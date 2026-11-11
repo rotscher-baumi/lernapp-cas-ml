@@ -21,6 +21,7 @@ lernapp-cas-ml/
   index.html                 Hauptseite: Kopf, Überblick, alle Kapitel
   titanic.html               Unterseite: Titanic-Beispiel ausführlich
   mathe-kompakt.html         Unterseite: Mathe-Spickzettel
+  kompakt.html               Unterseite: Spickzettel über die ML-Kapitel (Teaser-Modul kompakt-link in index.html)
   mathe-ausfuehrlich.html    Unterseite: Mathe ausführlich
   notebook.html              zwei Modi: lokal (JupyterLab im iframe, nur mit Server auf dem eigenen Rechner) oder Colab (Links)
   assets/

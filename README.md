@@ -16,6 +16,7 @@ lernapp/
   notebook.html     Übungs-Notebook (lokal mit Jupyter oder in Colab)
   titanic.html      Titanic-Seite
   mathe-kompakt.html, mathe-ausfuehrlich.html   eigene Mathe-Seiten
+  kompakt.html      Spickzettel über Supervised ML, Klassifikation, Unsupervised und Neural Networks (Modul `kompakt`; auf der Hauptseite verlinkt der Tab «Kompakt» über `kompakt-link`)
   server.py         lokaler Server (Zustand, Jupyter-Start, Proxy)
   run.sh            Jupyter und Server unter Linux/macOS starten
   requirements.txt, requirements-dev.txt   Laufzeit- und Entwicklungspakete
@@ -26,7 +27,7 @@ lernapp/
     demos-*.js      geteilte Demos (Mathe, k-Means)
     notebook-data.js  aus den Notebooks erzeugt (nicht von Hand ändern)
   modules/          ein Kapitel pro Datei
-    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js uebersicht.js titanic.js
+    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js uebersicht.js kompakt.js kompakt-link.js titanic.js
     en/             englische Texte je Kapitel
     _vorlage.js     Vorlage für ein neues Kapitel
   notebooks/        Übungs-Notebooks (Jupyter / VS Code)
