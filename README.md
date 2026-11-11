@@ -23,15 +23,15 @@ lernapp/
   assets/
     style.css       Design (hell und dunkel)
     core.js         Navigation, Sprache, Theme, Selbsttest; gemeinsame Helfer (mulberry32, gauss)
-    demos-<id>.js   Demo-Code der grossen Kapitel (ml, klass, unsup), das Kapitel in modules/ ruft ihn in init() auf
+    demos-<id>.js   Demo-Code der grossen Kapitel (ml, klass, unsup, nn), das Kapitel in modules/ ruft ihn in init() auf
     demos-*.js      geteilte Demos (Mathe, k-Means)
     notebook-data.js  aus den Notebooks erzeugt (nicht von Hand ändern)
   modules/          ein Kapitel pro Datei
-    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js uebersicht.js kompakt.js kompakt-link.js titanic.js
+    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js nn.js uebersicht.js kompakt.js kompakt-link.js titanic.js
     en/             englische Texte je Kapitel
     _vorlage.js     Vorlage für ein neues Kapitel
   notebooks/        Übungs-Notebooks (Jupyter / VS Code)
-    beispiele/      Beispiel-Notebooks zu allen Modellen und Strategien (01 bis 07)
+    beispiele/      Beispiel-Notebooks zu allen Modellen und Strategien (01 bis 08)
   tools/            build_notebook_exercises.py
   scripts/          Node-Skripte, die Notebooks erzeugen
   tests/            pytest-Tests
@@ -54,7 +54,7 @@ Die Übungs-Notebooks liegen in `notebooks/` (u. a. `Lernapp_Uebungen`, `Lernapp
 
 ### Beispiel-Notebooks
 
-`notebooks/beispiele/` hat ein eigenständiges Notebook pro Thema der Übersicht: `01_Regression`, `02_Klassifikation`, `03_Ensembles`, `04_Clustering_Anomalien`, `05_Dimensionsreduktion`, `06_Strategien` und `07_Titanic` (der ganze Ablauf an einem echten Datensatz, derselbe Code wie auf `titanic.html`). Jedes lädt seine Daten selbst (scikit-learn-Datensätze oder erzeugte Daten, nur Titanic nimmt `../../../titanic/data.csv`, falls vorhanden, sonst die öffentliche Kaggle-Kopie aus dem Netz) und hängt von keinem anderen ab. Die Steckbriefe der Übersicht verlinken mit «Beispiele →» darauf, `notebook.html?nb=beispiele/01_Regression.ipynb` öffnet ein Notebook direkt.
+`notebooks/beispiele/` hat ein eigenständiges Notebook pro Thema der Übersicht: `01_Regression`, `02_Klassifikation`, `03_Ensembles`, `04_Clustering_Anomalien`, `05_Dimensionsreduktion`, `06_Strategien`, `07_Titanic` (der ganze Ablauf an einem echten Datensatz, derselbe Code wie auf `titanic.html`) und `08_Neuronale_Netze` (Backpropagation von Hand mit Gradient-Check, dann `MLPClassifier`; ohne Keras/TensorFlow). Jedes lädt seine Daten selbst (scikit-learn-Datensätze oder erzeugte Daten, nur Titanic nimmt `../../../titanic/data.csv`, falls vorhanden, sonst die öffentliche Kaggle-Kopie aus dem Netz) und hängt von keinem anderen ab. Die Steckbriefe der Übersicht verlinken mit «Beispiele →» darauf, `notebook.html?nb=beispiele/01_Regression.ipynb` öffnet ein Notebook direkt.
 
 **Auf einem anderen PC:** Repo klonen, dann im Lernapp-Ordner `py -3.12 -m venv .venv`, `.venv\Scripts\python -m pip install -r requirements.txt`, `.venv\Scripts\python server.py` (Linux/macOS: `./run.sh`). Der Knopf «Jupyter starten» nimmt automatisch das Python aus `.venv`. Ohne Installation geht es im Browser mit Google Colab: Jedes Beispiel-Notebook hat oben den Link «In Colab öffnen»; ein Google-Konto genügt, solange das Repo öffentlich ist (ist es privat, in Colab mit GitHub anmelden und «Include private repos» anhaken). Die Setup-Zelle installiert dort `umap-learn` und `imbalanced-learn` bei Bedarf selbst.
 

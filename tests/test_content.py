@@ -25,7 +25,7 @@ def _read(path: Path) -> nbformat.NotebookNode:
 
 
 def test_there_are_example_notebooks() -> None:
-    assert len(EXAMPLES) == 7
+    assert len(EXAMPLES) == 8
 
 
 @pytest.mark.parametrize("path", ALL_NOTEBOOKS, ids=_id)

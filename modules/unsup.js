@@ -138,58 +138,6 @@
     </div>
     <figcaption>Skalieren ist (ausser bei Baumverfahren wie dem Isolation Forest) Pflicht, weil fast alle Verfahren mit Abständen rechnen. Es gibt kein Testset (orange): Statt mit der richtigen Antwort prüfst du mit Silhouette, Stabilität und Fachwissen. Die Schleifen zeigen, dass du Einstellungen und Vorverarbeitung mehrmals anpasst.</figcaption>
   </figure>
-  <div class="box" id="unsup-titanic">
-    <h4>Komplettes Beispiel: Titanic ohne Zielspalte</h4>
-    <p class="hint">Stark gekürzt. Dieselben Passagiere wie im <a href="titanic.html">Supervised-Beispiel</a>, aber die Frage ist eine andere: Welche Passagiertypen gab es? <code>Survived</code> geht nicht ins Modell, erst am Schluss zum Vergleich. Die Nummern sind die Schritte der Grafik oben; die Teile laufen nacheinander wie Zellen in einem Notebook.</p>
-    <pre><code>import numpy as np, pandas as pd, matplotlib.pyplot as plt
-from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
-from sklearn.metrics import silhouette_score, adjusted_rand_score
-
-# 1 · Frage: Welche Passagiertypen gab es? Survived bleibt draussen.
-# 2 · Daten laden und ansehen
-df = pd.read_csv(&quot;titanic/data.csv&quot;).dropna(subset=[&quot;Survived&quot;]).astype({&quot;Pclass&quot;: int, &quot;Survived&quot;: int})  # 1 leere Zeile
-
-# 3 · Vorverarbeiten: alles in Zahlen, Alter mit Median füllen, schiefe Fare logarithmieren
-X = pd.DataFrame({&quot;Klasse&quot;: df[&quot;Pclass&quot;], &quot;Frau&quot;: (df[&quot;Sex&quot;] == &quot;female&quot;).astype(int),
-                  &quot;Alter&quot;: df[&quot;Age&quot;].fillna(df[&quot;Age&quot;].median()),
-                  &quot;Familie&quot;: df[&quot;SibSp&quot;] + df[&quot;Parch&quot;], &quot;logFare&quot;: np.log1p(df[&quot;Fare&quot;])})
-
-# 4 · Skalieren (k-Means rechnet mit Abständen)
-X_s = StandardScaler().fit_transform(X)
-
-# 5 · Dimensionen reduzieren: hier nicht nötig, nur 5 Merkmale
-# 6 + 7 · k-Means wählen, k mit der Silhouette bestimmen
-ks = range(2, 9)
-sil = [silhouette_score(X_s, KMeans(k, n_init=10, random_state=0).fit_predict(X_s)) for k in ks]
-plt.figure(figsize=(4.5, 3)); plt.plot(ks, sil, &quot;o-&quot;); plt.xlabel(&quot;k&quot;); plt.ylabel(&quot;Silhouette&quot;); plt.show()
-k = ks[int(np.argmax(sil))]</code></pre>
-    <figure class="fig"><img style="max-width:400px;margin:0 auto" src="assets/img/titanic-unsup-1.png" alt="Silhouette für k gleich 2 bis 8, Maximum bei k gleich 6" loading="lazy"><figcaption>Die Silhouette ist bei k = 6 am höchsten. Der Unterschied zu k = 5 und 7 ist klein, darum folgt die Stabilitätsprüfung.</figcaption></figure>
-    <pre><code># 8 · Stabilität: anderer Zufallsstart, gleiche Gruppen?
-labels = KMeans(k, n_init=10, random_state=0).fit_predict(X_s)
-other = KMeans(k, n_init=10, random_state=1).fit_predict(X_s)
-print(&quot;k =&quot;, k, &quot;| ARI zwischen zwei Läufen:&quot;, round(adjusted_rand_score(labels, other), 2))</code></pre>
-    <pre class="out">k = 6 | ARI zwischen zwei Läufen: 0.83</pre>
-    <pre><code># 9 · Visualisieren: PCA auf 2D, nach Cluster eingefärbt
-pca = PCA(2).fit(X_s)
-Z = pca.transform(X_s)
-plt.figure(figsize=(4.5, 3.5)); plt.scatter(Z[:, 0], Z[:, 1], c=labels, s=8, cmap=&quot;tab10&quot;)
-plt.title(f&quot;PCA, {pca.explained_variance_ratio_.sum():.0%} der Varianz&quot;); plt.show()</code></pre>
-    <figure class="fig"><img style="max-width:400px;margin:0 auto" src="assets/img/titanic-unsup-2.png" alt="PCA-Streudiagramm der Passagiere, nach sechs Clustern eingefärbt" loading="lazy"><figcaption>Die PCA-Karte zeigt 67 % der Varianz. Die Cluster überlappen in 2D teilweise; im vollen 5-dimensionalen Raum sind sie besser getrennt, aber nicht scharf (Silhouette 0,41: mässig deutliche Struktur).</figcaption></figure>
-    <pre><code># 10 · Interpretieren in Originaleinheiten; Survived erst jetzt zum Vergleich
-print(X.assign(Cluster=labels, Survived=df[&quot;Survived&quot;]).groupby(&quot;Cluster&quot;).mean().round(2).assign(n=np.bincount(labels)))</code></pre>
-    <pre class="out">         Klasse  Frau  Alter  Familie  logFare  Survived    n
-Cluster                                                      
-0          2.83  0.00  27.70     0.24     2.27      0.13  373
-1          1.35  0.00  25.75     0.92     3.87      0.41   98
-2          2.64  1.00  24.84     0.84     2.68      0.71  184
-3          1.40  0.04  53.58     0.48     3.47      0.23   81
-4          2.98  0.50  17.79     5.80     3.55      0.11   56
-5          1.06  1.00  34.31     1.11     4.45      0.97   99</pre>
-    <p>So liest man die Tabelle: Cluster 0 sind allein reisende Männer der 3. Klasse (373, nur 13 % überlebt). Cluster 5 sind Frauen der 1. Klasse (97 % überlebt), Cluster 4 grosse Familien der 3. Klasse (11 %). Die Cluster kennen <code>Survived</code> nicht und trennen die Überlebenschancen trotzdem deutlich, weil Klasse, Geschlecht und Familie sie bestimmt haben.</p>
-    <p class="note">Ein ARI von 0,83 zwischen zwei Läufen heisst: Die Gruppen sind weitgehend, aber nicht ganz stabil. Mit k = 6 nicht als «die Wahrheit» rechnen, sondern als eine nützliche Einteilung.</p>
-  </div>
   <div class="merk"><b>Merksatz</b><p>Skalieren, mehrere Einstellungen vergleichen, Stabilität prüfen und die Cluster in Originaleinheiten erklären. Ein Ergebnis ist gut, wenn es stabil ist und fachlich Sinn ergibt.</p></div>
 
   <h3 id="unsup-wahl">Welches Verfahren wofür?</h3>

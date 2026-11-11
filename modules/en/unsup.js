@@ -135,58 +135,6 @@ LernApp.translate('unsup', {
     </div>
     <figcaption>Scaling is a must (except for tree methods such as Isolation Forest), because almost all methods compute distances. There is no test set (orange): instead of the right answer, you check with the silhouette, stability and domain knowledge. The loops show that you adjust settings and preprocessing several times.</figcaption>
   </figure>
-  <div class="box" id="unsup-titanic">
-    <h4>Complete example: Titanic without a target column</h4>
-    <p class="hint">Heavily shortened. The same passengers as in the <a href="titanic.html">supervised example</a>, but the question is a different one: which types of passengers were there? <code>Survived</code> does not go into the model, only at the end for comparison. The numbers are the steps of the figure above; the parts run one after another like cells in a notebook.</p>
-    <pre><code>import numpy as np, pandas as pd, matplotlib.pyplot as plt
-from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
-from sklearn.metrics import silhouette_score, adjusted_rand_score
-
-# 1 · Question: which types of passengers were there? Survived stays out.
-# 2 · Load and inspect data
-df = pd.read_csv(&quot;titanic/data.csv&quot;).dropna(subset=[&quot;Survived&quot;]).astype({&quot;Pclass&quot;: int, &quot;Survived&quot;: int})  # 1 empty row
-
-# 3 · Preprocess: everything into numbers, fill age with the median, take the log of the skewed Fare
-X = pd.DataFrame({&quot;Klasse&quot;: df[&quot;Pclass&quot;], &quot;Frau&quot;: (df[&quot;Sex&quot;] == &quot;female&quot;).astype(int),
-                  &quot;Alter&quot;: df[&quot;Age&quot;].fillna(df[&quot;Age&quot;].median()),
-                  &quot;Familie&quot;: df[&quot;SibSp&quot;] + df[&quot;Parch&quot;], &quot;logFare&quot;: np.log1p(df[&quot;Fare&quot;])})
-
-# 4 · Scale (k-Means computes distances)
-X_s = StandardScaler().fit_transform(X)
-
-# 5 · Reduce dimensions: not needed here, only 5 features
-# 6 + 7 · Choose k-Means, determine k with the silhouette
-ks = range(2, 9)
-sil = [silhouette_score(X_s, KMeans(k, n_init=10, random_state=0).fit_predict(X_s)) for k in ks]
-plt.figure(figsize=(4.5, 3)); plt.plot(ks, sil, &quot;o-&quot;); plt.xlabel(&quot;k&quot;); plt.ylabel(&quot;Silhouette&quot;); plt.show()
-k = ks[int(np.argmax(sil))]</code></pre>
-    <figure class="fig"><img style="max-width:400px;margin:0 auto" src="assets/img/titanic-unsup-1.png" alt="Silhouette for k equal to 2 to 8, maximum at k equal to 6" loading="lazy"><figcaption>The silhouette is highest at k = 6. The difference to k = 5 and 7 is small, so the stability check follows.</figcaption></figure>
-    <pre><code># 8 · Stability: different random start, same groups?
-labels = KMeans(k, n_init=10, random_state=0).fit_predict(X_s)
-other = KMeans(k, n_init=10, random_state=1).fit_predict(X_s)
-print(&quot;k =&quot;, k, &quot;| ARI zwischen zwei Läufen:&quot;, round(adjusted_rand_score(labels, other), 2))</code></pre>
-    <pre class="out">k = 6 | ARI zwischen zwei Läufen: 0.83</pre>
-    <pre><code># 9 · Visualise: PCA to 2D, coloured by cluster
-pca = PCA(2).fit(X_s)
-Z = pca.transform(X_s)
-plt.figure(figsize=(4.5, 3.5)); plt.scatter(Z[:, 0], Z[:, 1], c=labels, s=8, cmap=&quot;tab10&quot;)
-plt.title(f&quot;PCA, {pca.explained_variance_ratio_.sum():.0%} der Varianz&quot;); plt.show()</code></pre>
-    <figure class="fig"><img style="max-width:400px;margin:0 auto" src="assets/img/titanic-unsup-2.png" alt="PCA scatter plot of the passengers, coloured by six clusters" loading="lazy"><figcaption>The PCA map shows 67 % of the variance. The clusters partly overlap in 2D; in the full 5-dimensional space they are separated better, but not sharply (silhouette 0.41: moderately clear structure).</figcaption></figure>
-    <pre><code># 10 · Interpret in original units; Survived only now for comparison
-print(X.assign(Cluster=labels, Survived=df[&quot;Survived&quot;]).groupby(&quot;Cluster&quot;).mean().round(2).assign(n=np.bincount(labels)))</code></pre>
-    <pre class="out">         Klasse  Frau  Alter  Familie  logFare  Survived    n
-Cluster                                                      
-0          2.83  0.00  27.70     0.24     2.27      0.13  373
-1          1.35  0.00  25.75     0.92     3.87      0.41   98
-2          2.64  1.00  24.84     0.84     2.68      0.71  184
-3          1.40  0.04  53.58     0.48     3.47      0.23   81
-4          2.98  0.50  17.79     5.80     3.55      0.11   56
-5          1.06  1.00  34.31     1.11     4.45      0.97   99</pre>
-    <p>How to read the table: cluster 0 are men in 3rd class travelling alone (373, only 13 % survived). Cluster 5 are women in 1st class (97 % survived), cluster 4 large families in 3rd class (11 %). The clusters do not know <code>Survived</code> and still separate the chances of survival clearly, because class, sex and family determined them.</p>
-    <p class="note">An ARI of 0.83 between two runs means: the groups are largely, but not completely, stable. Do not treat k = 6 as «the truth», but as one useful partition.</p>
-  </div>
   <div class="merk"><b>Key takeaway</b><p>Scale, compare several settings, check stability and explain the clusters in original units. A result is good if it is stable and makes sense in the domain.</p></div>
 
   <h3 id="unsup-wahl">Which method for what?</h3>
