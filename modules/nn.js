@@ -13,7 +13,7 @@
   <h3 id="nn-ablauf">Der ganze Ablauf auf einen Blick</h3>
   <p>Der Ablauf ist derselbe wie beim <a href="#ml-ablauf">Supervised Learning</a>. Neu ist der Trainings-Loop in der Mitte: Vorhersagen, Fehler messen, Gradienten rückwärts berechnen, Gewichte anpassen, und das viele Male.</p>
   <p class="hint">Klicke auf einen Schritt in der Grafik: Darunter klappt die Erklärung auf, mit Links zu den passenden Stellen im Kapitel.</p>
-  <figure class="fig ab-fig">
+  <figure class="fig ab-fig" id="nnFlowFig">
     <div class="ab-scroll">
     <svg viewBox="0 0 680 650" role="img" aria-label="Ablauf eines Neural-Network-Projekts: Daten vorbereiten, Architektur wählen, Loss und Optimizer festlegen, dann der Trainings-Loop aus Forward pass, Loss, Backpropagation und Update, danach Validation prüfen mit Tuning-Schleife und zum Schluss einmal testen">
       ${LernApp.nnFlow({
@@ -41,6 +41,62 @@
     </div>
     <figcaption>Die Schritte 4 bis 7 (orange gestrichelt, innen) laufen für jeden Mini-Batch, alle Batches zusammen sind eine epoch. Der äussere Loop ist das Tuning: Du vergleichst Setups auf der Validation. Das Testset (orange) wird nicht zum Wählen benutzt.</figcaption>
   </figure>
+
+  <h3 id="nn-konzept">Das Hauptkonzept: Input, Hidden Layers, Backpropagation</h3>
+  <p>Jedes Neural Network besteht aus <b>drei Teilen</b> und einer Lernschleife. Die Grafik zeigt ein kleines Netz mit 2 Eingängen, zwei hidden layers zu je 3 Neuronen und 2 Ausgängen (nach der Kursfolie «Error Analysis»).</p>
+  <ul>
+    <li><b>Input Layer:</b> nimmt die Rohwerte entgegen (Pixel, Preise, Messwerte) und reicht sie weiter. Hier wird nichts gelernt.</li>
+    <li><b>Hidden Layers:</b> rechnen je Neuron eine gewichtete Summe und eine activation function. Jede Schicht baut aus den Merkmalen der vorherigen neue, abstraktere Merkmale (Pixel → Kanten → Formen → Ziffer).</li>
+    <li><b>Output Layer:</b> liefert die Vorhersage <code>ŷ</code>. Sie wird mit der richtigen Antwort <code>y</code> verglichen, die Loss <code>L</code> misst die Abweichung.</li>
+    <li><b>Backpropagation:</b> der Rückweg. Aus der Loss wird für <i>jedes</i> Gewicht berechnet, wie es den Fehler beeinflusst hat; danach wird jedes Gewicht ein kleines Stück korrigiert.</li>
+  </ul>
+  <p class="hint">Klicke auf einen Teil der Grafik: Die Erklärung öffnet sich darunter.</p>
+  <figure class="fig ab-fig" id="nnConceptFig">
+    <div class="ab-scroll">
+    <svg viewBox="0 0 760 345" role="img" aria-label="Aufbau eines Neural Networks: Input Layer, zwei Hidden Layers, Output Layer mit ŷ und y, Loss, Forward pass nach rechts und Backpropagation nach links">
+      ${LernApp.nnConcept({
+        aria: 'Teil «%»: Erklärung öffnen',
+        parts: { in: 'Input Layer', h1: 'Hidden Layer 1', h2: 'Hidden Layer 2', out: 'Output Layer', loss: 'Loss', fw: 'Forward pass', bp: 'Backpropagation' },
+        fw: 'Forward pass: x → z1 → a1 → z2 → a2 → z3 → ŷ',
+        bp: 'Backpropagation: ∂J/∂W₂ → ∂J/∂W₁ → ∂J/∂W₀',
+      })}
+    </svg>
+    </div>
+    <div class="ab-detail" id="nnConDetail" role="region" aria-live="polite" hidden>
+      <div class="ab-dh"><b></b><button type="button" class="ab-x" aria-label="Schliessen">✕</button></div>
+      <div class="ab-db"></div>
+      <div class="ab-dl"></div>
+    </div>
+    <figcaption>Blau: der Weg der Daten nach vorne (forward pass). Orange gestrichelt: der Weg des Fehlers nach hinten (backpropagation). Die Formel unten ist die Loss über alle <code>n</code> Beispiele, <code>W</code> sind alle Gewichte des Netzes.</figcaption>
+  </figure>
+  <p>In Formeln, Schicht für Schicht (<code>f</code> ist die activation function, <code>g</code> die der Ausgabe):</p>
+  <pre><code>z1 = W₀·x  + b₀      a1 = f(z1)
+z2 = W₁·a1 + b₁      a2 = f(z2)
+z3 = W₂·a2 + b₂      ŷ  = g(z3)
+J(W) = 1/n · Σ L(ŷᵢ, yᵢ)      # Loss über alle Beispiele</code></pre>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Ein Zahlenbeispiel von Hand</h4>
+  <p>Netz mit 2 Eingängen, 2 hidden Neuronen (ReLU) und 1 Ausgang (Sigmoid). Eingabe <code>x = (1.0, 0.5)</code>, richtige Klasse <code>y = 1</code>, learning rate <code>α = 0.1</code>. Gewichte: hidden <code>W₀ = [[0.4, 0.2], [−0.3, 0.8]]</code>, <code>b₀ = (0, 0.1)</code>; Ausgabe <code>W₁ = (0.6, −0.5)</code>, <code>b₁ = 0.1</code>.</p>
+  <pre><code># 1 · Forward pass
+z1 = (0.4·1.0 + 0.2·0.5 + 0,   −0.3·1.0 + 0.8·0.5 + 0.1) = (0.5, 0.2)
+a1 = ReLU(z1) = (0.5, 0.2)
+z2 = 0.6·0.5 − 0.5·0.2 + 0.1 = 0.3          ŷ = sigmoid(0.3) = 0.574
+
+# 2 · Loss
+L = −log(0.574) = 0.554
+
+# 3 · Backpropagation (Kettenregel, von hinten nach vorne)
+δ_out = ŷ − y = −0.426                      # Sigmoid + Cross-Entropy
+∂L/∂W₁ = δ_out · a1 = (−0.213, −0.085)      ∂L/∂b₁ = −0.426
+δ_hid  = δ_out · W₁ · ReLU'(z1) = (−0.255, 0.213)   # Fehler nach hinten gereicht
+∂L/∂W₀ = δ_hid · xᵀ = [[−0.255, −0.128], [0.213, 0.106]]
+
+# 4 · Update  (w ← w − α · ∂L/∂w)
+W₁ = (0.621, −0.491)   b₁ = 0.143
+W₀ = [[0.426, 0.213], [−0.321, 0.789]]   b₀ = (0.026, 0.079)
+
+# Nochmal vorwärts: ŷ = 0.602, Loss = 0.507  (vorher 0.554)</code></pre>
+  <p>Ein einziger Schritt hat die Loss gesenkt. Das Training wiederholt genau das für tausende Mini-Batches; die <a href="#nsDemo">Demo in Abschnitt 3</a> lässt dich jede Phase einzeln anklicken.</p>
+  <div class="merk"><b>Merksatz</b><p>Vorwärts rechnet das Netz eine Vorhersage, die Loss misst den Fehler, rückwärts verteilt backpropagation den Fehler als Gradient auf jedes Gewicht, und der Optimizer korrigiert die Gewichte. Diese Schleife ist das ganze Lernen.</p></div>
 
   <h3 id="nn-neuron">1 · Vom Neuron zum Netz</h3>
   <p>Ein künstliches Neuron macht zwei Dinge. Es bildet eine gewichtete Summe seiner Eingaben plus <b>bias</b>, <code>z = w1·x1 + w2·x2 + … + b</code>, und schickt sie durch eine <b>activation function</b>: <code>a = f(z)</code>. Die lineare Regression ist ein Neuron mit <code>f(z) = z</code>, die logistische Regression ein Neuron mit Sigmoid.</p>
@@ -75,6 +131,17 @@
     <tr><td>k Klassen (Ziffern 0 bis 9)</td><td>k</td><td>Softmax</td><td>Cross-Entropy</td></tr>
     <tr><td>Zahl (Preis)</td><td>1</td><td>Linear</td><td>MSE oder MAE</td></tr>
   </table></div>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Warum mehrere Neuronen und Schichten?</h4>
+  <p>Ein einzelnes Neuron mit ReLU ist ein «Knick»: flach, dann eine Gerade. Eine hidden layer mit <code>N</code> Neuronen addiert <code>N</code> solche Knicke, jeder mit eigener Lage (bias), Steigung (Gewicht) und Gewichtung im Ausgang. Damit lässt sich jede glatte Kurve beliebig genau annähern (<i>universal approximation theorem</i>). Mehr Schichten erreichen das oft mit weniger Neuronen, weil spätere Schichten die Muster der früheren wiederverwenden.</p>
+  <div class="demo" id="nuDemo">
+    <div class="tag">Demo</div><h4>Eine Kurve aus ReLU-Knicken</h4>
+    <p class="hint">Wähle eine Zielkurve und erhöhe die Zahl der Neuronen. Die dünnen orangen Linien sind die Beiträge der einzelnen Neuronen, die blaue Linie ist ihre Summe, also die Ausgabe des Netzes. Gestrichelt ist die Zielkurve. Die Ausgangsgewichte sind hier exakt berechnet (kleinste Quadrate), nicht trainiert: Du siehst, was die Schicht darstellen <i>kann</i>.</p>
+    <div class="btnrow" id="nuBtns" role="group" aria-label="Zielkurve"><button data-t="sine" class="pri" aria-pressed="true">Sinus</button><button data-t="bump" aria-pressed="false">Glocke</button><button data-t="step" aria-pressed="false">Stufe</button></div>
+    <svg class="plot" id="nuSvg" viewBox="0 0 320 190" role="img" aria-label="Zielkurve und Ausgabe eines Netzes mit einer hidden layer aus ReLU-Neuronen"></svg>
+    <div class="ctl"><label for="nuN">Neuronen in der hidden layer</label><input type="range" id="nuN" min="1" max="12" step="1" value="3"><output id="nuNO"></output></div>
+    <div class="stats"><span>Neuronen <b id="nuK"></b></span><span>Parameter <b id="nuPar"></b></span><span>Fehler (RMSE) <b id="nuErr"></b></span></div>
+    <p class="hint" id="nuMsg"></p>
+  </div>
   <div class="demo" id="npDemo">
     <div class="tag">Demo</div><h4>Parameter zählen</h4>
     <p class="hint">Stelle ein Netz zusammen. Die Startwerte (784 Eingänge, eine hidden layer mit 128 Neuronen, 10 Ausgänge) sind ein Netz für 28×28-Bilder von Ziffern wie in den Keras-Beispielen. Die Tabelle entspricht <code>model.summary()</code>.</p>
@@ -106,6 +173,14 @@
     <div class="stats"><span>Runde <b id="nsN"></b></span><span>Vorhersage ŷ <b id="nsPred"></b></span><span>Loss <b id="nsLoss"></b></span></div>
     <p class="hint">Die Gradienten sind von Hand nach der Kettenregel gerechnet und stimmen mit numerisch berechneten Gradienten überein. Bei Sigmoid-Ausgabe mit Cross-Entropy ist der Fehler am Ausgang einfach <code>δ = ŷ − y</code>.</p>
   </div>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Backpropagation genauer</h4>
+  <p>Die Loss hängt über viele Zwischenschritte von jedem Gewicht ab: <code>L(ŷ(z3(a2(z2(a1(z1(W₀)))))))</code>. Die <b>Kettenregel</b> zerlegt die Ableitung in ein Produkt lokaler Ableitungen. Damit nichts doppelt gerechnet wird, läuft man von hinten nach vorne und reicht einen Fehlerterm <code>δ</code> weiter:</p>
+  <pre><code>δ_out = ŷ − y                          # am Ausgang (Sigmoid/Softmax + Cross-Entropy)
+δ_l   = (W_(l+1)ᵀ · δ_(l+1)) ⊙ f'(z_l)   # eine Schicht zurück: Gewichte transponiert, mal Steigung
+∂L/∂W_l = δ_l · a_(l−1)ᵀ                # Gradient der Gewichte dieser Schicht
+∂L/∂b_l = δ_l</code></pre>
+  <p>Jede Schicht braucht dafür ihre Werte aus dem forward pass (<code>z</code> und <code>a</code>); darum werden sie beim Training gespeichert. Der Aufwand ist etwa so gross wie ein forward pass.</p>
+  <p><b>Vanishing gradients:</b> Auf dem Rückweg wird in jeder Schicht mit <code>f'(z)</code> multipliziert. Die Sigmoid hat höchstens die Steigung 0.25; nach 10 Schichten bleibt von δ weniger als <code>0.25¹⁰ ≈ 10⁻⁶</code> übrig, und die ersten Schichten lernen kaum noch. Gegenmittel: ReLU (Steigung 1 für z &gt; 0), passende Startgewichte (Xavier, He) und skalierte Eingaben.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Loss je nach Aufgabe</h4>
   <p>Bei <b>Klassifikation</b> gibt die Ausgabe-Schicht Wahrscheinlichkeiten aus (Sigmoid oder Softmax), die Loss ist die <b>Cross-Entropy</b>: <code>L = −[ y·log(ŷ) + (1−y)·log(1−ŷ) ]</code> (Mittel über alle Beispiele). Bei <b>Regression</b> ist die Ausgabe linear (oder Sigmoid, wenn der Bereich begrenzt ist), die Loss ist MSE oder MAE. Warum Cross-Entropy besser zur Klassifikation passt als MSE, zeigt die Demo im Kapitel <a href="#klass">Klassifikation</a>.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Startgewichte</h4>
@@ -217,12 +292,31 @@ for x_batch, y_batch in dataset:
         loss = loss_fn(y_batch, y_pred)                        # Loss
     grads = tape.gradient(loss, model.trainable_weights)       # Backpropagation
     optimizer.apply_gradients(zip(grads, model.trainable_weights))   # Update</code></pre>
+  <h3 id="nn-methoden">7 · Übersicht: Schritte und Methoden</h3>
+  <p>Alle Schritte des Ablaufs mit den Methoden, die du dort wählst, und dem passenden Keras-Aufruf. Die Nummern entsprechen der Grafik «Der ganze Ablauf auf einen Blick».</p>
+  <div class="tablewrap"><table>
+    <tr><th>Schritt</th><th>Methoden zur Wahl</th><th>Wann welche</th><th>Keras</th></tr>
+    <tr><td><b>1 · Daten</b></td><td>Split train/validation/test, <code>StandardScaler</code> oder MinMax, One-Hot für Kategorien</td><td>Scaler nur auf train lernen. Bilder oft durch 255 teilen.</td><td><code>validation_split</code>, <code>to_categorical</code></td></tr>
+    <tr><td><b>2 · Architektur</b></td><td>Dense (MLP), Zahl der Schichten und Neuronen, activation: ReLU, Leaky ReLU, Tanh, Sigmoid, Softmax, linear</td><td>Hidden: ReLU. Ausgabe: Sigmoid (2 Klassen), Softmax (k Klassen), linear (Zahl). Start klein, dann vergrössern.</td><td><code>Sequential</code>, <code>Dense</code>, <code>Input</code></td></tr>
+    <tr><td><b>3 · Loss, Optimizer</b></td><td>Loss: Binary und Categorical Cross-Entropy, MSE, MAE. Optimizer: SGD, Momentum, RMSProp, Adam</td><td>Klassifikation: Cross-Entropy. Regression: MSE (MAE robuster gegen Ausreisser). Adam mit 0.001 als Start.</td><td><code>compile(optimizer, loss, metrics)</code></td></tr>
+    <tr><td><b>4 · Forward pass</b></td><td>Mini-Batch durchs Netz: <code>z = W·a + b</code>, <code>a = f(z)</code></td><td>batch size 16 bis 256, Daten pro epoch mischen.</td><td><code>model(x)</code>, <code>predict</code></td></tr>
+    <tr><td><b>5 · Loss berechnen</b></td><td>Mittel der Loss über den Mini-Batch</td><td>—</td><td><code>loss_fn(y, ŷ)</code></td></tr>
+    <tr><td><b>6 · Backpropagation</b></td><td>Kettenregel, Gradient je Gewicht</td><td>Läuft automatisch (automatic differentiation).</td><td><code>fit</code>, <code>GradientTape</code></td></tr>
+    <tr><td><b>7 · Update</b></td><td><code>w ← w − α·g</code>, mit Momentum oder Adam verfeinert</td><td>learning rate zuerst tunen. Zu gross: Loss springt. Zu klein: kriecht.</td><td><code>optimizer.apply_gradients</code></td></tr>
+    <tr><td><b>8 · Validation</b></td><td>Loss-Kurven train und validation, Dropout, L2, Early Stopping, Data Augmentation, anderes Setup</td><td>Kurven weit auseinander: overfitting. Beide hoch: underfitting.</td><td><code>history</code>, <code>Dropout</code>, <code>EarlyStopping</code></td></tr>
+    <tr><td><b>9 · Test</b></td><td>Einmalige Auswertung mit Accuracy, Loss, Confusion Matrix</td><td>Erst wenn das Setup feststeht.</td><td><code>evaluate</code></td></tr>
+  </table></div>
+  <p class="note">Schritte 4 bis 7 laufen je Mini-Batch, alle Batches zusammen sind eine epoch (<code>fit(epochs=…)</code>). Schritt 8 nach jeder epoch.</p>
   <div class="merk"><b>Merksatz</b><p>Ein Neural Network ist ein Stapel von Neuronen (gewichtete Summe plus activation function), dessen Gewichte mit Backpropagation und einem Optimizer wie Adam gelernt werden. Gewählt wird es wie jedes Modell: auf der Validation, mit Early Stopping und Dropout gegen overfitting, und das Testset einmal am Schluss.</p></div>
 `,
     notebooks: [
       { file: 'beispiele/08_Neuronale_Netze.ipynb', desc: `Netz von Hand in NumPy (Gradienten gegen numerische Gradienten geprüft) und mit scikit-learn: Vergleich mit Baseline und logistischer Regression, Grösse, learning rate, L2, Early Stopping, Loss-Kurven.` },
     ],
     quiz: [
+      { q: `Welche drei Teile hat ein Neural Network, und was macht jeder?`, a: `Input Layer: nimmt die Rohwerte entgegen, lernt nichts. Hidden Layers: gewichtete Summe plus activation function, bauen schrittweise Merkmale. Output Layer: liefert die Vorhersage <code>ŷ</code>, die mit <code>y</code> in der Loss verglichen wird.` },
+      { q: `Was berechnet backpropagation, und womit?`, a: `Für jedes Gewicht den Gradienten der Loss, mit der Kettenregel von der Ausgabe nach hinten. Der Fehlerterm <code>δ</code> wird Schicht für Schicht zurückgereicht (<code>δ_l = (W_(l+1)ᵀ·δ_(l+1)) ⊙ f'(z_l)</code>) und mit den gespeicherten Werten des forward pass zum Gradienten kombiniert.` },
+      { q: `Was sind vanishing gradients, und was hilft?`, a: `Beim Rückweg wird mit <code>f'(z)</code> multipliziert. Bei Sigmoid (höchstens 0.25) schrumpft der Gradient über viele Schichten, die ersten Schichten lernen kaum. ReLU, Xavier/He-Startgewichte und skalierte Eingaben helfen.` },
+      { q: `Warum kann eine hidden layer eine gekrümmte Kurve darstellen?`, a: `Jedes ReLU-Neuron ist ein Knick. Die Summe vieler Knicke mit verschiedener Lage und Steigung nähert jede glatte Kurve an. Mehr Neuronen heisst genauer, aber auch mehr Parameter und mehr overfitting-Risiko.` },
       { q: `Was passiert, wenn alle activation functions in den hidden layers linear sind?`, a: `Das ganze Netz bleibt eine einzige lineare Funktion, egal wie viele Schichten es hat (<code>W2·(W1·x) = (W2·W1)·x</code>). Erst nicht-lineare activation functions wie ReLU erlauben gekrümmte Grenzen.` },
       { q: `Wie viele Parameter hat eine Dense-Schicht mit 784 Eingängen und 128 Neuronen?`, a: `<code>(784 + 1) · 128 = 100'480</code>: 784·128 Gewichte plus 128 bias.` },
       { q: `Welche activation und welche Loss nimmst du in der Ausgabe bei 2 Klassen, bei 10 Klassen und bei einem Preis?`, a: `2 Klassen: 1 Neuron mit Sigmoid und Binary Cross-Entropy. 10 Klassen: 10 Neuronen mit Softmax und Cross-Entropy. Preis: 1 Neuron, linear, MSE oder MAE.` },
@@ -236,23 +330,11 @@ for x_batch, y_batch in dataset:
     ],
     init() {
       LernApp.demos.nn();
-      // Workflow figure: click a step to open its explanation (same pattern as the other chapters)
-      (function(){
-        const fig=document.querySelector('#nn .ab-fig');
+      // Clickable figures: click a part to open its explanation (same pattern as the other chapters)
+      const t=LernApp.t;
+      function wire(fig,S){
         if(!fig)return;
         const panel=fig.querySelector('.ab-detail'),steps=fig.querySelectorAll('.ab-step');
-        const t=LernApp.t;
-        const S={
-          '1':[t('1 · Daten vorbereiten','1 · Prepare the data'),t('Wie beim Supervised Learning: Aufteilen in <b>train</b> (Gewichte lernen), <b>validation</b> (Setups vergleichen) und <b>test</b> (einmal am Schluss). Eingaben skalieren, zum Beispiel mit <code>StandardScaler</code>, nur auf train gelernt. Kategorien als One-Hot. Netze reagieren empfindlich auf sehr verschiedene Zahlenbereiche.','As in supervised learning: split into <b>train</b> (learn the weights), <b>validation</b> (compare setups) and <b>test</b> (once at the end). Scale the inputs, for example with <code>StandardScaler</code>, learned on train only. Categories as one-hot. Networks are sensitive to very different number ranges.'),[[t('Train, Validation, Test','Train, validation, test'),'#ml-split'],[t('Skalieren','Scaling'),'#ml-scaling']]],
-          '2':[t('2 · Architektur wählen','2 · Choose the architecture'),t('Wie viele <b>hidden layers</b> und Neuronen, welche <b>activation function</b>: ReLU ist der Standard in hidden layers. Die Ausgabe hängt von der Aufgabe ab: Sigmoid (2 Klassen), Softmax (mehrere Klassen), linear (Zahl). Zähle die Parameter, <code>(n_in + 1) · n_out</code> je Schicht.','How many <b>hidden layers</b> and neurons, which <b>activation function</b>: ReLU is the default in hidden layers. The output depends on the task: sigmoid (2 classes), softmax (several classes), linear (a number). Count the parameters, <code>(n_in + 1) · n_out</code> per layer.'),[[t('Vom Neuron zum Netz','From neuron to network'),'#nn-neuron'],[t('Parameter zählen','Count parameters'),'#nn-arch']]],
-          '3':[t('3 · Loss und Optimizer','3 · Loss and optimizer'),t('Die <b>Loss</b> misst den Fehler: Cross-Entropy bei Klassifikation, MSE oder MAE bei Regression. Der <b>Optimizer</b> bestimmt, wie aus dem Gradienten ein Update wird: Adam ist ein guter Start. Dazu die Hyperparameter <b>learning rate</b>, <b>batch size</b> und Zahl der <b>epochs</b>.','The <b>loss</b> measures the error: cross-entropy for classification, MSE or MAE for regression. The <b>optimizer</b> decides how a gradient becomes an update: Adam is a good start. Plus the hyperparameters <b>learning rate</b>, <b>batch size</b> and number of <b>epochs</b>.'),[[t('Loss je Aufgabe','Loss per task'),'#nn-training'],[t('Optimizer','Optimizers'),'#nn-opt']]],
-          '4':[t('4 · Forward pass','4 · Forward pass'),t('Ein Mini-Batch geht Schicht für Schicht durchs Netz: <code>z = W·a + b</code>, <code>a = f(z)</code>. Am Ende steht die Vorhersage <code>ŷ</code>. Beim Training merkt sich jede Schicht ihre Zwischenwerte, weil Backpropagation sie braucht.','A mini-batch goes through the network layer by layer: <code>z = W·a + b</code>, <code>a = f(z)</code>. At the end comes the prediction <code>ŷ</code>. During training each layer remembers its intermediate values, because backpropagation needs them.'),[[t('Demo: ein Trainingsschritt','Demo: one training step'),'#nsDemo']]],
-          '5':[t('5 · Loss berechnen','5 · Compute the loss'),t('Aus <code>ŷ</code> und der richtigen Antwort <code>y</code> wird eine einzige Zahl: der Fehler dieses Mini-Batches. Je kleiner, desto besser. Das ist die Zahl, die das Training senken will.','From <code>ŷ</code> and the correct answer <code>y</code> comes a single number: the error of this mini-batch. The smaller, the better. This is the number that training wants to lower.'),[[t('Demo: ein Trainingsschritt','Demo: one training step'),'#nsDemo']]],
-          '6':[t('6 · Backpropagation','6 · Backpropagation'),t('Mit der <b>Kettenregel</b> wird der Gradient der Loss nach jedem Gewicht berechnet, von der Ausgabe nach hinten: Der Fehler am Ausgang wird auf die Schicht davor zurückgerechnet, dann weiter zurück. Die Zwischenergebnisse werden wiederverwendet, darum ist das schnell. In Keras macht das <code>fit</code> oder <code>GradientTape</code> für dich.','With the <b>chain rule</b> the gradient of the loss with respect to every weight is computed, from the output backwards: the error at the output is passed back to the layer before it, then further back. Intermediate results are reused, which is why it is fast. In Keras, <code>fit</code> or <code>GradientTape</code> does this for you.'),[[t('Demo: ein Trainingsschritt','Demo: one training step'),'#nsDemo'],[t('Ableitung','Derivative'),'mathe-ausfuehrlich.html']]],
-          '7':[t('7 · Parameter aktualisieren','7 · Update the parameters'),t('<code>w ← w − α · ∂L/∂w</code>: ein kleiner Schritt gegen den Gradienten, mit der <b>learning rate</b> α. Adam oder Momentum verfeinern diesen Schritt. Die Schritte 4 bis 7 wiederholen sich für jeden Mini-Batch; alle Batches zusammen sind eine <b>epoch</b>, und man trainiert viele epochs.','<code>w ← w − α · ∂L/∂w</code>: a small step against the gradient, with the <b>learning rate</b> α. Adam or momentum refine this step. Steps 4 to 7 repeat for every mini-batch; all batches together are one <b>epoch</b>, and you train many epochs.'),[['Gradient Descent','#ml-gd'],[t('Optimizer','Optimizers'),'#nn-opt']]],
-          '8':[t('8 · Validation prüfen','8 · Check validation'),t('Nach jeder epoch den Loss auf train und validation ansehen. Sinkt die Validation-Loss nicht mehr oder steigt sie wieder, ist das <b>overfitting</b>: Early Stopping, Dropout, kleineres Netz, mehr Daten. Bleibt alles hoch, ist es underfitting. Danach zurück zu Schritt 2 oder 3 mit einem anderen Setup.','After every epoch look at the loss on train and validation. If the validation loss stops falling or rises again, that is <b>overfitting</b>: early stopping, dropout, a smaller network, more data. If everything stays high, it is underfitting. Then back to step 2 or 3 with a different setup.'),[[t('Validierung und Tuning','Validation and tuning'),'#nn-valid'],['Bias und Variance','#ml-bv']]],
-          '9':[t('9 · Einmal testen','9 · Test once'),t('Das Testset wird genau einmal benutzt, wenn Architektur und Hyperparameter feststehen. Wer danach noch am Setup dreht, benutzt das Testset zum Wählen und bekommt eine zu optimistische Schätzung.','The test set is used exactly once, when architecture and hyperparameters are fixed. Anyone who keeps changing the setup afterwards uses the test set for choosing and gets an overly optimistic estimate.'),[['Data Leakage','#klass-leakage']]],
-        };
         let cur=null;
         function close(){
           panel.hidden=true;cur=null;
@@ -273,7 +355,29 @@ for x_batch, y_batch in dataset:
           g.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open(g.getAttribute('data-s'))}});
         });
         panel.querySelector('.ab-x').addEventListener('click',close);
-      })();
+      }
+      wire(document.getElementById('nnFlowFig'),(function(){
+        return {
+          '1':[t('1 · Daten vorbereiten','1 · Prepare the data'),t('Wie beim Supervised Learning: Aufteilen in <b>train</b> (Gewichte lernen), <b>validation</b> (Setups vergleichen) und <b>test</b> (einmal am Schluss). Eingaben skalieren, zum Beispiel mit <code>StandardScaler</code>, nur auf train gelernt. Kategorien als One-Hot. Netze reagieren empfindlich auf sehr verschiedene Zahlenbereiche.','As in supervised learning: split into <b>train</b> (learn the weights), <b>validation</b> (compare setups) and <b>test</b> (once at the end). Scale the inputs, for example with <code>StandardScaler</code>, learned on train only. Categories as one-hot. Networks are sensitive to very different number ranges.'),[[t('Train, Validation, Test','Train, validation, test'),'#ml-split'],[t('Skalieren','Scaling'),'#ml-scaling']]],
+          '2':[t('2 · Architektur wählen','2 · Choose the architecture'),t('Wie viele <b>hidden layers</b> und Neuronen, welche <b>activation function</b>: ReLU ist der Standard in hidden layers. Die Ausgabe hängt von der Aufgabe ab: Sigmoid (2 Klassen), Softmax (mehrere Klassen), linear (Zahl). Zähle die Parameter, <code>(n_in + 1) · n_out</code> je Schicht.','How many <b>hidden layers</b> and neurons, which <b>activation function</b>: ReLU is the default in hidden layers. The output depends on the task: sigmoid (2 classes), softmax (several classes), linear (a number). Count the parameters, <code>(n_in + 1) · n_out</code> per layer.'),[[t('Vom Neuron zum Netz','From neuron to network'),'#nn-neuron'],[t('Parameter zählen','Count parameters'),'#nn-arch']]],
+          '3':[t('3 · Loss und Optimizer','3 · Loss and optimizer'),t('Die <b>Loss</b> misst den Fehler: Cross-Entropy bei Klassifikation, MSE oder MAE bei Regression. Der <b>Optimizer</b> bestimmt, wie aus dem Gradienten ein Update wird: Adam ist ein guter Start. Dazu die Hyperparameter <b>learning rate</b>, <b>batch size</b> und Zahl der <b>epochs</b>.','The <b>loss</b> measures the error: cross-entropy for classification, MSE or MAE for regression. The <b>optimizer</b> decides how a gradient becomes an update: Adam is a good start. Plus the hyperparameters <b>learning rate</b>, <b>batch size</b> and number of <b>epochs</b>.'),[[t('Loss je Aufgabe','Loss per task'),'#nn-training'],[t('Optimizer','Optimizers'),'#nn-opt']]],
+          '4':[t('4 · Forward pass','4 · Forward pass'),t('Ein Mini-Batch geht Schicht für Schicht durchs Netz: <code>z = W·a + b</code>, <code>a = f(z)</code>. Am Ende steht die Vorhersage <code>ŷ</code>. Beim Training merkt sich jede Schicht ihre Zwischenwerte, weil Backpropagation sie braucht.','A mini-batch goes through the network layer by layer: <code>z = W·a + b</code>, <code>a = f(z)</code>. At the end comes the prediction <code>ŷ</code>. During training each layer remembers its intermediate values, because backpropagation needs them.'),[[t('Demo: ein Trainingsschritt','Demo: one training step'),'#nsDemo']]],
+          '5':[t('5 · Loss berechnen','5 · Compute the loss'),t('Aus <code>ŷ</code> und der richtigen Antwort <code>y</code> wird eine einzige Zahl: der Fehler dieses Mini-Batches. Je kleiner, desto besser. Das ist die Zahl, die das Training senken will.','From <code>ŷ</code> and the correct answer <code>y</code> comes a single number: the error of this mini-batch. The smaller, the better. This is the number that training wants to lower.'),[[t('Demo: ein Trainingsschritt','Demo: one training step'),'#nsDemo']]],
+          '6':[t('6 · Backpropagation','6 · Backpropagation'),t('Mit der <b>Kettenregel</b> wird der Gradient der Loss nach jedem Gewicht berechnet, von der Ausgabe nach hinten: Der Fehler am Ausgang wird auf die Schicht davor zurückgerechnet, dann weiter zurück. Die Zwischenergebnisse werden wiederverwendet, darum ist das schnell. In Keras macht das <code>fit</code> oder <code>GradientTape</code> für dich.','With the <b>chain rule</b> the gradient of the loss with respect to every weight is computed, from the output backwards: the error at the output is passed back to the layer before it, then further back. Intermediate results are reused, which is why it is fast. In Keras, <code>fit</code> or <code>GradientTape</code> does this for you.'),[[t('Demo: ein Trainingsschritt','Demo: one training step'),'#nsDemo'],[t('Ableitung','Derivative'),'mathe-ausfuehrlich.html']]],
+          '7':[t('7 · Parameter aktualisieren','7 · Update the parameters'),t('<code>w ← w − α · ∂L/∂w</code>: ein kleiner Schritt gegen den Gradienten, mit der <b>learning rate</b> α. Adam oder Momentum verfeinern diesen Schritt. Die Schritte 4 bis 7 wiederholen sich für jeden Mini-Batch; alle Batches zusammen sind eine <b>epoch</b>, und man trainiert viele epochs.','<code>w ← w − α · ∂L/∂w</code>: a small step against the gradient, with the <b>learning rate</b> α. Adam or momentum refine this step. Steps 4 to 7 repeat for every mini-batch; all batches together are one <b>epoch</b>, and you train many epochs.'),[['Gradient Descent','#ml-gd'],[t('Optimizer','Optimizers'),'#nn-opt']]],
+          '8':[t('8 · Validation prüfen','8 · Check validation'),t('Nach jeder epoch den Loss auf train und validation ansehen. Sinkt die Validation-Loss nicht mehr oder steigt sie wieder, ist das <b>overfitting</b>: Early Stopping, Dropout, kleineres Netz, mehr Daten. Bleibt alles hoch, ist es underfitting. Danach zurück zu Schritt 2 oder 3 mit einem anderen Setup.','After every epoch look at the loss on train and validation. If the validation loss stops falling or rises again, that is <b>overfitting</b>: early stopping, dropout, a smaller network, more data. If everything stays high, it is underfitting. Then back to step 2 or 3 with a different setup.'),[[t('Validierung und Tuning','Validation and tuning'),'#nn-valid'],['Bias und Variance','#ml-bv']]],
+          '9':[t('9 · Einmal testen','9 · Test once'),t('Das Testset wird genau einmal benutzt, wenn Architektur und Hyperparameter feststehen. Wer danach noch am Setup dreht, benutzt das Testset zum Wählen und bekommt eine zu optimistische Schätzung.','The test set is used exactly once, when architecture and hyperparameters are fixed. Anyone who keeps changing the setup afterwards uses the test set for choosing and gets an overly optimistic estimate.'),[['Data Leakage','#klass-leakage']]],
+        };
+      })());
+      wire(document.getElementById('nnConceptFig'),{
+        'in':[t('Input Layer','Input Layer'),t('Die Eingabe-Schicht hat ein Neuron pro Merkmal (<code>feature</code>): bei 28×28-Bildern 784, bei einer Tabelle eine Spalte je feature. Sie rechnet nichts, sondern reicht <code>x</code> an die erste hidden layer. Skaliere die Eingaben vorher.','The input layer has one neuron per feature: 784 for 28×28 images, one per column for a table. It computes nothing and passes <code>x</code> on to the first hidden layer. Scale the inputs beforehand.'),[[t('Daten vorbereiten','Prepare the data'),'#ml-scaling'],[t('Architektur','Architecture'),'#nn-arch']]],
+        'h1':[t('Hidden Layer 1','Hidden Layer 1'),t('Jedes Neuron bildet <code>z1 = W₀·x + b₀</code> und dann <code>a1 = f(z1)</code>. Die Neuronen sind Detektoren für einfache Muster (bei Bildern etwa Kanten). Alle Neuronen sehen alle Eingaben (<code>Dense</code>); jede Verbindung hat ein eigenes Gewicht.','Each neuron forms <code>z1 = W₀·x + b₀</code> and then <code>a1 = f(z1)</code>. The neurons are detectors for simple patterns (edges in images, for example). Every neuron sees all inputs (<code>Dense</code>); each connection has its own weight.'),[[t('Vom Neuron zum Netz','From neuron to network'),'#nn-neuron'],[t('Warum mehrere Neuronen?','Why several neurons?'),'#nuDemo']]],
+        'h2':[t('Hidden Layer 2','Hidden Layer 2'),t('Die zweite Schicht bekommt <code>a1</code> statt der Rohwerte: <code>z2 = W₁·a1 + b₁</code>, <code>a2 = f(z2)</code>. Sie kombiniert die einfachen Muster zu komplexeren (Kanten → Ecken → Formen). Mehr Schichten heisst «tiefer» (deep learning), aber auch mehr Parameter und schwierigeres Training.','The second layer receives <code>a1</code> instead of the raw values: <code>z2 = W₁·a1 + b₁</code>, <code>a2 = f(z2)</code>. It combines the simple patterns into more complex ones (edges → corners → shapes). More layers means «deeper» (deep learning), but also more parameters and harder training.'),[[t('Parameter zählen','Count parameters'),'#npDemo'],['Dropout','#nn-valid']]],
+        'out':[t('Output Layer','Output Layer'),t('<code>z3 = W₂·a2 + b₂</code>, dann die Ausgabe-activation <code>g</code>: Sigmoid (2 Klassen), Softmax (k Klassen) oder linear (Zahl). Das Ergebnis ist die Vorhersage <code>ŷ</code>. Im Bild gibt es 2 Ausgänge, zum Beispiel 2 Klassen mit Softmax.','<code>z3 = W₂·a2 + b₂</code>, then the output activation <code>g</code>: sigmoid (2 classes), softmax (k classes) or linear (a number). The result is the prediction <code>ŷ</code>. The picture has 2 outputs, for example 2 classes with softmax.'),[[t('Ausgabe je Aufgabe','Output per task'),'#nn-arch']]],
+        'loss':[t('Loss','Loss'),t('Vergleicht <code>ŷ</code> (orange) mit der richtigen Antwort <code>y</code> (grün) und macht daraus eine Zahl <code>L</code>. Gemittelt über alle <code>n</code> Beispiele ist das <code>J(W)</code>, die Funktion, die das Training minimiert. Klassifikation: Cross-Entropy. Regression: MSE oder MAE.','Compares <code>ŷ</code> (orange) with the correct answer <code>y</code> (green) and turns it into one number <code>L</code>. Averaged over all <code>n</code> examples this is <code>J(W)</code>, the function that training minimises. Classification: cross-entropy. Regression: MSE or MAE.'),[[t('Loss je Aufgabe','Loss per task'),'#nn-training']]],
+        'fw':[t('Forward pass','Forward pass'),t('Die Daten laufen von links nach rechts: <code>x → z1 → a1 → z2 → a2 → z3 → ŷ</code>. Nur Matrixmultiplikation, bias und activation function. Dabei werden <code>z</code> und <code>a</code> jeder Schicht gespeichert, weil backpropagation sie braucht. Nach dem Training ist das auch die ganze Vorhersage.','The data flows from left to right: <code>x → z1 → a1 → z2 → a2 → z3 → ŷ</code>. Only matrix multiplication, bias and activation function. The <code>z</code> and <code>a</code> of every layer are stored, because backpropagation needs them. After training this is also the whole prediction.'),[[t('Demo: ein Trainingsschritt','Demo: one training step'),'#nsDemo']]],
+        'bp':[t('Backpropagation','Backpropagation'),t('Der Fehler läuft von rechts nach links. Mit der Kettenregel entsteht für jedes Gewicht der Gradient <code>∂J/∂W</code>: erst <code>W₂</code>, dann <code>W₁</code>, dann <code>W₀</code>, wobei jede Schicht den Fehlerterm <code>δ</code> an die davor weiterreicht. Danach schiebt der Optimizer jedes Gewicht gegen seinen Gradienten: <code>w ← w − α·∂J/∂w</code>.','The error flows from right to left. With the chain rule every weight gets its gradient <code>∂J/∂W</code>: first <code>W₂</code>, then <code>W₁</code>, then <code>W₀</code>, each layer passing the error term <code>δ</code> on to the one before. Then the optimizer moves every weight against its gradient: <code>w ← w − α·∂J/∂w</code>.'),[[t('Backpropagation genauer','Backpropagation in detail'),'#nn-training'],[t('Optimizer','Optimizers'),'#nn-opt']]],
+      });
     },
   });
 })();

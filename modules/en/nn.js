@@ -10,7 +10,7 @@ LernApp.translate('nn', {
   <h3 id="nn-ablauf">The whole workflow at a glance</h3>
   <p>The workflow is the same as in <a href="#ml-ablauf">supervised learning</a>. What is new is the training loop in the middle: predict, measure the error, compute gradients backwards, adjust the weights, and do that many times.</p>
   <p class="hint">Click a step in the figure: the explanation opens below it, with links to the matching places in the chapter.</p>
-  <figure class="fig ab-fig">
+  <figure class="fig ab-fig" id="nnFlowFig">
     <div class="ab-scroll">
     <svg viewBox="0 0 680 650" role="img" aria-label="Workflow of a neural network project: prepare data, choose architecture, set loss and optimizer, then the training loop of forward pass, loss, backpropagation and update, then check validation with a tuning loop and finally test once">
       ${LernApp.nnFlow({
@@ -38,6 +38,62 @@ LernApp.translate('nn', {
     </div>
     <figcaption>Steps 4 to 7 (orange dashed, inside) run for every mini-batch, all batches together are one epoch. The outer loop is tuning: you compare setups on the validation set. The test set (orange) is not used for choosing.</figcaption>
   </figure>
+
+  <h3 id="nn-konzept">The main concept: input, hidden layers, backpropagation</h3>
+  <p>Every neural network consists of <b>three parts</b> and a learning loop. The figure shows a small network with 2 inputs, two hidden layers of 3 neurons each and 2 outputs (after the course slide «Error Analysis»).</p>
+  <ul>
+    <li><b>Input layer:</b> receives the raw values (pixels, prices, measurements) and passes them on. Nothing is learned here.</li>
+    <li><b>Hidden layers:</b> each neuron computes a weighted sum and an activation function. Every layer builds new, more abstract features from those of the previous one (pixels → edges → shapes → digit).</li>
+    <li><b>Output layer:</b> delivers the prediction <code>ŷ</code>. It is compared with the correct answer <code>y</code>, and the loss <code>L</code> measures the difference.</li>
+    <li><b>Backpropagation:</b> the way back. From the loss it computes for <i>every</i> weight how it influenced the error; then every weight is corrected a little.</li>
+  </ul>
+  <p class="hint">Click a part of the figure: the explanation opens below it.</p>
+  <figure class="fig ab-fig" id="nnConceptFig">
+    <div class="ab-scroll">
+    <svg viewBox="0 0 760 345" role="img" aria-label="Structure of a neural network: input layer, two hidden layers, output layer with ŷ and y, loss, forward pass to the right and backpropagation to the left">
+      ${LernApp.nnConcept({
+        aria: 'Part «%»: open explanation',
+        parts: { in: 'Input layer', h1: 'Hidden layer 1', h2: 'Hidden layer 2', out: 'Output layer', loss: 'Loss', fw: 'Forward pass', bp: 'Backpropagation' },
+        fw: 'Forward pass: x → z1 → a1 → z2 → a2 → z3 → ŷ',
+        bp: 'Backpropagation: ∂J/∂W₂ → ∂J/∂W₁ → ∂J/∂W₀',
+      })}
+    </svg>
+    </div>
+    <div class="ab-detail" id="nnConDetail" role="region" aria-live="polite" hidden>
+      <div class="ab-dh"><b></b><button type="button" class="ab-x" aria-label="Close">✕</button></div>
+      <div class="ab-db"></div>
+      <div class="ab-dl"></div>
+    </div>
+    <figcaption>Blue: the path of the data forwards (forward pass). Orange dashed: the path of the error backwards (backpropagation). The formula at the bottom is the loss over all <code>n</code> examples, <code>W</code> are all weights of the network.</figcaption>
+  </figure>
+  <p>In formulas, layer by layer (<code>f</code> is the activation function, <code>g</code> the one of the output):</p>
+  <pre><code>z1 = W₀·x  + b₀      a1 = f(z1)
+z2 = W₁·a1 + b₁      a2 = f(z2)
+z3 = W₂·a2 + b₂      ŷ  = g(z3)
+J(W) = 1/n · Σ L(ŷᵢ, yᵢ)      # loss over all examples</code></pre>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">A worked example by hand</h4>
+  <p>Network with 2 inputs, 2 hidden neurons (ReLU) and 1 output (sigmoid). Input <code>x = (1.0, 0.5)</code>, correct class <code>y = 1</code>, learning rate <code>α = 0.1</code>. Weights: hidden <code>W₀ = [[0.4, 0.2], [−0.3, 0.8]]</code>, <code>b₀ = (0, 0.1)</code>; output <code>W₁ = (0.6, −0.5)</code>, <code>b₁ = 0.1</code>.</p>
+  <pre><code># 1 · Forward pass
+z1 = (0.4·1.0 + 0.2·0.5 + 0,   −0.3·1.0 + 0.8·0.5 + 0.1) = (0.5, 0.2)
+a1 = ReLU(z1) = (0.5, 0.2)
+z2 = 0.6·0.5 − 0.5·0.2 + 0.1 = 0.3          ŷ = sigmoid(0.3) = 0.574
+
+# 2 · Loss
+L = −log(0.574) = 0.554
+
+# 3 · Backpropagation (chain rule, from back to front)
+δ_out = ŷ − y = −0.426                      # sigmoid + cross-entropy
+∂L/∂W₁ = δ_out · a1 = (−0.213, −0.085)      ∂L/∂b₁ = −0.426
+δ_hid  = δ_out · W₁ · ReLU'(z1) = (−0.255, 0.213)   # error passed backwards
+∂L/∂W₀ = δ_hid · xᵀ = [[−0.255, −0.128], [0.213, 0.106]]
+
+# 4 · Update  (w ← w − α · ∂L/∂w)
+W₁ = (0.621, −0.491)   b₁ = 0.143
+W₀ = [[0.426, 0.213], [−0.321, 0.789]]   b₀ = (0.026, 0.079)
+
+# Forward again: ŷ = 0.602, loss = 0.507  (before: 0.554)</code></pre>
+  <p>A single step has lowered the loss. Training repeats exactly this for thousands of mini-batches; the <a href="#nsDemo">demo in section 3</a> lets you click through each phase.</p>
+  <div class="merk"><b>Key point</b><p>Forwards the network computes a prediction, the loss measures the error, backwards backpropagation distributes the error as a gradient to every weight, and the optimizer corrects the weights. This loop is all of learning.</p></div>
 
   <h3 id="nn-neuron">1 · From neuron to network</h3>
   <p>An artificial neuron does two things. It forms a weighted sum of its inputs plus a <b>bias</b>, <code>z = w1·x1 + w2·x2 + … + b</code>, and passes it through an <b>activation function</b>: <code>a = f(z)</code>. Linear regression is a neuron with <code>f(z) = z</code>, logistic regression a neuron with sigmoid.</p>
@@ -72,6 +128,17 @@ LernApp.translate('nn', {
     <tr><td>k classes (digits 0 to 9)</td><td>k</td><td>Softmax</td><td>Cross-entropy</td></tr>
     <tr><td>Number (price)</td><td>1</td><td>Linear</td><td>MSE or MAE</td></tr>
   </table></div>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Why several neurons and layers?</h4>
+  <p>A single neuron with ReLU is a «bend»: flat, then a straight line. A hidden layer with <code>N</code> neurons adds <code>N</code> such bends, each with its own position (bias), slope (weight) and weighting in the output. This lets you approximate any smooth curve as closely as you like (<i>universal approximation theorem</i>). More layers often get there with fewer neurons, because later layers reuse the patterns of earlier ones.</p>
+  <div class="demo" id="nuDemo">
+    <div class="tag">Demo</div><h4>A curve from ReLU bends</h4>
+    <p class="hint">Choose a target curve and increase the number of neurons. The thin orange lines are the contributions of the single neurons, the blue line is their sum, the output of the network. Dashed is the target curve. The output weights are computed exactly here (least squares), not trained: you see what the layer <i>can</i> represent.</p>
+    <div class="btnrow" id="nuBtns" role="group" aria-label="target curve"><button data-t="sine" class="pri" aria-pressed="true">Sine</button><button data-t="bump" aria-pressed="false">Bump</button><button data-t="step" aria-pressed="false">Step</button></div>
+    <svg class="plot" id="nuSvg" viewBox="0 0 320 190" role="img" aria-label="Target curve and output of a network with one hidden layer of ReLU neurons"></svg>
+    <div class="ctl"><label for="nuN">Neurons in the hidden layer</label><input type="range" id="nuN" min="1" max="12" step="1" value="3"><output id="nuNO"></output></div>
+    <div class="stats"><span>Neurons <b id="nuK"></b></span><span>Parameters <b id="nuPar"></b></span><span>Error (RMSE) <b id="nuErr"></b></span></div>
+    <p class="hint" id="nuMsg"></p>
+  </div>
   <div class="demo" id="npDemo">
     <div class="tag">Demo</div><h4>Counting parameters</h4>
     <p class="hint">Build a network. The start values (784 inputs, one hidden layer with 128 neurons, 10 outputs) are a network for 28×28 images of digits as in the Keras examples. The table corresponds to <code>model.summary()</code>.</p>
@@ -103,6 +170,14 @@ LernApp.translate('nn', {
     <div class="stats"><span>Round <b id="nsN"></b></span><span>Prediction ŷ <b id="nsPred"></b></span><span>Loss <b id="nsLoss"></b></span></div>
     <p class="hint">The gradients are computed by hand with the chain rule and agree with numerically computed gradients. With a sigmoid output and cross-entropy the error at the output is simply <code>δ = ŷ − y</code>.</p>
   </div>
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Backpropagation in detail</h4>
+  <p>The loss depends on every weight through many intermediate steps: <code>L(ŷ(z3(a2(z2(a1(z1(W₀)))))))</code>. The <b>chain rule</b> splits the derivative into a product of local derivatives. To avoid computing anything twice, you walk from back to front and pass an error term <code>δ</code> on:</p>
+  <pre><code>δ_out = ŷ − y                          # at the output (sigmoid/softmax + cross-entropy)
+δ_l   = (W_(l+1)ᵀ · δ_(l+1)) ⊙ f'(z_l)   # one layer back: transposed weights, times slope
+∂L/∂W_l = δ_l · a_(l−1)ᵀ                # gradient of the weights of this layer
+∂L/∂b_l = δ_l</code></pre>
+  <p>Each layer needs its values from the forward pass (<code>z</code> and <code>a</code>) for this, which is why they are stored during training. The cost is about the same as one forward pass.</p>
+  <p><b>Vanishing gradients:</b> On the way back, every layer multiplies by <code>f'(z)</code>. Sigmoid has a slope of at most 0.25; after 10 layers less than <code>0.25¹⁰ ≈ 10⁻⁶</code> of δ is left, and the first layers hardly learn. Remedies: ReLU (slope 1 for z &gt; 0), suitable initial weights (Xavier, He) and scaled inputs.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Loss by task</h4>
   <p>In <b>classification</b> the output layer gives probabilities (sigmoid or softmax) and the loss is <b>cross-entropy</b>: <code>L = −[ y·log(ŷ) + (1−y)·log(1−ŷ) ]</code> (mean over all examples). In <b>regression</b> the output is linear (or sigmoid if the range is bounded) and the loss is MSE or MAE. Why cross-entropy suits classification better than MSE is shown by the demo in the chapter <a href="#klass">Classification</a>.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Initial weights</h4>
@@ -214,9 +289,28 @@ for x_batch, y_batch in dataset:
         loss = loss_fn(y_batch, y_pred)                        # loss
     grads = tape.gradient(loss, model.trainable_weights)       # backpropagation
     optimizer.apply_gradients(zip(grads, model.trainable_weights))   # update</code></pre>
+  <h3 id="nn-methoden">7 · Overview: steps and methods</h3>
+  <p>All steps of the workflow with the methods you choose there and the matching Keras call. The numbers match the figure «The whole workflow at a glance».</p>
+  <div class="tablewrap"><table>
+    <tr><th>Step</th><th>Methods to choose from</th><th>When to use which</th><th>Keras</th></tr>
+    <tr><td><b>1 · Data</b></td><td>Split train/validation/test, <code>StandardScaler</code> or MinMax, one-hot for categories</td><td>Learn the scaler on train only. Images are often divided by 255.</td><td><code>validation_split</code>, <code>to_categorical</code></td></tr>
+    <tr><td><b>2 · Architecture</b></td><td>Dense (MLP), number of layers and neurons, activation: ReLU, leaky ReLU, tanh, sigmoid, softmax, linear</td><td>Hidden: ReLU. Output: sigmoid (2 classes), softmax (k classes), linear (a number). Start small, then grow.</td><td><code>Sequential</code>, <code>Dense</code>, <code>Input</code></td></tr>
+    <tr><td><b>3 · Loss, optimizer</b></td><td>Loss: binary and categorical cross-entropy, MSE, MAE. Optimizer: SGD, momentum, RMSProp, Adam</td><td>Classification: cross-entropy. Regression: MSE (MAE is more robust to outliers). Adam with 0.001 as a start.</td><td><code>compile(optimizer, loss, metrics)</code></td></tr>
+    <tr><td><b>4 · Forward pass</b></td><td>Mini-batch through the network: <code>z = W·a + b</code>, <code>a = f(z)</code></td><td>batch size 16 to 256, shuffle the data every epoch.</td><td><code>model(x)</code>, <code>predict</code></td></tr>
+    <tr><td><b>5 · Compute the loss</b></td><td>Mean of the loss over the mini-batch</td><td>—</td><td><code>loss_fn(y, ŷ)</code></td></tr>
+    <tr><td><b>6 · Backpropagation</b></td><td>Chain rule, gradient per weight</td><td>Runs automatically (automatic differentiation).</td><td><code>fit</code>, <code>GradientTape</code></td></tr>
+    <tr><td><b>7 · Update</b></td><td><code>w ← w − α·g</code>, refined with momentum or Adam</td><td>Tune the learning rate first. Too large: loss jumps. Too small: crawls.</td><td><code>optimizer.apply_gradients</code></td></tr>
+    <tr><td><b>8 · Validation</b></td><td>Loss curves train and validation, dropout, L2, early stopping, data augmentation, another setup</td><td>Curves far apart: overfitting. Both high: underfitting.</td><td><code>history</code>, <code>Dropout</code>, <code>EarlyStopping</code></td></tr>
+    <tr><td><b>9 · Test</b></td><td>One-time evaluation with accuracy, loss, confusion matrix</td><td>Only when the setup is fixed.</td><td><code>evaluate</code></td></tr>
+  </table></div>
+  <p class="note">Steps 4 to 7 run per mini-batch, all batches together are one epoch (<code>fit(epochs=…)</code>). Step 8 after every epoch.</p>
   <div class="merk"><b>Key point</b><p>A neural network is a stack of neurons (weighted sum plus activation function) whose weights are learned with backpropagation and an optimizer such as Adam. It is chosen like any model: on the validation set, with early stopping and dropout against overfitting, and the test set once at the end.</p></div>
 `,
   quiz: [
+    { q: `Which three parts does a neural network have, and what does each do?`, a: `Input layer: receives the raw values, learns nothing. Hidden layers: weighted sum plus activation function, build features step by step. Output layer: delivers the prediction <code>ŷ</code>, which is compared with <code>y</code> in the loss.` },
+    { q: `What does backpropagation compute, and how?`, a: `For every weight the gradient of the loss, with the chain rule from the output backwards. The error term <code>δ</code> is passed back layer by layer (<code>δ_l = (W_(l+1)ᵀ·δ_(l+1)) ⊙ f'(z_l)</code>) and combined with the stored values of the forward pass into the gradient.` },
+    { q: `What are vanishing gradients, and what helps?`, a: `On the way back you multiply by <code>f'(z)</code>. With sigmoid (at most 0.25) the gradient shrinks over many layers, the first layers hardly learn. ReLU, Xavier/He initial weights and scaled inputs help.` },
+    { q: `Why can one hidden layer represent a curved function?`, a: `Every ReLU neuron is a bend. The sum of many bends with different positions and slopes approximates any smooth curve. More neurons means more exact, but also more parameters and more overfitting risk.` },
     { q: `What happens if all activation functions in the hidden layers are linear?`, a: `The whole network stays a single linear function, however many layers it has (<code>W2·(W1·x) = (W2·W1)·x</code>). Only non-linear activation functions such as ReLU allow curved boundaries.` },
     { q: `How many parameters does a Dense layer with 784 inputs and 128 neurons have?`, a: `<code>(784 + 1) · 128 = 100,480</code>: 784·128 weights plus 128 biases.` },
     { q: `Which activation and which loss do you use in the output for 2 classes, for 10 classes and for a price?`, a: `2 classes: 1 neuron with sigmoid and binary cross-entropy. 10 classes: 10 neurons with softmax and cross-entropy. Price: 1 neuron, linear, MSE or MAE.` },

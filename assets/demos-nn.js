@@ -146,6 +146,46 @@
     return s;
   };
 
+  // SVG of the concept figure (after the course slide «Neural Networks: Error Analysis»): input layer, two hidden layers,
+  // output layer, the loss with ŷ and y, plus the forward pass and the backpropagation arrow. Parts are clickable (class ab-step).
+  // c = { aria: 'Part «%»: open explanation', parts: { in, h1, h2, out, loss, fw, bp: aria name }, fw: label, bp: label }.
+  LernApp.nnConcept = function (c) {
+    const X = [80, 250, 420, 590], NY = [[115, 165], [75, 125, 175], [75, 125, 175], [115, 165]];
+    const col = ['var(--muted)', 'var(--accent)', 'var(--accent)', 'var(--warn)'], key = ['in', 'h1', 'h2', 'out'];
+    const names = ['Input Layer', 'Hidden Layer', 'Hidden Layer', 'Output Layer'];
+    const tx = (x, y, t, st) => '<text x="' + x + '" y="' + y + '" text-anchor="middle" style="font-family:var(--f-body);' + st + '">' + t + '</text>';
+    const aria = (k) => c.aria.replace('%', c.parts[k]);
+    let s = '<defs><marker id="nc-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--accent)"/></marker>' +
+      '<marker id="nc-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--warn)"/></marker></defs>';
+    for (let l = 0; l < 3; l++) NY[l].forEach((a) => NY[l + 1].forEach((b) => { s += '<line x1="' + (X[l] + 14) + '" y1="' + a + '" x2="' + (X[l + 1] - 14) + '" y2="' + b + '" style="stroke:var(--line);stroke-width:1.2"/>'; }));
+    ['z1', 'z2', 'z3'].forEach((z, l) => { s += tx((X[l] + X[l + 1]) / 2, 40, z, 'fill:var(--muted);font-size:14px;font-weight:600'); });
+    ['a1', 'a2'].forEach((a, i) => { s += tx(X[i + 1], 40, a, 'fill:var(--accent);font-size:14px;font-weight:600'); });
+    key.forEach((k, l) => {
+      const ys = NY[l], y0 = ys[0] - 26, h = ys[ys.length - 1] - ys[0] + 52;
+      s += '<g class="ab-step" data-s="' + k + '" tabindex="0" role="button" aria-expanded="false" aria-label="' + aria(k) + '">' +
+        '<rect x="' + (X[l] - 28) + '" y="' + y0 + '" width="56" height="' + h + '" rx="14" style="fill:var(--surface);stroke:' + col[l] + ';stroke-width:2.5"/>';
+      ys.forEach((y, i) => { s += '<circle cx="' + X[l] + '" cy="' + y + '" r="14" style="fill:var(--bg);stroke:' + col[l] + ';stroke-width:2"/>'; });
+      if (l === 0) ys.forEach((y, i) => { s += tx(X[l], y + 5, 'x' + (i + 1), 'fill:var(--fg);font-size:13px'); });
+      s += tx(X[l], 225, names[l], 'fill:' + col[l] + ';font-size:14px;font-weight:600') + '</g>';
+    });
+    s += '<g class="ab-step" data-s="loss" tabindex="0" role="button" aria-expanded="false" aria-label="' + aria('loss') + '">' +
+      '<rect x="654" y="78" width="100" height="112" rx="10" style="fill:var(--surface);stroke:var(--ok);stroke-width:2;stroke-dasharray:5 3"/>' +
+      tx(704, 98, 'Loss L', 'fill:var(--fg);font-size:13px;font-weight:600');
+    [115, 165].forEach((y, i) => { s += tx(682, y + 5, 'ŷ' + (i + 1), 'fill:var(--warn);font-size:15px;font-weight:600') + tx(730, y + 5, 'y' + (i + 1), 'fill:var(--ok);font-size:15px;font-weight:600'); });
+    s += '</g>';
+    [115, 165].forEach((y) => { s += '<line x1="604" y1="' + y + '" x2="652" y2="' + y + '" marker-end="url(#nc-f)" style="stroke:var(--warn);stroke-width:2"/>'; });
+    s += '<g class="ab-step" data-s="fw" tabindex="0" role="button" aria-expanded="false" aria-label="' + aria('fw') + '">' +
+      '<rect x="60" y="244" width="600" height="30" rx="8" style="fill:none;stroke:none"/>' +
+      '<line x1="80" y1="259" x2="620" y2="259" marker-end="url(#nc-f)" style="stroke:var(--accent);stroke-width:2.5"/>' +
+      '<text x="90" y="253" style="fill:var(--accent);font-size:13px;font-weight:600;font-family:var(--f-body)">' + c.fw + '</text></g>';
+    s += '<g class="ab-step" data-s="bp" tabindex="0" role="button" aria-expanded="false" aria-label="' + aria('bp') + '">' +
+      '<rect x="60" y="282" width="600" height="30" rx="8" style="fill:none;stroke:none"/>' +
+      '<line x1="660" y1="297" x2="100" y2="297" marker-end="url(#nc-b)" style="stroke:var(--warn);stroke-width:2.5;stroke-dasharray:7 4"/>' +
+      '<text x="650" y="291" text-anchor="end" style="fill:var(--warn);font-size:13px;font-weight:600;font-family:var(--f-body)">' + c.bp + '</text></g>';
+    s += tx(360, 335, 'J(W) = 1/n · Σ L( f(xᵢ; W), yᵢ ),   W = {W₀, W₁, W₂}', 'fill:var(--fg);font-size:14px;font-family:var(--f-mono)');
+    return s;
+  };
+
   LernApp.nnLib = { ACT: ACT, makeNet: makeNet, cloneNet: cloneNet, forward: forward, predict: predict, meanLoss: meanLoss, accuracy: accuracy, grads: grads, adamState: adamState, adamStep: adamStep, makeMoons: makeMoons, race: race, SURF: SURF };
 
   // ---- Demos (DOM) ----
@@ -375,6 +415,59 @@
       ['nfH', 'nfDrop', 'nfLr'].forEach((id) => $(id).addEventListener('input', retrain));
       $('nfEp').addEventListener('input', draw);
       retrain();
+    })();
+
+    // Demo 5: why several neurons? A hidden layer of N ReLU neurons builds a curve from N bent pieces.
+    // The output weights are the exact least-squares fit (normal equations), no training noise: the demo shows what the layer CAN represent.
+    (function () {
+      if (!$('nuSvg')) return;
+      let tgt = 'sine';
+      const TG = { sine: (x) => 1.2 * Math.sin(1.5 * x), bump: (x) => 2 * Math.exp(-x * x) - 1, step: (x) => 2 * sg(6 * x) - 1 };
+      const W = 320, H = 190, PX = 26, PY = 14, XMIN = -3, XMAX = 3, YMIN = -2, YMAX = 2;
+      const sx = (x) => PX + ((x - XMIN) / (XMAX - XMIN)) * (W - PX - 8), sy = (y) => H - PY - ((Math.max(YMIN, Math.min(YMAX, y)) - YMIN) / (YMAX - YMIN)) * (H - PY - 8);
+      const sy0 = (y) => H - PY - ((y - YMIN) / (YMAX - YMIN)) * (H - PY - 8);
+      // Solve (A^T A + eps I) w = A^T y by Gauss elimination (A: rows = points, columns = basis functions)
+      function lsq(A, y) {
+        const m = A[0].length, M = Array.from({ length: m }, (_, i) => Array.from({ length: m + 1 }, (_, j) => {
+          let s = 0; for (let n = 0; n < A.length; n++) s += A[n][i] * (j < m ? A[n][j] : y[n]); return s + (i === j ? 1e-9 : 0);
+        }));
+        for (let i = 0; i < m; i++) {
+          let p = i; for (let r = i + 1; r < m; r++) if (Math.abs(M[r][i]) > Math.abs(M[p][i])) p = r;
+          [M[i], M[p]] = [M[p], M[i]];
+          for (let r = i + 1; r < m; r++) { const f = M[r][i] / M[i][i]; for (let c = i; c <= m; c++) M[r][c] -= f * M[i][c]; }
+        }
+        const w = new Array(m);
+        for (let i = m - 1; i >= 0; i--) { let s = M[i][m]; for (let c = i + 1; c < m; c++) s -= M[i][c] * w[c]; w[i] = s / M[i][i]; }
+        return w;
+      }
+      function draw() {
+        const n = +$('nuN').value, f = TG[tgt];
+        $('nuNO').textContent = n;
+        const xs = Array.from({ length: 121 }, (_, i) => XMIN + (i * (XMAX - XMIN)) / 120), cs = Array.from({ length: n }, (_, k) => XMIN + (k * (XMAX - XMIN)) / n);
+        const basis = (x) => cs.map((c) => Math.max(0, x - c)).concat([1]);
+        const w = lsq(xs.map(basis), xs.map(f)), pred = (x) => basis(x).reduce((s, b, i) => s + b * w[i], 0);
+        let s = '<line class="ax" x1="' + PX + '" y1="' + sy(0) + '" x2="' + (W - 8) + '" y2="' + sy(0) + '"/><line class="ax" x1="' + sx(0) + '" y1="8" x2="' + sx(0) + '" y2="' + (H - PY) + '"/>';
+        for (let k = 0; k < n; k++) {
+          let q = ''; xs.forEach((x, i) => { q += (i ? 'L' : 'M') + sx(x).toFixed(1) + ' ' + sy0(w[k] * Math.max(0, x - cs[k]) + w[n] / n).toFixed(1); });
+          s += '<path d="' + q + '" style="fill:none;stroke:var(--warn);stroke-width:1;opacity:.35"/>';
+        }
+        let p = '', q = '', se = 0;
+        xs.forEach((x, i) => { p += (i ? 'L' : 'M') + sx(x).toFixed(1) + ' ' + sy(pred(x)).toFixed(1); q += (i ? 'L' : 'M') + sx(x).toFixed(1) + ' ' + sy(f(x)).toFixed(1); se += (pred(x) - f(x)) ** 2; });
+        s += '<path class="dash" d="' + q + '"/><path class="ln" d="' + p + '"/>';
+        $('nuSvg').innerHTML = s;
+        const rmse = Math.sqrt(se / xs.length);
+        $('nuErr').textContent = fmt(rmse, 3); $('nuPar').textContent = 3 * n + 1; $('nuK').textContent = n;
+        $('nuMsg').textContent = n <= 2 ? T('Mit 1 bis 2 Neuronen bleibt die Kurve fast gerade: zu wenig Kapazität (underfitting).', 'With 1 to 2 neurons the curve stays almost straight: too little capacity (underfitting).')
+          : n <= 6 ? T('Jedes weitere Neuron fügt einen Knick hinzu, die Kurve schmiegt sich besser an.', 'Every extra neuron adds a bend, the curve fits better.')
+            : T('Mit vielen Neuronen ist die Kurve praktisch exakt. Mehr Neuronen heisst aber auch mehr Parameter und mehr Risiko für overfitting.', 'With many neurons the curve is practically exact. More neurons also mean more parameters and more risk of overfitting.');
+      }
+      $('nuBtns').querySelectorAll('button').forEach((bt) => bt.addEventListener('click', () => {
+        tgt = bt.dataset.t;
+        $('nuBtns').querySelectorAll('button').forEach((o) => { o.className = o === bt ? 'pri' : ''; o.setAttribute('aria-pressed', o === bt); });
+        draw();
+      }));
+      $('nuN').addEventListener('input', draw);
+      draw();
     })();
   };
 })();
