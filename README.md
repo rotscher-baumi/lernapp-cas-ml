@@ -24,6 +24,7 @@ lernapp/
     style.css       Design (hell und dunkel)
     core.js         Navigation, Sprache, Theme, Selbsttest; gemeinsame Helfer (mulberry32, gauss)
     demos-<id>.js   Demo-Code der grossen Kapitel (ml, klass, unsup, nn), das Kapitel in modules/ ruft ihn in init() auf
+                    (`demos-nn.js` liefert auch die zwei klickbaren SVG-Grafiken des Kapitels Neural Networks: `LernApp.nnFlow` Ablauf, `LernApp.nnConcept` Hauptkonzept)
     demos-*.js      geteilte Demos (Mathe, k-Means)
     notebook-data.js  aus den Notebooks erzeugt (nicht von Hand ändern)
   modules/          ein Kapitel pro Datei
