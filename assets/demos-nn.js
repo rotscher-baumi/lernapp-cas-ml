@@ -126,22 +126,24 @@
   }
 
   // SVG of the clickable workflow figure (nine steps, a training loop and a tuning loop). The texts come from the
-  // chapter files (DE and EN), so both languages share one geometry. c = { aria, steps: [[title, subtitle] x 9], loopA: [lines], loopB: [lines] }.
+  // chapter files (DE and EN), so both languages share one geometry. c = { aria, steps: [[title, subtitle] x 9], loopA: [lines], loopB: [lines],
+  // id: optional prefix for the arrow markers (default nb), needed when two flow figures share one page }.
   LernApp.nnFlow = function (c) {
+    const p = c.id || 'nb';
     const Y = (i) => 20 + i * 70, line = 'stroke:var(--line);stroke-width:1.5;fill:none', warn = 'stroke:var(--warn);stroke-width:1.5;stroke-dasharray:6 4;fill:none';
-    let s = '<defs><marker id="nb-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--line)"/></marker>' +
-      '<marker id="nb-al" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--warn)"/></marker></defs>';
+    let s = '<defs><marker id="' + p + '-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--line)"/></marker>' +
+      '<marker id="' + p + '-al" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--warn)"/></marker></defs>';
     c.steps.forEach((st, i) => {
       const y = Y(i), test = i === 8;
       s += '<g class="ab-step" data-s="' + (i + 1) + '" tabindex="0" role="button" aria-expanded="false" aria-label="' + c.aria.replace('%', i + 1) + '">' +
         '<rect x="60" y="' + y + '" width="300" height="52" rx="6" style="fill:' + (test ? 'var(--warn-soft)' : 'var(--surface)') + ';stroke:' + (test ? 'var(--warn)' : 'var(--line)') + ';stroke-width:1.5"/>' +
         '<text x="210" y="' + (y + 22) + '" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">' + (i + 1) + ' · ' + st[0] + '</text>' +
         '<text x="210" y="' + (y + 40) + '" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">' + st[1] + '</text></g>';
-      if (i < 8) s += '<line x1="210" y1="' + (y + 52) + '" x2="210" y2="' + (y + 70) + '" marker-end="url(#nb-a)" style="' + line + '"/>';
+      if (i < 8) s += '<line x1="210" y1="' + (y + 52) + '" x2="210" y2="' + (y + 70) + '" marker-end="url(#' + p + '-a)" style="' + line + '"/>';
     });
-    s += '<path d="M360,' + (Y(6) + 26) + ' H410 V' + (Y(3) + 26) + ' H362" marker-end="url(#nb-al)" style="' + warn + '"/>';
+    s += '<path d="M360,' + (Y(6) + 26) + ' H410 V' + (Y(3) + 26) + ' H362" marker-end="url(#' + p + '-al)" style="' + warn + '"/>';
     c.loopA.forEach((l, k) => { s += '<text x="418" y="' + (Y(4) + 26 + k * 15) + '" style="fill:var(--warn);font-size:12px;font-family:var(--f-body)">' + l + '</text>'; });
-    s += '<path d="M360,' + (Y(7) + 26) + ' H540 V' + (Y(1) + 26) + ' H362" marker-end="url(#nb-al)" style="' + warn + '"/>';
+    s += '<path d="M360,' + (Y(7) + 26) + ' H540 V' + (Y(1) + 26) + ' H362" marker-end="url(#' + p + '-al)" style="' + warn + '"/>';
     c.loopB.forEach((l, k) => { s += '<text x="548" y="' + (Y(4) + 40 + k * 15) + '" style="fill:var(--warn);font-size:12px;font-family:var(--f-body)">' + l + '</text>'; });
     return s;
   };

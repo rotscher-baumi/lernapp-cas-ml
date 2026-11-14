@@ -23,12 +23,12 @@ lernapp/
   assets/
     style.css       Design (hell und dunkel)
     core.js         Navigation, Sprache, Theme, Selbsttest; gemeinsame Helfer (mulberry32, gauss)
-    demos-<id>.js   Demo-Code der grossen Kapitel (ml, klass, unsup, nn), das Kapitel in modules/ ruft ihn in init() auf
-                    (`demos-nn.js` liefert auch die zwei klickbaren SVG-Grafiken des Kapitels Neural Networks: `LernApp.nnFlow` Ablauf, `LernApp.nnConcept` Hauptkonzept)
+    demos-<id>.js   Demo-Code der grossen Kapitel (ml, klass, unsup, nn, cnn), das Kapitel in modules/ ruft ihn in init() auf
+                    (`demos-nn.js` liefert auch die zwei klickbaren SVG-Grafiken des Kapitels Neural Networks: `LernApp.nnFlow` Ablauf, `LernApp.nnConcept` Hauptkonzept; das Kapitel CNN nutzt `nnFlow` mit eigenem `id` für die Pfeil-Marker)
     demos-*.js      geteilte Demos (Mathe, k-Means)
     notebook-data.js  aus den Notebooks erzeugt (nicht von Hand ändern)
   modules/          ein Kapitel pro Datei
-    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js nn.js uebersicht.js kompakt.js kompakt-link.js titanic.js
+    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js nn.js cnn.js uebersicht.js kompakt.js kompakt-link.js titanic.js
     en/             englische Texte je Kapitel
     _vorlage.js     Vorlage für ein neues Kapitel
   notebooks/        Übungs-Notebooks (Jupyter / VS Code)
