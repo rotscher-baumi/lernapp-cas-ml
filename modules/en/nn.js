@@ -5,7 +5,7 @@ LernApp.translate('nn', {
   kicker: `Module 3 · Neural Networks (Fri 13 and Sat 14.11.)`,
   summary: `Neuron, activation functions, backpropagation, optimizers, dropout, early stopping`,
   html: `  <p>A neural network is nothing new, but a stack of building blocks you already know: every neuron computes a weighted sum like <a href="#klass-modelle">logistic regression</a>, the weights are learned with <a href="#ml-gd">gradient descent</a>, and as before the validation set decides about success. What is new are the <b>many layers</b> and the question of how the gradient reaches the first layer (backpropagation).</p>
-  <p class="note">This chapter covers the introduction (perceptron to regularisation). Images and CNNs follow on the computer vision day (Fri 20.11.). The demos run in the browser with a small, self-computed network; the Keras code blocks at the end do not.</p>
+  <p class="note">This chapter covers the introduction (perceptron to regularisation). Images and CNNs follow in the chapter <a href="#cnn">Convolutional Neural Networks</a>. The demos run in the browser with a small, self-computed network; the Keras code blocks at the end do not.</p>
 
   <h3 id="nn-ablauf">The whole workflow at a glance</h3>
   <p>The workflow is the same as in <a href="#ml-ablauf">supervised learning</a>. What is new is the training loop in the middle: predict, measure the error, compute gradients backwards, adjust the weights, and do that many times.</p>
