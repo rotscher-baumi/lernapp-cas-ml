@@ -23,11 +23,12 @@ lernapp/
   assets/
     style.css       Design (hell und dunkel)
     core.js         Navigation, Sprache, Theme, Selbsttest; gemeinsame Helfer (mulberry32, gauss)
-    demos-<id>.js   Demo-Code der grossen Kapitel (ml, klass, unsup, nn), das Kapitel in modules/ ruft ihn in init() auf
+    demos-<id>.js   Demo-Code der grossen Kapitel (ml, klass, unsup, nn, cnn), das Kapitel in modules/ ruft ihn in init() auf
+                    (`demos-nn.js` liefert auch die zwei klickbaren SVG-Grafiken des Kapitels Neural Networks: `LernApp.nnFlow` Ablauf, `LernApp.nnConcept` Hauptkonzept; das Kapitel CNN nutzt `nnFlow` mit eigenem `id` für die Pfeil-Marker)
     demos-*.js      geteilte Demos (Mathe, k-Means)
     notebook-data.js  aus den Notebooks erzeugt (nicht von Hand ändern)
   modules/          ein Kapitel pro Datei
-    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js nn.js uebersicht.js kompakt.js titanic.js
+    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js nn.js cnn.js uebersicht.js kompakt.js titanic.js
     en/             englische Texte je Kapitel
     _vorlage.js     Vorlage für ein neues Kapitel
   notebooks/        Übungs-Notebooks (Jupyter / VS Code)
@@ -105,7 +106,7 @@ nicht sämtliche Requirements in die Jupyter-Basisumgebung mischen.
 
 ## Eigene Seiten (Sub Pages)
 
-Ein Thema kann zusätzlich eigene Seiten haben, z. B. `mathe-kompakt.html` (Spickzettel) und `mathe-ausfuehrlich.html` (alle Erklärungen und Diagramme). Eine Seite ist eine Kopie von `mathe-kompakt.html`: `core.js`, dann die Demo-Datei und ein Modul. Die Hauptseite verweist über ein kleines Teaser-Modul (`modules/mathe.js`) darauf. Gemeinsame Demos liegen in `assets/demos-mathe.js` (`MatheDemos.deriv()`, `.stats()`, `.scaler()`), damit beide Seiten denselben Code nutzen.
+Ein Thema kann zusätzlich eigene Seiten haben, z. B. `mathe-kompakt.html` (Spickzettel) und `mathe-ausfuehrlich.html` (alle Erklärungen und Diagramme). Eine Seite ist eine Kopie von `mathe-kompakt.html`: `core.js`, dann die Demo-Datei und ein Modul. Die Hauptseite verweist über ein kleines Teaser-Modul (`modules/mathe.js`) darauf. Eine Seite ohne eigenes Kapitel auf der Hauptseite (z. B. der Spickzettel `kompakt.html`) bekommt stattdessen nur einen Knopf in der Linkleiste oben in `index.html` (`<a class="linkbtn">`). Gemeinsame Demos liegen in `assets/demos-mathe.js` (`MatheDemos.deriv()`, `.stats()`, `.scaler()`), damit beide Seiten denselben Code nutzen.
 
 ## Mit Server (Eingaben dauerhaft speichern)
 

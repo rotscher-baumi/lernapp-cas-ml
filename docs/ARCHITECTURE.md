@@ -29,7 +29,7 @@ lernapp-cas-ml/
     style.css                Design-Tokens hell/dunkel und alle Komponenten
     demos-mathe.js           MatheDemos: Demos, die beide Mathe-Seiten teilen
     demos-kmeans.js          KMeansDemo: k-Means-Demo und gemeinsame k-Means-Helfer (`KMeansDemo.lib`)
-    demos-ml.js, demos-klass.js, demos-unsup.js, demos-nn.js   Demo-Code der Kapitel ml, klass, unsup und nn (`LernApp.demos.<id>`)
+    demos-ml.js, demos-klass.js, demos-unsup.js, demos-nn.js, demos-cnn.js   Demo-Code der Kapitel ml, klass, unsup, nn und cnn (`LernApp.demos.<id>`)
     img/                     Grafiken, aus echten Läufen erzeugt (Titanic)
     notebook-data.js         generiert aus den Notebooks (zurzeit von keiner Seite geladen)
   modules/
@@ -53,8 +53,8 @@ lernapp-cas-ml/
 
 ### Seiten
 
-- **index.html** ist die Hauptseite. Sie enthält den Kopf, den Abschnitt «Überblick» mit Übersichtskarten (`#toc`), den leeren Container `#modules`, den die Kapitel füllen. Unten lädt sie alle Kapitel und danach alle englischen Dateien.
-- **Unterseiten** (`titanic.html`, `mathe-*.html`) sind Kopien desselben Gerüsts mit genau einem Kapitel. Sie haben keinen Überblick; der Kern erkennt das am fehlenden Element `#ueberblick`.
+- **index.html** ist die Hauptseite. Sie enthält den Kopf, die Linkleiste (Notebooks, Spickzettel `kompakt.html`, Repository), den Abschnitt «Überblick» mit Übersichtskarten (`#toc`), den leeren Container `#modules`, den die Kapitel füllen. Unten lädt sie alle Kapitel und danach alle englischen Dateien.
+- **Unterseiten** (`titanic.html`, `mathe-*.html`, `kompakt.html`) sind Kopien desselben Gerüsts mit genau einem Kapitel. Sie haben keinen Überblick; der Kern erkennt das am fehlenden Element `#ueberblick`.
 - **notebook.html** lädt den Kern nicht. Sie hat zwei Modi und merkt sich die Wahl im `localStorage` (`cas-ml-nbmode`). **Lokal** zeigt JupyterLab über den Proxy des Servers in einem iframe und gibt es nur, wenn die Seite von `localhost`, `127.0.0.1` oder `::1` geladen wird; eine gehostete Kopie (zum Beispiel statisch auf S3) hat keinen Server dahinter und fragt `/jupyter/` nie an. **Colab** listet alle Notebooks mit Link «In Colab öffnen» (die Liste ist ein Feld im Skript der Seite; ein Test hält sie mit dem Ordner `notebooks/` abgeglichen) und hebt das mit `?nb=` gewünschte Notebook hervor. Die Seite hat ein eigenes kleines Skript für Sprache und Theme.
 
 Jede Seite setzt im `<head>` mit einem Inline-Skript das Theme, bevor der Browser zeichnet, damit beim Laden nichts hell aufblitzt.

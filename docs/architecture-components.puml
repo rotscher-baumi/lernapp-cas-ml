@@ -11,7 +11,7 @@ actor "Lernende:r\n(Browser)" as user
 
 package "Seiten (HTML, kein Build)" {
   [index.html\nHauptseite: Kopf, Überblick,\n#modules] as index
-  [titanic.html\nmathe-kompakt.html\nmathe-ausfuehrlich.html\nUnterseiten: Kopf + ein Modul] as sub
+  [titanic.html\nmathe-kompakt.html\nmathe-ausfuehrlich.html\nkompakt.html\nUnterseiten: Kopf + ein Modul] as sub
   [notebook.html\nModus lokal: iframe auf JupyterLab\nModus Colab: Links] as nbpage
 }
 
@@ -20,7 +20,7 @@ package "assets/" {
   [style.css\nDesign-Tokens hell/dunkel\n(data-theme, prefers-color-scheme)] as css
   [demos-mathe.js\nMatheDemos] as dm
   [demos-kmeans.js\nKMeansDemo] as dk
-  [demos-ml.js · demos-klass.js\ndemos-unsup.js · demos-nn.js\nLernApp.demos.<id>] as dd
+  [demos-ml.js · demos-klass.js\ndemos-unsup.js · demos-nn.js\ndemos-cnn.js\nLernApp.demos.<id>] as dd
   [img/\nGrafiken aus echten Läufen] as img
   [notebook-data.js\n(generiert, zurzeit\nvon keiner Seite geladen)] as nbdata
 }

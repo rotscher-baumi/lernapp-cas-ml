@@ -27,7 +27,7 @@ Stand: 2026-11-01. Ergänzt [ARCHITECTURE.md](ARCHITECTURE.md) um Ziele, Entsche
 | D6 | Theming über CSS-Tokens und `data-theme` auf `<html>` | Demos und SVG benutzen dieselben Farben; Systemeinstellung soll ohne Wahl funktionieren | Drei Stellungen Hell/Dunkel/Auto; Inline-Skript im `<head>` gegen Aufblitzen |
 | D7 | Persistenz-Kaskade: `localStorage` zuerst, Server-Kopie optional | Ohne Server soll alles funktionieren; mit Server sollen Einstellungen Browser-übergreifend bleiben | `state.json` ist eine flache Kopie aller Schlüssel; der Server kennt keine Struktur |
 | D8 | Server nur mit Standardbibliothek | Keine Installation ausser Python | Proxy und JSON-Endpunkt sind von Hand geschrieben, kein Framework |
-| D9 | Unterseiten für lange Beispiele (Titanic, Mathe) | Hauptseite bleibt lesbar; Beispiel darf wirklich ausführlich sein | Hauptseite verlinkt mit Kurzversion oder Teaser-Modul |
+| D9 | Unterseiten für lange Beispiele (Titanic, Mathe) und den Spickzettel (Kompakt) | Hauptseite bleibt lesbar; Beispiel darf wirklich ausführlich sein | Hauptseite verlinkt mit Kurzversion oder Teaser-Modul; der Spickzettel nur mit einem Knopf in der Linkleiste (2026-11-16: kein eigener Abschnitt unten nötig) |
 | D10 | Grafiken als PNG aus echten Läufen, Code und Ausgabe daneben | Lernende sollen den Code nachspielen und dasselbe sehen | Code im Kapitel darf nicht ohne neuen Lauf geändert werden; Ausgaben sind byte-identisch zu halten |
 | D11 | Workflow-Übersicht am Kapitelanfang | Erst der Ablauf, dann die Teile (Projektregel) | Klickbare SVG-Grafik mit Erklärungen pro Schritt |
 
