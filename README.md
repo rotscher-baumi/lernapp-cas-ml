@@ -16,7 +16,7 @@ lernapp/
   notebook.html     Übungs-Notebook (lokal mit Jupyter oder in Colab)
   titanic.html      Titanic-Seite
   mathe-kompakt.html, mathe-ausfuehrlich.html   eigene Mathe-Seiten
-  kompakt.html      Spickzettel über Supervised ML, Klassifikation, Unsupervised und Neural Networks (Modul `kompakt`; auf der Hauptseite verlinkt der Tab «Kompakt» über `kompakt-link`)
+  kompakt.html      Spickzettel über Supervised ML, Klassifikation, Unsupervised und Neural Networks (Modul `kompakt`; auf der Hauptseite verlinkt die Linkleiste oben darauf)
   server.py         lokaler Server (Zustand, Jupyter-Start, Proxy)
   run.sh            Jupyter und Server unter Linux/macOS starten
   requirements.txt, requirements-dev.txt   Laufzeit- und Entwicklungspakete
@@ -28,7 +28,7 @@ lernapp/
     demos-*.js      geteilte Demos (Mathe, k-Means)
     notebook-data.js  aus den Notebooks erzeugt (nicht von Hand ändern)
   modules/          ein Kapitel pro Datei
-    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js nn.js cnn.js uebersicht.js kompakt.js kompakt-link.js titanic.js
+    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js nn.js cnn.js uebersicht.js kompakt.js titanic.js
     en/             englische Texte je Kapitel
     _vorlage.js     Vorlage für ein neues Kapitel
   notebooks/        Übungs-Notebooks (Jupyter / VS Code)
@@ -106,7 +106,7 @@ nicht sämtliche Requirements in die Jupyter-Basisumgebung mischen.
 
 ## Eigene Seiten (Sub Pages)
 
-Ein Thema kann zusätzlich eigene Seiten haben, z. B. `mathe-kompakt.html` (Spickzettel) und `mathe-ausfuehrlich.html` (alle Erklärungen und Diagramme). Eine Seite ist eine Kopie von `mathe-kompakt.html`: `core.js`, dann die Demo-Datei und ein Modul. Die Hauptseite verweist über ein kleines Teaser-Modul (`modules/mathe.js`) darauf. Gemeinsame Demos liegen in `assets/demos-mathe.js` (`MatheDemos.deriv()`, `.stats()`, `.scaler()`), damit beide Seiten denselben Code nutzen.
+Ein Thema kann zusätzlich eigene Seiten haben, z. B. `mathe-kompakt.html` (Spickzettel) und `mathe-ausfuehrlich.html` (alle Erklärungen und Diagramme). Eine Seite ist eine Kopie von `mathe-kompakt.html`: `core.js`, dann die Demo-Datei und ein Modul. Die Hauptseite verweist über ein kleines Teaser-Modul (`modules/mathe.js`) darauf. Eine Seite ohne eigenes Kapitel auf der Hauptseite (z. B. der Spickzettel `kompakt.html`) bekommt stattdessen nur einen Knopf in der Linkleiste oben in `index.html` (`<a class="linkbtn">`). Gemeinsame Demos liegen in `assets/demos-mathe.js` (`MatheDemos.deriv()`, `.stats()`, `.scaler()`), damit beide Seiten denselben Code nutzen.
 
 ## Mit Server (Eingaben dauerhaft speichern)
 
