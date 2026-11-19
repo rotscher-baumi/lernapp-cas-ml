@@ -29,7 +29,7 @@ lernapp-cas-ml/
     style.css                Design-Tokens hell/dunkel und alle Komponenten
     demos-mathe.js           MatheDemos: Demos, die beide Mathe-Seiten teilen
     demos-kmeans.js          KMeansDemo: k-Means-Demo und gemeinsame k-Means-Helfer (`KMeansDemo.lib`)
-    demos-ml.js, demos-klass.js, demos-unsup.js, demos-nn.js, demos-cnn.js   Demo-Code der Kapitel ml, klass, unsup, nn und cnn (`LernApp.demos.<id>`)
+    demos-ml.js, demos-klass.js, demos-unsup.js, demos-nn.js, demos-cnn.js, demos-cv.js, demos-gen.js   Demo-Code der Kapitel ml, klass, unsup, nn, cnn, cv und gen (`LernApp.demos.<id>`)
     img/                     Grafiken, aus echten Läufen erzeugt (Titanic)
     notebook-data.js         generiert aus den Notebooks (zurzeit von keiner Seite geladen)
   modules/
