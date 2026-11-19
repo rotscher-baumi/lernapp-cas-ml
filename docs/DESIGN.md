@@ -132,4 +132,4 @@ Es gibt keine automatischen Tests. Geprüft wird so:
 ## 8. Offene Punkte
 
 - `assets/notebook-data.js` und das Feld `exercises` sind Altlasten der entfernten Browser-Übungen. Entfernen, sobald `scripts/build_notebook.js` nicht mehr gebraucht wird.
-- Die Kurstermine im Überblick sind von Hand gepflegt (Stand Juni 2026) und müssen gegen den Stundenplan geprüft werden.
+- Die Kurstermine im Überblick sind von Hand gepflegt (Stand 2026-11-19, Stundenplan vom 2026-06-09) und müssen gegen den Stundenplan geprüft werden.
