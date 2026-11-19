@@ -159,6 +159,21 @@ W₀ = [[0.426, 0.213], [−0.321, 0.789]]   b₀ = (0.026, 0.079)
     <li><b>Backpropagation:</b> with the chain rule the gradient of the loss with respect to every weight is computed, from the output backwards. The intermediate results of every layer are reused, which is why it is fast.</li>
     <li><b>Update:</b> <code>w ← w − α · ∂L/∂w</code> with the <b>learning rate</b> α, a small step against the gradient.</li>
   </ol>
+  <h4>Loss and accuracy: two numbers for two purposes</h4>
+  <p>Example: an exam with 4 questions where you state how sure you are for each. The column "p correct" is the confidence you gave to the <i>correct</i> answer.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Question</th><th>Correct</th><th>Your guess</th><th>Confidence in guess</th><th>p correct</th><th>Hit</th><th>Loss <code>−log(p)</code></th></tr>
+    <tr><td>1</td><td>3</td><td>3</td><td>90 %</td><td>0.90</td><td>yes</td><td>0.11</td></tr>
+    <tr><td>2</td><td>7</td><td>7</td><td>51 %</td><td>0.51</td><td>yes</td><td>0.67</td></tr>
+    <tr><td>3</td><td>1</td><td>4</td><td>60 %</td><td>0.10</td><td>no</td><td>2.30</td></tr>
+    <tr><td>4</td><td>5</td><td>5</td><td>80 %</td><td>0.80</td><td>yes</td><td>0.22</td></tr>
+    <tr><td colspan="5"><b>Mean</b></td><td><b>3 of 4 = 75 %</b></td><td><b>0.83</b></td></tr>
+  </table></div>
+  <ul>
+    <li><b>Accuracy</b> only counts whether the guess is right. It is easy to read, but it only jumps when a guess flips from wrong to right, so it is not suited for learning.</li>
+    <li><b>Loss</b> rewards confidence in the right answer and punishes confidence in the wrong one. If the confidence in question 2 rises from 51 % to 90 %, accuracy stays at 75 %, but the loss drops from 0.67 to 0.11. These small changes give the training its direction.</li>
+  </ul>
+  <div class="merk"><b>Rule of thumb</b><p>The network learns with the loss, you judge with the accuracy. With integer labels (<code>3</code>) use <code>sparse_categorical_crossentropy</code> in Keras, with one-hot labels (<code>[0,0,0,1,0,…]</code>) use <code>categorical_crossentropy</code>; both compute the same <code>−log(p correct)</code>.</p></div>
   <div class="demo" id="nsDemo">
     <div class="tag">Demo</div><h4>One training step in a tiny network</h4>
     <p class="hint">Network with 2 inputs, 2 hidden neurons (sigmoid) and 1 output. Example: <code>x = (1.0, 0.5)</code>, correct class <code>y = 1</code>. Click through the four phases. «Update» really changes the weights; afterwards «1 · Forward» shows the new values.</p>

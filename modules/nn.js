@@ -162,6 +162,21 @@ W₀ = [[0.426, 0.213], [−0.321, 0.789]]   b₀ = (0.026, 0.079)
     <li><b>Backpropagation:</b> Mit der Kettenregel wird der Gradient der Loss nach jedem Gewicht berechnet, von der Ausgabe nach hinten. Die Zwischenergebnisse jeder Schicht werden wiederverwendet, darum ist das schnell.</li>
     <li><b>Update:</b> <code>w ← w − α · ∂L/∂w</code> mit der <b>learning rate</b> α, ein kleiner Schritt gegen den Gradienten.</li>
   </ol>
+  <h4>Loss und Accuracy: zwei Zahlen für zwei Zwecke</h4>
+  <p>Beispiel: eine Prüfung mit 4 Fragen, bei jeder gibst du an, wie sicher du dir bist. Die Spalte «p richtig» ist die Sicherheit, die du der <i>richtigen</i> Antwort gegeben hast.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Frage</th><th>Richtig</th><th>Dein Tipp</th><th>Sicherheit auf Tipp</th><th>p richtig</th><th>Treffer</th><th>Loss <code>−log(p)</code></th></tr>
+    <tr><td>1</td><td>3</td><td>3</td><td>90 %</td><td>0.90</td><td>ja</td><td>0.11</td></tr>
+    <tr><td>2</td><td>7</td><td>7</td><td>51 %</td><td>0.51</td><td>ja</td><td>0.67</td></tr>
+    <tr><td>3</td><td>1</td><td>4</td><td>60 %</td><td>0.10</td><td>nein</td><td>2.30</td></tr>
+    <tr><td>4</td><td>5</td><td>5</td><td>80 %</td><td>0.80</td><td>ja</td><td>0.22</td></tr>
+    <tr><td colspan="5"><b>Mittel</b></td><td><b>3 von 4 = 75 %</b></td><td><b>0.83</b></td></tr>
+  </table></div>
+  <ul>
+    <li><b>Accuracy</b> zählt nur, ob der Tipp stimmt. Sie ist leicht zu lesen, springt aber nur, wenn ein Tipp von falsch auf richtig kippt, und taugt darum nicht zum Lernen.</li>
+    <li><b>Loss</b> belohnt Sicherheit bei der richtigen und bestraft Sicherheit bei der falschen Antwort. Steigt die Sicherheit bei Frage 2 von 51 % auf 90 %, bleibt die Accuracy bei 75 %, die Loss sinkt aber von 0.67 auf 0.11. Diese kleinen Veränderungen geben dem Training die Richtung.</li>
+  </ul>
+  <div class="merk"><b>Merksatz</b><p>Das Netz lernt mit der Loss, du beurteilst mit der Accuracy. Bei Ganzzahl-Labels (<code>3</code>) nimmst du in Keras <code>sparse_categorical_crossentropy</code>, bei One-Hot-Labels (<code>[0,0,0,1,0,…]</code>) <code>categorical_crossentropy</code>; beide rechnen dasselbe <code>−log(p richtig)</code>.</p></div>
   <div class="demo" id="nsDemo">
     <div class="tag">Demo</div><h4>Ein Trainingsschritt in einem winzigen Netz</h4>
     <p class="hint">Netz mit 2 Eingängen, 2 hidden Neuronen (Sigmoid) und 1 Ausgang. Beispiel: <code>x = (1.0, 0.5)</code>, richtige Klasse <code>y = 1</code>. Klicke durch die vier Phasen. «Update» ändert die Gewichte wirklich, danach siehst du in «1 · Forward» die neuen Werte.</p>
