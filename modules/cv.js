@@ -274,7 +274,7 @@ solange Boxen übrig:
     <tr><th>Aufgabe</th><th>Ausgabe</th><th>Modelle</th><th>Loss</th><th>Metrik</th></tr>
     <tr><td><b>Denoising</b></td><td>Bild</td><td>Gauss, BM3D; U-Net, SwinIR, Restormer</td><td>L1, Perceptual</td><td>PSNR, SSIM</td></tr>
     <tr><td><b>Deblurring</b></td><td>Bild</td><td>Wiener, Richardson-Lucy; DeblurGAN, Restormer</td><td>L1, Frequenz-Loss, GAN</td><td>PSNR, SSIM</td></tr>
-    <tr><td><b>Super-Resolution</b></td><td>Bild, grösser</td><td>bicubic; SRCNN, EDSR, SwinIR, ESRGAN</td><td>L1 / MSE, GAN</td><td>PSNR, SSIM, Aussehen</td></tr>
+    <tr><td><b>Super-Resolution</b></td><td>Bild, grösser</td><td>Bicubic; SRCNN, EDSR, SwinIR, ESRGAN</td><td>L1 / MSE, GAN</td><td>PSNR, SSIM, Aussehen</td></tr>
     <tr><td><b>Object Detection</b></td><td>Boxen, Klassen, Scores</td><td>Faster R-CNN, YOLO</td><td>Klasse (BCE/CE) + Box (IoU-basiert)</td><td>mAP@IoU</td></tr>
     <tr><td><b>Semantic Segmentation</b></td><td>Klasse pro Pixel</td><td>U-Net, SAM</td><td>Cross-Entropy + Dice</td><td>IoU, Dice, mIoU</td></tr>
   </table></div>
