@@ -16,7 +16,7 @@ lernapp/
   notebook.html     Übungs-Notebook (lokal mit Jupyter oder in Colab)
   titanic.html      Titanic-Seite
   mathe-kompakt.html, mathe-ausfuehrlich.html   eigene Mathe-Seiten
-  kompakt.html      Spickzettel über Supervised ML, Klassifikation, Unsupervised und Neural Networks (Modul `kompakt`; auf der Hauptseite verlinkt die Linkleiste oben darauf)
+  kompakt.html      Spickzettel über Supervised ML, Klassifikation, Unsupervised, Neural Networks, CNN, Computer Vision, Generative Models und Modelle in der Praxis (Modul `kompakt`; wird bei jeder inhaltlichen Änderung dieser Kapitel nachgeführt; auf der Hauptseite verlinkt die Linkleiste oben darauf)
   server.py         lokaler Server (Zustand, Jupyter-Start, Proxy)
   run.sh            Jupyter und Server unter Linux/macOS starten
   requirements.txt, requirements-dev.txt   Laufzeit- und Entwicklungspakete

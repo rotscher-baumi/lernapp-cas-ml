@@ -207,7 +207,7 @@
     <li>Jeden Punkt dem <b>nächsten Zentrum</b> zuordnen.</li>
     <li>Jedes Zentrum auf den <b>Mittelwert</b> seiner Punkte setzen.</li>
   </ol>
-  <p>Das Ziel dahinter: die Summe der quadrierten Abstände innerhalb der Cluster (<b>WSS</b>, within-cluster sum of squares) möglichst klein machen. Der Start ist zufällig, deshalb kann ein anderer Start ein anderes Ergebnis geben.</p>
+  <p>Das Ziel dahinter: die Summe der quadrierten Abstände innerhalb der Cluster (<b>WSS</b>, Within-Cluster Sum of Squares) möglichst klein machen. Der Start ist zufällig, deshalb kann ein anderer Start ein anderes Ergebnis geben.</p>
   <div class="demo" id="kmDemo">
     <div class="tag">Demo</div><h4>k-Means Schritt für Schritt</h4>
     ${KMeansDemo.html('km')}
@@ -267,7 +267,7 @@ labels = fcluster(Z, t=3, criterion="maxclust")   # 3 Cluster</code></pre>
     <div class="ctl"><label for="hcK">Anzahl Cluster (Schnitt)</label><input type="range" id="hcK" min="1" max="8" step="1" value="3"><output id="hcKO"></output></div>
     <div class="stats"><span>Cluster <b id="hcN"></b></span><span>letzte Verschmelzung bei <b id="hcLast"></b></span><span>nächste bei <b id="hcNext"></b></span></div>
     <p class="hint" id="hcMsg">&nbsp;</p>
-    <p class="hint">Die Zahlen sind Abstände im Bild (Einheit: 1 = Breite). Springt der Abstand der nächsten Verschmelzung stark, ist der Schnitt davor sinnvoll: genau das zeigt die Lücke im Dendrogramm.</p>
+    <p class="hint">Die Zahlen sind Abstände im Bild (Einheit: 1 = Breite). Springt der Abstand der nächsten Verschmelzung stark, ist der Schnitt davor sinnvoll: Genau das zeigt die Lücke im Dendrogramm.</p>
   </div>
   <h3 id="unsup-dbscan">6 · Andere Clusterformen: DBSCAN und GMM</h3>
   <p>k-Means und Ward suchen runde, ähnlich grosse Gruppen. Sind die Gruppen gekrümmt (Monde in der Demo oben), verschieden dicht oder gibt es Rauschen, helfen andere Verfahren.</p>
@@ -305,7 +305,7 @@ gmm.bic(X_s)               # für mehrere n_components vergleichen</code></pre>
     <div class="ctl"><label for="gmK">Komponenten (n_components)</label><input type="range" id="gmK" min="1" max="5" step="1" value="3"><output id="gmKO"></output></div>
     <div class="stats"><span>Komponenten <b id="gmN"></b></span><span>Log-Likelihood <b id="gmLL"></b></span><span>BIC <b id="gmBic"></b></span></div>
     <p class="hint" id="gmMsg">&nbsp;</p>
-    <p class="hint">Die Ellipsen umfassen je etwa 95 % einer Komponente. Blasse Punkte liegen zwischen zwei Komponenten: das Modell ist unsicher. Der BIC bestraft zu viele Komponenten, kleiner ist besser.</p>
+    <p class="hint">Die Ellipsen umfassen je etwa 95 % einer Komponente. Blasse Punkte liegen zwischen zwei Komponenten: Das Modell ist unsicher. Der BIC bestraft zu viele Komponenten, kleiner ist besser.</p>
   </div>
   <div class="tablewrap"><table>
     <tr><th>Verfahren</th><th>k vorgeben?</th><th>Clusterform</th><th>Rauschen</th><th>Gut für</th></tr>

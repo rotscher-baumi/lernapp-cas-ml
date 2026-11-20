@@ -48,7 +48,7 @@
   <pre><code>I(x, y) = f(x, y) ⊛ h(x, y) + n(x, y)</code></pre>
   <ul>
     <li><b>f</b> ist das ideale Bild, das wir gerne hätten.</li>
-    <li><b>h</b> ist die <b>PSF</b> (point spread function): wie die Optik einen Punkt verschmiert. <code>⊛</code> ist die Faltung, also dieselbe Operation wie bei einem Filter. Bewegung, falscher Fokus oder eine zittrige Hand erzeugen <b>Unschärfe</b>.</li>
+    <li><b>h</b> ist die <b>PSF</b> (Point Spread Function): wie die Optik einen Punkt verschmiert. <code>⊛</code> ist die Faltung, also dieselbe Operation wie bei einem Filter. Bewegung, falscher Fokus oder eine zittrige Hand erzeugen <b>Unschärfe</b>.</li>
     <li><b>n</b> ist <b>Rauschen</b> (Sensor, Elektronik, wenig Licht).</li>
     <li><b>I</b> ist das, was wir tatsächlich aufnehmen.</li>
   </ul>
@@ -214,7 +214,7 @@
   </ul>
   <div class="falle"><b>Falle</b><p>PSNR belohnt Pixel-Nähe, nicht gutes Aussehen. Ein L2-trainiertes Netz erreicht hohe PSNR mit einem weichen Bild; ein GAN-Netz sieht schärfer aus, hat aber tiefere PSNR, weil es plausible Details <i>erfindet</i>. Bei medizinischen oder forensischen Bildern ist erfundenes Detail ein Risiko.</p></div>
 
-  <h3 id="cv-detection">4 · Object Detection: was ist wo?</h3>
+  <h3 id="cv-detection">4 · Object Detection: Was ist wo?</h3>
   <p>Die Ausgabe ist eine <b>Menge</b> von Vorhersagen, und ihre Grösse ist unbekannt:</p>
   <pre><code>y = { (b₁, c₁, s₁), (b₂, c₂, s₂), … (bₖ, cₖ, sₖ) }
 b = Box (x0, y0, x1, y1)    c = Klasse    s = Score in [0, 1]    k = unbekannt</code></pre>
@@ -229,7 +229,7 @@ b = Box (x0, y0, x1, y1)    c = Klasse    s = Score in [0, 1]    k = unbekannt</
   <p>Die Labels im YOLO-Format sind eine Zeile pro Objekt: <code>class_id cx cy w h</code>, alle Koordinaten auf 0 bis 1 normiert. Ein Anker ist nichts anderes als eine vorgegebene Box, die das Netz leicht verschiebt und streckt; so muss es nicht jede Box von Grund auf raten.</p>
 
   <h3 id="cv-iou">5 · IoU und NMS: Treffer zählen und Duplikate entfernen</h3>
-  <p><b>IoU</b> (intersection over union) misst, wie gut sich zwei Boxen decken: Fläche des Schnitts geteilt durch Fläche der Vereinigung. 0 heisst kein Kontakt, 1 heisst identisch. IoU wird an drei Stellen gebraucht: beim <b>Zuordnen</b> von Ankern zu Ground-Truth-Boxen im Training, als <b>Box-Loss</b>, und bei der <b>Auswertung</b>: Eine Vorhersage zählt als Treffer, wenn ihre IoU mit einer Ground-Truth-Box über einem Threshold liegt (meist 0.5).</p>
+  <p><b>IoU</b> (Intersection over Union) misst, wie gut sich zwei Boxen decken: Fläche des Schnitts geteilt durch Fläche der Vereinigung. 0 heisst kein Kontakt, 1 heisst identisch. IoU wird an drei Stellen gebraucht: beim <b>Zuordnen</b> von Ankern zu Ground-Truth-Boxen im Training, als <b>Box-Loss</b>, und bei der <b>Auswertung</b>: Eine Vorhersage zählt als Treffer, wenn ihre IoU mit einer Ground-Truth-Box über einem Threshold liegt (meist 0.5).</p>
   <div class="demo" id="ioDemo">
     <div class="tag">Demo</div><h4>IoU von zwei Boxen</h4>
     <p class="hint">Verschiebe und skaliere die orange Vorhersage gegen die blaue Ground Truth. Der grüne Schnitt geteilt durch die Vereinigung ist die IoU.</p>

@@ -106,7 +106,7 @@
         $('vaM1O').textContent = fmt(m1, 1); $('vaM2O').textContent = fmt(m2, 1); $('vaSO').textContent = fmt(sg, 2);
         const kl = klDiv([m1, m2], [sg, sg]);
         $('vaKL').textContent = fmt(kl, 2);
-        $('vaMsg').textContent = kl < 0.3 ? T('Fast N(0, 1): Der latent space ist gut gefüllt, ein zufälliger Punkt daraus ergibt ein sinnvolles Bild.', 'Almost N(0, 1): the latent space is well filled, a random point from it gives a sensible image.')
+        $('vaMsg').textContent = kl < 0.3 ? T('Fast N(0, 1): Der Latent Space ist gut gefüllt, ein zufälliger Punkt daraus ergibt ein sinnvolles Bild.', 'Almost N(0, 1): the latent space is well filled, a random point from it gives a sensible image.')
           : sg < 0.25 ? T('σ klein: fast ein Punkt wie beim normalen Autoencoder. Rekonstruktion wäre scharf, aber die Umgebung des Punktes ist leer und der KL-Term hoch.', 'σ small: almost a point as in the plain autoencoder. Reconstruction would be sharp, but the surroundings of the point are empty and the KL term is high.')
             : T('Weit weg von N(0, 1): Der KL-Term zieht μ zum Ursprung und σ Richtung 1.', 'Far from N(0, 1): the KL term pulls μ to the origin and σ towards 1.');
       }

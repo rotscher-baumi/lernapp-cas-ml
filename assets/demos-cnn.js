@@ -133,7 +133,7 @@
         const d = data(), r0 = Math.floor(pos / 6), c0 = pos % 6;
         let fmax = 0; d.F.forEach((row) => row.forEach((v) => { fmax = Math.max(fmax, Math.abs(v)); }));
         let pmax = 0; d.P.forEach((row) => row.forEach((v) => { pmax = Math.max(pmax, v); }));
-        let s = lbl(GX[0], 22, T('Bild 8×8', 'Image 8×8')) + lbl(GX[1], 22, 'Filter 3×3') + lbl(GX[2], 22, 'Feature map 6×6') + lbl(GX[3], 22, T('ReLU + Pool → 3×3', 'ReLU + pool → 3×3'));
+        let s = lbl(GX[0], 22, T('Bild 8×8', 'Image 8×8')) + lbl(GX[1], 22, 'Filter 3×3') + lbl(GX[2], 22, 'Feature Map 6×6') + lbl(GX[3], 22, T('ReLU + Pool → 3×3', 'ReLU + pool → 3×3'));
         d.A.forEach((row, r) => row.forEach((v, c) => { s += cell(GX[0] + c * C, GY + r * C, C, 'var(--fg)', v ? 0.85 : 0.04); }));
         s += '<rect x="' + (GX[0] + c0 * C) + '" y="' + (GY + r0 * C) + '" width="' + 3 * C + '" height="' + 3 * C + '" style="fill:none;stroke:var(--warn);stroke-width:2.5"/>';
         d.k.forEach((row, r) => row.forEach((v, c) => {

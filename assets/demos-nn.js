@@ -409,8 +409,8 @@
         $('nfCurve').innerHTML = g;
         $('nfTr').textContent = fmt(c.tr[e], 3); $('nfVa').textContent = fmt(c.va[e], 3); $('nfAcc').textContent = fmt(100 * c.acc[e], 0) + ' %'; $('nfBest').textContent = run.best;
         const gap = c.va[e] - c.tr[e];
-        $('nfMsg').textContent = T('epoch ', 'Epoch ') + e + T(': Training-Loss ', ': training loss ') + fmt(c.tr[e], 3) + T(', Validation-Loss ', ', validation loss ') + fmt(c.va[e], 3) + '. ' +
-          (e > run.best + 15 && c.va[e] > c.va[run.best] * 1.05 ? T('Die Validation-Loss steigt seit epoch ' + run.best + ' wieder: overfitting. Early Stopping hätte bei epoch ' + run.best + ' gestoppt.', 'The validation loss has been rising again since epoch ' + run.best + ': overfitting. Early stopping would have stopped at epoch ' + run.best + '.')
+        $('nfMsg').textContent = T('Epoch ', 'Epoch ') + e + T(': Training-Loss ', ': training loss ') + fmt(c.tr[e], 3) + T(', Validation-Loss ', ', validation loss ') + fmt(c.va[e], 3) + '. ' +
+          (e > run.best + 15 && c.va[e] > c.va[run.best] * 1.05 ? T('Die Validation-Loss steigt seit Epoch ' + run.best + ' wieder: Overfitting. Early Stopping hätte bei Epoch ' + run.best + ' gestoppt.', 'The validation loss has been rising again since epoch ' + run.best + ': overfitting. Early stopping would have stopped at epoch ' + run.best + '.')
             : gap > 0.15 ? T('Training und Validation laufen auseinander.', 'Training and validation are drifting apart.')
               : e < 20 ? T('Das Netz lernt noch, beide Kurven sinken.', 'The network is still learning, both curves are falling.') : T('Beide Kurven liegen nah beieinander: kein klares overfitting.', 'Both curves are close together: no clear overfitting.'));
       }

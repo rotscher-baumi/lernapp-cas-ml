@@ -20,7 +20,7 @@
   <p>Schnell ist NumPy aus drei Gründen: eine kompilierte C-Schleife statt Python-Schleife, zusammenhängender Speicher mit festem Typ und SIMD (die CPU rechnet mit einem Befehl mehrere Zahlen gleichzeitig). Im Kursbeispiel war <code>x * 2</code> rund 70-mal schneller als die Listen-Schleife (Messung auf einem Rechner, deiner liefert andere Zahlen).</p>
   <div class="merk"><b>Merksatz</b><p>«Vektorisiert» (<code>x * 2</code>) ist schnell, <code>.apply()</code> und Python-Schleifen sind langsam.</p></div>
 
-  <h3>dtype: der Typ bestimmt die Grösse</h3>
+  <h3>dtype: Der Typ bestimmt die Grösse</h3>
   <pre><code>a = np.array([1, 2, 3, 4, 5])   # int64: 8 Byte pro Wert = 40 Byte
 a.astype(np.int8)               # 1 Byte pro Wert = 5 Byte, aber nur -128 bis 127!</code></pre>
 
@@ -33,7 +33,7 @@ col + row   # [[ 1, 2, 3],
             #  [21,22,23]]</code></pre>
 
   <h3>View oder Copy?</h3>
-  <p>Ein <b>View</b> ist ein neues Fenster auf dieselben Daten: ändert man den View, ändert sich das Original. Eine <b>Copy</b> hat eigene Daten.</p>
+  <p>Ein <b>View</b> ist ein neues Fenster auf dieselben Daten: Ändert man den View, ändert sich das Original. Eine <b>Copy</b> hat eigene Daten.</p>
   <div class="tablewrap"><table>
     <tr><th>Code</th><th>Ergebnis</th><th>Warum</th></tr>
     <tr><td><code>a[1:4]</code></td><td>View</td><td>normaler Ausschnitt</td></tr>

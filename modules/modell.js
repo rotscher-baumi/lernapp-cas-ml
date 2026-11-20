@@ -142,7 +142,7 @@ assert (pipe2.predict(X_val) == pipe.predict(X_val)).all()   # Laden prüfen</co
   <h3 id="mo-neu">4 · Neu trainieren: wann und wie</h3>
   <p>Ein Modell ist eine Momentaufnahme der Trainingsdaten. Die Welt ändert sich danach weiter, und das Modell merkt es nicht. Man spricht von <b>Drift</b>:</p>
   <ul>
-    <li><b>Data Drift</b> (covariate shift): Die Eingaben verteilen sich anders. Beispiel: Ein neuer Sensor misst systematisch höher, Kunden werden jünger, Fotos kommen von einer anderen Kamera.</li>
+    <li><b>Data Drift</b> (Covariate Shift): Die Eingaben verteilen sich anders. Beispiel: Ein neuer Sensor misst systematisch höher, Kunden werden jünger, Fotos kommen von einer anderen Kamera.</li>
     <li><b>Concept Drift</b>: Der Zusammenhang zwischen x und y ändert sich. Beispiel: Nach einer Zinserhöhung bedeuten dieselben Kundendaten ein anderes Kreditrisiko; Spam-Mails ändern ihren Stil.</li>
     <li><b>Neue Klassen oder neue Fragen</b>: Ein neues Produkt soll erkannt werden, das es beim Training nicht gab. Dann muss das Modell (mindestens der Output Layer) angepasst werden.</li>
   </ul>
@@ -155,7 +155,7 @@ assert (pipe2.predict(X_val) == pipe.predict(X_val)).all()   # Laden prüfen</co
     <tr><td><b>Nur den Kopf neu</b></td><td>Basis behalten, Output Layer neu (z. B. für eine neue Klasse)</td><td>Neue Klassen, Basis ist gut</td><td>Basis lernt nichts Neues</td></tr>
   </table></div>
   <div class="demo" id="moDriftDemo">
-    <div class="tag">Demo</div><h4>Drift: ein altes Modell wird schlechter</h4>
+    <div class="tag">Demo</div><h4>Drift: Ein altes Modell wird schlechter</h4>
     <p class="hint">Das Modell (logistische Regression) wurde auf den Daten von «Monat 0» trainiert. Schiebe die Zeit nach rechts: Die Punkte verschieben sich (Data Drift), und die Grenze zwischen den Klassen dreht sich (Concept Drift). Dann trainiere neu und vergleiche.</p>
     <div class="ctl"><label for="moDr">Zeit (Monate seit dem Training)</label><input type="range" id="moDr" min="0" max="12" step="1" value="9"><output id="moDrO"></output></div>
     <div class="btnrow" id="moDrMode" role="group" aria-label="Neu trainieren"><button data-v="old" class="pri" aria-pressed="true">altes Modell behalten</button><button data-v="new" aria-pressed="false">neu trainieren: nur aktuelle Daten</button><button data-v="all" aria-pressed="false">neu trainieren: alte + aktuelle Daten</button></div>
@@ -201,7 +201,7 @@ assert (pipe2.predict(X_val) == pipe.predict(X_val)).all()   # Laden prüfen</co
     <tr><td><b>Checkpoint</b></td><td>Zwischenstand der Gewichte während des Trainings, z. B. die beste Epoch (<code>ModelCheckpoint</code>)</td></tr>
     <tr><td><b>Weights</b></td><td>Die Parameter eines Netzes; «vortrainierte Weights» heisst: die gelernten Zahlen eines fremden Trainings</td></tr>
     <tr><td><b>Model Card</b></td><td>Kurzbeschreibung eines Modells: Zweck, Daten, Metriken, Grenzen, Lizenz</td></tr>
-    <tr><td><b>Model Registry</b></td><td>Ablage für Modellversionen mit Metadaten und Status (z. B. MLflow): welche Version läuft, welche ist archiviert</td></tr>
+    <tr><td><b>Model Registry</b></td><td>Ablage für Modellversionen mit Metadaten und Status (z. B. MLflow): Welche Version läuft, welche ist archiviert</td></tr>
     <tr><td><b>Drift</b></td><td>Daten (Data Drift) oder Zusammenhang (Concept Drift) ändern sich nach dem Training</td></tr>
     <tr><td><b>Rollback</b></td><td>Zur vorherigen Modellversion zurückwechseln, wenn die neue schlechter ist</td></tr>
   </table></div>

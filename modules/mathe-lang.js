@@ -166,7 +166,7 @@ print(ableitung(quadrat, 3))`,
     quiz: [
       { q: `Warum skaliert man Merkmale, und ist danach auf den Testdaten Mittelwert 0 und Std 1 exakt erreicht?`, a: `Damit kein Merkmal nur wegen grosser Zahlen dominiert (wichtig für Gradient Descent, k-NN, Regularisierung). Exakt gilt 0 und 1 nur auf den Trainingsdaten; Testdaten werden mit den Trainingswerten skaliert und liegen nur ungefähr dort.` },
       { q: `Was haben Mittelwert und Standardabweichung nach dem StandardScaler?`, a: `Mittelwert 0 und Standardabweichung 1. Jeder Wert wird zu z = (x − Mittelwert) / Std; die Form der Verteilung bleibt, nur Lage und Massstab ändern sich.` },
-      { q: `Was sagt die Ableitung einer Funktion an einer Stelle aus?`, a: `Die Steigung der Kurve an dieser Stelle, also wie stark sich y ändert, wenn x ein winziges Stück wächst. Positiv heisst: die Kurve steigt, negativ: sie fällt, null: sie ist flach.` },
+      { q: `Was sagt die Ableitung einer Funktion an einer Stelle aus?`, a: `Die Steigung der Kurve an dieser Stelle, also wie stark sich y ändert, wenn x ein winziges Stück wächst. Positiv heisst: Die Kurve steigt, negativ: Sie fällt, null: Sie ist flach.` },
       { q: `Wie lautet die Ableitung von <code>x²</code>, und wie gross ist sie bei <code>x = -3</code>?`, a: `<code>2x</code>, also -6 bei x = -3. Das Minus zeigt: Die Kurve fällt dort, das Tal liegt rechts davon.` },
       { q: `Warum steht bei Gradient Descent ein Minus: <code>x_neu = x_alt - lernrate * steigung</code>?`, a: `Die Ableitung zeigt bergauf. Du willst ins Tal, also gehst du in die Gegenrichtung.` },
       { q: `Was bedeutet das Summenzeichen Σ in einer Formel?`, a: `Eine Schleife mit Aufsummieren: Rechne den Ausdruck für jeden Index aus und zähle alle Ergebnisse zusammen.` },

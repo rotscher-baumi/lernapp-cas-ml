@@ -30,7 +30,7 @@
           ['Beispiele prüfen', 'scharf? vielfältig? sinnvoll?'],
           ['Generieren', 'z ziehen, interpolieren'],
         ],
-        loopA: ['pro Mini-Batch,', 'viele epochs'],
+        loopA: ['pro Mini-Batch,', 'viele Epochs'],
         loopB: ['Tuning:', 'Grösse von z,', 'Architektur, Loss'],
       })}
     </svg>
@@ -62,7 +62,7 @@ Loss = Abstand(x, x̂)       # MSE oder Binary Cross-Entropy</code></pre>
     <div class="ctl"><label for="vaM1">μ₁</label><input type="range" id="vaM1" min="-2.5" max="2.5" step="0.1" value="1.2"><output id="vaM1O"></output></div>
     <div class="ctl"><label for="vaM2">μ₂</label><input type="range" id="vaM2" min="-2.5" max="2.5" step="0.1" value="-0.8"><output id="vaM2O"></output></div>
     <div class="ctl"><label for="vaS">σ</label><input type="range" id="vaS" min="0.05" max="1.5" step="0.05" value="0.5"><output id="vaSO"></output></div>
-    <svg class="plot" id="vaSvg" viewBox="0 0 300 240" style="max-width:420px" role="img" aria-label="Zweidimensionaler latent space mit Mittelwert, 40 gezogenen Punkten und Standardnormalverteilung als Kreisen"></svg>
+    <svg class="plot" id="vaSvg" viewBox="0 0 300 240" style="max-width:420px" role="img" aria-label="Zweidimensionaler Latent Space mit Mittelwert, 40 gezogenen Punkten und Standardnormalverteilung als Kreisen"></svg>
     <div class="stats"><span>KL-Term <b id="vaKL"></b></span></div>
     <p class="hint" id="vaMsg"></p>
   </div>
