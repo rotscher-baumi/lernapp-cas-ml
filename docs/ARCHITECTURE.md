@@ -29,7 +29,8 @@ lernapp-cas-ml/
     style.css                Design-Tokens hell/dunkel und alle Komponenten
     demos-mathe.js           MatheDemos: Demos, die beide Mathe-Seiten teilen
     demos-kmeans.js          KMeansDemo: k-Means-Demo und gemeinsame k-Means-Helfer (`KMeansDemo.lib`)
-    demos-ml.js, demos-klass.js, demos-unsup.js, demos-nn.js, demos-cnn.js, demos-cv.js, demos-gen.js   Demo-Code der Kapitel ml, klass, unsup, nn, cnn, cv und gen (`LernApp.demos.<id>`)
+    demos-ml.js, demos-klass.js, demos-unsup.js, demos-nn.js, demos-cnn.js, demos-cv.js, demos-gen.js, demos-modell.js   Demo-Code der Kapitel ml, klass, unsup, nn, cnn, cv, gen und modell (`LernApp.demos.<id>`)
+    search.js                Volltextsuche der Hauptseite (klebende Leiste `.topbar` um `nav.chips`)
     img/                     Grafiken, aus echten Läufen erzeugt (Titanic)
     notebook-data.js         generiert aus den Notebooks (zurzeit von keiner Seite geladen)
   modules/
@@ -37,7 +38,7 @@ lernapp-cas-ml/
     en/<id>.js               englische Texte desselben Kapitels
     _vorlage.js              Vorlage für ein neues Kapitel
   notebooks/                 Jupyter-Notebooks (Übungen, Lernhilfe)
-    beispiele/               je ein eigenständiges Beispiel-Notebook pro Thema der Übersicht (01 bis 08, Titanic = 07)
+    beispiele/               je ein eigenständiges Beispiel-Notebook pro Thema der Übersicht (01 bis 09, Titanic = 07)
   tools/                     build_notebook_exercises.py: Notebooks → notebook-data.js
   scripts/                   build_notebook.js, build_lernhilfe_notebook.js: Module → Notebooks
   server.py                  statischer Server, /api/state, Proxy /jupyter/*
@@ -72,6 +73,10 @@ Der Kern stellt das globale Objekt `LernApp` bereit:
 | `modules`, `lang` | angemeldete Kapitel, aktuelle Sprache |
 
 Beim Start läuft `start()`: Schalter einfügen, bei EN die Übersetzungen überlagern, Kapitel nach `order` sortieren, Leiste und Übersicht füllen, pro Kapitel den Abschnitt bauen (`buildSection`), dann pro Kapitel `init()` aufrufen. Ein Fehler in einem `init()` wird abgefangen und als Hinweis im Kapitel angezeigt; die anderen Kapitel laufen weiter.
+
+### Suche (`assets/search.js`)
+
+Läuft nach dem Kern (eigener `DOMContentLoaded`-Listener, später registriert) und nur auf `index.html`. Sie legt eine klebende Leiste `.topbar` um `nav.chips` und setzt darin Suchfeld, Zähler und ▲▼ ein. Bei jeder Eingabe (150 ms verzögert) sammelt sie die sichtbaren Textknoten von `#ueberblick` und `#modules` (ohne SVG, Formularelemente, Buttons, `[hidden]`), faltet sie zu einem String (klein, ä → ae, ohne Akzente) mit einer Rückabbildung auf Knoten und Offset und sucht darin. Treffer sind `Range`-Objekte; markiert wird über `CSS.highlights` (`::highlight(srch)`, aktueller Treffer `srch-cur`), das DOM bleibt unverändert. Beim Springen werden umgebende `<details>` geöffnet. Der Index wird bei jeder Suche neu gebaut, damit Texte aus Demos aktuell sind.
 
 ### Kapitel (`modules/`)
 

@@ -20,7 +20,8 @@ package "assets/" {
   [style.css\nDesign-Tokens hell/dunkel\n(data-theme, prefers-color-scheme)] as css
   [demos-mathe.js\nMatheDemos] as dm
   [demos-kmeans.js\nKMeansDemo] as dk
-  [demos-ml.js · demos-klass.js\ndemos-unsup.js · demos-nn.js\ndemos-cnn.js · demos-cv.js\ndemos-gen.js\nLernApp.demos.<id>] as dd
+  [demos-ml.js · demos-klass.js\ndemos-unsup.js · demos-nn.js\ndemos-cnn.js · demos-cv.js\ndemos-gen.js · demos-modell.js\nLernApp.demos.<id>] as dd
+  [search.js\nSuche: Leiste .topbar,\nTrefferliste, CSS.highlights] as srch
   [img/\nGrafiken aus echten Läufen] as img
   [notebook-data.js\n(generiert, zurzeit\nvon keiner Seite geladen)] as nbdata
 }
@@ -52,6 +53,8 @@ user --> sub
 user --> nbpage
 
 index --> core
+index --> srch
+srch ..> core : nach start()
 sub --> core
 index ..> css
 sub ..> css
