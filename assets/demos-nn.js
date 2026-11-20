@@ -231,6 +231,10 @@
         draw();
       }));
       ['nnActX', 'nnActW', 'nnActB'].forEach((id) => $(id).addEventListener('input', draw));
+      // Drag along z: the orange point follows the pointer, x = (z − b) / w with the current w and b
+      const iz = LernApp.invert(sx);
+      LernApp.drag('nnActSvg', { axis: 'x', move: (k, px) => { const w = +$('nnActW').value, b = +$('nnActB').value; if (Math.abs(w) > 0.05) LernApp.setRange('nnActX', (iz(px) - b) / w); },
+        hint: ['Ziehe im Plot nach links oder rechts: Der orange Punkt wandert entlang der Kurve, die Eingabe x passt sich an.', 'Drag left or right in the plot: the orange point moves along the curve and the input x adapts.'] });
       draw();
     })();
 

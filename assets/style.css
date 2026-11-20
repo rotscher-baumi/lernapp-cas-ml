@@ -98,6 +98,10 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,s
 .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
 svg.plot{display:block;width:100%;height:auto;max-width:420px;margin:0 auto;background:var(--bg);border-radius:8px;border:1px solid var(--line)}
 svg.plot[viewBox^="0 0 240 "]{max-width:315px}
+svg.plot .dh{fill:var(--surface);stroke:var(--accent);stroke-width:2.5;cursor:grab}
+svg.dragplot{cursor:crosshair;user-select:none;-webkit-user-select:none}svg.dragplot.dragging{cursor:grabbing!important}
+.demo p.drag-hint{margin:4px 0 0;font-size:13px;text-align:center}
+.demo p.drag-hint::before{content:"✥ ";color:var(--accent)}
 @media (max-width:480px){.demo{padding:12px} svg.plot .lbl{font-size:11.5px}}
 svg .ax{stroke:var(--line);stroke-width:1} svg .lbl{fill:var(--muted);font-family:var(--f-mono);font-size:10px}
 svg .pt{fill:var(--fg)} svg .ln{stroke:var(--accent);stroke-width:2.5;fill:none} svg .ln2{stroke:var(--warn);stroke-width:2;fill:none}

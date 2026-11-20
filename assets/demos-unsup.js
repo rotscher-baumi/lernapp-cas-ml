@@ -205,7 +205,11 @@
           P.forEach(p=>{const t=p[0]*ux+p[1]*uy;s+=dot(sx(p[0]),sy(p[1]),'var(--surface)',3);s+='<circle cx="'+sx(t*ux)+'" cy="'+sy(t*uy)+'" r="2.5" style="fill:var(--accent)"/>'});
           $('pcSvg').innerHTML=s;
           const v=ux*ux*sxx+2*ux*uy*sxy+uy*uy*syy;$('pcV').textContent=fmt(v/total*100,0)+' %';$('pcL').textContent=fmt((1-v/total)*100,0)+' %'}
-        $('pcA').addEventListener('input',draw);$('pcBest').addEventListener('click',()=>{$('pcA').value=bestDeg;draw()});draw()})();
+        $('pcA').addEventListener('input',draw);
+        // Drag: the axis turns towards the pointer (angle around the centre, 0–180°)
+        LernApp.drag('pcSvg',{move:(k,x,y)=>{const dx=x-W/2,dy=H/2-y;if(Math.hypot(dx,dy)<6)return;LernApp.setRange('pcA',((Math.atan2(dy,dx)*180/Math.PI)%180+180)%180)},
+          hint:['Fasse die blaue Achse irgendwo im Plot und drehe sie um die Mitte.','Grab the blue axis anywhere in the plot and turn it around the centre.']});
+        $('pcBest').addEventListener('click',()=>{$('pcA').value=bestDeg;draw()});draw()})();
 
       // Demo 5: why the PCA output is not rescaled (whitening flattens the variance per direction)
       (function(){

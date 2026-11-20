@@ -133,6 +133,10 @@
       }
       $('moEp').addEventListener('input', (e) => { ep = +e.target.value; draw(); });
       $('moQ').addEventListener('input', (e) => { q = +e.target.value; draw(); });
+      // Drag: the orange prediction point follows the pointer along the floor area
+      const ix = LernApp.invert(sx);
+      LernApp.drag('moFileSvg', { axis: 'x', move: (k, x) => LernApp.setRange('moQ', ix(x)),
+        hint: ['Ziehe im Plot nach links oder rechts: Die Wohnfläche der Vorhersage (oranger Punkt) folgt.', 'Drag left or right in the plot: the floor area of the prediction (orange point) follows.'] });
       group('moScl', (v) => { scl = v === '1'; }, draw);
       draw();
     })();

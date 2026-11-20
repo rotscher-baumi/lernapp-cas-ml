@@ -85,6 +85,16 @@
           'Pixel ' + k + ' (orange): the network sees only the ' + k + ' blue pixels before it and predicts p(pixel = 1) = ' + fmt(p, 2) + '. Then a die is rolled: ' + (img[k] ? 'dark' : 'white') + '.');
       }
       $('pxK').addEventListener('input', (e) => { k = +e.target.value; draw(); });
+      // Click or drag over either grid: that pixel becomes the current one
+      const cell = (x, y) => {
+        for (const x0 of [8, 240]) {
+          const c = Math.floor((x - x0) / C), r = Math.floor((y - 30) / C);
+          if (c >= 0 && c < 8 && r >= 0 && r < 8) return r * 8 + c;
+        }
+        return null;
+      };
+      LernApp.drag('pxSvg', { pick: (x, y) => (cell(x, y) === null ? null : 'k'), move: (key, x, y) => { const i = cell(x, y); if (i !== null) LernApp.setRange('pxK', i); },
+        hint: ['Klicke auf einen Pixel oder fahre mit gedrückter Maus über das Raster.', 'Click a pixel or move over the grid with the button held down.'] });
       $('pxNew').addEventListener('click', () => { seed++; draw(); });
       draw();
     })();
@@ -101,7 +111,8 @@
         [1, 2].forEach((r) => { s += '<circle cx="' + CX + '" cy="' + CY + '" r="' + r * SC + '" style="fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:4 4"/>'; });
         s += '<text class="lbl" x="' + (CX + 4) + '" y="' + (CY - SC - 3) + '">N(0, 1)</text>';
         E.forEach((e) => { s += '<circle cx="' + (CX + (m1 + sg * e[0]) * SC) + '" cy="' + (CY - (m2 + sg * e[1]) * SC) + '" r="3.5" style="fill:var(--accent);fill-opacity:.7"/>'; });
-        s += '<circle cx="' + (CX + m1 * SC) + '" cy="' + (CY - m2 * SC) + '" r="5" style="fill:var(--warn)"/>';
+        s += '<circle cx="' + (CX + m1 * SC) + '" cy="' + (CY - m2 * SC) + '" r="' + sg * SC + '" style="fill:none;stroke:var(--warn);stroke-width:1.5"/>';
+        s += '<circle class="dh" cx="' + (CX + m1 * SC) + '" cy="' + (CY - m2 * SC) + '" r="6" style="stroke:var(--warn)"/>';
         $('vaSvg').innerHTML = s;
         $('vaM1O').textContent = fmt(m1, 1); $('vaM2O').textContent = fmt(m2, 1); $('vaSO').textContent = fmt(sg, 2);
         const kl = klDiv([m1, m2], [sg, sg]);
@@ -111,6 +122,14 @@
             : T('Weit weg von N(0, 1): Der KL-Term zieht μ zum Ursprung und σ Richtung 1.', 'Far from N(0, 1): the KL term pulls μ to the origin and σ towards 1.');
       }
       [['vaM1', (v) => { m1 = v; }], ['vaM2', (v) => { m2 = v; }], ['vaS', (v) => { sg = v; }]].forEach((p) => $(p[0]).addEventListener('input', (e) => { p[1](+e.target.value); draw(); }));
+      // Drag: the orange centre moves μ, anywhere else sets σ = distance to the centre (the orange ring is 1 σ)
+      LernApp.drag('vaSvg', {
+        pick: (x, y) => (Math.hypot(x - (CX + m1 * SC), y - (CY - m2 * SC)) < 14 ? 'mu' : 'sigma'),
+        move: (k, x, y) => {
+          if (k === 'mu') { LernApp.setRange('vaM1', (x - CX) / SC); LernApp.setRange('vaM2', (CY - y) / SC); }
+          else LernApp.setRange('vaS', Math.hypot(x - (CX + m1 * SC), y - (CY - m2 * SC)) / SC);
+        },
+        hint: ['Ziehe den orangen Mittelpunkt für μ. Ziehen ausserhalb ändert σ (oranger Ring = 1 σ).', 'Drag the orange centre for μ. Dragging elsewhere changes σ (orange ring = 1 σ).'] });
       draw();
     })();
   };

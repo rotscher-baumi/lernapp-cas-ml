@@ -309,26 +309,96 @@
       $('pxBayer').innerHTML = bay;
     })();
 
-    // Demo 2: IoU of two boxes
+    // Demo 2: IoU of two boxes. Both boxes are dragged with the mouse (or finger); the corner handle resizes.
+    // Keyboard: Tab to a box, arrows move it, Shift + arrows resize it.
     (function () {
-      if (!$('ioSvg')) return;
-      const A = [100, 60, 200, 140];
-      let dx = 40, dy = 20, sc = 100;
+      const svg = $('ioSvg');
+      if (!svg) return;
+      const VW = 400, VH = 300, MIN = 20, NS = 'http://www.w3.org/2000/svg';
+      const boxes = [[100, 60, 200, 140], [140, 80, 240, 160]]; // A = ground truth, B = prediction
+      const colors = ['var(--accent)', 'var(--warn)'];
+      const names = [T('Ground Truth A', 'Ground truth A'), T('Vorhersage B', 'Prediction B')];
+      const el = (tag, attrs) => { const e = document.createElementNS(NS, tag); Object.keys(attrs).forEach((k) => e.setAttribute(k, attrs[k])); return e; };
+      svg.innerHTML = '';
+      svg.style.touchAction = 'none';
+      const inter = el('rect', { style: 'fill:var(--ok);fill-opacity:.35;stroke:none;pointer-events:none' });
+      svg.appendChild(inter);
+      const parts = boxes.map((_, i) => {
+        const g = el('g', { tabindex: '0', role: 'button', 'aria-label': names[i] + T(': ziehen zum Verschieben, Ecke ziehen für die Grösse; Pfeiltasten verschieben, Shift + Pfeiltasten ändern die Grösse', ': drag to move, drag the corner to resize; arrow keys move, Shift + arrow keys resize') });
+        const body = el('rect', { style: 'fill:' + colors[i] + ';fill-opacity:.08;stroke:' + colors[i] + ';stroke-width:2.5;cursor:move' });
+        const handle = el('rect', { width: 12, height: 12, style: 'fill:' + colors[i] + ';stroke:var(--bg);stroke-width:1.5;cursor:nwse-resize' });
+        const label = el('text', { class: 'lbl', style: 'fill:' + colors[i] + ';pointer-events:none' });
+        label.textContent = names[i];
+        g.append(body, handle, label);
+        svg.appendChild(g);
+        return { g, body, handle, label };
+      });
+      const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
       function draw() {
-        const w = 100 * sc / 100, h = 80 * sc / 100;
-        const B = [A[0] + dx, A[1] + dy, A[0] + dx + w, A[1] + dy + h];
-        const v = iou(A, B);
+        boxes.forEach((b, i) => {
+          const p = parts[i];
+          p.body.setAttribute('x', b[0]); p.body.setAttribute('y', b[1]);
+          p.body.setAttribute('width', b[2] - b[0]); p.body.setAttribute('height', b[3] - b[1]);
+          p.handle.setAttribute('x', b[2] - 6); p.handle.setAttribute('y', b[3] - 6);
+          // Label above the box, or below it when there is no room at the top
+          p.label.setAttribute('x', clamp(b[0] + 2, 2, VW - 110));
+          p.label.setAttribute('y', b[1] > 18 ? b[1] - 6 : b[3] + 16);
+        });
+        const [A, B] = boxes;
         const ix0 = Math.max(A[0], B[0]), iy0 = Math.max(A[1], B[1]), ix1 = Math.min(A[2], B[2]), iy1 = Math.min(A[3], B[3]);
-        const inter = ix1 > ix0 && iy1 > iy0 ? '<rect x="' + ix0 + '" y="' + iy0 + '" width="' + (ix1 - ix0) + '" height="' + (iy1 - iy0) + '" style="fill:var(--ok);fill-opacity:.35;stroke:none"/>' : '';
-        const rect = (b, c) => '<rect x="' + b[0] + '" y="' + b[1] + '" width="' + (b[2] - b[0]) + '" height="' + (b[3] - b[1]) + '" style="fill:none;stroke:' + c + ';stroke-width:2.5"/>';
-        $('ioSvg').innerHTML = inter + rect(A, 'var(--accent)') + rect(B, 'var(--warn)') +
-          '<text class="lbl" x="104" y="52" style="fill:var(--accent)">' + T('Ground Truth A', 'Ground truth A') + '</text><text class="lbl" x="' + Math.min(B[0], 300) + '" y="' + (B[3] + 14) + '" style="fill:var(--warn)">' + T('Vorhersage B', 'Prediction B') + '</text>';
-        const areaI = Math.max(0, ix1 - ix0) * Math.max(0, iy1 - iy0), areaU = 100 * 80 + w * h - areaI;
+        const iw = Math.max(0, ix1 - ix0), ih = Math.max(0, iy1 - iy0);
+        inter.setAttribute('x', ix0); inter.setAttribute('y', iy0); inter.setAttribute('width', iw); inter.setAttribute('height', ih);
+        const area = (b) => (b[2] - b[0]) * (b[3] - b[1]);
+        const areaI = iw * ih, areaU = area(A) + area(B) - areaI, v = iou(A, B);
         $('ioV').textContent = fmt(v, 2);
-        $('ioDX').textContent = dx; $('ioDY').textContent = dy; $('ioSC').textContent = sc + ' %';
+        $('ioI').textContent = fmt(areaI, 0);
+        $('ioU').textContent = fmt(areaU, 0);
         $('ioCalc').textContent = 'IoU = ' + fmt(areaI, 0) + ' / ' + fmt(areaU, 0) + ' = ' + fmt(v, 2) + (v >= 0.5 ? '   ' + T('(≥ 0.5: gilt meist als Treffer)', '(≥ 0.5: usually counts as a hit)') : '   ' + T('(< 0.5: kein Treffer)', '(< 0.5: no hit)'));
       }
-      [['ioX', (v) => { dx = v; }], ['ioY', (v) => { dy = v; }], ['ioS', (v) => { sc = v; }]].forEach((p) => $(p[0]).addEventListener('input', (e) => { p[1](+e.target.value); draw(); }));
+      // Move keeps the size; resize moves the bottom-right corner. Both stay inside the plot.
+      function move(b, dx, dy) {
+        const w = b[2] - b[0], h = b[3] - b[1];
+        b[0] = clamp(b[0] + dx, 0, VW - w); b[1] = clamp(b[1] + dy, 0, VH - h);
+        b[2] = b[0] + w; b[3] = b[1] + h;
+      }
+      function resize(b, x, y) {
+        b[2] = clamp(x, b[0] + MIN, VW); b[3] = clamp(y, b[1] + MIN, VH);
+      }
+      function toSvg(e) {
+        const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+        const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+        return [Math.round(p.x), Math.round(p.y)]; // whole pixels, so the areas in the calculation stay integers
+      }
+      let drag = null;
+      parts.forEach((p, i) => {
+        [[p.body, 'move'], [p.handle, 'resize']].forEach(([target, mode]) => target.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          const [x, y] = toSvg(e), b = boxes[i];
+          // Remember where the drag started, so the box stays under the pointer even after hitting the border
+          drag = { i, mode, x, y, start: b.slice(), ox: b[2] - x, oy: b[3] - y };
+          svg.setPointerCapture(e.pointerId);
+          svg.appendChild(p.g); // the active box goes on top, so it stays grabbable when the boxes overlap
+          p.g.focus({ preventScroll: true });
+        }));
+        p.g.addEventListener('keydown', (e) => {
+          const d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+          if (!d) return;
+          e.preventDefault();
+          const b = boxes[i], step = 5;
+          if (e.shiftKey) resize(b, b[2] + d[0] * step, b[3] + d[1] * step); else move(b, d[0] * step, d[1] * step);
+          draw();
+        });
+      });
+      svg.addEventListener('pointermove', (e) => {
+        if (!drag) return;
+        const [x, y] = toSvg(e), b = boxes[drag.i];
+        if (drag.mode === 'move') { for (let k = 0; k < 4; k++) b[k] = drag.start[k]; move(b, x - drag.x, y - drag.y); }
+        else resize(b, x + drag.ox, y + drag.oy);
+        draw();
+      });
+      const end = () => { drag = null; };
+      svg.addEventListener('pointerup', end);
+      svg.addEventListener('pointercancel', end);
       draw();
     })();
 

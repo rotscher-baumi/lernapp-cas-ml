@@ -25,7 +25,7 @@ lernapp-cas-ml/
   mathe-ausfuehrlich.html    Unterseite: Mathe ausführlich
   notebook.html              zwei Modi: lokal (JupyterLab im iframe, nur mit Server auf dem eigenen Rechner) oder Colab (Links)
   assets/
-    core.js                  Kern: LernApp-API, Sprache, Theme, Speicher, Rendern, gemeinsame Helfer (mulberry32, gauss)
+    core.js                  Kern: LernApp-API, Sprache, Theme, Speicher, Rendern, gemeinsame Helfer (mulberry32, gauss, drag, setRange)
     style.css                Design-Tokens hell/dunkel und alle Komponenten
     demos-mathe.js           MatheDemos: Demos, die beide Mathe-Seiten teilen
     demos-kmeans.js          KMeansDemo: k-Means-Demo und gemeinsame k-Means-Helfer (`KMeansDemo.lib`)
@@ -70,6 +70,8 @@ Der Kern stellt das globale Objekt `LernApp` bereit:
 | `translate(id, felder)` | englische Felder für ein Kapitel hinterlegen |
 | `t(de, en)` | Text je nach Sprache wählen, für Demo-Code und Beschriftungen |
 | `$(id)`, `fmt(v, d)` | Helfer für Demos |
+| `drag(svg, {pick, move, axis, hint})` | Ziehen mit Maus, Stift oder Finger in einem SVG-Plot; der Zeiger wird auf dem SVG selbst gefangen, darum darf die Demo beim Ziehen mit `innerHTML` neu zeichnen. `axis: 'x'` lässt auf Touch-Geräten das senkrechte Scrollen zu, `hint` setzt eine Zeile unter den Plot |
+| `setRange(id, v)`, `invert(scale)` | Slider aus einer Demo setzen (begrenzen, auf `step` runden, `input` auslösen) und eine lineare Skala umkehren (Plot-Koordinate zurück zum Wert) |
 | `modules`, `lang` | angemeldete Kapitel, aktuelle Sprache |
 
 Beim Start läuft `start()`: Schalter einfügen, bei EN die Übersetzungen überlagern, Kapitel nach `order` sortieren, Leiste und Übersicht füllen, pro Kapitel den Abschnitt bauen (`buildSection`), dann pro Kapitel `init()` aufrufen. Ein Fehler in einem `init()` wird abgefangen und als Hinweis im Kapitel angezeigt; die anderen Kapitel laufen weiter.

@@ -90,7 +90,7 @@
             return [CX+S*xr,CY-S*(z*Math.cos(e)+d*Math.sin(e))*1.0,d]}
           const f=(q,z)=>nz(c[0]+c[1]*q+c[2]*z);
           function draw3(){
-            $('r3AzO').textContent=az+'°';$('r3ElO').textContent=el+'°';
+            $('r3Az').value=az;$('r3El').value=el;$('r3AzO').textContent=az+'°';$('r3ElO').textContent=el+'°';
             $('r3Az').value=az;$('r3El').value=el;
             const q0=30,q1=135,z0=1,z1=6;let s='';
             const box=[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1]].map(v=>P(v[0],v[1],v[2]));
@@ -189,9 +189,20 @@
             s+='<line class="res" x1="'+sx(xs[i])+'" y1="'+sy(ys[i])+'" x2="'+sx(xs[i])+'" y2="'+sy(p)+'"/>'}
           s+='<line class="ln" x1="'+sx(0)+'" y1="'+sy(b)+'" x2="'+sx(9)+'" y2="'+sy(a*9+b)+'"/>';
           for(let i=0;i<n;i++)s+='<circle class="pt" cx="'+sx(xs[i])+'" cy="'+sy(ys[i])+'" r="4"/>';
+          s+='<circle class="dh" cx="'+sx(0)+'" cy="'+sy(b)+'" r="6"/><circle class="dh" cx="'+sx(8)+'" cy="'+sy(a*8+b)+'" r="6"/>';
           $('lrSvg').innerHTML=s;$('lrMae').textContent=fmt(sae/n,2);$('lrMse').textContent=fmt(sse/n,2);$('lrR2').textContent=fmt(1-sse/sst,2)}
         function set(a,b){$('lrA').value=Math.max(-1,Math.min(2,a));$('lrB').value=Math.max(-2,Math.min(8,b));draw()}
         $('lrA').addEventListener('input',draw);$('lrB').addEventListener('input',draw);
+        // Drag: left handle = intercept (the right end stays), right handle = slope (the intercept stays), elsewhere = shift the line
+        const iy=LernApp.invert(sy);let grab=null;
+        LernApp.drag('lrSvg',{
+          pick:(x,y)=>{const a=+$('lrA').value,b=+$('lrB').value,d0=Math.hypot(x-sx(0),y-sy(b)),d1=Math.hypot(x-sx(8),y-sy(a*8+b));return d0<22&&d0<=d1?'b':d1<22?'e':'shift'},
+          move:(k,x,y,first)=>{const a=+$('lrA').value,b=+$('lrB').value,v=iy(y);
+            if(first)grab={v:v,b:b};
+            if(k==='b'){const end=a*8+b;LernApp.setRange('lrB',v);LernApp.setRange('lrA',(end-+$('lrB').value)/8)}
+            else if(k==='e')LernApp.setRange('lrA',(v-b)/8);
+            else LernApp.setRange('lrB',grab.b+v-grab.v)},
+          hint:['Ziehe die runden Griffe (Achsenabschnitt links, Steigung rechts) oder die ganze Gerade.','Drag the round handles (intercept on the left, slope on the right) or the whole line.']});
         $('lrBest').addEventListener('click',()=>set(Math.round(best.a*20)/20,Math.round(best.b*10)/10));
         $('lrMean').addEventListener('click',()=>set(0,Math.round(best.my*10)/10));draw()})();
       (function(){

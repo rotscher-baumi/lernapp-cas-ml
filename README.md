@@ -22,7 +22,7 @@ lernapp/
   requirements.txt, requirements-dev.txt   Laufzeit- und Entwicklungspakete
   assets/
     style.css       Design (hell und dunkel)
-    core.js         Navigation, Sprache, Theme, Selbsttest; gemeinsame Helfer (mulberry32, gauss)
+    core.js         Navigation, Sprache, Theme, Selbsttest; gemeinsame Helfer (mulberry32, gauss, drag, setRange)
     demos-<id>.js   Demo-Code der grossen Kapitel (ml, klass, unsup, nn, cnn, cv, gen, modell), das Kapitel in modules/ ruft ihn in init() auf
                     (`demos-nn.js` liefert auch die zwei klickbaren SVG-Grafiken des Kapitels Neural Networks: `LernApp.nnFlow` Ablauf, `LernApp.nnConcept` Hauptkonzept; die Kapitel CNN, Computer Vision und Generative Models nutzen `nnFlow` mit eigenem `id` für die Pfeil-Marker)
     demos-*.js      geteilte Demos (Mathe, k-Means)

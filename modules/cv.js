@@ -232,13 +232,10 @@ b = Box (x0, y0, x1, y1)    c = Klasse    s = Score in [0, 1]    k = unbekannt</
   <p><b>IoU</b> (Intersection over Union) misst, wie gut sich zwei Boxen decken: Fläche des Schnitts geteilt durch Fläche der Vereinigung. 0 heisst kein Kontakt, 1 heisst identisch. IoU wird an drei Stellen gebraucht: beim <b>Zuordnen</b> von Ankern zu Ground-Truth-Boxen im Training, als <b>Box-Loss</b>, und bei der <b>Auswertung</b>: Eine Vorhersage zählt als Treffer, wenn ihre IoU mit einer Ground-Truth-Box über einem Threshold liegt (meist 0.5).</p>
   <div class="demo" id="ioDemo">
     <div class="tag">Demo</div><h4>IoU von zwei Boxen</h4>
-    <p class="hint">Verschiebe und skaliere die orange Vorhersage gegen die blaue Ground Truth. Der grüne Schnitt geteilt durch die Vereinigung ist die IoU.</p>
-    <div class="ctl"><label for="ioX">Verschiebung x</label><input type="range" id="ioX" min="-80" max="100" step="2" value="40"><output id="ioDX"></output></div>
-    <div class="ctl"><label for="ioY">Verschiebung y</label><input type="range" id="ioY" min="-60" max="80" step="2" value="20"><output id="ioDY"></output></div>
-    <div class="ctl"><label for="ioS">Grösse der Vorhersage</label><input type="range" id="ioS" min="40" max="160" step="5" value="100"><output id="ioSC"></output></div>
-    <svg class="plot" id="ioSvg" viewBox="0 0 400 300" style="max-width:420px" role="img" aria-label="Zwei Boxen mit grün markiertem Schnitt"></svg>
+    <p class="hint">Ziehe die Boxen mit der Maus (oder dem Finger) an eine neue Stelle, die Grösse änderst du am Eckgriff unten rechts. Der grüne Schnitt geteilt durch die Vereinigung ist die IoU. Tastatur: Box mit Tab wählen, Pfeiltasten verschieben, Shift + Pfeiltasten ändern die Grösse.</p>
+    <svg class="plot" id="ioSvg" viewBox="0 0 400 300" style="max-width:420px" role="group" aria-label="Zwei verschiebbare Boxen mit grün markiertem Schnitt"></svg>
     <pre><code id="ioCalc"></code></pre>
-    <div class="stats"><span>IoU <b id="ioV"></b></span></div>
+    <div class="stats"><span>Schnitt <b id="ioI"></b></span><span>Vereinigung <b id="ioU"></b></span><span>IoU <b id="ioV"></b></span></div>
   </div>
   <p>Ein Detector gibt zunächst <b>viele überlappende Boxen</b> für dasselbe Objekt aus. <b>Non-Maximum Suppression (NMS)</b> räumt auf:</p>
   <pre><code>Boxen nach Score sortieren
