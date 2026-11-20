@@ -72,7 +72,7 @@ LernApp.translate('cv', {
       <div>
         <canvas class="px-scene" id="pxScene" width="160" height="100" aria-label="Sample image: landscape with house, lake and sun, 160 × 100 pixels"></canvas>
         <div class="px-axis"><span>(0, 0) top left</span><span>x → W = 160</span></div>
-        <div class="px-axis"><span>y ↓ H = 100</span><span>shape (100, 160, 3)</span></div>
+        <div class="px-axis"><span>y ↓ H = 100</span><span>img.shape = (100, 160, 3)</span></div>
       </div>
       <div>
         <canvas class="px-lens" id="pxLens" width="198" height="198" aria-label="Magnified 9 × 9 pixels around the selected pixel"></canvas>
