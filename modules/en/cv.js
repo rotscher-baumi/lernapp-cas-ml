@@ -49,16 +49,17 @@ LernApp.translate('cv', {
     <li><b>n</b> is <b>noise</b> (sensor, electronics, low light).</li>
     <li><b>I</b> is what we actually capture.</li>
   </ul>
+  <p>In the computer an image is a table of numbers: a greyscale image is an H × W matrix with values from 0 to 1 (or 0 to 255), a colour image has three channels (RGB). PyTorch expects <code>[C, H, W]</code>, a mini-batch <code>[B, C, H, W]</code>.</p>
   <p>The three restoration tasks each undo one part: <b>denoising</b> removes n, <b>deblurring</b> undoes the convolution with h, <b>super-resolution</b> reconstructs details lost when shrinking (aliasing). All three are <i>ill-posed</i>: many possible f fit one I. So you need prior knowledge of «what real images look like», classically as filter rules, today learned from data.</p>
-  <div class="demo" id="cvDemo">
+  <div class="demo" id="rcvDemo">
     <div class="tag">Demo</div><h4>Degrade an image and repair it with a filter</h4>
     <p class="hint">Degrade the 16 × 16 test image with blur and noise, then choose a restoration filter. PSNR (in dB, higher is better) measures the distance to the original. Try «Salt and pepper» with the median filter.</p>
-    <div class="ctl"><label for="cvB">Blur (passes)</label><input type="range" id="cvB" min="0" max="3" step="1" value="0"><output id="cvBO"></output></div>
-    <div class="ctl"><label for="cvS">Noise strength</label><input type="range" id="cvS" min="0" max="0.5" step="0.05" value="0.15"><output id="cvSO"></output></div>
-    <div class="btnrow" id="cvKind" role="group" aria-label="Noise type"><button data-v="gauss" class="pri" aria-pressed="true">Gaussian noise</button><button data-v="sp" aria-pressed="false">Salt and pepper</button></div>
-    <div class="btnrow" id="cvFix" role="group" aria-label="Restoration filter"><button data-v="none" class="pri" aria-pressed="true">No filter</button><button data-v="mean" aria-pressed="false">Mean 3×3</button><button data-v="median" aria-pressed="false">Median 3×3</button></div>
-    <svg class="plot" id="cvSvg" viewBox="0 0 590 210" style="max-width:640px" role="img" aria-label="Original image, degraded capture and restored image with PSNR"></svg>
-    <p class="hint" id="cvMsg"></p>
+    <div class="ctl"><label for="rcvB">Blur (passes)</label><input type="range" id="rcvB" min="0" max="3" step="1" value="0"><output id="rcvBO"></output></div>
+    <div class="ctl"><label for="rcvS">Noise strength</label><input type="range" id="rcvS" min="0" max="0.5" step="0.05" value="0.15"><output id="rcvSO"></output></div>
+    <div class="btnrow" id="rcvKind" role="group" aria-label="Noise type"><button data-v="gauss" class="pri" aria-pressed="true">Gaussian noise</button><button data-v="sp" aria-pressed="false">Salt and pepper</button></div>
+    <div class="btnrow" id="rcvFix" role="group" aria-label="Restoration filter"><button data-v="none" class="pri" aria-pressed="true">No filter</button><button data-v="mean" aria-pressed="false">Mean 3×3</button><button data-v="median" aria-pressed="false">Median 3×3</button></div>
+    <svg class="plot" id="rcvSvg" viewBox="0 0 590 210" style="max-width:640px" role="img" aria-label="Original image, degraded capture and restored image with PSNR"></svg>
+    <p class="hint" id="rcvMsg"></p>
   </div>
   <div class="merk"><b>Key point</b><p>Capture = original, smeared, plus noise. Every filter trades something for something: the mean filter smooths noise but blurs edges. The median filter is better with outliers (salt and pepper) because a single extreme pixel does not move the median.</p></div>
 
@@ -75,7 +76,7 @@ LernApp.translate('cv', {
   <pre><code>θ* = argmin_θ  Σᵢ  L( Φ_θ(Iᵢ), fᵢ )</code></pre>
   <p>So it learns implicitly what clean images look like, without having to estimate the PSF or a noise model explicitly.</p>
   <ul>
-    <li><b>Skip connections (U-Net):</b> the encoder shrinks, the decoder enlarges again, and connections copy fine detail from the encoder straight to the decoder. Without them edges would be lost in the bottleneck.</li>
+    <li><b>Skip connections (U-Net):</b> the encoder shrinks, the decoder enlarges again, and connections copy fine detail from the encoder straight to the decoder. Without them edges would be lost in the <i>bottleneck</i>.</li>
     <li><b>Loss:</b> <b>L1</b> (mean absolute error) gives sharper images than <b>L2</b> (MSE), which tends towards the mean of all plausible images and looks washed out. Add a <b>perceptual loss</b> (distance in the features of a pretrained network such as VGG) and a <b>GAN loss</b> (a discriminator penalises unnatural textures, see <a href="#gen">Generative Models</a>).</li>
     <li><b>Transformers:</b> self-attention sees the whole image from the first layer (large blur, distant similar parts). Full attention costs too much on large images; so SwinIR and Restormer work with windows or channels.</li>
   </ul>
@@ -100,10 +101,10 @@ b = box (x0, y0, x1, y1)    c = class    s = score in [0, 1]    k = unknown</cod
   <div class="demo" id="ioDemo">
     <div class="tag">Demo</div><h4>IoU of two boxes</h4>
     <p class="hint">Shift and scale the orange prediction against the blue ground truth. The green intersection divided by the union is the IoU.</p>
-    <div class="ctl"><label for="ioX">Shift x</label><input type="range" id="ioX" min="-80" max="120" step="2" value="40"><output id="ioDX"></output></div>
+    <div class="ctl"><label for="ioX">Shift x</label><input type="range" id="ioX" min="-80" max="100" step="2" value="40"><output id="ioDX"></output></div>
     <div class="ctl"><label for="ioY">Shift y</label><input type="range" id="ioY" min="-60" max="80" step="2" value="20"><output id="ioDY"></output></div>
-    <div class="ctl"><label for="ioS">Size of the prediction</label><input type="range" id="ioS" min="40" max="200" step="5" value="100"><output id="ioSC"></output></div>
-    <svg class="plot" id="ioSvg" viewBox="0 0 320 200" style="max-width:420px" role="img" aria-label="Two boxes with the intersection marked in green"></svg>
+    <div class="ctl"><label for="ioS">Size of the prediction</label><input type="range" id="ioS" min="40" max="160" step="5" value="100"><output id="ioSC"></output></div>
+    <svg class="plot" id="ioSvg" viewBox="0 0 400 300" style="max-width:420px" role="img" aria-label="Two boxes with the intersection marked in green"></svg>
     <pre><code id="ioCalc"></code></pre>
     <div class="stats"><span>IoU <b id="ioV"></b></span></div>
   </div>
@@ -112,7 +113,7 @@ b = box (x0, y0, x1, y1)    c = class    s = score in [0, 1]    k = unknown</cod
 while boxes remain:
     keep the best box
     remove all remaining boxes with IoU &gt; τ to the best one</code></pre>
-  <p>Before that a <b>score threshold</b> (e.g. 0.25) removes the uncertain boxes.</p>
+  <p>Before that a <b>score threshold</b> (e.g. 0.25) removes the uncertain boxes. NMS runs per class: boxes of different classes may overlap freely.</p>
   <div class="demo" id="nmDemo">
     <div class="tag">Demo</div><h4>NMS with a movable threshold τ</h4>
     <p class="hint">Five candidates for two objects (number = score). Green = kept, grey dashed = suppressed.</p>
@@ -132,7 +133,7 @@ while boxes remain:
     <tr><td><b>Loss</b></td><td>Cross-entropy + λ · Dice</td><td>–</td></tr>
     <tr><td><b>Limit</b></td><td>Needs labels, transfers poorly</td><td>Knows no class names, only «object»; combine with a classifier for classes</td></tr>
   </table></div>
-  <p><b>Dice</b> measures the overlap of predicted and true mask: <code>2·|A∩B| / (|A| + |B|)</code>. As a loss it complements cross-entropy because it does not average rare classes away: a network that says «background» everywhere has high pixel accuracy but Dice 0 for the object. Evaluation uses the <b>IoU</b> per class (averaged: mIoU).</p>
+  <p><b>Dice</b> measures the overlap of predicted and true mask: <code>2·|A∩B| / (|A| + |B|)</code>. As a loss it complements cross-entropy because it does not average rare classes away: a network that says «background» everywhere has high pixel accuracy but Dice 0 for the object. It holds that <code>Dice = 2·IoU / (1 + IoU)</code>, so Dice ≥ IoU. Evaluation uses the <b>IoU</b> per class (averaged: mIoU).</p>
   <div class="falle"><b>Pitfall</b><p>Pixel accuracy is almost worthless in segmentation. With 95 % background «everything background» reaches 95 %. Always report IoU or Dice per class.</p></div>
 
   <h3 id="cv-methoden">6 · Overview: tasks, models, loss, metric</h3>

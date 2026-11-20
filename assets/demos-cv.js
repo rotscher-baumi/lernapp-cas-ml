@@ -72,7 +72,7 @@
         '5': [T('5 · Loss berechnen', '5 · Compute the loss'), T('Die Ausgabe wird mit dem Ziel verglichen: sauberes Bild, Ground-Truth-Boxen oder Masken. Detection ordnet zuerst jeder Ground-Truth-Box passende Anker oder Zellen zu (über IoU).', 'The output is compared with the target: clean image, ground-truth boxes or masks. Detection first assigns anchors or cells to every ground-truth box (via IoU).'), [['IoU und NMS', '#cv-iou']]],
         '6': [T('6 · Backpropagation', '6 · Backpropagation'), T('Wie beim <a href="#cnn">CNN</a>: Gradienten für alle filter. Skip Connections helfen, weil der Fehler auf kurzem Weg zu den frühen Schichten zurückfliesst.', 'As for the <a href="#cnn">CNN</a>: gradients for all filters. Skip connections help because the error flows back to the early layers on a short path.'), [['CNN', '#cnn']]],
         '7': [T('7 · Parameter aktualisieren', '7 · Update the parameters'), T('Der Optimizer verschiebt die Gewichte gegen den Gradienten. Mit vortrainiertem Backbone (Transfer Learning) startet das Netz nicht bei null.', 'The optimizer moves the weights against the gradient. With a pretrained backbone (transfer learning) the network does not start from scratch.'), [['Transfer Learning', '#cnn-transfer']]],
-        '8': [T('8 · Validation prüfen', '8 · Check validation'), T('Metrik je Aufgabe: <b>PSNR</b> und SSIM (Restauration), <b>mAP</b> bei IoU-Schwellen (Detection), <b>IoU</b> und Dice pro Klasse (Segmentation). Immer auch Bilder ansehen: Metriken können gut sein, obwohl das Bild unnatürlich glatt wirkt.', 'Metric per task: <b>PSNR</b> and SSIM (restoration), <b>mAP</b> at IoU thresholds (detection), <b>IoU</b> and Dice per class (segmentation). Always look at images too: metrics can be good although the image looks unnaturally smooth.'), [['Methoden', '#cv-methoden']]],
+        '8': [T('8 · Validation prüfen', '8 · Check validation'), T('Metrik je Aufgabe: <b>PSNR</b> und SSIM (Restauration), <b>mAP</b> bei IoU-thresholds (Detection), <b>IoU</b> und Dice pro Klasse (Segmentation). Immer auch Bilder ansehen: Metriken können gut sein, obwohl das Bild unnatürlich glatt wirkt.', 'Metric per task: <b>PSNR</b> and SSIM (restoration), <b>mAP</b> at IoU thresholds (detection), <b>IoU</b> and Dice per class (segmentation). Always look at images too: metrics can be good although the image looks unnaturally smooth.'), [['Methoden', '#cv-methoden']]],
         '9': [T('9 · Einmal testen', '9 · Test once'), T('Das Testset bleibt bis zum Schluss gesperrt. Bei Restauration Bilder aus anderen Kameras oder mit anderem Rauschen testen: Ein Netz, das nur auf künstlichem Rauschen trainiert wurde, versagt oft bei echten Fotos.', 'The test set stays locked until the end. For restoration, test with images from other cameras or with different noise: a network trained only on synthetic noise often fails on real photos.'), [['Bildentstehung', '#cv-bild']]],
       };
       let cur = null;
@@ -99,7 +99,7 @@
 
     // Demo 1: image formation I = blur(f) + noise, then a classical restoration filter
     (function () {
-      if (!$('cvSvg')) return;
+      if (!$('rcvSvg')) return;
       const F = testImage(), n = F.length;
       // Fixed random numbers, so the picture only changes when a control changes.
       const rnd = LernApp.mulberry32(7), G = [], U = [];
@@ -133,11 +133,11 @@
       function draw() {
         const D = degrade(), R = restore(D);
         const pd = psnr(F, D), pr = psnr(F, R), f = (v) => (isFinite(v) ? fmt(v, 1) + ' dB' : '∞');
-        $('cvSvg').innerHTML = panel(F, 4, T('Original f', 'Original f'), '') + panel(D, 4 + 196, T('Aufnahme I', 'Captured I'), 'PSNR ' + f(pd)) + panel(R, 4 + 392, T('Restauriert', 'Restored'), 'PSNR ' + f(pr));
-        $('cvBO').textContent = blur; $('cvSO').textContent = fmt(sigma, 2);
-        $('cvMsg').textContent = pr > pd + 0.05 ? T('Der Filter hat das Bild verbessert (PSNR +' + fmt(pr - pd, 1) + ' dB).', 'The filter improved the image (PSNR +' + fmt(pr - pd, 1) + ' dB).')
-          : fix === 'none' ? T('Noch nichts restauriert. Wähle einen Filter.', 'Nothing restored yet. Choose a filter.')
-            : T('Der Filter hilft hier nicht (oder schadet): Weichzeichnen verschmiert Kanten, die das Bild braucht.', 'The filter does not help here (or hurts): smoothing blurs edges the image needs.');
+        $('rcvSvg').innerHTML = panel(F, 4, T('Original f', 'Original f'), '') + panel(D, 4 + 196, T('Aufnahme I', 'Captured I'), 'PSNR ' + f(pd)) + panel(R, 4 + 392, T('Restauriert', 'Restored'), 'PSNR ' + f(pr));
+        $('rcvBO').textContent = blur; $('rcvSO').textContent = fmt(sigma, 2);
+        $('rcvMsg').textContent = pr > pd + 0.05 ? T('Der filter hat das Bild verbessert (PSNR +' + fmt(pr - pd, 1) + ' dB).', 'The filter improved the image (PSNR +' + fmt(pr - pd, 1) + ' dB).')
+          : fix === 'none' ? T('Noch nichts restauriert. Wähle einen filter.', 'Nothing restored yet. Choose a filter.')
+            : T('Der filter hilft hier nicht (oder schadet): Weichzeichnen verschmiert Kanten, die das Bild braucht.', 'The filter does not help here (or hurts): smoothing blurs edges the image needs.');
       }
       function group(id, set) {
         const g = $(id);
@@ -147,17 +147,17 @@
           set(b.getAttribute('data-v')); draw();
         }));
       }
-      $('cvB').addEventListener('input', (e) => { blur = +e.target.value; draw(); });
-      $('cvS').addEventListener('input', (e) => { sigma = +e.target.value; draw(); });
-      group('cvKind', (v) => { kind = v; });
-      group('cvFix', (v) => { fix = v; });
+      $('rcvB').addEventListener('input', (e) => { blur = +e.target.value; draw(); });
+      $('rcvS').addEventListener('input', (e) => { sigma = +e.target.value; draw(); });
+      group('rcvKind', (v) => { kind = v; });
+      group('rcvFix', (v) => { fix = v; });
       draw();
     })();
 
     // Demo 2: IoU of two boxes
     (function () {
       if (!$('ioSvg')) return;
-      const A = [40, 30, 140, 110];
+      const A = [100, 60, 200, 140];
       let dx = 40, dy = 20, sc = 100;
       function draw() {
         const w = 100 * sc / 100, h = 80 * sc / 100;
@@ -167,7 +167,7 @@
         const inter = ix1 > ix0 && iy1 > iy0 ? '<rect x="' + ix0 + '" y="' + iy0 + '" width="' + (ix1 - ix0) + '" height="' + (iy1 - iy0) + '" style="fill:var(--ok);fill-opacity:.35;stroke:none"/>' : '';
         const rect = (b, c) => '<rect x="' + b[0] + '" y="' + b[1] + '" width="' + (b[2] - b[0]) + '" height="' + (b[3] - b[1]) + '" style="fill:none;stroke:' + c + ';stroke-width:2.5"/>';
         $('ioSvg').innerHTML = inter + rect(A, 'var(--accent)') + rect(B, 'var(--warn)') +
-          '<text class="lbl" x="44" y="24" style="fill:var(--accent)">' + T('Ground Truth A', 'Ground truth A') + '</text><text class="lbl" x="' + Math.min(B[0], 230) + '" y="' + (B[3] + 14) + '" style="fill:var(--warn)">' + T('Vorhersage B', 'Prediction B') + '</text>';
+          '<text class="lbl" x="104" y="52" style="fill:var(--accent)">' + T('Ground Truth A', 'Ground truth A') + '</text><text class="lbl" x="' + Math.min(B[0], 300) + '" y="' + (B[3] + 14) + '" style="fill:var(--warn)">' + T('Vorhersage B', 'Prediction B') + '</text>';
         const areaI = Math.max(0, ix1 - ix0) * Math.max(0, iy1 - iy0), areaU = 100 * 80 + w * h - areaI;
         $('ioV').textContent = fmt(v, 2);
         $('ioDX').textContent = dx; $('ioDY').textContent = dy; $('ioSC').textContent = sc + ' %';
@@ -181,7 +181,7 @@
     (function () {
       if (!$('nmSvg')) return;
       // Two objects, each with several overlapping candidate boxes (as an untrained NMS would see them).
-      const B = [[30, 30, 120, 120], [40, 38, 132, 126], [24, 44, 114, 134], [190, 50, 270, 130], [198, 44, 282, 122]];
+      const B = [[30, 30, 120, 120], [40, 38, 132, 126], [24, 44, 114, 134], [96, 50, 176, 130], [104, 44, 188, 122]];
       const P = [0.92, 0.85, 0.7, 0.88, 0.6];
       let tau = 0.5;
       function draw() {
@@ -195,7 +195,7 @@
         $('nmSvg').innerHTML = s;
         $('nmTO').textContent = fmt(tau, 2);
         $('nmN').textContent = keep.length + ' / ' + B.length;
-        $('nmMsg').textContent = keep.length > 2 ? T('Zu hoher threshold: Duplikate bleiben stehen (eine Box zu viel pro Objekt).', 'Threshold too high: duplicates survive (one box too many per object).')
+        $('nmMsg').textContent = keep.length > 2 ? T('Zu hoher threshold: Duplikate bleiben stehen (mehr Boxen als Objekte).', 'Threshold too high: duplicates survive (more boxes than objects).')
           : keep.length === 2 ? T('Zwei Objekte, zwei Boxen: das beste Duplikat gewinnt, die anderen werden unterdrückt.', 'Two objects, two boxes: the best candidate wins, the others are suppressed.')
             : T('Zu tiefer threshold: auch das zweite Objekt wird unterdrückt, weil seine Box die erste überlappt.', 'Threshold too low: the second object is suppressed too, because its box overlaps the first.');
       }
