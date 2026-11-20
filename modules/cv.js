@@ -52,18 +52,19 @@
     <li><b>n</b> ist <b>Rauschen</b> (Sensor, Elektronik, wenig Licht).</li>
     <li><b>I</b> ist das, was wir tatsächlich aufnehmen.</li>
   </ul>
-  <p>Die drei Restaurationsaufgaben kehren je einen Teil davon um: <b>denoising</b> entfernt n, <b>deblurring</b> macht die Faltung mit h rückgängig, <b>super-resolution</b> rekonstruiert Details, die beim Verkleinern verloren gingen (aliasing). Alle drei sind <i>schlecht gestellt</i>: Aus I gibt es viele mögliche f. Darum braucht man Vorwissen über «wie sehen echte Bilder aus», klassisch als Filter-Regeln, heute aus Daten gelernt.</p>
-  <div class="demo" id="cvDemo">
+  <p>Im Rechner ist ein Bild eine Zahlentabelle: ein Graustufenbild eine Matrix H × W mit Werten von 0 bis 1 (oder 0 bis 255), ein Farbbild hat drei channels (RGB). PyTorch erwartet <code>[C, H, W]</code>, ein Mini-Batch <code>[B, C, H, W]</code>.</p>
+  <p>Die drei Restaurationsaufgaben kehren je einen Teil davon um: <b>denoising</b> entfernt n, <b>deblurring</b> macht die Faltung mit h rückgängig, <b>super-resolution</b> rekonstruiert Details, die beim Verkleinern verloren gingen (aliasing). Alle drei sind <i>schlecht gestellt</i>: Aus I gibt es viele mögliche f. Darum braucht man Vorwissen über «wie sehen echte Bilder aus», klassisch als filter-Regeln, heute aus Daten gelernt.</p>
+  <div class="demo" id="rcvDemo">
     <div class="tag">Demo</div><h4>Ein Bild verschlechtern und mit einem filter reparieren</h4>
     <p class="hint">Verschlechtere das 16 × 16-Testbild mit Unschärfe und Rauschen, dann wähle einen Restaurations-filter. PSNR (in dB, höher ist besser) misst den Abstand zum Original. Probiere «Salz und Pfeffer» mit dem Median-filter.</p>
-    <div class="ctl"><label for="cvB">Unschärfe (Durchgänge)</label><input type="range" id="cvB" min="0" max="3" step="1" value="0"><output id="cvBO"></output></div>
-    <div class="ctl"><label for="cvS">Rauschstärke</label><input type="range" id="cvS" min="0" max="0.5" step="0.05" value="0.15"><output id="cvSO"></output></div>
-    <div class="btnrow" id="cvKind" role="group" aria-label="Rauschart"><button data-v="gauss" class="pri" aria-pressed="true">Gauss-Rauschen</button><button data-v="sp" aria-pressed="false">Salz und Pfeffer</button></div>
-    <div class="btnrow" id="cvFix" role="group" aria-label="Restaurations-filter"><button data-v="none" class="pri" aria-pressed="true">Kein filter</button><button data-v="mean" aria-pressed="false">Mittelwert 3×3</button><button data-v="median" aria-pressed="false">Median 3×3</button></div>
-    <svg class="plot" id="cvSvg" viewBox="0 0 590 210" style="max-width:640px" role="img" aria-label="Originalbild, verschlechterte Aufnahme und restauriertes Bild mit PSNR"></svg>
-    <p class="hint" id="cvMsg"></p>
+    <div class="ctl"><label for="rcvB">Unschärfe (Durchgänge)</label><input type="range" id="rcvB" min="0" max="3" step="1" value="0"><output id="rcvBO"></output></div>
+    <div class="ctl"><label for="rcvS">Rauschstärke</label><input type="range" id="rcvS" min="0" max="0.5" step="0.05" value="0.15"><output id="rcvSO"></output></div>
+    <div class="btnrow" id="rcvKind" role="group" aria-label="Rauschart"><button data-v="gauss" class="pri" aria-pressed="true">Gauss-Rauschen</button><button data-v="sp" aria-pressed="false">Salz und Pfeffer</button></div>
+    <div class="btnrow" id="rcvFix" role="group" aria-label="Restaurations-filter"><button data-v="none" class="pri" aria-pressed="true">Kein filter</button><button data-v="mean" aria-pressed="false">Mittelwert 3×3</button><button data-v="median" aria-pressed="false">Median 3×3</button></div>
+    <svg class="plot" id="rcvSvg" viewBox="0 0 590 210" style="max-width:640px" role="img" aria-label="Originalbild, verschlechterte Aufnahme und restauriertes Bild mit PSNR"></svg>
+    <p class="hint" id="rcvMsg"></p>
   </div>
-  <div class="merk"><b>Merksatz</b><p>Aufnahme = Original, verschmiert, plus Rauschen. Jeder Filter tauscht etwas gegen etwas: Der Mittelwert-filter glättet Rauschen, verschmiert aber Kanten. Der Median-filter ist bei Ausreissern (Salz und Pfeffer) besser, weil ein einzelner extremer Pixel den Median nicht verschiebt.</p></div>
+  <div class="merk"><b>Merksatz</b><p>Aufnahme = Original, verschmiert, plus Rauschen. Jeder filter tauscht etwas gegen etwas: Der Mittelwert-filter glättet Rauschen, verschmiert aber Kanten. Der Median-filter ist bei Ausreissern (Salz und Pfeffer) besser, weil ein einzelner extremer Pixel den Median nicht verschiebt.</p></div>
 
   <h3 id="cv-restauration">2 · Restauration: denoising, deblurring, super-resolution</h3>
   <p>Alle drei Aufgaben sind «Bild rein, Bild raus». Pro Aufgabe gibt es klassische Methoden und Deep Learning.</p>
@@ -79,8 +80,8 @@
   <p>Es lernt also implizit, wie saubere Bilder aussehen, ohne dass man PSF oder Rauschmodell explizit schätzen muss.</p>
   <ul>
     <li><b>Skip Connections (U-Net):</b> Encoder verkleinert, Decoder vergrössert wieder, und Verbindungen kopieren feine Details vom Encoder direkt zum Decoder. Ohne sie gingen Kanten im Engpass (<i>bottleneck</i>) verloren.</li>
-    <li><b>Loss:</b> <b>L1</b> (mittlerer absoluter Fehler) ergibt schärfere Bilder als <b>L2</b> (MSE), der zum Mittelwert aller plausiblen Bilder neigt und damit verwaschen wirkt. Dazu kommen <b>Perceptual Loss</b> (Abstand in den Merkmalen eines vortrainierten Netzes wie VGG) und ein <b>GAN-Loss</b> (ein Discriminator bestraft unnatürliche Texturen, siehe <a href="#gen">Generative Models</a>).</li>
-    <li><b>Transformer:</b> Self-Attention sieht von der ersten Schicht an das ganze Bild (grosse Unschärfe, entfernte ähnliche Bildteile). Volle Attention kostet bei grossen Bildern zu viel; darum arbeiten SwinIR und Restormer mit Fenstern oder Kanälen.</li>
+    <li><b>Loss:</b> <b>L1</b> (mittlerer absoluter Fehler) ergibt schärfere Bilder als <b>L2</b> (MSE), der zum Mittelwert aller plausiblen Bilder neigt und damit verwaschen wirkt. Dazu kommen <b>Perceptual Loss</b> (Abstand in den features eines vortrainierten Netzes wie VGG) und ein <b>GAN-Loss</b> (ein Discriminator bestraft unnatürliche Texturen, siehe <a href="#gen">Generative Models</a>).</li>
+    <li><b>Transformer:</b> Self-Attention sieht von der ersten Schicht an das ganze Bild (grosse Unschärfe, entfernte ähnliche Bildteile). Volle Attention kostet bei grossen Bildern zu viel; darum arbeiten SwinIR und Restormer mit Fenstern (windows) oder channel-weiser Attention.</li>
   </ul>
   <div class="falle"><b>Falle</b><p>PSNR belohnt Pixel-Nähe, nicht gutes Aussehen. Ein L2-trainiertes Netz erreicht hohe PSNR mit einem weichen Bild; ein GAN-Netz sieht schärfer aus, hat aber tiefere PSNR, weil es plausible Details <i>erfindet</i>. Bei medizinischen oder forensischen Bildern ist erfundenes Detail ein Risiko.</p></div>
 
@@ -94,7 +95,7 @@ b = Box (x0, y0, x1, y1)    c = Klasse    s = Score in [0, 1]    k = unbekannt</
     <tr><td><b>Ablauf</b></td><td>1. Backbone erzeugt feature maps. 2. Das <b>RPN</b> (region proposal network) schlägt Kandidaten-Regionen vor (~2000, nach NMS ~300). 3. Pro Kandidat: Klasse bestimmen und Box verfeinern.</td><td>1. Backbone erzeugt feature maps. 2. Köpfe auf mehreren Massstäben. 3. Jede Gitterzelle sagt Klasse und Box voraus; die Zelle mit dem Objektmittelpunkt ist zuständig.</td></tr>
     <tr><td><b>Anker</b></td><td>Pro Position 9 <i>Anker</i> (3 Grössen × 3 Seitenverhältnisse); das Netz sagt Abweichungen davon voraus</td><td>Anchor-free: sagt die Box direkt voraus</td></tr>
     <tr><td><b>Loss</b></td><td>RPN: objectness + Box; Kopf: Klasse + Box (gemeinsam trainiert)</td><td>Klassen-Loss (BCE) + Box-Loss (CIoU, DFL)</td></tr>
-    <tr><td><b>Stärke</b></td><td>Höchste Genauigkeit, kleine Objekte</td><td>Echtzeit, Edge-Geräte</td></tr>
+    <tr><td><b>Stärke</b></td><td>Höchste accuracy, kleine Objekte</td><td>Echtzeit, Edge-Geräte</td></tr>
   </table></div>
   <p>Die Labels im YOLO-Format sind eine Zeile pro Objekt: <code>class_id cx cy w h</code>, alle Koordinaten auf 0 bis 1 normiert. Ein Anker ist nichts anderes als eine vorgegebene Box, die das Netz leicht verschiebt und streckt; so muss es nicht jede Box von null raten.</p>
 
@@ -103,10 +104,10 @@ b = Box (x0, y0, x1, y1)    c = Klasse    s = Score in [0, 1]    k = unbekannt</
   <div class="demo" id="ioDemo">
     <div class="tag">Demo</div><h4>IoU von zwei Boxen</h4>
     <p class="hint">Verschiebe und skaliere die orange Vorhersage gegen die blaue Ground Truth. Der grüne Schnitt geteilt durch die Vereinigung ist die IoU.</p>
-    <div class="ctl"><label for="ioX">Verschiebung x</label><input type="range" id="ioX" min="-80" max="120" step="2" value="40"><output id="ioDX"></output></div>
+    <div class="ctl"><label for="ioX">Verschiebung x</label><input type="range" id="ioX" min="-80" max="100" step="2" value="40"><output id="ioDX"></output></div>
     <div class="ctl"><label for="ioY">Verschiebung y</label><input type="range" id="ioY" min="-60" max="80" step="2" value="20"><output id="ioDY"></output></div>
-    <div class="ctl"><label for="ioS">Grösse der Vorhersage</label><input type="range" id="ioS" min="40" max="200" step="5" value="100"><output id="ioSC"></output></div>
-    <svg class="plot" id="ioSvg" viewBox="0 0 320 200" style="max-width:420px" role="img" aria-label="Zwei Boxen mit grün markiertem Schnitt"></svg>
+    <div class="ctl"><label for="ioS">Grösse der Vorhersage</label><input type="range" id="ioS" min="40" max="160" step="5" value="100"><output id="ioSC"></output></div>
+    <svg class="plot" id="ioSvg" viewBox="0 0 400 300" style="max-width:420px" role="img" aria-label="Zwei Boxen mit grün markiertem Schnitt"></svg>
     <pre><code id="ioCalc"></code></pre>
     <div class="stats"><span>IoU <b id="ioV"></b></span></div>
   </div>
@@ -115,7 +116,7 @@ b = Box (x0, y0, x1, y1)    c = Klasse    s = Score in [0, 1]    k = unbekannt</
 solange Boxen übrig:
     beste Box behalten
     alle übrigen Boxen mit IoU &gt; τ zur besten entfernen</code></pre>
-  <p>Vorher filtert ein <b>Score-threshold</b> (z. B. 0.25) die unsicheren Boxen weg.</p>
+  <p>Vorher filtert ein <b>Score-threshold</b> (z. B. 0.25) die unsicheren Boxen weg. NMS läuft pro Klasse: Boxen verschiedener Klassen dürfen sich beliebig überlappen.</p>
   <div class="demo" id="nmDemo">
     <div class="tag">Demo</div><h4>NMS mit verschiebbarem threshold τ</h4>
     <p class="hint">Fünf Kandidaten für zwei Objekte (Zahl = Score). Grün = behalten, grau gestrichelt = unterdrückt.</p>
@@ -124,7 +125,7 @@ solange Boxen übrig:
     <div class="stats"><span>Behalten <b id="nmN"></b></span></div>
     <p class="hint" id="nmMsg"></p>
   </div>
-  <div class="merk"><b>Merksatz</b><p>Detection = Boxen vorhersagen, dann mit einem Score-threshold und NMS auf eine saubere Liste reduzieren. Mit IoU wird zugeordnet, trainiert und ausgewertet. Die Metrik <b>mAP</b> mittelt die Genauigkeit über Klassen und IoU-Schwellen.</p></div>
+  <div class="merk"><b>Merksatz</b><p>Detection = Boxen vorhersagen, dann mit einem Score-threshold und NMS auf eine saubere Liste reduzieren. Mit IoU wird zugeordnet, trainiert und ausgewertet. Die Metrik <b>mAP</b> mittelt die precision über Klassen und IoU-thresholds.</p></div>
 
   <h3 id="cv-seg">5 · Semantic Segmentation: eine Klasse pro Pixel</h3>
   <p>Die Ausgabe hat <b>dieselbe Höhe und Breite wie das Eingabebild</b>: jeder Pixel bekommt genau eine Klasse (<code>y ∈ {1…C}^(H×W)</code>). Es gibt keine Boxen und keine Einzelobjekte; zwei Autos nebeneinander sind dieselbe Klasse «Auto». Schwierig sind genaue Kanten (jeder falsche Randpixel zählt), starkes <b>Klassen-Imbalance</b> (Hintergrund oft über 95 % der Pixel, ein naives Netz sagt überall «Hintergrund»), die Mischung kleiner und grosser Strukturen und die Kosten pixelgenauer Labels (10 bis 100 mal teurer als Boxen).</p>
@@ -135,7 +136,7 @@ solange Boxen übrig:
     <tr><td><b>Loss</b></td><td>Cross-Entropy + λ · Dice</td><td>–</td></tr>
     <tr><td><b>Grenze</b></td><td>Braucht Labels, wenig übertragbar</td><td>Kennt keine Klassennamen, nur «Objekt»; für Klassen mit einem Klassifikator kombinieren</td></tr>
   </table></div>
-  <p><b>Dice</b> misst die Überlappung von vorhergesagter und wahrer Maske: <code>2·|A∩B| / (|A| + |B|)</code>. Als Loss ergänzt er die Cross-Entropy, weil er seltene Klassen nicht wegmittelt: Ein Netz, das überall «Hintergrund» sagt, hat hohe Pixel-Accuracy, aber Dice 0 für das Objekt. Ausgewertet wird mit der <b>IoU</b> pro Klasse (gemittelt: mIoU).</p>
+  <p><b>Dice</b> misst die Überlappung von vorhergesagter und wahrer Maske: <code>2·|A∩B| / (|A| + |B|)</code>. Als Loss ergänzt er die Cross-Entropy, weil er seltene Klassen nicht wegmittelt: Ein Netz, das überall «Hintergrund» sagt, hat hohe Pixel-Accuracy, aber Dice 0 für das Objekt. Es gilt <code>Dice = 2·IoU / (1 + IoU)</code>, also Dice ≥ IoU. Ausgewertet wird mit der <b>IoU</b> pro Klasse (gemittelt: mIoU).</p>
   <div class="falle"><b>Falle</b><p>Pixel-Accuracy ist bei Segmentation fast wertlos. Bei 95 % Hintergrund erreicht «alles Hintergrund» 95 %. Immer IoU oder Dice pro Klasse berichten.</p></div>
 
   <h3 id="cv-methoden">6 · Übersicht: Aufgaben, Modelle, Loss, Metrik</h3>
@@ -153,14 +154,14 @@ solange Boxen übrig:
     quiz: [
       { q: `Wie lautet das Bildentstehungsmodell, und was bedeuten die drei Teile?`, a: `<code>I = f ⊛ h + n</code>. <b>f</b> ist das ideale Bild, <b>h</b> die PSF (Verschmierung durch Optik, Bewegung, Fokus, als Faltung), <b>n</b> das Rauschen. I ist die Aufnahme.` },
       { q: `Welche Restaurationsaufgabe kehrt welchen Teil des Modells um?`, a: `<b>denoising</b> entfernt n, <b>deblurring</b> macht die Faltung mit h rückgängig, <b>super-resolution</b> stellt feine Details nach dem Verkleinern wieder her.` },
-      { q: `Warum sind diese Aufgaben «schlecht gestellt»?`, a: `Aus der Aufnahme I gibt es viele mögliche Originale f. Ohne Vorwissen über natürliche Bilder (Filter-Regeln oder aus Daten gelernt) ist die Lösung nicht eindeutig.` },
+      { q: `Warum sind diese Aufgaben «schlecht gestellt»?`, a: `Aus der Aufnahme I gibt es viele mögliche Originale f. Ohne Vorwissen über natürliche Bilder (filter-Regeln oder aus Daten gelernt) ist die Lösung nicht eindeutig.` },
       { q: `Wann ist der Median-filter besser als der Mittelwert-filter?`, a: `Bei Ausreissern wie Salz-und-Pfeffer-Rauschen: Ein einzelner extremer Wert verschiebt den Median nicht, den Mittelwert aber stark. Der Median erhält zudem Kanten besser.` },
       { q: `Warum L1 statt L2 als Loss bei der Restauration?`, a: `L2 (MSE) neigt zum Mittelwert aller plausiblen Bilder und ergibt verwaschene Resultate; L1 liefert meist schärfere Bilder.` },
       { q: `Wozu dienen Skip Connections im U-Net?`, a: `Sie führen feine Details (Kanten, Texturen) vom Encoder direkt zum Decoder, die im Engpass verloren gingen. Dazu verkürzen sie den Weg für den Gradienten.` },
       { q: `Was ist der Unterschied zwischen Klassifikation und Object Detection bei der Ausgabe?`, a: `Klassifikation: ein Label pro Bild. Detection: eine Menge von (Box, Klasse, Score) mit unbekannter Anzahl, die vom Bild abhängt.` },
       { q: `Berechne die IoU: Box A hat Fläche 100, Box B Fläche 100, der Schnitt 50.`, a: `Vereinigung = 100 + 100 − 50 = 150, IoU = 50 / 150 = 0.33. Bei threshold 0.5 wäre das kein Treffer.` },
       { q: `Was macht NMS, und was passiert bei einem zu tiefen threshold τ?`, a: `Behält die Box mit dem höchsten Score und entfernt alle anderen, die mit ihr eine IoU über τ haben, dann wiederholt. Bei zu tiefem τ werden auch Boxen echter Nachbarobjekte unterdrückt; bei zu hohem bleiben Duplikate.` },
-      { q: `Faster R-CNN oder YOLO: wann welches?`, a: `Faster R-CNN (zwei Stufen) wenn höchste Genauigkeit und kleine Objekte zählen. YOLO (eine Stufe, anchor-free) wenn Geschwindigkeit zählt, z. B. Echtzeit oder Edge-Geräte.` },
+      { q: `Faster R-CNN oder YOLO: wann welches?`, a: `Faster R-CNN (zwei Stufen) wenn höchste accuracy und kleine Objekte zählen. YOLO (eine Stufe, anchor-free) wenn Geschwindigkeit zählt, z. B. Echtzeit oder Edge-Geräte.` },
       { q: `Was ist ein Anker?`, a: `Eine vorgegebene Box (Grösse und Seitenverhältnis) an jeder Position der feature map. Das Netz sagt nur voraus, ob dort ein Objekt ist und wie die Box verschoben und gestreckt werden muss.` },
       { q: `Wie unterscheidet sich Semantic Segmentation von Detection?`, a: `Ausgabe ist eine Klasse pro Pixel in der Grösse des Bildes, ohne Boxen und ohne Unterscheidung von Einzelobjekten derselben Klasse.` },
       { q: `Warum ist Pixel-Accuracy bei Segmentation irreführend, und was nimmt man stattdessen?`, a: `Der Hintergrund macht oft über 95 % der Pixel aus; «alles Hintergrund» hätte 95 % Accuracy. Besser IoU oder Dice pro Klasse (mIoU), und Dice als Loss neben der Cross-Entropy.` },
