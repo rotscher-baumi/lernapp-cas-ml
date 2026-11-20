@@ -231,6 +231,10 @@
         draw();
       }));
       ['nnActX', 'nnActW', 'nnActB'].forEach((id) => $(id).addEventListener('input', draw));
+      // Drag along z: the orange point follows the pointer, x = (z − b) / w with the current w and b
+      const iz = LernApp.invert(sx);
+      LernApp.drag('nnActSvg', { axis: 'x', move: (k, px) => { const w = +$('nnActW').value, b = +$('nnActB').value; if (Math.abs(w) > 0.05) LernApp.setRange('nnActX', (iz(px) - b) / w); },
+        hint: ['Ziehe im Plot nach links oder rechts: Der orange Punkt wandert entlang der Kurve, die Eingabe x passt sich an.', 'Drag left or right in the plot: the orange point moves along the curve and the input x adapts.'] });
       draw();
     })();
 
@@ -409,8 +413,8 @@
         $('nfCurve').innerHTML = g;
         $('nfTr').textContent = fmt(c.tr[e], 3); $('nfVa').textContent = fmt(c.va[e], 3); $('nfAcc').textContent = fmt(100 * c.acc[e], 0) + ' %'; $('nfBest').textContent = run.best;
         const gap = c.va[e] - c.tr[e];
-        $('nfMsg').textContent = T('epoch ', 'Epoch ') + e + T(': Training-Loss ', ': training loss ') + fmt(c.tr[e], 3) + T(', Validation-Loss ', ', validation loss ') + fmt(c.va[e], 3) + '. ' +
-          (e > run.best + 15 && c.va[e] > c.va[run.best] * 1.05 ? T('Die Validation-Loss steigt seit epoch ' + run.best + ' wieder: overfitting. Early Stopping hätte bei epoch ' + run.best + ' gestoppt.', 'The validation loss has been rising again since epoch ' + run.best + ': overfitting. Early stopping would have stopped at epoch ' + run.best + '.')
+        $('nfMsg').textContent = T('Epoch ', 'Epoch ') + e + T(': Training-Loss ', ': training loss ') + fmt(c.tr[e], 3) + T(', Validation-Loss ', ', validation loss ') + fmt(c.va[e], 3) + '. ' +
+          (e > run.best + 15 && c.va[e] > c.va[run.best] * 1.05 ? T('Die Validation-Loss steigt seit Epoch ' + run.best + ' wieder: Overfitting. Early Stopping hätte bei Epoch ' + run.best + ' gestoppt.', 'The validation loss has been rising again since epoch ' + run.best + ': overfitting. Early stopping would have stopped at epoch ' + run.best + '.')
             : gap > 0.15 ? T('Training und Validation laufen auseinander.', 'Training and validation are drifting apart.')
               : e < 20 ? T('Das Netz lernt noch, beide Kurven sinken.', 'The network is still learning, both curves are falling.') : T('Beide Kurven liegen nah beieinander: kein klares overfitting.', 'Both curves are close together: no clear overfitting.'));
       }

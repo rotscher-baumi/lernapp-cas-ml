@@ -19,7 +19,14 @@
           s+='<circle cx="'+sx(x)+'" cy="'+sy(f(x))+'" r="5" style="fill:var(--fg)"/><text class="lbl" x="'+(sx(x)+7)+'" y="'+(sy(f(x))-7)+'">P</text>';
           s+='<circle cx="'+sx(x+h)+'" cy="'+sy(f(x+h))+'" r="5" style="fill:var(--warn)"/><text class="lbl" x="'+(sx(x+h)+7)+'" y="'+(sy(f(x+h))-7)+'">Q</text>';
           $('dvSvg').innerHTML=s}
-        $('dvX').addEventListener('input',draw);$('dvH').addEventListener('input',draw);draw()})();
+        $('dvX').addEventListener('input',draw);$('dvH').addEventListener('input',draw);
+        // Drag P (moves both points) or Q (changes h); both stay on the curve, so only x counts
+        const ix=LernApp.invert(sx);
+        LernApp.drag('dvSvg',{axis:'x',
+          pick:(px,py)=>{const x=+$('dvX').value,h=+$('dvH').value,f=v=>v*v,dP=Math.hypot(px-sx(x),py-sy(f(x))),dQ=Math.hypot(px-sx(x+h),py-sy(f(x+h)));return Math.min(dP,dQ)>24?null:dP<dQ?'P':'Q'},
+          move:(k,px)=>{if(k==='P')LernApp.setRange('dvX',ix(px));else LernApp.setRange('dvH',ix(px)-(+$('dvX').value))},
+          hint:['Ziehe die Punkte P und Q entlang der Kurve.','Drag the points P and Q along the curve.']});
+        draw()})();
     },
     stats: function () {
       (function(){
@@ -63,7 +70,12 @@
           s+='<line class="ln" x1="'+sz(0)+'" y1="160" x2="'+sz(0)+'" y2="'+y2+'"/>';
           z.forEach((x,i)=>{const yy=y2-12-(i%3)*12;s+='<circle cx="'+sz(x)+'" cy="'+yy+'" r="5" style="fill:'+(i===n-1?'var(--warn)':'var(--fg)')+'"/>'});
           $('stSvg').innerHTML=s}
-        $('stOut').addEventListener('input',draw);draw()})();
+        $('stOut').addEventListener('input',draw);
+        // Drag in the upper (raw value) part: the orange eighth value follows the pointer
+        const ix=LernApp.invert(sx);
+        LernApp.drag('stSvg',{axis:'x',pick:(x,y)=>y<135?'o':null,move:(k,x)=>LernApp.setRange('stOut',ix(x)),
+          hint:['Ziehe oben bei den Rohwerten nach links oder rechts: Der orange achte Wert folgt.','Drag left or right in the raw values at the top: the orange eighth value follows.']});
+        draw()})();
     },
     scaler: function () {
       (function(){

@@ -3,9 +3,9 @@ LernApp.translate('kompakt', {
   nav: 'Compact',
   title: 'Everything compact',
   kicker: 'Cheat sheet · Modules 2 and 3',
-  summary: `Supervised ML, classification, unsupervised and neural networks on one page`,
+  summary: `Supervised ML, classification, unsupervised, neural networks, CNN, computer vision, generative models and models in practice on one page`,
   html: `
-  <p>The cheat sheet over the chapters <a href="index.html#ml">Supervised ML</a>, <a href="index.html#klass">Classification</a>, <a href="index.html#unsup">Unsupervised</a> and <a href="index.html#nn">Neural Networks</a>. The explanations, demos and self-test are in the chapters, profiles of single models in the <a href="index.html#uebersicht">Overview</a>.</p>
+  <p>The cheat sheet over the chapters <a href="index.html#ml">Supervised ML</a>, <a href="index.html#klass">Classification</a>, <a href="index.html#unsup">Unsupervised</a>, <a href="index.html#nn">Neural Networks</a>, <a href="index.html#cnn">CNN</a>, <a href="index.html#cv">Computer Vision</a>, <a href="index.html#gen">Generative Models</a> and <a href="index.html#modell">Models in practice</a>. The explanations, demos and self-test are in the chapters, profiles of single models in the <a href="index.html#uebersicht">Overview</a>.</p>
 
   <h3 id="k-ablauf">Supervised ML: workflow and data</h3>
   <div class="tablewrap"><table>
@@ -75,5 +75,58 @@ LernApp.translate('kompakt', {
     <tr><td><b>Loss curves</b></td><td>Both high: underfitting. Train low, validation rising again: overfitting. Choose hyperparameters on validation only, test once.</td></tr>
   </table></div>
   <p class="note"><a href="index.html#nn">To the chapter →</a></p>
+
+  <h3 id="k-cnn">CNN</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Topic</th><th>Remember</th></tr>
+    <tr><td><b>Why not dense?</b></td><td>Too many parameters (32 × 32 × 3 with 512 neurons: about 1.6 million), flattening loses the neighbourhood of the pixels, and a pattern would have to be learned again at every position.</td></tr>
+    <tr><td><b>Convolution</b></td><td>A small filter (e.g. 3 × 3) slides over the image and computes a weighted sum at every position. Result: a feature map, high where the pattern fits. Local connections and shared weights.</td></tr>
+    <tr><td><b>Output size</b></td><td><code>⌊(n + 2p − k) / s⌋ + 1</code>. <code>padding='valid'</code>: p = 0, the map shrinks. <code>padding='same'</code>: the size stays (with stride 1). Stride 2 roughly halves it.</td></tr>
+    <tr><td><b>Pooling</b></td><td>MaxPooling 2 × 2 halves height and width, has no weights and enlarges the field of view of the following layers.</td></tr>
+    <tr><td><b>Parameters</b></td><td>Conv2D: <code>(k · k · C_in + 1) · C_out</code>. Example <code>Conv2D(32, (3, 3))</code> on RGB: (3·3·3 + 1) · 32 = 896. The image size does not appear.</td></tr>
+    <tr><td><b>Architecture</b></td><td>Conv + pooling blocks, double the filters per block (32, 64, 128), then Flatten or GlobalAveragePooling and Dense with softmax. Loss: (sparse) categorical cross-entropy, Adam.</td></tr>
+    <tr><td><b>Against overfitting</b></td><td>Data augmentation (flip, rotate, zoom; only in training, suited to the task), dropout, batch normalization, early stopping.</td></tr>
+    <tr><td><b>Transfer learning</b></td><td>Freeze a pretrained network (e.g. from <code>keras.applications</code>), train a new head. Then fine-tune the upper layers with a very small learning rate. First choice with few images.</td></tr>
+  </table></div>
+  <p class="note"><a href="index.html#cnn">To the chapter →</a></p>
+
+  <h3 id="k-cv">Computer vision</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Topic</th><th>Remember</th></tr>
+    <tr><td><b>Image formation</b></td><td>The measured image is the true image, blurred by the optics (PSF), plus noise, then demosaicing and compression. That is why no image is perfect.</td></tr>
+    <tr><td><b>Pixels and channels</b></td><td>An image is an array (H, W, C): greyscale C = 1, RGB 3, RGBA 4 (alpha = opacity). Access <code>img[y, x]</code>, row before column. OpenCV loads BGR instead of RGB.</td></tr>
+    <tr><td><b>dtype and memory</b></td><td><code>uint8</code>: 0 to 255, 1 byte. For networks <code>float32</code> 0.0 to 1.0, 4 bytes. Memory = H · W · C · bytes: 224 × 224 × 3 in float32 ≈ 0.6 MB, a batch of 32 about 19 MB.</td></tr>
+    <tr><td><b>HWC or CHW</b></td><td>NumPy, PIL, OpenCV and TensorFlow: HWC (channels last). PyTorch: CHW. The wrong order gives errors or nonsense.</td></tr>
+    <tr><td><b>File formats</b></td><td>PNG lossless, good for masks and graphics. JPEG lossy, small, for photos; never for label masks. Metadata (EXIF) can hold the orientation.</td></tr>
+    <tr><td><b>Restoration</b></td><td>Denoising, deblurring, super-resolution: image in, image out. Classical (Gaussian, median, Wiener, bicubic) or learned (U-Net, SwinIR, Restormer). Loss L1 or perceptual, metric PSNR and SSIM.</td></tr>
+    <tr><td><b>Object detection</b></td><td>Boxes, classes, scores. Two-stage (Faster R-CNN, more accurate) or one-stage (YOLO, fast). <b>IoU</b> = intersection / union. <b>NMS</b> removes duplicate boxes. Metric mAP@IoU.</td></tr>
+    <tr><td><b>Semantic segmentation</b></td><td>One class per pixel. U-Net (encoder, decoder, skip connections). SAM (Segment Anything) returns masks from a prompt (point, box) without training of your own, but without class names. Loss cross-entropy + Dice, metric IoU, Dice, mIoU.</td></tr>
+  </table></div>
+  <p class="note"><a href="index.html#cv">To the chapter →</a></p>
+
+  <h3 id="k-gen">Generative models</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Topic</th><th>Remember</th></tr>
+    <tr><td><b>Idea</b></td><td>A generative model learns the distribution of the data (without labels) and creates new examples that look like the real ones.</td></tr>
+    <tr><td><b>Autoencoder</b></td><td>Encoder → latent space <code>z</code> (small) → decoder. Loss: reconstruction. Good for compression, denoising, anomalies (high reconstruction error). Not a usable generator, because the latent space has gaps.</td></tr>
+    <tr><td><b>VAE</b></td><td>The encoder outputs μ and σ, <code>z = μ + σ · ε</code> (reparameterization trick, so backpropagation can pass). Loss: reconstruction + KL to N(0, 1). Ordered latent space, stable, images somewhat blurry.</td></tr>
+    <tr><td><b>PixelCNN</b></td><td>Creates pixel by pixel, each depending on the previous ones (masked convolution). True likelihood, simple training, very slow generation.</td></tr>
+    <tr><td><b>GAN</b></td><td>Generator against discriminator, two losses in turn. Very sharp images, but unstable training and mode collapse (only a few images left). Variants: CycleGAN (style without paired examples), ESRGAN (super-resolution), DeblurGAN.</td></tr>
+    <tr><td><b>Choice</b></td><td>A trade-off between sharpness (GAN), stability and latent space (VAE) and likelihood (PixelCNN).</td></tr>
+  </table></div>
+  <p class="note"><a href="index.html#gen">To the chapter →</a></p>
+
+  <h3 id="k-modell">Models in practice</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Topic</th><th>Remember</th></tr>
+    <tr><td><b>What is a model?</b></td><td><code>ŷ = f(x; θ)</code>: architecture (shape of the function, you choose it), parameters θ (learned by training), hyperparameters (steer the training, you choose them on validation). Training changes the parameters, inference (<code>predict</code>) does not.</td></tr>
+    <tr><td><b>Where from?</b></td><td>Train yourself (tabular data, your own task), take a finished one (zero-shot), transfer learning (freeze the base, new head; little data) or fine-tuning (upper layers with a small learning rate; more data).</td></tr>
+    <tr><td><b>Saving</b></td><td>Save the whole pipeline, not only the estimator: without the scaler the loaded model computes nonsense, with no error message. Add metadata (version, date, metric, library versions) and a model card.</td></tr>
+    <tr><td><b>Formats</b></td><td>scikit-learn: joblib. Keras: <code>.keras</code>. PyTorch: <code>state_dict</code>. Exchange: ONNX. Careful: pickle and joblib run code when loading; load foreign files only as <code>.safetensors</code> or with <code>weights_only=True</code>.</td></tr>
+    <tr><td><b>Drift</b></td><td>Data drift: the inputs are distributed differently. Concept drift: the relationship between x and y changes. Detect it by monitoring inputs and the metric in production.</td></tr>
+    <tr><td><b>Retraining</b></td><td>Completely new (old + new data), only on new data (forgets rare old cases), continue training (<code>partial_fit</code>, risk: catastrophic forgetting) or only a new head. The new version must be better on fixed and current test data, otherwise the old one stays. Never put test data into training.</td></tr>
+    <tr><td><b>Checklist</b></td><td>Baseline, split before preprocessing, pipeline, seed and versions, hyperparameters on validation only, test once, look at the errors, save the pipeline with metadata, keep the old version for a rollback.</td></tr>
+  </table></div>
+  <p class="note"><a href="index.html#modell">To the chapter →</a></p>
 `,
 });

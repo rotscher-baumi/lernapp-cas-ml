@@ -21,7 +21,12 @@
           let ok=0;xs.forEach((x,i)=>{const pr=sigmoid(w*x+b);if((pr>=0.5?1:0)===ys[i])ok++;
             s+='<circle cx="'+sx(x)+'" cy="'+sy(ys[i])+'" r="5" style="fill:'+(ys[i]?'var(--accent)':'var(--surface)')+';stroke:var(--accent);stroke-width:2"/>'});
           $('sgSvg').innerHTML=s;$('sgBd').textContent=fmt(bd,2).replace('-',MU);$('sgAcc').textContent=ok+LernApp.t(' von ',' of ')+xs.length}
-        $('sgW').addEventListener('input',draw);$('sgB').addEventListener('input',draw);draw()})();
+        $('sgW').addEventListener('input',draw);$('sgB').addEventListener('input',draw);
+        // Drag: the decision boundary (red line) follows the pointer, b = −w · boundary
+        const ix=LernApp.invert(sx);
+        LernApp.drag('sgSvg',{axis:'x',move:(k,x)=>LernApp.setRange('sgB',-(+$('sgW').value)*ix(x)),
+          hint:['Ziehe im Plot nach links oder rechts: Die Entscheidungsgrenze folgt der Maus.','Drag left or right in the plot: the decision boundary follows the pointer.']});
+        draw()})();
 
       // Demo 1b: 10 apartments, linear price vs. logistic P(expensive), same z = b + w*qm
       (function(){
@@ -68,7 +73,11 @@
         }
         $('lgLin').addEventListener('click',()=>{mode='lin';draw()});
         $('lgLog').addEventListener('click',()=>{mode='log';draw()});
-        $('lgT').addEventListener('input',draw);draw()})();
+        $('lgT').addEventListener('input',draw);
+        // Drag (price view only): the dashed threshold line follows the pointer up and down
+        LernApp.drag('lgSvg',{pick:()=>mode==='lin'?'t':null,move:(k,x,y)=>LernApp.setRange('lgT',1000+(H-PY-y)/(H-PY-12)*1800),
+          hint:['In der Ansicht «Preis (linear)»: gestrichelte Threshold-Linie nach oben oder unten ziehen.','In the «Price (linear)» view: drag the dashed threshold line up or down.']});
+        draw()})();
 
       // Demo 1c: cross-entropy vs. MSE for a true positive
       (function(){
@@ -82,7 +91,11 @@
           s+='<path class="ln" d="'+a+'"/><path class="ln2" d="'+b+'" style="stroke-dasharray:5 4"/>';
           s+='<circle cx="'+sx(p)+'" cy="'+sy(-Math.log(p))+'" r="5" style="fill:var(--accent)"/><circle cx="'+sx(p)+'" cy="'+sy((1-p)*(1-p))+'" r="5" style="fill:var(--warn)"/>';
           $('lsSvg').innerHTML=s;$('lsCE').textContent=fmt(-Math.log(p),2);$('lsMS').textContent=fmt((1-p)*(1-p),2)}
-        $('lsP').addEventListener('input',draw);draw()})();
+        $('lsP').addEventListener('input',draw);
+        const ix=LernApp.invert(sx);
+        LernApp.drag('lsSvg',{axis:'x',move:(k,x)=>LernApp.setRange('lsP',ix(x)*100),
+          hint:['Ziehe im Plot nach links oder rechts, um P(teuer) zu ändern.','Drag left or right in the plot to change P(expensive).']});
+        draw()})();
 
       // Demo 2: threshold, confusion matrix, ROC (class sizes adjustable; the score shape comes from a 10 + 10 template)
       (function(){
@@ -124,7 +137,12 @@
         const act=(a,b)=>{$('thNP').value=a;$('thNN').value=b;[['thP1'],['thP2'],['thP3']].forEach(x=>{$(x[0]).className=''});prep();draw()};
         ['thNP','thNN'].forEach(id=>$(id).addEventListener('input',()=>{[['thP1'],['thP2'],['thP3']].forEach(x=>{$(x[0]).className=''});prep();draw()}));
         [['thP1',1,1],['thP2',1,3],['thP3',0,3]].forEach(b=>$(b[0]).addEventListener('click',()=>{act(b[1],b[2]);$(b[0]).className='pri'}));
-        $('thT').addEventListener('input',draw);prep();draw()})();
+        $('thT').addEventListener('input',draw);
+        // Drag: the threshold line on the score axis follows the pointer
+        const ix=LernApp.invert(sx);
+        LernApp.drag('thSvg',{axis:'x',move:(k,x)=>LernApp.setRange('thT',ix(x)),
+          hint:['Ziehe den Threshold (senkrechte Linie) im Plot nach links oder rechts.','Drag the threshold (vertical line) left or right in the plot.']});
+        prep();draw()})();
 
       // Demo 3: imbalance
       (function(){
@@ -182,7 +200,11 @@
           $('nbSvg').innerHTML=s;const post=fb(x)/(fa(x)+fb(x));
           $('nbPost').textContent=fmt(post,2);$('nbLb').textContent=fmt(fb(x)*1000,2);$('nbLa').textContent=fmt(fa(x)*1000,2);
           $('nbMsg').textContent=post>0.5?LernApp.t('Die blaue Kurve liegt hier höher: Vorhersage «teuer».','The blue curve is higher here: prediction «expensive».'):LernApp.t('Die orange Kurve liegt hier höher: Vorhersage «nicht teuer».','The orange curve is higher here: prediction «not expensive».')}
-        $('nbX').addEventListener('input',draw);$('nbP').addEventListener('input',draw);draw()})();
+        $('nbX').addEventListener('input',draw);$('nbP').addEventListener('input',draw);
+        const ix=LernApp.invert(sx);
+        LernApp.drag('nbSvg',{axis:'x',move:(k,x)=>LernApp.setRange('nbX',ix(x)),
+          hint:['Ziehe den neuen Fall (senkrechte Linie) entlang der Wohnfläche.','Drag the new case (vertical line) along the floor area.']});
+        draw()})();
 
       // Demo 5b: linear soft-margin SVM on 40 apartments (qm and location score), slider C.
       // Solver: dual coordinate descent (Hsieh et al. 2008) with the bias as a third weight.
@@ -273,7 +295,7 @@
           let s=regions(t);tr.forEach(p=>{s+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="3.5" style="fill:'+cl(p.c)+';stroke:var(--fg);stroke-width:1"/>'});
           $('dtSvg').innerHTML=s+axes();$('dtTree').innerHTML=diagram(t);$('dtCurve').innerHTML=curve(md);
           $('dtL').textContent=cnt(t);$('dtTr').textContent=fmt(CUR[md-1][0],2);$('dtTe').textContent=fmt(CUR[md-1][1],2);
-          $('dtMsg').textContent=md===1?LernApp.t('Tiefe 1: nur eine Frage, die Fläche hat zwei Rechtecke (Stumpf). Das ist zu einfach.','Depth 1: only one question, the region has two rectangles (a stump). That is too simple.'):md>=6?LernApp.t('Tiefer Baum: Fast jeder Trainingspunkt bekommt sein eigenes Rechteck. Die Trainingskurve steigt weiter, die Testkurve fällt (Overfitting).','Deep tree: almost every training point gets its own rectangle. The training curve keeps rising, the test curve falls (overfitting).'):LernApp.t('Mittlere Tiefe: die groben Bereiche sind erkannt. Beobachte in der Kurve, ab wann die Test-Accuracy nicht mehr steigt.','Medium depth: the rough areas are found. Watch in the curve from which depth the test accuracy stops rising.')}
+          $('dtMsg').textContent=md===1?LernApp.t('Tiefe 1: nur eine Frage, die Fläche hat zwei Rechtecke (Stumpf). Das ist zu einfach.','Depth 1: only one question, the region has two rectangles (a stump). That is too simple.'):md>=6?LernApp.t('Tiefer Baum: Fast jeder Trainingspunkt bekommt sein eigenes Rechteck. Die Trainingskurve steigt weiter, die Testkurve fällt (Overfitting).','Deep tree: almost every training point gets its own rectangle. The training curve keeps rising, the test curve falls (overfitting).'):LernApp.t('Mittlere Tiefe: Die groben Bereiche sind erkannt. Beobachte in der Kurve, ab wann die Test-Accuracy nicht mehr steigt.','Medium depth: the rough areas are found. Watch in the curve from which depth the test accuracy stops rising.')}
         $('dtD').addEventListener('input',draw);draw()})();
 
       // Demo 5d: small neural network (1 hidden layer, tanh), trained step by step in the browser

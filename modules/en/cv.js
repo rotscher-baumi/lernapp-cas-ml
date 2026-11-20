@@ -229,13 +229,10 @@ b = box (x0, y0, x1, y1)    c = class    s = score in [0, 1]    k = unknown</cod
   <p><b>IoU</b> (intersection over union) measures how well two boxes overlap: area of the intersection divided by area of the union. 0 means no contact, 1 means identical. IoU is used in three places: when <b>assigning</b> anchors to ground-truth boxes in training, as a <b>box loss</b>, and in <b>evaluation</b>: a prediction counts as a hit if its IoU with a ground-truth box is above a threshold (usually 0.5).</p>
   <div class="demo" id="ioDemo">
     <div class="tag">Demo</div><h4>IoU of two boxes</h4>
-    <p class="hint">Shift and scale the orange prediction against the blue ground truth. The green intersection divided by the union is the IoU.</p>
-    <div class="ctl"><label for="ioX">Shift x</label><input type="range" id="ioX" min="-80" max="100" step="2" value="40"><output id="ioDX"></output></div>
-    <div class="ctl"><label for="ioY">Shift y</label><input type="range" id="ioY" min="-60" max="80" step="2" value="20"><output id="ioDY"></output></div>
-    <div class="ctl"><label for="ioS">Size of the prediction</label><input type="range" id="ioS" min="40" max="160" step="5" value="100"><output id="ioSC"></output></div>
-    <svg class="plot" id="ioSvg" viewBox="0 0 400 300" style="max-width:420px" role="img" aria-label="Two boxes with the intersection marked in green"></svg>
+    <p class="hint">Drag the boxes with the mouse (or a finger) to a new place; resize them with the corner handle at the bottom right. The green intersection divided by the union is the IoU. Keyboard: select a box with Tab, arrow keys move it, Shift + arrow keys resize it.</p>
+    <svg class="plot" id="ioSvg" viewBox="0 0 400 300" style="max-width:420px" role="group" aria-label="Two draggable boxes with the intersection marked in green"></svg>
     <pre><code id="ioCalc"></code></pre>
-    <div class="stats"><span>IoU <b id="ioV"></b></span></div>
+    <div class="stats"><span>Intersection <b id="ioI"></b></span><span>Union <b id="ioU"></b></span><span>IoU <b id="ioV"></b></span></div>
   </div>
   <p>A detector first outputs <b>many overlapping boxes</b> for the same object. <b>Non-maximum suppression (NMS)</b> cleans up:</p>
   <pre><code>sort boxes by score

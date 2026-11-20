@@ -16,28 +16,33 @@ lernapp/
   notebook.html     Übungs-Notebook (lokal mit Jupyter oder in Colab)
   titanic.html      Titanic-Seite
   mathe-kompakt.html, mathe-ausfuehrlich.html   eigene Mathe-Seiten
-  kompakt.html      Spickzettel über Supervised ML, Klassifikation, Unsupervised und Neural Networks (Modul `kompakt`; auf der Hauptseite verlinkt die Linkleiste oben darauf)
+  kompakt.html      Spickzettel über Supervised ML, Klassifikation, Unsupervised, Neural Networks, CNN, Computer Vision, Generative Models und Modelle in der Praxis (Modul `kompakt`; wird bei jeder inhaltlichen Änderung dieser Kapitel nachgeführt; auf der Hauptseite verlinkt die Linkleiste oben darauf)
   server.py         lokaler Server (Zustand, Jupyter-Start, Proxy)
   run.sh            Jupyter und Server unter Linux/macOS starten
   requirements.txt, requirements-dev.txt   Laufzeit- und Entwicklungspakete
   assets/
     style.css       Design (hell und dunkel)
-    core.js         Navigation, Sprache, Theme, Selbsttest; gemeinsame Helfer (mulberry32, gauss)
-    demos-<id>.js   Demo-Code der grossen Kapitel (ml, klass, unsup, nn, cnn, cv, gen), das Kapitel in modules/ ruft ihn in init() auf
+    core.js         Navigation, Sprache, Theme, Selbsttest; gemeinsame Helfer (mulberry32, gauss, drag, setRange)
+    demos-<id>.js   Demo-Code der grossen Kapitel (ml, klass, unsup, nn, cnn, cv, gen, modell), das Kapitel in modules/ ruft ihn in init() auf
                     (`demos-nn.js` liefert auch die zwei klickbaren SVG-Grafiken des Kapitels Neural Networks: `LernApp.nnFlow` Ablauf, `LernApp.nnConcept` Hauptkonzept; die Kapitel CNN, Computer Vision und Generative Models nutzen `nnFlow` mit eigenem `id` für die Pfeil-Marker)
     demos-*.js      geteilte Demos (Mathe, k-Means)
+    search.js       Volltextsuche der Hauptseite: klebende Leiste über den Kapitel-Chips, Trefferliste, ▲▼, Markierung (CSS Custom Highlight API)
     notebook-data.js  aus den Notebooks erzeugt (nicht von Hand ändern)
   modules/          ein Kapitel pro Datei
-    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js nn.js cnn.js cv.js gen.js uebersicht.js kompakt.js titanic.js
+    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js nn.js cnn.js cv.js gen.js modell.js uebersicht.js kompakt.js titanic.js
     en/             englische Texte je Kapitel
     _vorlage.js     Vorlage für ein neues Kapitel
   notebooks/        Übungs-Notebooks (Jupyter / VS Code)
-    beispiele/      Beispiel-Notebooks zu allen Modellen und Strategien (01 bis 08)
+    beispiele/      Beispiel-Notebooks zu allen Modellen und Strategien (01 bis 09)
   tools/            build_notebook_exercises.py
   scripts/          Node-Skripte, die Notebooks erzeugen
   tests/            pytest-Tests
   docs/             Architektur, PlantUML-Diagramme, Design-Dokument
 ```
+
+## Suche
+
+Oben in der klebenden Leiste über den Kapiteln steht ein Suchfeld (Taste `/` oder `Ctrl+K`). Gesucht wird im sichtbaren Text der gewählten Sprache, auch in den zugeklappten Antworten des Selbsttests; Gross- und Kleinschreibung und Akzente zählen nicht, «groesse» findet «Grösse». Die Liste zeigt Kapitel › Abschnitt und einen Ausschnitt; Enter und ▼ springen zum nächsten Treffer, Shift+Enter und ▲ zum vorherigen, Esc schliesst. Die Markierung im Text braucht die CSS Custom Highlight API (Chrome, Edge, Safari 17.2+, Firefox 140+); ohne sie funktionieren Liste und Springen trotzdem. Code: `assets/search.js`, nur auf `index.html` eingebunden.
 
 ## Neues Kapitel hinzufügen
 
@@ -55,7 +60,7 @@ Die Übungs-Notebooks liegen in `notebooks/` (u. a. `Lernapp_Uebungen`, `Lernapp
 
 ### Beispiel-Notebooks
 
-`notebooks/beispiele/` hat ein eigenständiges Notebook pro Thema der Übersicht: `01_Regression`, `02_Klassifikation`, `03_Ensembles`, `04_Clustering_Anomalien`, `05_Dimensionsreduktion`, `06_Strategien`, `07_Titanic` (der ganze Ablauf an einem echten Datensatz, derselbe Code wie auf `titanic.html`) und `08_Neuronale_Netze` (Backpropagation von Hand mit Gradient-Check, dann `MLPClassifier`; ohne Keras/TensorFlow). Jedes lädt seine Daten selbst (scikit-learn-Datensätze oder erzeugte Daten, nur Titanic nimmt `../../../titanic/data.csv`, falls vorhanden, sonst die öffentliche Kaggle-Kopie aus dem Netz) und hängt von keinem anderen ab. Die Steckbriefe der Übersicht verlinken mit «Beispiele →» darauf, `notebook.html?nb=beispiele/01_Regression.ipynb` öffnet ein Notebook direkt.
+`notebooks/beispiele/` hat ein eigenständiges Notebook pro Thema der Übersicht: `01_Regression`, `02_Klassifikation`, `03_Ensembles`, `04_Clustering_Anomalien`, `05_Dimensionsreduktion`, `06_Strategien`, `07_Titanic` (der ganze Ablauf an einem echten Datensatz, derselbe Code wie auf `titanic.html`) `08_Neuronale_Netze` (Backpropagation von Hand mit Gradient-Check, dann `MLPClassifier`; ohne Keras/TensorFlow) und `09_Modelle_Praxis` (Pipeline speichern und laden mit Metadaten, Drift simulieren, neu trainieren, `partial_fit`, Model Card; speichert nur in einen temporären Ordner). Jedes lädt seine Daten selbst (scikit-learn-Datensätze oder erzeugte Daten, nur Titanic nimmt `../../../titanic/data.csv`, falls vorhanden, sonst die öffentliche Kaggle-Kopie aus dem Netz) und hängt von keinem anderen ab. Die Steckbriefe der Übersicht verlinken mit «Beispiele →» darauf, `notebook.html?nb=beispiele/01_Regression.ipynb` öffnet ein Notebook direkt.
 
 **Auf einem anderen PC:** Repo klonen, dann im Lernapp-Ordner `py -3.12 -m venv .venv`, `.venv\Scripts\python -m pip install -r requirements.txt`, `.venv\Scripts\python server.py` (Linux/macOS: `./run.sh`). Der Knopf «Jupyter starten» nimmt automatisch das Python aus `.venv`. Ohne Installation geht es im Browser mit Google Colab: Jedes Beispiel-Notebook hat oben den Link «In Colab öffnen»; ein Google-Konto genügt, solange das Repo öffentlich ist (ist es privat, in Colab mit GitHub anmelden und «Include private repos» anhaken). Die Setup-Zelle installiert dort `umap-learn` und `imbalanced-learn` bei Bedarf selbst.
 

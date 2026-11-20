@@ -48,7 +48,7 @@
   <pre><code>I(x, y) = f(x, y) ⊛ h(x, y) + n(x, y)</code></pre>
   <ul>
     <li><b>f</b> ist das ideale Bild, das wir gerne hätten.</li>
-    <li><b>h</b> ist die <b>PSF</b> (point spread function): wie die Optik einen Punkt verschmiert. <code>⊛</code> ist die Faltung, also dieselbe Operation wie bei einem Filter. Bewegung, falscher Fokus oder eine zittrige Hand erzeugen <b>Unschärfe</b>.</li>
+    <li><b>h</b> ist die <b>PSF</b> (Point Spread Function): wie die Optik einen Punkt verschmiert. <code>⊛</code> ist die Faltung, also dieselbe Operation wie bei einem Filter. Bewegung, falscher Fokus oder eine zittrige Hand erzeugen <b>Unschärfe</b>.</li>
     <li><b>n</b> ist <b>Rauschen</b> (Sensor, Elektronik, wenig Licht).</li>
     <li><b>I</b> ist das, was wir tatsächlich aufnehmen.</li>
   </ul>
@@ -214,7 +214,7 @@
   </ul>
   <div class="falle"><b>Falle</b><p>PSNR belohnt Pixel-Nähe, nicht gutes Aussehen. Ein L2-trainiertes Netz erreicht hohe PSNR mit einem weichen Bild; ein GAN-Netz sieht schärfer aus, hat aber tiefere PSNR, weil es plausible Details <i>erfindet</i>. Bei medizinischen oder forensischen Bildern ist erfundenes Detail ein Risiko.</p></div>
 
-  <h3 id="cv-detection">4 · Object Detection: was ist wo?</h3>
+  <h3 id="cv-detection">4 · Object Detection: Was ist wo?</h3>
   <p>Die Ausgabe ist eine <b>Menge</b> von Vorhersagen, und ihre Grösse ist unbekannt:</p>
   <pre><code>y = { (b₁, c₁, s₁), (b₂, c₂, s₂), … (bₖ, cₖ, sₖ) }
 b = Box (x0, y0, x1, y1)    c = Klasse    s = Score in [0, 1]    k = unbekannt</code></pre>
@@ -229,16 +229,13 @@ b = Box (x0, y0, x1, y1)    c = Klasse    s = Score in [0, 1]    k = unbekannt</
   <p>Die Labels im YOLO-Format sind eine Zeile pro Objekt: <code>class_id cx cy w h</code>, alle Koordinaten auf 0 bis 1 normiert. Ein Anker ist nichts anderes als eine vorgegebene Box, die das Netz leicht verschiebt und streckt; so muss es nicht jede Box von Grund auf raten.</p>
 
   <h3 id="cv-iou">5 · IoU und NMS: Treffer zählen und Duplikate entfernen</h3>
-  <p><b>IoU</b> (intersection over union) misst, wie gut sich zwei Boxen decken: Fläche des Schnitts geteilt durch Fläche der Vereinigung. 0 heisst kein Kontakt, 1 heisst identisch. IoU wird an drei Stellen gebraucht: beim <b>Zuordnen</b> von Ankern zu Ground-Truth-Boxen im Training, als <b>Box-Loss</b>, und bei der <b>Auswertung</b>: Eine Vorhersage zählt als Treffer, wenn ihre IoU mit einer Ground-Truth-Box über einem Threshold liegt (meist 0.5).</p>
+  <p><b>IoU</b> (Intersection over Union) misst, wie gut sich zwei Boxen decken: Fläche des Schnitts geteilt durch Fläche der Vereinigung. 0 heisst kein Kontakt, 1 heisst identisch. IoU wird an drei Stellen gebraucht: beim <b>Zuordnen</b> von Ankern zu Ground-Truth-Boxen im Training, als <b>Box-Loss</b>, und bei der <b>Auswertung</b>: Eine Vorhersage zählt als Treffer, wenn ihre IoU mit einer Ground-Truth-Box über einem Threshold liegt (meist 0.5).</p>
   <div class="demo" id="ioDemo">
     <div class="tag">Demo</div><h4>IoU von zwei Boxen</h4>
-    <p class="hint">Verschiebe und skaliere die orange Vorhersage gegen die blaue Ground Truth. Der grüne Schnitt geteilt durch die Vereinigung ist die IoU.</p>
-    <div class="ctl"><label for="ioX">Verschiebung x</label><input type="range" id="ioX" min="-80" max="100" step="2" value="40"><output id="ioDX"></output></div>
-    <div class="ctl"><label for="ioY">Verschiebung y</label><input type="range" id="ioY" min="-60" max="80" step="2" value="20"><output id="ioDY"></output></div>
-    <div class="ctl"><label for="ioS">Grösse der Vorhersage</label><input type="range" id="ioS" min="40" max="160" step="5" value="100"><output id="ioSC"></output></div>
-    <svg class="plot" id="ioSvg" viewBox="0 0 400 300" style="max-width:420px" role="img" aria-label="Zwei Boxen mit grün markiertem Schnitt"></svg>
+    <p class="hint">Ziehe die Boxen mit der Maus (oder dem Finger) an eine neue Stelle, die Grösse änderst du am Eckgriff unten rechts. Der grüne Schnitt geteilt durch die Vereinigung ist die IoU. Tastatur: Box mit Tab wählen, Pfeiltasten verschieben, Shift + Pfeiltasten ändern die Grösse.</p>
+    <svg class="plot" id="ioSvg" viewBox="0 0 400 300" style="max-width:420px" role="group" aria-label="Zwei verschiebbare Boxen mit grün markiertem Schnitt"></svg>
     <pre><code id="ioCalc"></code></pre>
-    <div class="stats"><span>IoU <b id="ioV"></b></span></div>
+    <div class="stats"><span>Schnitt <b id="ioI"></b></span><span>Vereinigung <b id="ioU"></b></span><span>IoU <b id="ioV"></b></span></div>
   </div>
   <p>Ein Detector gibt zunächst <b>viele überlappende Boxen</b> für dasselbe Objekt aus. <b>Non-Maximum Suppression (NMS)</b> räumt auf:</p>
   <pre><code>Boxen nach Score sortieren

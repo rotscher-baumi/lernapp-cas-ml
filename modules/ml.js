@@ -117,7 +117,7 @@
       <g class="ab-step" data-s="6" tabindex="0" role="button" aria-expanded="false" aria-label="Schritt 6: Erklärung aufklappen">
       <rect x="60" y="468" width="300" height="52" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
       <text x="210" y="490" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">6 · Skalieren</text>
-      <text x="210" y="508" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Skaler ebenfalls nur auf Training anpassen</text>
+      <text x="210" y="508" text-anchor="middle" style="fill:var(--muted);font-size:12px;font-family:var(--f-body)">Scaler ebenfalls nur auf Training anpassen</text>
       </g>
       <line x1="210" y1="520" x2="210" y2="552" marker-end="url(#ab-a)" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
 
@@ -158,7 +158,7 @@
       <rect x="60" y="806" width="300" height="40" rx="6" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
       <text x="210" y="831" text-anchor="middle" style="fill:var(--fg);font-size:14px;font-weight:600;font-family:var(--f-body)">10 · Einmal auf Testset bewerten</text>
       </g>
-      <text x="738" y="816" text-anchor="end" style="fill:var(--warn);font-size:11.5px;font-family:var(--f-mono)">transform mit Train-Median und Train-Skaler</text>
+      <text x="738" y="816" text-anchor="end" style="fill:var(--warn);font-size:11.5px;font-family:var(--f-mono)">transform mit Train-Median und Train-Scaler</text>
     </svg>
     </div>
     <div class="ab-detail" id="abDetail" role="region" aria-live="polite" hidden>
@@ -169,7 +169,7 @@
     <figcaption>Die EDA (blau) kommt vor Vorverarbeitung und Modell. Das Testset (orange) wird gleich zu Beginn abgetrennt und erst im letzten Schritt benutzt, damit das Testergebnis nicht durch Wissen aus den Testdaten verfälscht wird.</figcaption>
   </figure>
   <div class="merk"><b>Erst Daten anschauen</b><p>Ohne EDA weiss man nicht, ob Werte fehlen, ob Ausreisser Median oder Mittelwert verzerren, ob skaliert werden muss oder ob die Klassen ungleich verteilt sind. Die EDA bestimmt Schritt 4 bis 8.</p></div>
-  <div class="falle"><b>Data Leakage</b><p>Auch die EDA nur auf den 80 % machen. Merkmalsauswahl, Median und Skaler werden wie das Modell nur mit den Trainingsdaten berechnet, am sichersten innerhalb jedes Cross-Validation-Durchgangs. Sonst fliesst Testwissen ein und die Validierung ist zu optimistisch.</p></div>
+  <div class="falle"><b>Data Leakage</b><p>Auch die EDA nur auf den 80 % machen. Merkmalsauswahl, Median und Scaler werden wie das Modell nur mit den Trainingsdaten berechnet, am sichersten innerhalb jedes Cross-Validation-Durchgangs. Sonst fliesst Testwissen ein und die Validierung ist zu optimistisch.</p></div>
 
   <h3 id="ml-gd">1 · Gradient Descent: so «lernt» ein Modell</h3>
   <p>Stell dir einen Nebel auf einem Berg vor. Du willst ins Tal, siehst aber nur, wie steil der Boden unter deinen Füssen ist. Also gehst du immer ein Stück bergab. Genau das macht der Algorithmus.</p>
@@ -227,7 +227,7 @@
     <div class="ctl"><label for="r3El">Kippen</label><input type="range" id="r3El" min="0" max="80" step="1" value="25"><output id="r3ElO"></output></div>
     <div class="btnrow"><button id="r3Top">Ansicht qm / Preis</button><button id="r3Side">Ansicht Zimmer / Preis</button><button id="r3Reset">Zurücksetzen</button></div>
     <div class="stats"><span>R² (qm + Zimmer) <b id="r3R2"></b></span></div>
-    <p class="hint">Du kannst auch im Bild ziehen. Gefüllte Punkte sind die echten Preise, die rote Linie ist der Abstand zur Ebene. Die Knöpfe zeigen dir die flachen 2D-Ansichten: von vorn siehst du qm gegen Preis wie in der Grafik oben, von der Seite Zimmer gegen Preis. Der 3D-Raum enthält beides gleichzeitig. Lage fehlt hier, weil eine 4. Achse nicht mehr zeichenbar wäre.</p>
+    <p class="hint">Du kannst auch im Bild ziehen. Gefüllte Punkte sind die echten Preise, die rote Linie ist der Abstand zur Ebene. Die Knöpfe zeigen dir die flachen 2D-Ansichten: Von vorn siehst du qm gegen Preis wie in der Grafik oben, von der Seite Zimmer gegen Preis. Der 3D-Raum enthält beides gleichzeitig. Lage fehlt hier, weil eine 4. Achse nicht mehr zeichenbar wäre.</p>
   </div>
 
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Was <code>fit()</code> macht: die Gewichte lernen</h4>
@@ -320,7 +320,7 @@ scores = cross_val_score(pipe, X, y, cv=10,    # 10 Folds
   <p>Mehr Merkmale sind nicht automatisch besser. Mit vielen Dimensionen werden Daten «dünn» und Modelle schwerer zu trainieren (<i>Curse of Dimensionality</i>). Überflüssige Merkmale erhöhen das Risiko von Overfitting und machen das Modell schwer erklärbar.</p>
   <ul>
     <li><b>Filter</b>: Merkmale nach Statistik oder Korrelation bewerten (z. B. <code>X.corr()</code>).</li>
-    <li><b>Wrapper</b>: Mit einem Modell verschiedene Merkmalmengen ausprobieren.</li>
+    <li><b>Wrapper</b>: Mit einem Modell verschiedene Merkmalsmengen ausprobieren.</li>
     <li><b>Embedded</b>: Die Auswahl steckt im Modell (Lasso, siehe unten).</li>
   </ul>
   <p>Im Ablauf kommt Feature Selection zweimal vor:</p>
@@ -440,7 +440,7 @@ print(&quot;CV-Accuracy:&quot;, round(search.best_score_, 3), &quot;| Test-Accur
       { q: `Dein Modell hat Trainingsfehler 1 und Testfehler 20. Was ist los und was tust du?`, a: `Overfitting. Weniger oder einfachere Merkmale, Regularisierung (Ridge/Lasso), mehr Daten.` },
       { q: `Warum braucht man neben dem Test-Set auch ein Validation-Set?`, a: `Die Validation wird beim Feintunen mehrfach benutzt und lernt indirekt mit. Das Test-Set bleibt ungesehen und gibt am Schluss die ehrliche Schätzung.` },
       { q: `Wann nimmst du Lasso statt Ridge?`, a: `Wenn du viele Merkmale hast und vermutest, dass einige unwichtig sind: Lasso setzt deren Koeffizienten auf exakt 0.` },
-      { q: `Bei 4-fold Cross-Validation: Wie oft wird trainiert, und wird das Modell dabei weiter optimiert?`, a: `4 Mal, jeweils ein neues Modell (mit neuem Imputer/Scaler) von Grund auf auf 3 Folds, bewertet auf dem 4. Fold und verworfen. Die 4 Scores bewerten das Setup. Danach wird das gewählte Setup einmal auf allen Entwicklungsdaten trainiert und einmal auf dem Test-Set geprüft.` },
+      { q: `Bei 4-Fold Cross-Validation: Wie oft wird trainiert, und wird das Modell dabei weiter optimiert?`, a: `4 Mal, jeweils ein neues Modell (mit neuem Imputer/Scaler) von Grund auf auf 3 Folds, bewertet auf dem 4. Fold und verworfen. Die 4 Scores bewerten das Setup. Danach wird das gewählte Setup einmal auf allen Entwicklungsdaten trainiert und einmal auf dem Test-Set geprüft.` },
       { q: `Wozu dient <code>Pipeline</code>?`, a: `Sie verkettet Schritte wie Skalieren und Modell. In der Cross-Validation wird so jeder Schritt nur mit den Trainingsdaten des jeweiligen Folds gelernt, das verhindert Leakage.` },
       { q: `Was ist der Unterschied zwischen Grid und Random Search?`, a: `Grid probiert alle Kombinationen, Random eine zufällige Auswahl. Random ist oft ähnlich gut und deutlich schneller.` },
     ],

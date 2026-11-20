@@ -22,15 +22,15 @@
         steps: [
           ['Bilder vorbereiten', '(Höhe, Breite, Kanäle), /255, One-Hot'],
           ['Architektur wählen', 'Conv2D + Pooling, dann Dense'],
-          ['Loss und Optimizer', 'Cross-Entropy, Adam, learning rate'],
+          ['Loss und Optimizer', 'Cross-Entropy, Adam, Learning Rate'],
           ['Forward Pass', 'Filter → Feature Maps → Softmax'],
           ['Loss berechnen', 'Abstand zwischen ŷ und y'],
           ['Backpropagation', 'Gradienten auch für die filter'],
           ['Parameter aktualisieren', 'w ← w − α · ∂L/∂w'],
-          ['Validation prüfen', 'overfitting? Augmentation, Dropout'],
+          ['Validation prüfen', 'Overfitting? Augmentation, Dropout'],
           ['Einmal testen', 'Testset, erst ganz am Schluss'],
         ],
-        loopA: ['pro Mini-Batch,', 'viele epochs'],
+        loopA: ['pro Mini-Batch,', 'viele Epochs'],
         loopB: ['Tuning:', 'filter, Blöcke,', 'Augmentation'],
       })}
     </svg>
@@ -46,7 +46,7 @@
   <h3 id="cnn-warum">1 · Warum nicht einfach ein Dense-Netz?</h3>
   <p>Ein Farbbild aus CIFAR-10 hat 32 × 32 Pixel mit je 3 Kanälen (Rot, Grün, Blau), also 3'072 Zahlen. Ein Dense-Netz macht daraus mit <code>Flatten</code> einen langen Vektor. Das hat drei Nachteile:</p>
   <ul>
-    <li><b>Zu viele Parameter:</b> Schon eine Hidden Layer mit 512 Neuronen hat <code>(3072 + 1) · 512 ≈ 1.6 Mio.</code> Gewichte. Bei 224 × 224-Fotos wären es über 77 Mio. für eine Schicht. Das Netz überanpasst schnell (Overfitting).</li>
+    <li><b>Zu viele Parameter:</b> Schon eine Hidden Layer mit 512 Neuronen hat <code>(3072 + 1) · 512 ≈ 1.6 Mio.</code> Gewichte. Bei 224 × 224-Fotos wären es über 77 Mio. für eine Schicht. Das Netz neigt schnell zu Overfitting.</li>
     <li><b>Die Nachbarschaft geht verloren:</b> Nach <code>Flatten</code> weiss das Netz nicht mehr, welche Pixel nebeneinander liegen. Kanten und Formen bestehen aber aus Nachbarpixeln.</li>
     <li><b>Kein Wiedererkennen an anderer Stelle:</b> Ein Neuron, das eine Katze oben links gelernt hat, hilft nicht für eine Katze unten rechts. Jede Position muss neu gelernt werden.</li>
   </ul>
@@ -62,7 +62,7 @@ a[r, c] = ReLU(z[r, c])</code></pre>
     <p class="hint">Wähle Bild und Filter. Der orange Rahmen links ist das aktuelle Fenster, rechts daneben sein Wert in der Feature Map. Klicke auf ein Feld der Feature Map oder schiebe das Fenster mit den Pfeilen. Ganz rechts: Feature Map nach ReLU und 2 × 2-Pooling.</p>
     <div class="btnrow" id="ccImg" role="group" aria-label="Bild"><button data-v="seven" class="pri" aria-pressed="true">Ziffer 7</button><button data-v="square" aria-pressed="false">Quadrat</button><button data-v="cross" aria-pressed="false">Kreuz</button></div>
     <div class="btnrow" id="ccKer" role="group" aria-label="filter"><button data-v="vert" class="pri" aria-pressed="true">Vertikale Kante</button><button data-v="horiz" aria-pressed="false">Horizontale Kante</button><button data-v="diag" aria-pressed="false">Diagonale</button><button data-v="blur" aria-pressed="false">Weichzeichner</button></div>
-    <svg class="plot" id="ccSvg" viewBox="0 0 490 190" style="max-width:560px" role="img" aria-label="8 × 8-Bild mit Fenster, 3 × 3-filter, 6 × 6-feature map und 3 × 3-Ergebnis nach Pooling"></svg>
+    <svg class="plot" id="ccSvg" viewBox="0 0 490 190" style="max-width:560px" role="img" aria-label="8 × 8-Bild mit Fenster, 3 × 3-Filter, 6 × 6-Feature-Map und 3 × 3-Ergebnis nach Pooling"></svg>
     <div class="btnrow"><button id="ccPrev" aria-label="Fenster zurück">◀ Fenster</button><button id="ccNext" aria-label="Fenster weiter">Fenster ▶</button></div>
     <div class="btnrow" id="ccMode" role="group" aria-label="Pooling"><button data-v="max" class="pri" aria-pressed="true">Max-Pooling</button><button data-v="avg" aria-pressed="false">Average-Pooling</button></div>
     <pre><code id="ccCalc"></code></pre>
@@ -72,7 +72,7 @@ a[r, c] = ReLU(z[r, c])</code></pre>
   <div class="merk"><b>Merksatz</b><p>Convolution = dasselbe kleine Neuron an jeder Bildposition. Die Ausgabe ist eine Feature Map, die zeigt, <i>wo</i> im Bild das Muster des Filters vorkommt.</p></div>
   <p class="note">Mathematisch rechnen Keras und PyTorch eine <i>Cross-Correlation</i> (der Filter wird nicht gespiegelt). Weil die Gewichte ohnehin gelernt werden, spielt das keine Rolle; der Name «Convolution» ist geblieben.</p>
 
-  <h3 id="cnn-pad">3 · Padding und Stride: wie gross wird die Feature Map?</h3>
+  <h3 id="cnn-pad">3 · Padding und Stride: Wie gross wird die Feature Map?</h3>
   <p>Ohne Rand passt ein 3 × 3-Filter auf ein 8 × 8-Bild nur an 6 × 6 Positionen: Jede Schicht verliert <code>k − 1</code> Pixel. <b>Padding</b> legt einen Rand aus Nullen um das Bild, damit die Grösse erhalten bleibt und auch die Randpixel in genug Fenstern vorkommen. <b>Stride</b> ist die Schrittweite des Filters; mit Stride 2 wird jede zweite Position übersprungen und die Feature Map etwa halb so gross.</p>
   <pre><code>Ausgabe = ⌊(n + 2p − k) / s⌋ + 1        # n Eingabe, k kernel, p padding, s stride
 
@@ -81,7 +81,7 @@ Conv2D(32, (3, 3), padding='same')    # p = 1: 32 → 32 (bei stride 1)</code></
   <div class="demo" id="csDemo">
     <div class="tag">Demo</div><h4>Ausgabegrösse ausrechnen</h4>
     <p class="hint">Eine Zeile des Bildes. Die orangen Klammern sind die Positionen des Filters, unten die Felder der Ausgabe. Die Formel gilt für Höhe und Breite getrennt.</p>
-    <svg class="plot" id="csSvg" viewBox="0 0 420 135" role="img" aria-label="Eine Bildzeile mit padding, die Positionen des filters und die Ausgabefelder"></svg>
+    <svg class="plot" id="csSvg" viewBox="0 0 420 135" role="img" aria-label="Eine Bildzeile mit Padding, die Positionen des Filters und die Ausgabefelder"></svg>
     <div class="ctl"><label for="csN">Eingabe n</label><input type="range" id="csN" min="3" max="12" step="1" value="8"><output id="csNO"></output></div>
     <div class="ctl"><label for="csK">Kernel Size k</label><input type="range" id="csK" min="1" max="5" step="2" value="3"><output id="csKO"></output></div>
     <div class="ctl"><label for="csS">Stride s</label><input type="range" id="csS" min="1" max="3" step="1" value="1"><output id="csSO"></output></div>
@@ -195,14 +195,14 @@ model = keras.Model(inputs, outputs)                    # 3 · nur der Kopf lern
   <div class="merk"><b>Merksatz</b><p>Ein CNN ersetzt die ersten Dense-Schichten durch Conv- und Pooling-Blöcke: lokale Filter mit geteilten Gewichten finden Muster überall im Bild, Pooling verkleinert und vergrössert das Sichtfeld. Gegen Overfitting helfen Data Augmentation, Dropout und Transfer Learning.</p></div>
 `,
     quiz: [
-      { q: `Welche zwei Ideen unterscheiden eine Conv-Schicht von einer Dense-Schicht?`, a: `<b>Lokale Verbindungen:</b> jedes Neuron sieht nur einen kleinen Ausschnitt (z. B. 3 × 3). <b>Geteilte Gewichte:</b> derselbe Filter wird an jeder Position verwendet. Dadurch wenige Parameter, Nachbarschaft bleibt erhalten, ein Muster wird überall erkannt.` },
+      { q: `Welche zwei Ideen unterscheiden eine Conv-Schicht von einer Dense-Schicht?`, a: `<b>Lokale Verbindungen:</b> Jedes Neuron sieht nur einen kleinen Ausschnitt (z. B. 3 × 3). <b>Geteilte Gewichte:</b> Derselbe Filter wird an jeder Position verwendet. Dadurch wenige Parameter, Nachbarschaft bleibt erhalten, ein Muster wird überall erkannt.` },
       { q: `Was ist eine Feature Map?`, a: `Die Ausgabe eines Filters über das ganze Bild: an jeder Position die gewichtete Summe aus Fenster und Filter (plus Bias, dann ReLU). Hohe Werte zeigen, wo das Muster des Filters vorkommt.` },
       { q: `Ein 32 × 32-Bild, 3 × 3-Filter, Padding 'valid', Stride 1. Wie gross ist die Ausgabe, und mit 'same'?`, a: `'valid': <code>(32 − 3)/1 + 1 = 30</code>, also 30 × 30. 'same': 32 × 32 (Padding 1 auf jeder Seite).` },
       { q: `Wie viele Parameter hat <code>Conv2D(64, (3, 3))</code> auf einer Eingabe mit 32 Kanälen?`, a: `<code>(3 · 3 · 32 + 1) · 64 = 18'496</code>. Die Höhe und Breite der Eingabe spielen keine Rolle.` },
       { q: `Was macht Max-Pooling 2 × 2, und wie viele Parameter hat es?`, a: `Es nimmt aus jedem 2 × 2-Fenster den grössten Wert: Höhe und Breite halbieren sich, die Kanäle bleiben. Keine Parameter. Es macht das Netz robuster gegen kleine Verschiebungen und vergrössert das Sichtfeld der folgenden Schichten.` },
       { q: `Warum steigt die Zahl der Filter typischerweise von Block zu Block (32 → 64 → 128)?`, a: `Das Bild wird durch Pooling kleiner, die Muster werden komplexer und zahlreicher (Kanten → Texturen → Objektteile). Mehr Filter bei kleinerer Fläche hält den Rechenaufwand pro Schicht etwa gleich.` },
       { q: `Wo stecken bei einem kleinen CNN die meisten Parameter, und wie spart man sie?`, a: `In der ersten Dense-Schicht nach <code>Flatten</code>. <code>GlobalAveragePooling2D</code> statt <code>Flatten</code> oder ein Pooling mehr verkleinern ihre Eingabe stark.` },
-      { q: `Was ist Data Augmentation, und wann ist sie aktiv?`, a: `Zufällige Veränderungen der Trainingsbilder (spiegeln, drehen, zoomen, verschieben), damit das Netz robuste Merkmale lernt und weniger überanpasst. Nur beim Training; Validation und Test bleiben unverändert.` },
+      { q: `Was ist Data Augmentation, und wann ist sie aktiv?`, a: `Zufällige Veränderungen der Trainingsbilder (spiegeln, drehen, zoomen, verschieben), damit das Netz robuste Merkmale lernt und weniger overfittet. Nur beim Training; Validation und Test bleiben unverändert.` },
       { q: `Warum ist horizontales Spiegeln bei Ziffern eine schlechte Augmentation?`, a: `Gespiegelte Ziffern sind keine gültigen Ziffern mehr (eine gespiegelte 2 oder 7). Augmentation darf nur Veränderungen erzeugen, nach denen die Klasse dieselbe bleibt.` },
       { q: `Was ist Transfer Learning, und warum friert man die Basis zuerst ein?`, a: `Ein auf vielen Bildern vortrainiertes CNN übernehmen und nur einen neuen Kopf trainieren. Eingefroren, weil die zufälligen Gewichte des neuen Kopfs anfangs grosse Gradienten erzeugen, die die gelernten Filter zerstören würden. Danach optional Fine-Tuning mit sehr kleiner Learning Rate.` },
       { q: `Ein Notebook trainiert mit <code>validation_data=(x_test, y_test)</code>. Was ist das Problem?`, a: `Epochen und Setup werden am Testset gewählt; die Test-Accuracy ist dann keine ehrliche Schätzung mehr. Besser <code>validation_split</code> oder ein eigener Validation-Teil, Test einmal am Schluss.` },

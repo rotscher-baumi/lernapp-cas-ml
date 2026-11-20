@@ -25,7 +25,7 @@ def _read(path: Path) -> nbformat.NotebookNode:
 
 
 def test_there_are_example_notebooks() -> None:
-    assert len(EXAMPLES) == 8
+    assert len(EXAMPLES) == 9
 
 
 @pytest.mark.parametrize("path", ALL_NOTEBOOKS, ids=_id)
@@ -68,6 +68,21 @@ def test_overview_links_only_to_existing_notebooks() -> None:
     assert flat, "the overview no longer links to example notebooks"
     for name in flat:
         assert (NOTEBOOK_DIR / "beispiele" / f"{name}.ipynb").exists(), f"overview links to missing {name}"
+
+
+def test_index_loads_every_chapter_and_the_search() -> None:
+    """Every chapter of the main page (and its English file, if any) is loaded; search.js is the last script."""
+    index = (ROOT / "index.html").read_text(encoding="utf-8")
+    own_pages = {"mathe-kompakt", "mathe-lang", "kompakt", "titanic"}  # chapters that only appear on their own page
+    for path in sorted((ROOT / "modules").glob("*.js")):
+        if path.stem.startswith("_") or path.stem in own_pages:
+            continue
+        assert f'src="modules/{path.name}"' in index, f"index.html does not load modules/{path.name}"
+        if (ROOT / "modules" / "en" / path.name).exists():
+            assert f'src="modules/en/{path.name}"' in index, f"index.html does not load modules/en/{path.name}"
+    scripts = re.findall(r'<script src="([^"]+)"', index)
+    assert scripts[-1] == "assets/search.js", "search.js must be the last script (it runs after core.js has rendered)"
+    assert "assets/demos-modell.js" in scripts
 
 
 def test_exercise_data_is_up_to_date() -> None:

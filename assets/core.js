@@ -58,6 +58,65 @@
     translate: function (id, fields) { EN[id] = fields; },
     t: t,
     lang: 'de',
+    // Set a range slider from a demo (drag in a plot): clamp, snap to its step, then fire 'input'
+    // so the demo redraws through its normal slider listener and the shown value follows.
+    setRange: function (id, v) {
+      const el = typeof id === 'string' ? $(id) : id;
+      if (!el || !isFinite(v)) return;
+      const min = +el.min, max = +el.max, step = +el.step || 1;
+      const dec = (String(el.step).split('.')[1] || '').length;
+      const snapped = +(min + Math.round((Math.max(min, Math.min(max, v)) - min) / step) * step).toFixed(dec);
+      if (+el.value === snapped) return;
+      el.value = snapped;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    },
+    // Inverse of a linear scale such as sx = (x) => L + x * k: maps a plot coordinate back to a data value.
+    invert: function (scale) { const a = scale(0), k = scale(1) - a; return (p) => (p - a) / k; },
+    // Drag with mouse, pen or finger in an SVG plot. The SVG may be redrawn with innerHTML while dragging,
+    // because the pointer is captured on the SVG element itself, not on a child.
+    //   pick(x, y)    key of the handle under the pointer, or null (then the press is ignored);
+    //                 omitted: every press in the plot counts (the plot works like one big slider)
+    //   move(key, x, y, first)  called on press (first = true) and while dragging, in viewBox coordinates
+    //   axis 'x'      only horizontal dragging: on touch the page can still scroll vertically over the plot
+    //   hint [de, en] short line under the plot that tells the reader what to drag
+    drag: function (svg, opts) {
+      svg = typeof svg === 'string' ? $(svg) : svg;
+      if (!svg) return;
+      const pick = opts.pick || (() => 'all');
+      svg.classList.add('dragplot');
+      svg.style.touchAction = opts.axis === 'x' ? 'pan-y' : 'none';
+      if (opts.hint && !svg.nextElementSibling?.classList.contains('drag-hint')) {
+        const p = document.createElement('p');
+        p.className = 'hint drag-hint';
+        p.textContent = t(opts.hint[0], opts.hint[1]);
+        svg.after(p);
+      }
+      const at = (e) => {
+        const m = svg.getScreenCTM();
+        if (!m) return [0, 0];
+        const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
+        return [p.x, p.y];
+      };
+      let key = null;
+      svg.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0) return;
+        const [x, y] = at(e), k = pick(x, y);
+        if (k === null || k === undefined) return;
+        e.preventDefault();
+        key = k;
+        try { svg.setPointerCapture(e.pointerId); } catch (err) {}
+        svg.classList.add('dragging');
+        opts.move(key, x, y, true);
+      });
+      svg.addEventListener('pointermove', (e) => {
+        const [x, y] = at(e);
+        if (key === null) { if (opts.pick) svg.style.cursor = pick(x, y) === null ? '' : 'grab'; return; }
+        opts.move(key, x, y, false);
+      });
+      const end = () => { key = null; svg.classList.remove('dragging'); };
+      svg.addEventListener('pointerup', end);
+      svg.addEventListener('pointercancel', end);
+    },
   };
 
   const SRV = location.protocol.startsWith('http');

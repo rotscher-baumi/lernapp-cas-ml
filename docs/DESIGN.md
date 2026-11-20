@@ -30,6 +30,7 @@ Stand: 2026-11-01. Ergänzt [ARCHITECTURE.md](ARCHITECTURE.md) um Ziele, Entsche
 | D9 | Unterseiten für lange Beispiele (Titanic, Mathe) und den Spickzettel (Kompakt) | Hauptseite bleibt lesbar; Beispiel darf wirklich ausführlich sein | Hauptseite verlinkt mit Kurzversion oder Teaser-Modul; der Spickzettel nur mit einem Knopf in der Linkleiste (2026-11-16: kein eigener Abschnitt unten nötig) |
 | D10 | Grafiken als PNG aus echten Läufen, Code und Ausgabe daneben | Lernende sollen den Code nachspielen und dasselbe sehen | Code im Kapitel darf nicht ohne neuen Lauf geändert werden; Ausgaben sind byte-identisch zu halten |
 | D11 | Workflow-Übersicht am Kapitelanfang | Erst der Ablauf, dann die Teile (Projektregel) | Klickbare SVG-Grafik mit Erklärungen pro Schritt |
+| D12 | Werte, die einer Stelle im Plot entsprechen, werden direkt im Plot gezogen (`LernApp.drag`) | Ziehen am Objekt ist anschaulicher als ein Slider daneben | Der Slider bleibt als genaue Anzeige und für die Tastatur; das Ziehen setzt ihn über `setRange`, die Demo-Logik bleibt unverändert. Abstrakte Grössen (Learning Rate, k, Epochs) bleiben reine Slider |
 
 ## 4. Theming
 

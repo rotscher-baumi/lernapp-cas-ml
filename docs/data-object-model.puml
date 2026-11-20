@@ -73,6 +73,9 @@ package "Laufzeit (assets/core.js)" {
     +t(de, en) : string
     +$(id) : Element
     +fmt(v, d) : string
+    +drag(svg, opts)
+    +setRange(id, v)
+    +invert(scale) : function
   }
   LernApp "1" o-- "0..*" Module : Reihenfolge nach order
 }

@@ -128,7 +128,7 @@ plt.figure(figsize=(6.5, 5))
 sns.heatmap(num_eda.corr().round(2), annot=True, cmap=&quot;RdBu_r&quot;, vmin=-1, vmax=1)
 plt.title(&quot;Korrelationen (nur Trainingsdaten)&quot;)
 plt.show()</code></pre>
-    <figure class="fig"><img style="max-width:480px;margin:0 auto" src="assets/img/titanic-eda-5.png" alt="Korrelations-Heatmap von Survived, Pclass, Age, SibSp, Parch, Fare und Frau" loading="lazy"><figcaption>Rot: steigen zusammen. Blau: das eine steigt, das andere sinkt. Weiss: kein linearer Zusammenhang.</figcaption></figure>
+    <figure class="fig"><img style="max-width:480px;margin:0 auto" src="assets/img/titanic-eda-5.png" alt="Korrelations-Heatmap von Survived, Pclass, Age, SibSp, Parch, Fare und Frau" loading="lazy"><figcaption>Rot: steigen zusammen. Blau: Das eine steigt, das andere sinkt. Weiss: kein linearer Zusammenhang.</figcaption></figure>
     <p>Mit dem Ziel <code>Survived</code> hängen am stärksten zusammen: <code>Frau</code> (+0,55), <code>Pclass</code> (−0,35, höhere Klassennummer heisst weniger Überlebende) und <code>Fare</code> (+0,27). Das bestätigt die Säulendiagramme.</p>
     <p>Zwischen den Merkmalen fällt <code>Pclass</code> gegen <code>Fare</code> auf (−0,55): Teure Tickets sind 1. Klasse, die beiden Spalten tragen teilweise dieselbe Information. <code>SibSp</code> und <code>Parch</code> hängen zusammen (+0,43), das spricht dafür, sie zu einer Familiengrösse zusammenzufassen (Teil 2).</p>
     <div class="falle"><b>Grenzen der Heatmap</b><p>Die Korrelation misst nur gerade Zusammenhänge. Beim Alter zeigt sie −0,06, obwohl Kinder klar häufiger überlebten (3e). Bei Kategorien wie <code>Pclass</code> ist sie nur eine grobe Näherung. Und Korrelation ist keine Ursache, siehe den Einstiegshafen.</p></div>

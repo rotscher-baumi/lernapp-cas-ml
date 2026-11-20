@@ -72,7 +72,7 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
   <div class="tablewrap"><table>
     <tr><th>Mass</th><th>Formel</th><th>Frage dahinter</th></tr>
     <tr><td>Accuracy</td><td><code>(TP+TN) / alle</code></td><td>Wie oft liege ich insgesamt richtig?</td></tr>
-    <tr><td>Precision</td><td><code>TP / (TP+FP)</code></td><td>Wenn ich «positiv» sage: wie oft stimmt das?</td></tr>
+    <tr><td>Precision</td><td><code>TP / (TP+FP)</code></td><td>Wenn ich «positiv» sage: Wie oft stimmt das?</td></tr>
     <tr><td>Recall (Sensitivität)</td><td><code>TP / (TP+FN)</code></td><td>Wie viele der echten Positiven finde ich?</td></tr>
     <tr><td>F1</td><td><code>2·TP / (2·TP+FP+FN)</code></td><td>Ein Mittelwert aus Precision und Recall</td></tr>
   </table></div>
@@ -83,7 +83,7 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
   <p>Die <b>ROC-Kurve</b> trägt für alle Thresholds den Recall (TPR) gegen die False Alarm Rate (FPR) auf. Ein perfektes Modell liegt oben links, Raten liegt auf der Diagonalen. Die <b>AUC</b> ist die Fläche unter der Kurve: 1 ist perfekt, 0,5 ist Zufall.</p>
   <div class="demo" id="thDemo">
     <div class="tag">Demo</div><h4>Threshold, Confusion Matrix und ROC</h4>
-    <p class="hint">Wähle, wie viele echte Positive und Negative es gibt (Regler logarithmisch, 1 bis 1000). Die Form der Modell-Wahrscheinlichkeiten bleibt gleich: die meisten Fälle sind eindeutig, nur wenige liegen im Grenzbereich (bei 10 und 10 genau 4).</p>
+    <p class="hint">Wähle, wie viele echte Positive und Negative es gibt (Regler logarithmisch, 1 bis 1000). Die Form der Modell-Wahrscheinlichkeiten bleibt gleich: Die meisten Fälle sind eindeutig, nur wenige liegen im Grenzbereich (bei 10 und 10 genau 4).</p>
     <div class="btnrow"><button class="pri" id="thP1">10 : 10 (ausgewogen)</button><button id="thP2">10 : 1000 (selten)</button><button id="thP3">1 : 1000 (sehr selten)</button></div>
     <div class="ctl"><label for="thNP">Anzahl echt positiv</label><input type="range" id="thNP" min="0" max="3" step="0.05" value="1"><output id="thNPO"></output></div>
     <div class="ctl"><label for="thNN">Anzahl echt negativ</label><input type="range" id="thNN" min="0" max="3" step="0.05" value="1"><output id="thNNO"></output></div>
@@ -120,7 +120,7 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
   </ul>
   <p>Bewertet wird pro Klasse: Du betrachtest jede Klasse der Reihe nach als «positiv» und alle anderen als «negativ» und bekommst so TP, FP, FN, TN und Precision/Recall/F1 je Klasse. Zusammenfassen kannst du das auf zwei Arten:</p>
   <ul>
-    <li><b>Micro</b>: Zuerst alle TP, FP, FN über alle Klassen addieren, dann die Masse berechnen. Hat jeder Fall genau ein Label (normales Multiclass), ist micro-Precision = micro-Recall = micro-F1 = Accuracy.</li>
+    <li><b>Micro</b>: Zuerst alle TP, FP, FN über alle Klassen addieren, dann die Masse berechnen. Hat jeder Fall genau ein Label (normales Multiclass), ist Micro-Precision = Micro-Recall = Micro-F1 = Accuracy.</li>
     <li><b>Macro</b>: Die Masse pro Klasse berechnen und ungewichtet mitteln, jede Klasse zählt gleich.</li>
     <li><b>Weighted</b>: Wie Macro, aber gewichtet nach Klassengrösse, damit grosse Klassen mehr zählen.</li>
   </ul>
@@ -310,7 +310,7 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
   <ul>
     <li><b>Einzelbaum:</b> Die Gerade kann den Sprung bei 85 qm nicht abbilden (Bias). Ein tiefer Baum (Tiefe 6) lernt dagegen auch das Rauschen: Auf den 70 Trainings-Wohnungen ist der Fehler klein (55 CHF), auf den 30 neuen deutlich grösser (128 CHF). Dieser Abstand ist das Overfitting.</li>
     <li><b>Bagging:</b> Jeder Baum bekommt 70 Wohnungen, die <i>mit Zurücklegen</i> gezogen werden. Manche kommen doppelt vor, andere gar nicht (im Schnitt sind etwa 63 % verschiedene dabei). Jeder Baum irrt anders, der Mittelwert über 20 Bäume ist glatter und merkt sich weniger Rauschen: Der Test-Fehler sinkt von 126 auf 107 CHF, obwohl die Bäume gleich tief sind (Varianz).</li>
-    <li><b>Boosting, Runde für Runde:</b> Start ist der Durchschnittspreis, <b>1480 CHF</b> für jede Wohnung. Die kleinste Wohnung (30 qm) kostet aber nur 940, der Restfehler ist also <b>−540</b>. Runde 1: Ein Baum der Tiefe 1 schneidet bei 86 qm. Links (38 Wohnungen) liegt der mittlere Restfehler bei −396, rechts (32 Wohnungen) bei +470. Mit Lernrate 0,3 wird nur ein Teil addiert: die 30-qm-Wohnung steigt nicht auf 1084, sondern auf 1480 − 0,3·396 ≈ <b>1361</b>. Ihr Restfehler schrumpft von −540 auf etwa <b>−420</b>. Runde 2 schneidet bei 80 qm und korrigiert die neuen Restfehler, Runde 3 bei 90 qm, danach liegt der Restfehler bei etwa −260. Nach 3 Runden ist der Test-Fehler noch hoch (204 CHF, Underfitting), nach 30 Runden sinkt er auf 104 CHF (Bias). Mit Tiefe 3 und Lernrate 1 lernt Boosting dagegen auch das Rauschen: Training 40, Test 131 CHF.</li>
+    <li><b>Boosting, Runde für Runde:</b> Start ist der Durchschnittspreis, <b>1480 CHF</b> für jede Wohnung. Die kleinste Wohnung (30 qm) kostet aber nur 940, der Restfehler ist also <b>−540</b>. Runde 1: Ein Baum der Tiefe 1 schneidet bei 86 qm. Links (38 Wohnungen) liegt der mittlere Restfehler bei −396, rechts (32 Wohnungen) bei +470. Mit Lernrate 0,3 wird nur ein Teil addiert: Die 30-qm-Wohnung steigt nicht auf 1084, sondern auf 1480 − 0,3·396 ≈ <b>1361</b>. Ihr Restfehler schrumpft von −540 auf etwa <b>−420</b>. Runde 2 schneidet bei 80 qm und korrigiert die neuen Restfehler, Runde 3 bei 90 qm, danach liegt der Restfehler bei etwa −260. Nach 3 Runden ist der Test-Fehler noch hoch (204 CHF, Underfitting), nach 30 Runden sinkt er auf 104 CHF (Bias). Mit Tiefe 3 und Lernrate 1 lernt Boosting dagegen auch das Rauschen: Training 40, Test 131 CHF.</li>
   </ul>
   <div class="demo" id="enDemo">
     <div class="tag">Demo</div><h4>Einzelbaum, Bagging und Boosting auf 100 Wohnungen</h4>
@@ -366,7 +366,7 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
       { q: `Warum ist Accuracy bei 1 % Betrugsfällen ein schlechtes Mass?`, a: `Ein Modell, das nie Betrug meldet, hat 99 % Accuracy und ist trotzdem nutzlos. Precision, Recall, F1 und AUC zeigen, wie gut die seltene Klasse erkannt wird.` },
       { q: `Du senkst den Threshold von 0,5 auf 0,2. Was passiert mit Recall und Precision?`, a: `Mehr Fälle werden positiv: Recall steigt (oder bleibt gleich), Precision sinkt meist, weil mehr falsche Alarme dazukommen.` },
       { q: `Was bedeutet eine AUC von 0,5, was von 1?`, a: `0,5 ist Zufall (ROC-Kurve auf der Diagonalen), 1 ist ein perfekter Klassifikator (alle Positiven vor allen Negativen).` },
-      { q: `Was passiert bei kNN mit k = 1 und mit k = N?`, a: `k = 1 folgt jedem Trainingspunkt (Overfitting, trainings-perfekt). k = N sagt immer die Mehrheitsklasse (Underfitting).` },
+      { q: `Was passiert bei kNN mit k = 1 und mit k = N?`, a: `k = 1 folgt jedem Trainingspunkt (Overfitting, auf den Trainingsdaten perfekt). k = N sagt immer die Mehrheitsklasse (Underfitting).` },
       { q: `Worin unterscheiden sich Bagging und Boosting?`, a: `Bagging trainiert viele Modelle parallel auf Zufallsstichproben und mittelt (senkt Varianz). Boosting trainiert nacheinander, jedes Modell korrigiert die Restfehler des bisherigen Gesamtmodells (senkt Bias, anfälliger für Rauschen).` },
       { q: `Wie entsteht Data Leakage, und wie verhinderst du es bei Skalierung und Imputation?`, a: `Information aus Test- oder Zukunftsdaten fliesst ins Training. Alle lernenden Vorverarbeitungsschritte nur auf den Trainingsdaten fitten, am einfachsten mit einer Pipeline in der Cross-Validation.` },
       { q: `Wann darfst du ein Resampling (z. B. SMOTE) anwenden?`, a: `Nur auf die Trainingsdaten, nie auf Validation oder Test. Sonst wird auf künstlichen Daten bewertet.` },

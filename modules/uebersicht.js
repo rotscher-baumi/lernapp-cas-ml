@@ -283,7 +283,7 @@
     <div class="sb"><h4>Feature Selection</h4><ul>
       <li>${t('<b>Filter:</b> Merkmale nach Statistik oder Korrelation bewerten', '<b>Filter:</b> rate features by statistics or correlation')}</li>
       <li>${t('<b>Wrapper:</b> Modell mit verschiedenen Merkmals-Sets trainieren (z. B. RFE)', '<b>Wrapper:</b> train the model with different feature sets (e.g. RFE)')}</li>
-      <li>${t('<b>Embedded:</b> das Modell wählt selbst (Lasso, Wichtigkeit im Random Forest)', '<b>Embedded:</b> the model chooses itself (Lasso, importance in the Random Forest)')}</li>
+      <li>${t('<b>Embedded:</b> Das Modell wählt selbst (Lasso, Wichtigkeit im Random Forest)', '<b>Embedded:</b> the model chooses itself (Lasso, importance in the Random Forest)')}</li>
     </ul><div class="sb-f"><a href="#ml-fs">${MEHR}</a> ${bsp('06_Strategien')}</div></div>
     <div class="sb"><h4>${t('Under- und Overfitting erkennen', 'Spotting underfitting and overfitting')}</h4><ul>
       <li>${t('<b>Underfitting</b> (hoher Bias): Train und Validierung beide schlecht → komplexeres Modell, mehr Merkmale, weniger Regularisierung', '<b>Underfitting</b> (high bias): train and validation both poor → more complex model, more features, less regularisation')}</li>
