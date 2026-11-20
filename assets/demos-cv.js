@@ -54,7 +54,23 @@
     }
     return keep;
   }
-  LernApp.cvLib = { testImage, filter3, meanF, medianF, psnr, iou, nms };
+  // Luma weights of ITU-R BT.601 (what OpenCV uses for BGR2GRAY).
+  const gray = (r, g, b) => 0.299 * r + 0.587 * g + 0.114 * b;
+  // Hue in degrees 0..360 of an RGB colour, -1 for grey (no hue).
+  function hue(r, g, b) {
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+    if (d === 0) return -1;
+    const h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    return (h * 60 + 360) % 360;
+  }
+  // Order of the values of an H × W × C image in memory: [channel, y, x] per position.
+  function layout(H, W, C, order) {
+    const out = [];
+    if (order === 'hwc') { for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) for (let c = 0; c < C; c++) out.push([c, y, x]); }
+    else { for (let c = 0; c < C; c++) for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) out.push([c, y, x]); }
+    return out;
+  }
+  LernApp.cvLib = { testImage, filter3, meanF, medianF, psnr, iou, nms, gray, hue, layout };
 
   LernApp.demos.cv = function () {
     const T = LernApp.t;
@@ -65,7 +81,7 @@
       if (!fig) return;
       const panel = fig.querySelector('.ab-detail'), steps = fig.querySelectorAll('.ab-step');
       const S = {
-        '1': [T('1 · Bilder und Aufgabe', '1 · Images and task'), T('Zuerst die Aufgabe festlegen: <b>Restauration</b> (denoising, deblurring, super-resolution: Bild rein, Bild raus), <b>Object Detection</b> (Bild rein, Liste aus Box, Klasse, Score) oder <b>Segmentation</b> (Bild rein, Klasse pro Pixel). Daraus folgen die Daten: Bildpaare (verschlechtert, sauber), Bilder mit Boxen oder Bilder mit Masken. Pixel auf 0 bis 1 skalieren.', 'First fix the task: <b>restoration</b> (denoising, deblurring, super-resolution: image in, image out), <b>object detection</b> (image in, list of box, class, score) or <b>segmentation</b> (image in, a class per pixel). The data follows: image pairs (degraded, clean), images with boxes or images with masks. Scale pixels to 0 to 1.'), [['Bildentstehung', '#cv-bild'], ['Denoising, Deblurring, Super-Resolution', '#cv-restauration']]],
+        '1': [T('1 · Bilder und Aufgabe', '1 · Images and task'), T('Zuerst die Aufgabe festlegen: <b>Restauration</b> (denoising, deblurring, super-resolution: Bild rein, Bild raus), <b>Object Detection</b> (Bild rein, Liste aus Box, Klasse, Score) oder <b>Segmentation</b> (Bild rein, Klasse pro Pixel). Daraus folgen die Daten: Bildpaare (verschlechtert, sauber), Bilder mit Boxen oder Bilder mit Masken. Pixel auf 0 bis 1 skalieren.', 'First fix the task: <b>restoration</b> (denoising, deblurring, super-resolution: image in, image out), <b>object detection</b> (image in, list of box, class, score) or <b>segmentation</b> (image in, a class per pixel). The data follows: image pairs (degraded, clean), images with boxes or images with masks. Scale pixels to 0 to 1.'), [['Bildentstehung', '#cv-bild'], [T('Pixel und channels', 'Pixels and channels'), '#cv-pixel'], ['Denoising, Deblurring, Super-Resolution', '#cv-restauration']]],
         '2': [T('2 · Modell wählen', '2 · Choose the model'), T('Restauration: CNN mit <b>Skip Connections</b> (U-Net, DnCNN) oder Transformer (SwinIR, Restormer). Detection: <b>Faster R-CNN</b> (zwei Stufen, genau) oder <b>YOLO</b> (eine Stufe, schnell). Segmentation: <b>U-Net</b> pro Aufgabe trainiert oder das Foundation Model <b>SAM</b> ohne Training.', 'Restoration: CNN with <b>skip connections</b> (U-Net, DnCNN) or transformer (SwinIR, Restormer). Detection: <b>Faster R-CNN</b> (two stages, accurate) or <b>YOLO</b> (one stage, fast). Segmentation: <b>U-Net</b> trained per task or the foundation model <b>SAM</b> without training.'), [['Detection', '#cv-detection'], ['Segmentation', '#cv-seg']]],
         '3': [T('3 · Loss und Optimizer', '3 · Loss and optimizer'), T('Passend zur Ausgabe: Restauration mit <b>L1</b> (schärfer als L2), oft plus Perceptual oder GAN-Loss. Detection: Summe aus Klassen-Loss und Box-Loss (IoU-basiert). Segmentation: <b>Cross-Entropy + Dice</b> gegen den Klassen-Imbalance. Optimizer meist Adam.', 'Matching the output: restoration with <b>L1</b> (sharper than L2), often plus a perceptual or GAN loss. Detection: class loss plus box loss (IoU-based). Segmentation: <b>cross-entropy + Dice</b> against class imbalance. Optimizer usually Adam.'), [['Methoden', '#cv-methoden']]],
         '4': [T('4 · Forward pass', '4 · Forward pass'), T('Das Netz berechnet seine Ausgabe: ein Bild gleicher Grösse (Restauration, Segmentation) oder viele Kandidaten-Boxen mit Score (Detection). Bei Detection folgen beim Inferenz-Schritt <b>Score-threshold</b> und <b>NMS</b>.', 'The network computes its output: an image of the same size (restoration, segmentation) or many candidate boxes with scores (detection). For detection, a <b>score threshold</b> and <b>NMS</b> follow at inference.'), [['IoU und NMS', '#cv-iou']]],
@@ -152,6 +168,145 @@
       group('rcvKind', (v) => { kind = v; });
       group('rcvFix', (v) => { fix = v; });
       draw();
+    })();
+
+    // Demo: pixel inspector, channel split, bit depth, memory, layout, Bayer (section «Was in einem Bild steckt»)
+    (function () {
+      const scene = $('pxScene');
+      if (!scene) return;
+      const W = scene.width, H = scene.height;
+      const c = scene.getContext('2d', { willReadFrequently: true });
+      // Sample scene in fixed photo colours (an image, not page chrome, so it is the same in both themes).
+      const sky = c.createLinearGradient(0, 0, 0, 62);
+      sky.addColorStop(0, '#2f6fd0'); sky.addColorStop(1, '#f7c873');
+      c.fillStyle = sky; c.fillRect(0, 0, W, H);
+      c.fillStyle = '#ffd23f'; c.beginPath(); c.arc(124, 22, 11, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#3c9a5f'; c.beginPath(); c.moveTo(0, 62); c.quadraticCurveTo(50, 36, 100, 60); c.quadraticCurveTo(135, 46, 160, 58); c.lineTo(160, 100); c.lineTo(0, 100); c.fill();
+      c.fillStyle = '#23633b'; c.beginPath(); c.moveTo(0, 78); c.quadraticCurveTo(70, 60, 160, 80); c.lineTo(160, 100); c.lineTo(0, 100); c.fill();
+      c.fillStyle = '#1e64d8'; c.beginPath(); c.ellipse(112, 86, 34, 8, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#f2efe6'; c.fillRect(30, 56, 26, 20);
+      c.fillStyle = '#d62828'; c.beginPath(); c.moveTo(26, 57); c.lineTo(43, 42); c.lineTo(60, 57); c.fill();
+      c.fillStyle = '#5a3a22'; c.fillRect(39, 66, 7, 10);
+      c.fillStyle = '#7fc8f8'; c.fillRect(32, 59, 6, 5); c.fillRect(48, 59, 6, 5);
+      const data = c.getImageData(0, 0, W, H).data;
+      const px = (x, y) => { const i = (y * W + x) * 4; return [data[i], data[i + 1], data[i + 2]]; };
+      const hex2 = (v) => v.toString(16).padStart(2, '0').toUpperCase();
+
+      // Inspector: 9 × 9 magnifier and the values of the centre pixel
+      const lens = $('pxLens'), lc = lens.getContext('2d'), N = 9, S = lens.width / N, h = (N - 1) / 2;
+      function inspect(x, y) {
+        x = Math.max(0, Math.min(W - 1, x)); y = Math.max(0, Math.min(H - 1, y));
+        lc.clearRect(0, 0, lens.width, lens.height);
+        for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+          const xx = x + i - h, yy = y + j - h;
+          lc.fillStyle = xx < 0 || yy < 0 || xx >= W || yy >= H ? 'rgba(128,128,128,0.2)' : 'rgb(' + px(xx, yy).join(',') + ')';
+          lc.fillRect(i * S, j * S, S, S);
+        }
+        lc.strokeStyle = 'rgba(0,0,0,0.18)'; lc.lineWidth = 1; lc.beginPath();
+        for (let k = 1; k < N; k++) { lc.moveTo(k * S + 0.5, 0); lc.lineTo(k * S + 0.5, lens.height); lc.moveTo(0, k * S + 0.5); lc.lineTo(lens.width, k * S + 0.5); }
+        lc.stroke();
+        lc.lineWidth = 3; lc.strokeStyle = '#fff'; lc.strokeRect(h * S + 1.5, h * S + 1.5, S - 3, S - 3);
+        lc.lineWidth = 1; lc.strokeStyle = '#000'; lc.strokeRect(h * S, h * S, S, S);
+        const [r, g, b] = px(x, y), off = (y * W + x) * 3;
+        $('pxRead').innerHTML =
+          '<dt>' + T('Index', 'Index') + '</dt><dd>img[' + y + ', ' + x + ']</dd>' +
+          '<dt>RGB</dt><dd><span class="px-sw" style="background:rgb(' + r + ',' + g + ',' + b + ')"></span>[<span class="px-r">' + r + '</span>, <span class="px-g">' + g + '</span>, <span class="px-b">' + b + '</span>]</dd>' +
+          '<dt>OpenCV</dt><dd>BGR [' + b + ', ' + g + ', ' + r + ']</dd>' +
+          '<dt>Hex</dt><dd>#' + hex2(r) + hex2(g) + hex2(b) + '</dd>' +
+          '<dt>float32</dt><dd>[' + [r, g, b].map((v) => (v / 255).toFixed(3)).join(', ') + ']</dd>' +
+          '<dt>' + T('Grau', 'Grey') + '</dt><dd>' + Math.round(gray(r, g, b)) + '</dd>' +
+          '<dt>Bytes</dt><dd>' + T('Offset ', 'offset ') + off + '…' + (off + 2) + ' (HWC)</dd>';
+      }
+      function at(e) {
+        const rc = scene.getBoundingClientRect();
+        inspect(Math.floor((e.clientX - rc.left) / rc.width * W), Math.floor((e.clientY - rc.top) / rc.height * H));
+      }
+      scene.addEventListener('pointermove', at);
+      scene.addEventListener('pointerdown', at);
+      inspect(36, 48); // start on the edge of the red roof, so the magnifier shows two colours
+
+      // Channel split
+      const defs = [
+        ['R · ' + T('Rot', 'red'), 'img[:, :, 0]', (r, g, b) => [r, r, r], (r) => [r, 0, 0]],
+        ['G · ' + T('Grün', 'green'), 'img[:, :, 1]', (r, g) => [g, g, g], (r, g) => [0, g, 0]],
+        ['B · ' + T('Blau', 'blue'), 'img[:, :, 2]', (r, g, b) => [b, b, b], (r, g, b) => [0, 0, b]],
+        [T('Graustufen', 'Greyscale'), '.299R + .587G + .114B', (r, g, b) => { const v = gray(r, g, b); return [v, v, v]; }, (r, g, b) => { const v = gray(r, g, b); return [v, v, v]; }],
+        ['Hue (HSV)', T('Winkel 0–360°', 'angle 0–360°'), (r, g, b) => { const t = hue(r, g, b); const v = t < 0 ? 128 : t / 360 * 255; return [v, v, v]; },
+          (r, g, b) => { const t = hue(r, g, b); if (t < 0) return [128, 128, 128]; const f = (n) => { const k = (n + t / 30) % 12; return 255 * (0.5 - 0.5 * Math.max(-1, Math.min(k - 3, 9 - k, 1))); }; return [f(0), f(8), f(4)]; }],
+        ['Alpha (RGBA)', T('4. channel: Deckkraft', '4th channel: opacity'), null, null],
+      ];
+      const wrap = $('pxCh');
+      wrap.innerHTML = '';
+      const cvs = defs.map((d) => {
+        const box = document.createElement('div');
+        const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+        cv.setAttribute('aria-label', d[0]);
+        box.append(cv);
+        box.insertAdjacentHTML('beforeend', '<b>' + d[0] + '</b><code>' + d[1] + '</code>');
+        wrap.append(box);
+        return cv;
+      });
+      function channels(tint) {
+        defs.forEach((d, k) => {
+          const cx = cvs[k].getContext('2d'), out = cx.createImageData(W, H), o = out.data;
+          for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+            const i = (y * W + x) * 4, r = data[i], g = data[i + 1], b = data[i + 2];
+            let v;
+            if (!d[2]) { // alpha: linear ramp, tinted = composited over a checkerboard
+              const a = Math.min(1, Math.max(0, (x - 10) / (W - 20)));
+              if (tint) { const ch = ((x >> 3) + (y >> 3)) % 2 ? 200 : 245; v = [r * a + ch * (1 - a), g * a + ch * (1 - a), b * a + ch * (1 - a)]; }
+              else v = [a * 255, a * 255, a * 255];
+            } else v = (tint ? d[3] : d[2])(r, g, b);
+            o[i] = v[0]; o[i + 1] = v[1]; o[i + 2] = v[2]; o[i + 3] = 255;
+          }
+          cx.putImageData(out, 0, 0);
+        });
+      }
+      const mode = $('pxMode');
+      mode.querySelectorAll('button').forEach((bt) => bt.addEventListener('click', () => {
+        mode.querySelectorAll('button').forEach((x) => { x.setAttribute('aria-pressed', 'false'); x.classList.remove('pri'); });
+        bt.setAttribute('aria-pressed', 'true'); bt.classList.add('pri');
+        channels(bt.getAttribute('data-v') === 'tint');
+      }));
+      channels(false);
+
+      // Bit depth: the same ramp quantised to 2, 4, 16 and 256 levels
+      $('pxLevels').innerHTML = [1, 2, 4, 8].map((bits) => '<div><span>' + bits + ' Bit · ' + (2 ** bits) + T(' Stufen', ' levels') + '</span><canvas width="256" height="1" data-bits="' + bits + '" aria-hidden="true"></canvas></div>').join('');
+      $('pxLevels').querySelectorAll('canvas').forEach((cv) => {
+        const lv = 2 ** +cv.dataset.bits, cx = cv.getContext('2d');
+        for (let x = 0; x < 256; x++) { const q = Math.round(Math.floor(x / 256 * lv) / (lv - 1) * 255); cx.fillStyle = 'rgb(' + q + ',' + q + ',' + q + ')'; cx.fillRect(x, 0, 1, 1); }
+      });
+
+      // Memory calculator
+      const loc = T('de-CH', 'en-US');
+      function size(bytes) {
+        const u = ['B', 'KB', 'MB', 'GB', 'TB']; let i = 0;
+        while (bytes >= 1000 && i < u.length - 1) { bytes /= 1000; i++; }
+        return bytes.toLocaleString(loc, { maximumFractionDigits: 1 }) + ' ' + u[i];
+      }
+      const ins = ['pxH', 'pxW', 'pxC', 'pxD'].map((id) => $(id));
+      function calc() {
+        const [hh, ww, cc, dd] = ins.map((e) => Math.max(0, Math.floor(+e.value) || 0));
+        const bytes = hh * ww * cc * dd;
+        $('pxM1').textContent = size(bytes);
+        $('pxM32').textContent = size(bytes * 32);
+        $('pxMCalc').textContent = hh.toLocaleString(loc) + ' × ' + ww.toLocaleString(loc) + ' × ' + cc + ' × ' + dd + ' B = ' + bytes.toLocaleString(loc) + ' Bytes';
+      }
+      ins.forEach((e) => e.addEventListener('input', calc));
+      calc();
+
+      // HWC vs CHW for a 2 × 2 image
+      const P = [[[214, 60, 60], [40, 160, 90]], [[50, 90, 220], [235, 190, 40]]];
+      $('pxMini').innerHTML = P.map((row, y) => row.map((p, x) => '<div style="background:rgb(' + p.join(',') + ')">' + y + ',' + x + '</div>').join('')).join('');
+      const names = ['R', 'G', 'B'];
+      const strip = (order) => layout(2, 2, 3, order).map((q, i) => '<span class="px-cell px-c' + names[q[0]] + '" title="' + T('Position ', 'position ') + i + ': ' + names[q[0]] + T(' von Pixel [', ' of pixel [') + q[1] + ', ' + q[2] + ']">' + names[q[0]] + q[1] + q[2] + '</span>').join('');
+      $('pxHWC').innerHTML = strip('hwc');
+      $('pxCHW').innerHTML = strip('chw');
+
+      // Bayer pattern RGGB
+      let bay = '';
+      for (let y = 0; y < 6; y++) for (let x = 0; x < 6; x++) { const k = y % 2 === 0 ? (x % 2 === 0 ? 'R' : 'G') : (x % 2 === 0 ? 'G' : 'B'); bay += '<span class="px-c' + k + '">' + k + '</span>'; }
+      $('pxBayer').innerHTML = bay;
     })();
 
     // Demo 2: IoU of two boxes

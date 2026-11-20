@@ -81,7 +81,7 @@ Die englische Fassung eines Kapitels liegt in `modules/en/<id>.js` und ruft `Ler
 
 ### Design (`assets/style.css`)
 
-Alle Farben sind Tokens auf `:root` (`--bg`, `--fg`, `--accent`, ...). Der dunkle Satz gilt bei `prefers-color-scheme: dark`, solange `<html>` kein `data-theme="light"` trägt, und immer bei `data-theme="dark"`. Demos und SVG-Grafiken benutzen dieselben Tokens, darum passen sie sich automatisch an.
+Alle Farben sind Tokens auf `:root` (`--bg`, `--fg`, `--accent`, ...). Der dunkle Satz gilt bei `prefers-color-scheme: dark`, solange `<html>` kein `data-theme="light"` trägt, und immer bei `data-theme="dark"`. Demos und SVG-Grafiken benutzen dieselben Tokens, darum passen sie sich automatisch an. `--ch-r`, `--ch-g`, `--ch-b` sind die Farben der Bild-channels R, G, B (Kapitel Computer Vision, Abschnitt «Was in einem Bild steckt»).
 
 ### Server (`server.py`)
 
