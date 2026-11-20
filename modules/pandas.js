@@ -88,7 +88,7 @@ df.groupby("jahr")["preis"].agg(["count", "sum", "mean", "median"])</code></pre>
 # indicator=True fügt Spalte _merge hinzu: both / left_only / right_only</code></pre>
   <p>Nützlich: <code>validate="one_to_one"</code> bricht ab, falls ein Schlüssel doppelt vorkommt. <code>indicator=True</code> zeigt, woher jede Zeile kam.</p>
 
-  <h3>Eigene Kategorien: map und pd.cut</h3>
+  <h3>Eigene Kategorien: <code>map</code> und <code>pd.cut</code></h3>
   <pre><code>bins   = [-float("inf"), 500, 3500, 10000, float("inf")]
 labels = ["cheap", "normal", "expensive", "super expensive"]
 df["kategorie"] = pd.cut(df["preis_pro_sqft"], bins=bins, labels=labels)</code></pre>

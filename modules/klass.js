@@ -122,7 +122,7 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
   <ul>
     <li><b>Micro</b>: Zuerst alle TP, FP, FN über alle Klassen addieren, dann die Masse berechnen. Hat jeder Fall genau ein Label (normales Multiclass), ist micro-Precision = micro-Recall = micro-F1 = Accuracy.</li>
     <li><b>Macro</b>: Die Masse pro Klasse berechnen und ungewichtet mitteln, jede Klasse zählt gleich.</li>
-    <li><b>Weighted</b>: Wie macro, aber gewichtet nach Klassengrösse, damit grosse Klassen mehr zählen.</li>
+    <li><b>Weighted</b>: Wie Macro, aber gewichtet nach Klassengrösse, damit grosse Klassen mehr zählen.</li>
   </ul>
   <pre><code>from sklearn.metrics import classification_report, confusion_matrix
 print(confusion_matrix(y_test, pred))
