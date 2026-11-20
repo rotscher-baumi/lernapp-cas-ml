@@ -1,7 +1,7 @@
 /*
  * Overview chapter: one card per model and one checklist per strategy, as a
- * study sheet across the Supervised and Unsupervised chapters. Content only
- * summarises what ml.js, klass.js and unsup.js already explain.
+ * study sheet across all ML chapters. Content only summarises what ml.js,
+ * klass.js, unsup.js, nn.js, cnn.js, cv.js and gen.js already explain.
  * Translated in place: every text is t('deutsch', 'english') via LernApp.t.
  */
 (function () {
@@ -27,7 +27,7 @@
   function card(name, idea, rows, sk, href) {
     return '<div class="sb"><h4>' + name + '</h4><p>' + idea + '</p><dl>' +
       rows.map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>'; }).join('') +
-      '</dl><div class="sb-f"><code>' + sk + '</code><span><a href="' + href + '">' + MEHR + '</a> ' + bsp(NB) + '</span></div></div>';
+      '</dl><div class="sb-f"><code>' + sk + '</code><span><a href="' + href + '">' + MEHR + '</a>' + (NB ? ' ' + bsp(NB) : '') + '</span></div></div>';
   }
 
   NB = '01_Regression';
@@ -195,6 +195,110 @@
     ], 'umap.UMAP', '#unsup-tsne'),
   ];
 
+  /* Deep learning: Neural Networks, CNN, Computer Vision, Generative Models (summarise nn.js, cnn.js, cv.js, gen.js). */
+  const EING = t('Eingaben', 'Inputs');
+  NB = '08_Neuronale_Netze';
+  const dl = [
+    card(t('MLP (Dense-Netz)', 'MLP (dense network)'), t('Schichten von Neuronen: gewichtete Summe plus Activation Function. Die Gewichte lernt Backpropagation mit einem Optimizer wie Adam.', 'Layers of neurons: weighted sum plus activation function. Backpropagation learns the weights with an optimizer such as Adam.'), [
+      [WANN, t('Klassifikation oder Regression mit vielen Daten und nicht-linearen Zusammenhängen. Bei Tabellen meist nicht besser als Gradient Boosting.', 'classification or regression with lots of data and non-linear relationships. On tables usually not better than gradient boosting.')],
+      [HP, t('Schichten und Neuronen, Learning Rate, Batch Size, Epochs, Dropout', 'layers and neurons, learning rate, batch size, epochs, dropout')],
+      [EING, t('skalieren, Scaler nur auf Train', 'scale, scaler on training data only')],
+      ['+', t('lernt beliebige Zusammenhänge, Grundbaustein aller Netze', 'learns any relationship, building block of all networks')],
+      ['−', t('braucht viele Daten und Tuning, kaum erklärbar, streut von Lauf zu Lauf', 'needs lots of data and tuning, hardly explainable, varies from run to run')],
+    ], 'keras.layers.Dense / MLPClassifier', '#nn-arch'),
+  ];
+  NB = '';
+  const cnn = [
+    card(t('CNN (eigenes Netz)', 'CNN (your own network)'), t('Filter gleiten über das Bild und erzeugen Feature Maps. Pooling verkleinert, am Schluss entscheiden Dense-Schichten. Dieselben Gewichte an jeder Stelle: viel weniger Parameter als ein Dense-Netz.', 'Filters slide over the image and produce feature maps. Pooling shrinks, dense layers decide at the end. The same weights at every position: far fewer parameters than a dense network.'), [
+      [WANN, t('Bilder klassifizieren, wenn es viele eigene Bilder gibt oder kein passendes vortrainiertes Netz', 'classifying images when there are many own images or no suitable pretrained network')],
+      [HP, t('Zahl der Filter und Blöcke, Kernel-Grösse, Padding, Learning Rate, Augmentation', 'number of filters and blocks, kernel size, padding, learning rate, augmentation')],
+      [EING, t('Pixel durch 255 teilen', 'divide pixels by 255')],
+      ['+', t('erkennt Muster unabhängig von ihrer Lage', 'recognises patterns regardless of their position')],
+      ['−', t('braucht viele Bilder, sonst Overfitting', 'needs many images, otherwise overfitting')],
+    ], 'keras.layers.Conv2D', '#cnn-keras'),
+    card('Transfer Learning', t('Ein auf ImageNet vortrainiertes Netz (ResNet, MobileNet, EfficientNet) als Basis einfrieren, nur einen neuen Kopf trainieren. Für Fine-Tuning danach obere Schichten mit kleiner Learning Rate freigeben.', 'Freeze a network pretrained on ImageNet (ResNet, MobileNet, EfficientNet) as the base and train only a new head. For fine-tuning, unfreeze the upper layers afterwards with a small learning rate.'), [
+      [WANN, t('wenige hundert bis tausend Bilder, Aufgabe ähnlich wie Fotos', 'a few hundred to a few thousand images, task similar to photos')],
+      [HP, t('welche Schichten frei, Learning Rate (Fine-Tuning etwa 1e-5)', 'which layers are unfrozen, learning rate (fine-tuning about 1e-5)')],
+      [EING, t('genau die Vorverarbeitung des Netzes (<code>preprocess_input</code>, Bildgrösse)', 'exactly the network’s preprocessing (<code>preprocess_input</code>, image size)')],
+      ['+', t('gute Ergebnisse mit wenig Daten und kurzem Training', 'good results with little data and short training')],
+      ['−', t('hilft wenig bei ganz anderen Bildern (Röntgen, Mikroskop), Lizenz beachten', 'helps little with very different images (X-ray, microscope), mind the licence')],
+    ], 'keras.applications.ResNet50', '#cnn-transfer'),
+  ];
+  const cv = [
+    card(t('Klassische Bildfilter', 'Classical image filters'), t('Feste Rechenregeln ohne Training: Gauss-, Median- und bilateraler Filter, Non-Local Means und BM3D gegen Rauschen, Wiener-Filter gegen bekannte Unschärfe, bicubic zum Vergrössern.', 'Fixed rules without training: Gaussian, median and bilateral filter, non-local means and BM3D against noise, Wiener filter against known blur, bicubic for upscaling.'), [
+      [WANN, t('Baseline für jede Restauration, wenig Rechenleistung, bekanntes Rauschmodell', 'baseline for any restoration, little compute, known noise model')],
+      [HP, t('Fenstergrösse, σ des Filters', 'window size, σ of the filter')],
+      [EING, t('Werte auf 0 bis 1', 'values in 0 to 1')],
+      ['+', t('schnell, nachvollziehbar, erfindet nichts', 'fast, traceable, invents nothing')],
+      ['−', t('verwischt Kanten und feine Details stärker als gelernte Modelle', 'blurs edges and fine detail more than learned models')],
+    ], 'scipy.ndimage, cv2', '#cv-restauration'),
+    card('U-Net', t('Encoder-Decoder mit Skip Connections: Der Encoder versteht, was im Bild ist, der Decoder baut die volle Auflösung wieder auf, die Skips liefern die Kanten.', 'Encoder-decoder with skip connections: the encoder understands what is in the image, the decoder rebuilds full resolution, the skips provide the edges.'), [
+      [WANN, t('Bild zu Bild: Denoising, Deblurring, Segmentation mit eigenen Labels', 'image to image: denoising, deblurring, segmentation with own labels')],
+      [HP, t('Tiefe, Zahl der Channels, Loss (L1, Cross-Entropy + Dice)', 'depth, number of channels, loss (L1, cross-entropy + Dice)')],
+      [EING, t('Pixel skalieren, Bildgrösse durch 2<sup>Tiefe</sup> teilbar', 'scale pixels, image size divisible by 2<sup>depth</sup>')],
+      ['+', t('genaue Kanten, auch mit wenigen Bildern trainierbar', 'precise edges, trainable even with few images')],
+      ['−', t('ein Modell pro Aufgabe, braucht pixelgenaue Labels oder saubere Zielbilder', 'one model per task, needs pixel-exact labels or clean target images')],
+    ], 'keras.Model (Encoder-Decoder)', '#cv-seg'),
+    card(t('Restaurations-Transformer', 'Restoration transformer'), t('SwinIR und Restormer: Self-Attention in Fenstern oder über Channels sieht grosse Bildteile auf einmal und nutzt ähnliche Stellen im ganzen Bild.', 'SwinIR and Restormer: self-attention in windows or across channels sees large image regions at once and uses similar places across the whole image.'), [
+      [WANN, t('beste Bildqualität bei Denoising, Deblurring, Super-Resolution, meist vortrainiert übernommen', 'best image quality for denoising, deblurring, super-resolution, usually taken over pretrained')],
+      [HP, t('Variante wählen (Aufgabe, Rauschstärke, Vergrösserung)', 'choose the variant (task, noise level, scale factor)')],
+      [EING, t('wie beim Training des Modells (RGB, Wertebereich)', 'as in the model’s training (RGB, value range)')],
+      ['+', t('Stand der Technik auf Benchmarks', 'state of the art on benchmarks')],
+      ['−', t('gross und langsam, kann Details erfinden, nur für die trainierte Degradation gut', 'large and slow, can invent details, only good for the degradation it was trained on')],
+    ], 'transformers.Swin2SRForImageSuperResolution', '#cv-restauration'),
+    card('Faster R-CNN', t('Detection in zwei Stufen: Ein Region Proposal Network schlägt Kandidaten vor, ein Kopf bestimmt pro Kandidat Klasse und genaue Box.', 'Two-stage detection: a region proposal network suggests candidates, a head determines class and exact box for each.'), [
+      [WANN, t('höchste Genauigkeit, kleine Objekte, Zeit spielt keine Rolle', 'highest accuracy, small objects, time does not matter')],
+      [HP, t('Score-Threshold, NMS-IoU-Threshold, Anker', 'score threshold, NMS IoU threshold, anchors')],
+      [EING, t('wie der vortrainierte Backbone', 'as the pretrained backbone')],
+      ['+', t('genau, gut für kleine Objekte', 'accurate, good for small objects')],
+      ['−', t('langsamer als YOLO, komplexer', 'slower than YOLO, more complex')],
+    ], 'torchvision.models.detection', '#cv-detection'),
+    card('YOLO', t('Detection in einer Stufe: Das Netz sagt auf einem Gitter direkt Klassen und Boxen voraus (anchor-free ab v8), NMS räumt Duplikate weg.', 'One-stage detection: the network predicts classes and boxes directly on a grid (anchor-free from v8), NMS removes duplicates.'), [
+      [WANN, t('Echtzeit, Video, Edge-Geräte', 'real time, video, edge devices')],
+      [HP, t('Modellgrösse (n, s, m, l, x), Score- und NMS-Threshold, Bildgrösse', 'model size (n, s, m, l, x), score and NMS threshold, image size')],
+      [EING, t('Labels als <code>class cx cy w h</code>, auf 0 bis 1 normiert', 'labels as <code>class cx cy w h</code>, normalised to 0 to 1')],
+      ['+', t('schnell, einfach zu fine-tunen', 'fast, easy to fine-tune')],
+      ['−', t('etwas schwächer bei sehr kleinen, dicht gedrängten Objekten', 'somewhat weaker on very small, densely packed objects')],
+    ], 'ultralytics.YOLO', '#cv-detection'),
+    card('SAM (Segment Anything)', t('Foundation Model für Segmentation, auf einer Milliarde Masken trainiert. Ein Prompt (Punkt, Box) genügt, und es liefert die Maske des Objekts.', 'Foundation model for segmentation, trained on a billion masks. A prompt (point, box) is enough and it returns the object’s mask.'), [
+      [WANN, t('Masken ohne eigenes Training (zero-shot), Labels schneller erstellen', 'masks without own training (zero-shot), creating labels faster')],
+      [HP, t('Prompt, Modellgrösse', 'prompt, model size')],
+      [EING, t('RGB-Bild, Prompt-Koordinaten', 'RGB image, prompt coordinates')],
+      ['+', t('kein Training, funktioniert auf sehr vielen Bildarten', 'no training, works on very many kinds of images')],
+      ['−', t('kennt keine Klassennamen, gross; für Klassen mit einem Klassifikator kombinieren', 'knows no class names, large; combine with a classifier for classes')],
+    ], 'segment_anything.SamPredictor', '#cv-seg'),
+  ];
+  const gen = [
+    card('Autoencoder', t('Encoder drückt das Bild in einen kleinen Code <code>z</code>, der Decoder rekonstruiert es daraus. Gelernt wird nur mit der Rekonstruktion, ohne Labels.', 'The encoder squeezes the image into a small code <code>z</code>, the decoder reconstructs it. It learns only from the reconstruction, without labels.'), [
+      [WANN, t('Kompression, Denoising, Anomalien (grosser Rekonstruktionsfehler)', 'compression, denoising, anomalies (large reconstruction error)')],
+      [HP, t('Grösse von <code>z</code>, Architektur', 'size of <code>z</code>, architecture')],
+      [EING, t('Pixel auf 0 bis 1', 'pixels in 0 to 1')],
+      ['+', t('einfach, stabil, kein Label nötig', 'simple, stable, no labels needed')],
+      ['−', t('kein brauchbarer Generator: zufällige <code>z</code> ergeben Unsinn', 'no usable generator: random <code>z</code> give nonsense')],
+    ], 'keras.Model', '#gen-ae'),
+    card(t('VAE (Variational Autoencoder)', 'VAE (variational autoencoder)'), t('Der Encoder gibt Mittelwert und Streuung aus, <code>z</code> wird daraus gezogen. Die KL-Divergenz ordnet den Latent Space, so dass man neue Bilder ziehen und interpolieren kann.', 'The encoder outputs mean and spread, <code>z</code> is sampled from them. The KL divergence orders the latent space so you can sample and interpolate new images.'), [
+      [WANN, t('neue Bilder erzeugen, glatte Übergänge zwischen Bildern', 'generating new images, smooth transitions between images')],
+      [HP, t('Grösse von <code>z</code>, Gewicht der KL-Divergenz', 'size of <code>z</code>, weight of the KL divergence')],
+      [EING, t('Pixel auf 0 bis 1', 'pixels in 0 to 1')],
+      ['+', t('stabiles Training, geordneter Latent Space', 'stable training, ordered latent space')],
+      ['−', t('etwas unscharfe Bilder', 'somewhat blurry images')],
+    ], 'keras.Model', '#gen-vae'),
+    card('PixelCNN', t('Erzeugt ein Bild Pixel für Pixel. Maskierte Faltungen sorgen dafür, dass jeder Pixel nur die schon erzeugten sieht.', 'Generates an image pixel by pixel. Masked convolutions make sure each pixel only sees those already generated.'), [
+      [WANN, t('wenn eine echte Wahrscheinlichkeit pro Bild gebraucht wird', 'when a real probability per image is needed')],
+      [HP, t('Tiefe, Zahl der Filter', 'depth, number of filters')],
+      [EING, t('Pixel als Klassen (z. B. 0 bis 255 oder binär)', 'pixels as classes (e.g. 0 to 255 or binary)')],
+      ['+', t('einfaches, stabiles Training, exakte Likelihood', 'simple, stable training, exact likelihood')],
+      ['−', t('Generieren sehr langsam (ein Durchlauf pro Pixel)', 'generation very slow (one pass per pixel)')],
+    ], 'keras.layers.Conv2D (maskiert)', '#gen-pixel'),
+    card('GAN', t('Ein Generator macht aus Zufall Bilder, ein Discriminator unterscheidet echte von gefälschten. Beide lernen gegeneinander.', 'A generator turns noise into images, a discriminator tells real from fake. Both learn against each other.'), [
+      [WANN, t('sehr scharfe Bilder, Bild-zu-Bild-Übersetzung, Super-Resolution (ESRGAN)', 'very sharp images, image-to-image translation, super-resolution (ESRGAN)')],
+      [HP, t('Learning Rates von Generator und Discriminator, Grösse von <code>z</code>', 'learning rates of generator and discriminator, size of <code>z</code>')],
+      [EING, t('Pixel skalieren, passend zur Output-Activation des Generators', 'scale pixels to match the generator’s output activation')],
+      ['+', t('schärfste Bilder der vier Verfahren', 'sharpest images of the four methods')],
+      ['−', t('instabil, Mode Collapse, Loss sagt wenig über die Qualität', 'unstable, mode collapse, the loss says little about quality')],
+    ], 'keras.Model', '#gen-gan'),
+  ];
+
   function grid(cards) { return '<div class="sbgrid">' + cards.join('') + '</div>'; }
 
   LernApp.register({
@@ -203,9 +307,9 @@
     nav: t('Übersicht', 'Overview'),
     title: t('Alle Modelle und Strategien auf einen Blick', 'All models and strategies at a glance'),
     kicker: t('Zum Lernen · Module 2 und 3', 'For revision · Modules 2 and 3'),
-    summary: t('Steckbriefe aller Modelle, Checklisten der Strategien und eine Entscheidungshilfe', 'Profiles of all models, strategy checklists and a decision guide'),
+    summary: t('Steckbriefe aller Modelle von der linearen Regression bis zum GAN, Checklisten der Strategien und eine Entscheidungshilfe', 'Profiles of all models from linear regression to the GAN, strategy checklists and a decision guide'),
     html: `
-  <p>${t('Diese Seite fasst die Kapitel <a href="#ml">Supervised ML</a>, <a href="#klass">Klassifikation</a> und <a href="#unsup">Unsupervised</a> zum Lernen zusammen. Zu jedem Modell gibt es einen Steckbrief, zu jeder Strategie eine kurze Checkliste. Über «ausführlich →» kommst du zur Erklärung mit Demo, über «Beispiele →» zu einem Notebook mit lauffähigem Code (lokal mit Jupyter oder in Google Colab).', 'This page summarises the chapters <a href="#ml">Supervised ML</a>, <a href="#klass">Classification</a> and <a href="#unsup">Unsupervised</a> for revision. Each model has a profile, each strategy a short checklist. “in detail →” takes you to the explanation with a demo, “Examples →” to a notebook with runnable code (locally with Jupyter or in Google Colab).')}</p>
+  <p>${t('Diese Seite fasst die Kapitel <a href="#ml">Supervised ML</a>, <a href="#klass">Klassifikation</a>, <a href="#unsup">Unsupervised</a>, <a href="#nn">Neural Networks</a>, <a href="#cnn">CNN</a>, <a href="#cv">Computer Vision</a> und <a href="#gen">Generative Models</a> zum Lernen zusammen. Zu jedem Modell gibt es einen Steckbrief, zu jeder Strategie eine kurze Checkliste. Über «ausführlich →» kommst du zur Erklärung mit Demo, über «Beispiele →» zu einem Notebook mit lauffähigem Code (lokal mit Jupyter oder in Google Colab), wo es eines gibt.', 'This page summarises the chapters <a href="#ml">Supervised ML</a>, <a href="#klass">Classification</a>, <a href="#unsup">Unsupervised</a>, <a href="#nn">Neural Networks</a>, <a href="#cnn">CNN</a>, <a href="#cv">Computer Vision</a> and <a href="#gen">Generative Models</a> for revision. Each model has a profile, each strategy a short checklist. “in detail →” takes you to the explanation with a demo, “Examples →” to a notebook with runnable code (locally with Jupyter or in Google Colab) where there is one.')}</p>
 
   <h3 id="ue-wahl">${t('Welches Modell wann?', 'Which model when?')}</h3>
   <div class="ue-tree">
@@ -215,12 +319,14 @@
         <div class="ue-q">${t('Ist <code>y</code> eine Zahl oder eine Klasse?', 'Is <code>y</code> a number or a class?')}</div>
         <div class="ue-leaf">${t('<b>Zahl → Regression</b>Start: Lineare Regression. Overfitting → Ridge/Lasso. Gebogen → Polynom, Random Forest, Gradient Boosting.', '<b>Number → Regression</b>Start: linear regression. Overfitting → Ridge/Lasso. Curved → polynomial, Random Forest, Gradient Boosting.')}</div>
         <div class="ue-leaf">${t('<b>Klasse → Klassifikation</b>Start: Logistische Regression. Erklärbar → Entscheidungsbaum. Beste Leistung auf Tabellen → Random Forest, Gradient Boosting. Krumme Grenzen → kNN (wenige Merkmale) oder SVM mit Kernel (auch viele Merkmale).', '<b>Class → Classification</b>Start: logistic regression. Explainable → decision tree. Best performance on tables → Random Forest, Gradient Boosting. Curved boundaries → kNN (few features) or SVM with a kernel (also many features).')}</div>
+        <div class="ue-leaf">${t('<b>Bilder statt Tabelle → Deep Learning</b>Bild → Klasse: Transfer Learning (ResNet, MobileNet), eigenes CNN nur mit vielen Bildern. Bild → besseres Bild: klassischer Filter als Baseline, dann U-Net oder vortrainierter Transformer (SwinIR, Restormer). Was ist wo: YOLO (schnell), Faster R-CNN (genau). Klasse pro Pixel: U-Net mit eigenen Labels, SAM ohne Training. Tabellen mit sehr vielen Daten: MLP möglich, Gradient Boosting meist gleich gut.', '<b>Images instead of a table → Deep learning</b>Image → class: transfer learning (ResNet, MobileNet), your own CNN only with many images. Image → better image: classical filter as the baseline, then U-Net or a pretrained transformer (SwinIR, Restormer). What is where: YOLO (fast), Faster R-CNN (accurate). Class per pixel: U-Net with own labels, SAM without training. Tables with very much data: MLP possible, gradient boosting usually as good.')}</div>
       </div>
       <div class="ue-b"><b>${t('Nein → Unsupervised', 'No → Unsupervised')}</b>
         <div class="ue-q">${t('Was willst du finden?', 'What do you want to find?')}</div>
         <div class="ue-leaf">${t('<b>Gruppen → Clustering</b>Runde Gruppen, k bekannt → k-Means. Beliebige Form, Ausreisser → DBSCAN. Struktur auf mehreren Ebenen → Hierarchisch. Weiche Zuordnung → GMM.', '<b>Groups → Clustering</b>Round groups, k known → k-Means. Any shape, outliers → DBSCAN. Structure on several levels → hierarchical. Soft assignment → GMM.')}</div>
         <div class="ue-leaf">${t('<b>Ausreisser → Anomalien</b>Isolation Forest (oder Rauschen bei DBSCAN).', '<b>Outliers → Anomalies</b>Isolation Forest (or noise in DBSCAN).')}</div>
         <div class="ue-leaf">${t('<b>Weniger Merkmale oder ein 2D-Bild → Dimensionsreduktion</b>Verdichten und weiterrechnen → PCA. Nur anschauen → t-SNE, UMAP.', '<b>Fewer features or a 2D picture → Dimensionality reduction</b>Compress and keep computing → PCA. Just look → t-SNE, UMAP.')}</div>
+        <div class="ue-leaf">${t('<b>Neue Bilder erzeugen → Generative Models</b>Komprimieren, Anomalien → Autoencoder. Ziehen und interpolieren, stabil → VAE. Echte Wahrscheinlichkeit → PixelCNN. Möglichst scharf → GAN.', '<b>Generate new images → Generative models</b>Compress, anomalies → autoencoder. Sample and interpolate, stable → VAE. Real probability → PixelCNN. As sharp as possible → GAN.')}</div>
       </div>
     </div>
   </div>
@@ -245,6 +351,19 @@
     <tr><td>Isolation Forest</td><td>${t('Anomalien', 'Anomalies')}</td><td>${NEIN}</td><td>${MITTEL}</td><td>${t('Prüf-Budget (Top-N)', 'review budget (top N)')}</td></tr>
     <tr><td>PCA</td><td>${t('Dim.-Reduktion', 'Dim. reduction')}</td><td>${JA}</td><td>${MITTEL}</td><td><code>n_components</code></td></tr>
     <tr><td>t-SNE / UMAP</td><td>${t('Dim.-Reduktion', 'Dim. reduction')}</td><td>${JA}</td><td>${NEIN}</td><td><code>perplexity</code> / <code>n_neighbors</code></td></tr>
+    <tr><td>MLP</td><td>${BEIDES}</td><td>${JA}</td><td>${NEIN}</td><td>${t('Learning Rate, Schichten', 'learning rate, layers')}</td></tr>
+    <tr><td>CNN</td><td>${t('Bildklassifikation', 'Image classification')}</td><td>${t('ja (/255)', 'yes (/255)')}</td><td>${NEIN}</td><td>${t('Filter, Blöcke, Learning Rate', 'filters, blocks, learning rate')}</td></tr>
+    <tr><td>Transfer Learning</td><td>${t('Bildklassifikation', 'Image classification')}</td><td>${t('wie das Netz', 'as the network')}</td><td>${NEIN}</td><td>${t('freie Schichten, Learning Rate', 'unfrozen layers, learning rate')}</td></tr>
+    <tr><td>${t('Klassische Bildfilter', 'Classical image filters')}</td><td>${t('Restauration', 'Restoration')}</td><td>${t('0 bis 1', '0 to 1')}</td><td>${JA}</td><td>${t('Fenstergrösse, σ', 'window size, σ')}</td></tr>
+    <tr><td>U-Net</td><td>${t('Restauration, Segmentation', 'Restoration, segmentation')}</td><td>${JA}</td><td>${NEIN}</td><td>${t('Tiefe, Loss', 'depth, loss')}</td></tr>
+    <tr><td>SwinIR / Restormer</td><td>${t('Restauration', 'Restoration')}</td><td>${t('wie das Modell', 'as the model')}</td><td>${NEIN}</td><td>${t('Variante (Aufgabe, Rauschstärke)', 'variant (task, noise level)')}</td></tr>
+    <tr><td>Faster R-CNN</td><td>Object Detection</td><td>${t('wie der Backbone', 'as the backbone')}</td><td>${NEIN}</td><td>${t('Score- und NMS-Threshold', 'score and NMS threshold')}</td></tr>
+    <tr><td>YOLO</td><td>Object Detection</td><td>${t('wie das Modell', 'as the model')}</td><td>${NEIN}</td><td>${t('Modellgrösse, Score- und NMS-Threshold', 'model size, score and NMS threshold')}</td></tr>
+    <tr><td>SAM</td><td>Segmentation</td><td>${t('wie das Modell', 'as the model')}</td><td>${NEIN}</td><td>Prompt</td></tr>
+    <tr><td>Autoencoder</td><td>${t('Kompression, Anomalien', 'Compression, anomalies')}</td><td>${JA}</td><td>${NEIN}</td><td>${t('Grösse von <code>z</code>', 'size of <code>z</code>')}</td></tr>
+    <tr><td>VAE</td><td>${t('Generieren', 'Generating')}</td><td>${JA}</td><td>${NEIN}</td><td>${t('Grösse von <code>z</code>, KL-Gewicht', 'size of <code>z</code>, KL weight')}</td></tr>
+    <tr><td>PixelCNN</td><td>${t('Generieren', 'Generating')}</td><td>${JA}</td><td>${NEIN}</td><td>${t('Tiefe, Filter', 'depth, filters')}</td></tr>
+    <tr><td>GAN</td><td>${t('Generieren', 'Generating')}</td><td>${JA}</td><td>${NEIN}</td><td>${t('Learning Rates G und D', 'learning rates G and D')}</td></tr>
   </table></div>
   <p class="note">${t('* Für das Ergebnis nicht nötig, sobald aber regularisiert oder mit Gradient Descent gelernt wird, schon. Faustregel: Alles, was mit Abständen oder Strafen auf Gewichten rechnet, braucht Skalierung. Bäume nicht.', '* Not needed for the result, but needed as soon as you regularise or train with gradient descent. Rule of thumb: anything that works with distances or penalties on weights needs scaling. Trees do not.')}</p>
 
@@ -265,6 +384,18 @@
 
   <h3 id="ue-dim">${t('Dimensionsreduktion', 'Dimensionality reduction')}</h3>
   ${grid(dim)}
+
+  <h3 id="ue-nn">Neural Networks</h3>
+  ${grid(dl)}
+
+  <h3 id="ue-cnn">CNN</h3>
+  ${grid(cnn)}
+
+  <h3 id="ue-cv">Computer Vision</h3>
+  ${grid(cv)}
+
+  <h3 id="ue-gen">Generative Models</h3>
+  ${grid(gen)}
 
   <h3 id="ue-strat">${t('Strategien', 'Strategies')}</h3>
   <div class="sbgrid">
@@ -331,6 +462,11 @@
       { q: t(`Was ist der Unterschied zwischen Hyperparameter und Parameter?`, `What is the difference between a hyperparameter and a parameter?`), a: t(`Parameter (Gewichte) lernt das Modell aus den Daten. Hyperparameter (z. B. alpha, k, max_depth) legst du vorher fest und suchst sie mit der Validierung.`, `The model learns parameters (weights) from the data. You fix hyperparameters (e.g. alpha, k, max_depth) beforehand and search for them with the validation set.`) },
       { q: t(`Warum gehört der Scaler in eine Pipeline?`, `Why does the scaler belong in a pipeline?`), a: t(`Damit er in jedem Cross-Validation-Lauf nur auf dem Trainingsteil gelernt wird. Sonst sickert Information aus dem Validierungsteil ein (Data Leakage).`, `So that in every Cross-Validation run it is learned on the training part only. Otherwise information leaks in from the validation part (data leakage).`) },
       { q: t(`Wie wählst du k bei k-Means?`, `How do you choose k for k-Means?`), a: t(`Elbow-Methode (Knick in der Inertia-Kurve) und Silhouette-Wert vergleichen, dann prüfen, ob die Cluster inhaltlich Sinn ergeben.`, `Compare the elbow method (bend in the inertia curve) and the silhouette score, then check whether the clusters make sense in terms of content.`) },
+      { q: t(`Du hast 800 Fotos in 3 Klassen. Eigenes CNN oder Transfer Learning?`, `You have 800 photos in 3 classes. Your own CNN or transfer learning?`), a: t(`Transfer Learning: Basis (z. B. ResNet oder MobileNet) einfrieren, neuen Kopf trainieren, dabei die Vorverarbeitung des Netzes übernehmen. Ein eigenes CNN würde mit 800 Bildern stark overfitten.`, `Transfer learning: freeze the base (e.g. ResNet or MobileNet), train a new head and take over the network’s preprocessing. Your own CNN would overfit badly with 800 images.`) },
+      { q: t(`YOLO oder Faster R-CNN?`, `YOLO or Faster R-CNN?`), a: t(`YOLO (eine Stufe) für Echtzeit, Video und Edge-Geräte. Faster R-CNN (zwei Stufen) für höchste Genauigkeit und kleine Objekte, wenn die Zeit keine Rolle spielt.`, `YOLO (one stage) for real time, video and edge devices. Faster R-CNN (two stages) for the highest accuracy and small objects when time does not matter.`) },
+      { q: t(`Wann U-Net, wann SAM für Segmentation?`, `When U-Net, when SAM for segmentation?`), a: t(`U-Net, wenn es eigene pixelgenaue Labels gibt und feste Klassen gebraucht werden. SAM ohne Training (zero-shot) mit einem Prompt; es kennt keine Klassennamen und wird dafür mit einem Klassifikator kombiniert.`, `U-Net when there are own pixel-exact labels and fixed classes are needed. SAM without training (zero-shot) with a prompt; it knows no class names and is combined with a classifier for that.`) },
+      { q: t(`Ist das neueste vortrainierte Modell plus Fine-Tuning immer die beste Wahl?`, `Is the newest pretrained model plus fine-tuning always the best choice?`), a: t(`Nein. Zuerst eine einfache Baseline und das vortrainierte Modell zero-shot auf den eigenen Daten testen. Fine-Tuning nur mit genug passenden Daten. Bei Tabellendaten sind klassische Modelle meist besser, und Rahmenbedingungen (Hardware, Latenz, Lizenz, Domain Shift, erfundene Details) entscheiden mit.`, `No. First test a simple baseline and the pretrained model zero-shot on your own data. Fine-tune only with enough suitable data. On tabular data classical models are usually better, and constraints (hardware, latency, licence, domain shift, invented details) decide as well.`) },
+      { q: t(`VAE oder GAN, um neue Bilder zu erzeugen?`, `VAE or GAN to generate new images?`), a: t(`VAE für stabiles Training und einen geordneten Latent Space zum Ziehen und Interpolieren, dafür etwas unscharf. GAN für sehr scharfe Bilder, dafür instabil und mit Gefahr von Mode Collapse.`, `VAE for stable training and an ordered latent space for sampling and interpolating, but somewhat blurry. GAN for very sharp images, but unstable and at risk of mode collapse.`) },
     ],
   });
 })();

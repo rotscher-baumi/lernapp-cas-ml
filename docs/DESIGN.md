@@ -31,6 +31,7 @@ Stand: 2026-11-01. Ergänzt [ARCHITECTURE.md](ARCHITECTURE.md) um Ziele, Entsche
 | D10 | Grafiken als PNG aus echten Läufen, Code und Ausgabe daneben | Lernende sollen den Code nachspielen und dasselbe sehen | Code im Kapitel darf nicht ohne neuen Lauf geändert werden; Ausgaben sind byte-identisch zu halten |
 | D11 | Workflow-Übersicht am Kapitelanfang | Erst der Ablauf, dann die Teile (Projektregel) | Klickbare SVG-Grafik mit Erklärungen pro Schritt |
 | D12 | Werte, die einer Stelle im Plot entsprechen, werden direkt im Plot gezogen (`LernApp.drag`) | Ziehen am Objekt ist anschaulicher als ein Slider daneben | Der Slider bleibt als genaue Anzeige und für die Tastatur; das Ziehen setzt ihn über `setRange`, die Demo-Logik bleibt unverändert. Abstrakte Grössen (Learning Rate, k, Epochs) bleiben reine Slider |
+| D13 | Best Practices als letzter Abschnitt jedes Fachkapitels (`<id>-best`), keine separate Checkliste | Regeln stehen dort, wo das Thema erklärt wird; ein Querschnittskapitel allein wird übersehen | Allgemeine Regeln stehen einmal in `ml-best`, spätere Kapitel verlinken darauf und ergänzen nur Fachliches; Raster mit der Klasse `.bp-check`, Spickzettel mit je einer Zeile «Best Practices» |
 
 ## 4. Theming
 
