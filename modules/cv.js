@@ -276,6 +276,31 @@ solange Boxen übrig:
     <tr><td><b>Semantic Segmentation</b></td><td>Klasse pro Pixel</td><td>U-Net, SAM</td><td>Cross-Entropy + Dice</td><td>IoU, Dice, mIoU</td></tr>
   </table></div>
   <div class="merk"><b>Merksatz</b><p>Gleiche Bausteine, andere Ausgabe: Bild für Restauration, Boxen für Detection, Pixel-Karte für Segmentation. Die Aufgabe bestimmt Modell, Loss und Metrik. Skip Connections und vortrainierte Backbones tauchen überall auf.</p></div>
+
+  <h3 id="cv-best">8 · Best Practices</h3>
+  <p>Ergänzend zu den <a href="#cnn-best">Best Practices aus CNN</a> gilt bei Restauration, Detection und Segmentation:</p>
+  <div class="bp-check">
+    <div><b>Baseline und Modellwahl</b><ul>
+      <li>Zuerst ein klassisches Verfahren als Baseline: Medianfilter bei Salt-and-Pepper-Rauschen, Gauss- oder bilateraler Filter und NLM beim Denoising, bicubic bei Super-Resolution. Manchmal reicht das schon.</li>
+      <li>Ein vortrainiertes Modell zuerst zero-shot auf den eigenen Bildern testen und erst fine-tunen, wenn eine Lücke bleibt und passende Daten da sind.</li>
+      <li>Das neueste Modell ist nicht automatisch das beste: Es zählt, ob es für deine Aufgabe, deine Bilder und deine Hardware gebaut ist.</li>
+    </ul></div>
+    <div><b>Daten und Degradation</b><ul>
+      <li>Mit realistischer Degradation trainieren: Echtes Sensorrauschen ist nicht gaussisch (Poisson bei wenig Licht, Speckle bei Ultraschall und Radar). Die Rauschstärke beim Training variieren.</li>
+      <li>Domain Shift beachten: Ein Modell, das auf Fotos gelernt hat, hilft bei Röntgen- oder Mikroskopbildern wenig.</li>
+      <li>Bei Detection und Segmentation die Annotationen prüfen und nach Szene oder Video splitten, nicht nach einzelnen Frames.</li>
+    </ul></div>
+    <div><b>Fair vergleichen</b><ul>
+      <li>Alle Verfahren auf denselben Testbildern mit derselben Metrik messen, dazu Laufzeit und Zahl der Parameter.</li>
+      <li>PSNR und SSIM <b>und</b> Bildausschnitte ansehen: Eine gute Zahl kann trotzdem verwaschen aussehen.</li>
+      <li>Bei Detection mAP mit dem IoU-Threshold angeben (mAP@0.5 oder mAP@0.5:0.95), bei Segmentation IoU oder Dice pro Klasse.</li>
+    </ul></div>
+    <div><b>Grenzen</b><ul>
+      <li>Super-Resolution und generative Restauration <b>erfinden</b> plausible Details. In Medizin, Forensik oder Messtechnik darf man ein solches Bild nicht als Messung verwenden.</li>
+      <li>Auch auf Bildern anderer Kameras und Lichtverhältnisse testen, bevor das Modell eingesetzt wird.</li>
+    </ul></div>
+  </div>
+  <div class="merk"><b>Merksatz</b><p>Klassische Baseline zuerst, vortrainierte Modelle zuerst zero-shot prüfen, realistisch degradieren, auf denselben Testbildern fair vergleichen und Bilder ansehen, nicht nur Zahlen.</p></div>
 `,
     quiz: [
       { q: `Wie lautet das Bildentstehungsmodell, und was bedeuten die drei Teile?`, a: `<code>I = f ⊛ h + n</code>. <b>f</b> ist das ideale Bild, <b>h</b> die PSF (Verschmierung durch Optik, Bewegung, Fokus, als Faltung), <b>n</b> das Rauschen. I ist die Aufnahme.` },

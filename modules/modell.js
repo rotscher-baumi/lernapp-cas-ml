@@ -5,9 +5,9 @@
     order: 94.7,
     nav: 'Modelle in der Praxis',
     title: `Modelle in der Praxis`,
-    kicker: `Querschnitt · Best Practices`,
-    summary: `Was ein Modell eigentlich ist (Architektur, Parameter, Hyperparameter), fertige Modelle übernehmen, Fine-Tuning, speichern und laden, Drift und neu trainieren, Checkliste`,
-    html: `  <p>In jedem Kapitel bisher hiess es «das Modell lernt» oder «wir trainieren ein Modell». Dieses Kapitel tritt einen Schritt zurück: <b>Was ist ein Modell eigentlich</b>, was steckt in einer Modelldatei, wann nimmt man ein fertiges Modell statt ein eigenes, und was passiert, wenn das Modell im Einsatz langsam schlechter wird? Am Schluss steht eine Checkliste, die für Regression, Klassifikation, Neural Networks und Computer Vision gleich gilt.</p>
+    kicker: `Querschnitt · Lebenszyklus eines Modells`,
+    summary: `Was ein Modell eigentlich ist (Architektur, Parameter, Hyperparameter), fertige Modelle übernehmen, Fine-Tuning, speichern und laden, Drift und neu trainieren, Best Practices`,
+    html: `  <p>In jedem Kapitel bisher hiess es «das Modell lernt» oder «wir trainieren ein Modell». Dieses Kapitel tritt einen Schritt zurück: <b>Was ist ein Modell eigentlich</b>, was steckt in einer Modelldatei, wann nimmt man ein fertiges Modell statt ein eigenes, und was passiert, wenn das Modell im Einsatz langsam schlechter wird? Am Schluss stehen die Best Practices für Modellwahl, Speichern und Einsatz; die fachlichen Best Practices stehen jeweils am Ende ihres Kapitels.</p>
   <p class="note">Die Demos rechnen im Browser. Das Beispiel-Notebook am Ende des Kapitels macht dasselbe mit scikit-learn: Pipeline speichern, laden, Drift simulieren, neu trainieren.</p>
 
   <h3 id="mo-ablauf">Der ganze Ablauf auf einen Blick</h3>
@@ -167,31 +167,24 @@ assert (pipe2.predict(X_val) == pipe.predict(X_val)).all()   # Laden prüfen</co
   <div class="merk"><b>Merksatz</b><p>Jedes Modell veraltet. Eingaben und Metriken im Einsatz überwachen, bei Drift mit derselben Pipeline neu trainieren, die neue Version auf festen und aktuellen Testdaten gegen die alte prüfen und erst dann austauschen. Die alte Version bleibt gespeichert, damit man zurückwechseln kann (Rollback).</p></div>
   <div class="falle"><b>Falle</b><p>Beim Retraining die Testdaten mit in die Trainingsdaten werfen («wir haben ja jetzt mehr Daten»). Dann hat man keine ehrliche Messung mehr. Ebenso: Feedback Loops. Wenn das Modell entscheidet, welche Fälle überhaupt ein Label bekommen (z. B. nur genehmigte Kredite zeigen, ob sie zurückbezahlt werden), sieht das neue Training nur noch die Fälle, die das alte Modell durchgelassen hat.</p></div>
 
-  <h3 id="mo-best">5 · Best Practices: die Checkliste</h3>
-  <p>Diese Punkte gelten für jedes Modell in diesem CAS, vom Titanic-Klassifikator bis zum CNN.</p>
-  <div class="mo-check">
-    <div><b>Vor dem Training</b><ul>
-      <li>Ziel und <b>Metrik</b> festlegen, bevor man ein Modell anfasst (Kosten von Fehlern bedenken).</li>
-      <li>Eine <b>Baseline</b> rechnen: häufigste Klasse, Mittelwert, einfache Regel. Jedes Modell muss sie klar schlagen.</li>
-      <li>Daten <b>vor</b> jeder Vorverarbeitung splitten; das Testset wegschliessen.</li>
-      <li>Prüfen, ob es ein vortrainiertes Modell gibt (Bilder, Text, Audio).</li>
+  <h3 id="mo-best">5 · Best Practices: Modell wählen, speichern, einsetzen</h3>
+  <p>Die allgemeinen Regeln (Baseline, Split, Pipeline, einmal testen) stehen in den <a href="#ml-best">Best Practices aus Supervised ML</a>, die fachlichen in jedem Kapitel am Schluss. Hier geht es um die Modellwahl, das Speichern und den Einsatz.</p>
+  <div class="bp-check">
+    <div><b>Modell wählen</b><ul>
+      <li>Zuerst prüfen, ob es für Bilder, Text oder Audio ein vortrainiertes Modell gibt, und es zero-shot auf den eigenen Daten testen.</li>
+      <li>«Das neueste Modell nehmen und fine-tunen» ist kein Rezept für alles: Bei Tabellendaten sind klassische Modelle meist besser, und Rahmenbedingungen (Datenmenge, Hardware, Latenz, Lizenz, Datenschutz) entscheiden mit.</li>
+      <li>Fine-Tuning nur mit genug passenden Daten. Mit wenig Daten nur den Kopf trainieren, sonst droht Overfitting oder Catastrophic Forgetting.</li>
+      <li>Gewählt wird auf den eigenen Validierungsdaten, nicht nach Benchmark oder Erscheinungsdatum.</li>
     </ul></div>
-    <div><b>Beim Training</b><ul>
-      <li>Vorverarbeitung und Modell in <b>eine Pipeline</b> (kein Data Leakage, alles in einer Datei).</li>
-      <li><b>Seeds</b> fixieren, Library-Versionen festhalten (<code>requirements.txt</code>).</li>
-      <li>Hyperparameter nur auf der Validation oder mit Cross-Validation wählen.</li>
-      <li>Jeden Lauf protokollieren: Daten, Hyperparameter, Metriken (Tabelle, MLflow, Weights &amp; Biases).</li>
-    </ul></div>
-    <div><b>Nach dem Training</b><ul>
-      <li>Einmal auf dem Testset messen, mit Baseline und Datenmenge berichten.</li>
-      <li>Fehler ansehen: Welche Fälle gehen schief, gibt es Gruppen, auf denen das Modell schlecht ist?</li>
-      <li>Pipeline mit <b>Metadaten</b> speichern, Laden testen, Version vergeben.</li>
-      <li>Eine kurze <b>Model Card</b> schreiben: Zweck, Daten, Metriken, Grenzen.</li>
+    <div><b>Speichern</b><ul>
+      <li>Die ganze Pipeline mit <b>Metadaten</b> speichern (Version, Datum, Library-Versionen, Features, Seed, Metriken mit Baseline), Laden testen.</li>
+      <li>Eine kurze <b>Model Card</b> schreiben: Zweck, Daten, Metriken, Grenzen, Lizenz.</li>
+      <li>Fremde Gewichte nur als <code>.safetensors</code> oder mit <code>weights_only=True</code> laden.</li>
     </ul></div>
     <div><b>Im Einsatz</b><ul>
       <li>Eingaben prüfen (fehlende Spalten, unbekannte Kategorien, Werte ausserhalb des Trainingsbereichs).</li>
       <li>Verteilung der Eingaben und, sobald bekannt, die Metrik <b>überwachen</b>.</li>
-      <li>Retraining mit derselben Pipeline; neue Version gegen alte auf festen Testdaten.</li>
+      <li>Retraining mit derselben Pipeline; neue Version gegen alte auf festen und aktuellen Testdaten.</li>
       <li>Alte Versionen archivieren, damit ein <b>Rollback</b> möglich ist.</li>
     </ul></div>
   </div>

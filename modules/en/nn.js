@@ -320,6 +320,27 @@ for x_batch, y_batch in dataset:
   </table></div>
   <p class="note">Steps 4 to 7 run per mini-batch, all batches together are one epoch (<code>fit(epochs=…)</code>). Step 8 after every epoch.</p>
   <div class="merk"><b>Key point</b><p>A neural network is a stack of neurons (weighted sum plus activation function) whose weights are learned with backpropagation and an optimizer such as Adam. It is chosen like any model: on the validation set, with early stopping and dropout against overfitting, and the test set once at the end.</p></div>
+
+  <h3 id="nn-best">8 · Best practices</h3>
+  <p>On top of the general <a href="#ml-best">best practices from Supervised ML</a>, for neural networks:</p>
+  <div class="bp-check">
+    <div><b>Before you build a network</b><ul>
+      <li>Compute a baseline (most frequent class, logistic regression). On tabular data, gradient boosting is often as good as a network or better.</li>
+      <li>Scale the inputs, fit the scaler on the training data only.</li>
+      <li>Match output activation and loss: sigmoid with binary cross-entropy, softmax with cross-entropy, linear with MSE.</li>
+    </ul></div>
+    <div><b>Training</b><ul>
+      <li>Start small and check that the network can learn a single batch by heart. If it cannot, something in the code is wrong.</li>
+      <li>Adam with learning rate 0.001 as the start, tune the learning rate first.</li>
+      <li>Early stopping with <code>restore_best_weights=True</code>. Dropout or L2 only once the curves show overfitting.</li>
+    </ul></div>
+    <div><b>Evaluating</b><ul>
+      <li>Always look at the training and validation loss curves, not just the last number.</li>
+      <li>Networks vary from run to run: fix the seed (<code>keras.utils.set_random_seed</code>) and repeat important comparisons with several seeds.</li>
+      <li>Choose hyperparameters on validation, the test set once at the end.</li>
+    </ul></div>
+  </div>
+  <div class="merk"><b>Key point</b><p>Baseline first, start small, overfit one batch, tune the learning rate first, look at the curves and keep the best model with early stopping.</p></div>
 `,
   quiz: [
     { q: `Which three parts does a neural network have, and what does each do?`, a: `Input layer: receives the raw values, learns nothing. Hidden layers: weighted sum plus activation function, build features step by step. Output layer: delivers the prediction <code>ŷ</code>, which is compared with <code>y</code> in the loss.` },

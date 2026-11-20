@@ -429,7 +429,34 @@ print(&quot;CV-Accuracy:&quot;, round(search.best_score_, 3), &quot;| Test-Accur
     <pre class="out">CV-Accuracy: 0.803 | Test-Accuracy: 0.793</pre>
     <p class="hint">Die Test-Accuracy liegt nahe an der CV-Schätzung: Die CV war verlässlich, es ist kein Testwissen eingeflossen. Dass das Modell nicht überangepasst ist, zeigt der Vergleich mit dem Training (Accuracy 0,805 gegenüber CV 0,803). Jeder Schritt mit Erklärung, EDA-Grafiken, Ausgaben und einer zweiten, ausführlicheren Version mit Random Forest: <a href="titanic.html">Titanic ausführlich</a>.</p>
   </div>
-  <p class="note"><b>Mit den 10 Wohnungen:</b> Hyperparameter sind hier der Polynomgrad (1 bis 9) und bei Ridge/Lasso das alpha. Du probierst jede Einstellung aus, misst jeweils den Fehler bei fehlender Wohnung (Cross-Validation) und nimmst die beste. Beim Polynomgrad gewinnt Grad 1 (123 CHF), nicht Grad 9 (Training 0 CHF, aber mehrere 100 000 bei fehlender Wohnung). Bei echten Daten bliebe zusätzlich ein Test-Set bis zum Schluss unberührt, bei nur 10 Wohnungen verzichten wir darauf.</p>`,
+  <p class="note"><b>Mit den 10 Wohnungen:</b> Hyperparameter sind hier der Polynomgrad (1 bis 9) und bei Ridge/Lasso das alpha. Du probierst jede Einstellung aus, misst jeweils den Fehler bei fehlender Wohnung (Cross-Validation) und nimmst die beste. Beim Polynomgrad gewinnt Grad 1 (123 CHF), nicht Grad 9 (Training 0 CHF, aber mehrere 100 000 bei fehlender Wohnung). Bei echten Daten bliebe zusätzlich ein Test-Set bis zum Schluss unberührt, bei nur 10 Wohnungen verzichten wir darauf.</p>
+
+  <h3 id="ml-best">10 · Best Practices</h3>
+  <p>Diese Punkte gelten für jedes Supervised-Modell, von der linearen Regression bis zum CNN. Die späteren Kapitel ergänzen nur, was dort zusätzlich wichtig ist.</p>
+  <div class="bp-check">
+    <div><b>Vor dem Training</b><ul>
+      <li>Ziel und <b>Metrik</b> festlegen, bevor man ein Modell anfasst: MAE, wenn alle Fehler gleich zählen, RMSE, wenn grosse Fehler besonders teuer sind.</li>
+      <li>Eine <b>Baseline</b> rechnen (Mittelwert oder Median von <code>y</code>). Jedes Modell muss sie klar schlagen.</li>
+      <li>Daten <b>vor</b> jeder Vorverarbeitung splitten und das Testset wegschliessen. EDA nur auf den Trainingsdaten.</li>
+    </ul></div>
+    <div><b>Beim Training</b><ul>
+      <li>Imputer, Scaler und Modell in <b>eine Pipeline</b>: kein Data Leakage, alles in einer Datei.</li>
+      <li><b>Seeds</b> fixieren (<code>random_state</code>) und die Library-Versionen festhalten (<code>requirements.txt</code>).</li>
+      <li>Hyperparameter nur auf der Validation oder mit Cross-Validation wählen. Jeden Lauf mit Daten, Einstellungen und Metrik protokollieren.</li>
+    </ul></div>
+    <div><b>Modell wählen</b><ul>
+      <li>Einfach anfangen: lineare Regression, dann Ridge oder Lasso. Ein komplexeres Modell nur, wenn es auf der Validation klar besser ist.</li>
+      <li>Train- und Validation-Fehler nebeneinander ansehen: Beide hoch heisst Underfitting, grosse Lücke heisst Overfitting.</li>
+      <li>Bei Tabellendaten sind Gradient Boosting und Random Forest oft am stärksten. Ein grösseres oder neueres Modell ist nicht automatisch besser.</li>
+    </ul></div>
+    <div><b>Nach dem Training</b><ul>
+      <li>Genau einmal auf dem Testset messen und mit Baseline und Datenmenge berichten.</li>
+      <li>Residuen ansehen: Gibt es Muster, Ausreisser oder Gruppen, auf denen das Modell schlecht ist?</li>
+      <li>Vorhersagen ausserhalb des Trainingsbereichs (Extrapolation) misstrauen, vor allem bei Polynomen.</li>
+    </ul></div>
+  </div>
+  <div class="merk"><b>Merksatz</b><p>Baseline zuerst, Split vor allem anderen, alles in eine Pipeline, Wahl auf der Validation, Test genau einmal. Wer diese fünf Regeln einhält, vermeidet die meisten Fehler.</p></div>
+`,
     nbExercises: 'Supervised_Learning_1_Uebungen_own.ipynb',
     notebooks: [
       { file: 'Fehlende_Werte_Imputation.ipynb', desc: `Mit Cross-Validation-Beispiel (4 Folds, Imputer pro Fold neu, finales Modell). Schritt-für-Schritt-Beispiel mit 10 Datensätzen, 4 Features und SimpleImputer: Median nur am Training lernen und dann auf Validation und Test anwenden.` },

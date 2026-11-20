@@ -338,6 +338,31 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
     <li><b>Zeitreihen</b>: Zukunft im Training. Immer nach Zeit trennen.</li>
   </ul>
   <div class="merk"><b>Merksatz</b><p>Misstraue zu guten Zahlen. Frage bei jedem Merkmal: «Hätte ich diesen Wert zum Zeitpunkt der Vorhersage wirklich?» Verdächtig sind auffällig gute Validierungs- oder Testwerte (die im Einsatz einbrechen) und ein einzelnes Merkmal mit enormem Gewicht. Ein grosser Abstand Training zu Validation ist dagegen Overfitting, nicht Leakage.</p></div>
+
+  <h3 id="klass-best">8 · Best Practices</h3>
+  <p>Ergänzend zu den allgemeinen <a href="#ml-best">Best Practices aus Supervised ML</a> gilt bei Klassifikation:</p>
+  <div class="bp-check">
+    <div><b>Metrik und Threshold</b><ul>
+      <li>Accuracy nur bei ausgewogenen Klassen. Sonst Precision, Recall, F1 oder PR-AUC, je nachdem, welcher Fehler teurer ist.</li>
+      <li>Die Kosten von False Positives und False Negatives festlegen und den <b>Threshold</b> auf der Validation wählen, nicht blind 0.5 nehmen.</li>
+      <li>Immer die Confusion Matrix ansehen, nicht nur eine Zahl.</li>
+    </ul></div>
+    <div><b>Split und Ungleichgewicht</b><ul>
+      <li><code>stratify=y</code> beim Split, damit die Klassenanteile gleich bleiben.</li>
+      <li>Zuerst <code>class_weight="balanced"</code> probieren. Resampling (SMOTE, Undersampling) nur auf den Trainingsdaten, in der Pipeline.</li>
+      <li>Baseline ist die häufigste Klasse: Bei 95 % «nein» ist 95 % Accuracy wertlos.</li>
+    </ul></div>
+    <div><b>Modelle</b><ul>
+      <li>Logistische Regression als erstes Modell: schnell, gut erklärbar, liefert Wahrscheinlichkeiten.</li>
+      <li>kNN, SVM und logistische Regression brauchen skalierte Merkmale, Bäume nicht.</li>
+      <li>Für Tabellendaten sind Random Forest und Gradient Boosting meist die stärkste Wahl. Werden die Wahrscheinlichkeiten selbst gebraucht, die Kalibrierung prüfen.</li>
+    </ul></div>
+    <div><b>Leakage</b><ul>
+      <li>Zu guten Zahlen misstrauen und die wichtigsten Merkmale prüfen: Hätte ich diesen Wert zum Zeitpunkt der Vorhersage?</li>
+      <li>Bei Zeitdaten nach Zeit splitten, bei mehreren Zeilen pro Person nach Person (<code>GroupKFold</code>).</li>
+    </ul></div>
+  </div>
+  <div class="merk"><b>Merksatz</b><p>Metrik nach den Kosten der Fehler wählen, Threshold auf der Validation setzen, gegen die häufigste Klasse vergleichen und Resampling nur im Training.</p></div>
 `,
     exercises: [
       {

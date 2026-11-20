@@ -426,7 +426,34 @@ print(&quot;CV-Accuracy:&quot;, round(search.best_score_, 3), &quot;| Test-Accur
     <pre class="out">CV-Accuracy: 0.803 | Test-Accuracy: 0.793</pre>
     <p class="hint">The test accuracy is close to the CV estimate: the CV was reliable, no test knowledge leaked in. That the model is not overfitted is shown by the comparison with training (accuracy 0.805 versus CV 0.803). Every step with explanations, EDA charts, outputs and a second, more detailed version with Random Forest: <a href="titanic.html">Titanic in detail</a>.</p>
   </div>
-  <p class="note"><b>With the 10 apartments:</b> The hyperparameters here are the polynomial degree (1 to 9) and, for Ridge/Lasso, the alpha. You try out each setting, measure the error on the left-out apartment each time (cross-validation) and take the best. For the polynomial degree, degree 1 wins (123 CHF), not degree 9 (training 0 CHF, but several 100,000 on the left-out apartment). With real data you would also keep a test set untouched until the end; with only 10 apartments we do without it.</p>`,
+  <p class="note"><b>With the 10 apartments:</b> The hyperparameters here are the polynomial degree (1 to 9) and, for Ridge/Lasso, the alpha. You try out each setting, measure the error on the left-out apartment each time (cross-validation) and take the best. For the polynomial degree, degree 1 wins (123 CHF), not degree 9 (training 0 CHF, but several 100,000 on the left-out apartment). With real data you would also keep a test set untouched until the end; with only 10 apartments we do without it.</p>
+
+  <h3 id="ml-best">10 · Best practices</h3>
+  <p>These points hold for every supervised model, from linear regression to the CNN. The later chapters only add what matters on top.</p>
+  <div class="bp-check">
+    <div><b>Before training</b><ul>
+      <li>Fix the goal and the <b>metric</b> before touching a model: MAE if all errors count the same, RMSE if large errors are especially costly.</li>
+      <li>Compute a <b>baseline</b> (mean or median of <code>y</code>). Every model must beat it clearly.</li>
+      <li>Split the data <b>before</b> any preprocessing and lock the test set away. EDA on the training data only.</li>
+    </ul></div>
+    <div><b>During training</b><ul>
+      <li>Imputer, scaler and model in <b>one pipeline</b>: no data leakage, everything in one file.</li>
+      <li>Fix the <b>seeds</b> (<code>random_state</code>) and record the library versions (<code>requirements.txt</code>).</li>
+      <li>Choose hyperparameters only on validation or with cross-validation. Log every run with data, settings and metric.</li>
+    </ul></div>
+    <div><b>Choosing a model</b><ul>
+      <li>Start simple: linear regression, then Ridge or Lasso. A more complex model only if it is clearly better on validation.</li>
+      <li>Look at training and validation error side by side: both high means underfitting, a large gap means overfitting.</li>
+      <li>On tabular data, gradient boosting and random forest are often the strongest. A bigger or newer model is not automatically better.</li>
+    </ul></div>
+    <div><b>After training</b><ul>
+      <li>Measure exactly once on the test set and report it with baseline and amount of data.</li>
+      <li>Look at the residuals: are there patterns, outliers or groups on which the model is bad?</li>
+      <li>Distrust predictions outside the training range (extrapolation), especially with polynomials.</li>
+    </ul></div>
+  </div>
+  <div class="merk"><b>Key point</b><p>Baseline first, split before anything else, everything in one pipeline, choose on validation, test exactly once. Following these five rules avoids most mistakes.</p></div>
+`,
   notebooks: [
     { file: 'Fehlende_Werte_Imputation.ipynb', desc: `With a cross-validation example (4 folds, new imputer per fold, final model). Step-by-step example with 10 records, 4 features and SimpleImputer: learn the median on the training data only, then apply it to validation and test.` },
     { file: 'Workflow_Train_Val_Test_CV.ipynb', desc: `The whole workflow with 25 apartments: 60/20/20 split by hand (imputer, scaler, model, validation, final model, test), then the same with cross-validation and GridSearchCV, comparing preprocessing variants (including a leakage mistake), StratifiedKFold and TimeSeriesSplit.` },

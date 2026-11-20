@@ -453,6 +453,31 @@ trustworthiness(X_s, Z, n_neighbors=10)  # 1 = neighbours well preserved</code><
   <p>Classical clustering works poorly with very many features (images, text). In deep clustering, an <b>autoencoder</b> (a neural network that reconstructs its input through a narrow bottleneck) learns a compact representation. Clustering is then done in this «latent» representation. Advanced variants train representation and clustering together. Here you only need to be able to place it.</p>
 
   <p class="note">Lecturer's notebooks (course folder <code>07 - UNSUPERVISED-LEARNING/code</code>): <code>clustering_k_means</code>, <code>clustering_k_means optimizing</code>, <code>hierarchical_clustering</code>, <code>dimension_reduction_pca</code>, <code>dimension_reduction_tsne</code>, each with an <code>_exercise</code> version. Labs (folder <code>notebooks</code>): <code>01_clustering_lab</code> (wine: scaling, k, DBSCAN, GMM, ARI), <code>02_anomaly_detection_lab</code> (Isolation Forest), <code>03_pca_lab</code> (components, reconstruction), <code>04_embeddings_lab</code> (t-SNE and UMAP).</p>
+
+  <h3 id="unsup-best">13 · Best practices</h3>
+  <p>Without a target column there is no correct answer to measure against. That makes it all the more important to check the results from several sides.</p>
+  <div class="bp-check">
+    <div><b>Preparing the data</b><ul>
+      <li>Scale: k-means, DBSCAN, GMM and PCA work with distances or variances, otherwise the feature with the largest numbers dominates.</li>
+      <li>Only include features that matter for the question. IDs and existing labels stay out.</li>
+      <li>Check outliers: they pull k-means centres and PCA axes towards themselves.</li>
+    </ul></div>
+    <div><b>Clustering</b><ul>
+      <li>Choose the method by the shape of the clusters: k-means for round ones, DBSCAN for any shape with noise, GMM for elliptical ones and soft assignment.</li>
+      <li>Choose k with several criteria (elbow, silhouette) <b>and</b> domain knowledge.</li>
+      <li>Check stability: do the clusters stay the same with another seed (<code>n_init</code>) or on a subsample?</li>
+    </ul></div>
+    <div><b>Checking the results</b><ul>
+      <li>Describe every cluster with the means of its features (profile). A cluster you cannot explain is of little value.</li>
+      <li>Use existing labels only at the end for comparison.</li>
+      <li>With Isolation Forest, estimate <code>contamination</code> from domain knowledge and look at the found cases by hand.</li>
+    </ul></div>
+    <div><b>Dimensionality reduction</b><ul>
+      <li>Fit PCA inside the pipeline on the training data only and report the explained variance.</li>
+      <li>t-SNE and UMAP only for looking: do not interpret distances between clusters or their size, vary <code>perplexity</code> or <code>n_neighbors</code>.</li>
+    </ul></div>
+  </div>
+  <div class="merk"><b>Key point</b><p>Scale, choose the method by the cluster shape, fix k with criteria and domain knowledge, check stability and be able to explain every cluster.</p></div>
 `,
   quiz: [
     { q: `What is the difference between Supervised and Unsupervised Learning?`, a: `Supervised learns from examples with a known answer. Unsupervised has no answer and finds structure on its own (groups, important directions).` },

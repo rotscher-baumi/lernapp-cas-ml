@@ -456,6 +456,31 @@ trustworthiness(X_s, Z, n_neighbors=10)  # 1 = Nachbarn gut erhalten</code></pre
   <p>Klassisches Clustering wird bei sehr vielen Merkmalen (Bilder, Text) schlecht. Beim Deep Clustering lernt ein <b>Autoencoder</b> (ein neuronales Netz, das seine Eingabe durch einen engen Flaschenhals hindurch rekonstruiert) eine kompakte Darstellung. In dieser «latenten» Darstellung wird dann geclustert. Fortgeschrittene Varianten trainieren Darstellung und Clustering gemeinsam. Du musst das hier nur einordnen können.</p>
 
   <p class="note">Notebooks des Dozenten (Kursordner <code>07 - UNSUPERVISED-LEARNING/code</code>): <code>clustering_k_means</code>, <code>clustering_k_means optimizing</code>, <code>hierarchical_clustering</code>, <code>dimension_reduction_pca</code>, <code>dimension_reduction_tsne</code>, jeweils mit <code>_exercise</code>-Version. Labs (Ordner <code>notebooks</code>): <code>01_clustering_lab</code> (Wein: Skalierung, k, DBSCAN, GMM, ARI), <code>02_anomaly_detection_lab</code> (Isolation Forest), <code>03_pca_lab</code> (Komponenten, Rekonstruktion), <code>04_embeddings_lab</code> (t-SNE und UMAP).</p>
+
+  <h3 id="unsup-best">13 · Best Practices</h3>
+  <p>Ohne Zielspalte gibt es keine richtige Antwort, gegen die man messen kann. Umso wichtiger ist es, die Ergebnisse von mehreren Seiten zu prüfen.</p>
+  <div class="bp-check">
+    <div><b>Daten vorbereiten</b><ul>
+      <li>Skalieren: k-Means, DBSCAN, GMM und PCA rechnen mit Abständen oder Varianzen, sonst dominiert das Merkmal mit den grössten Zahlen.</li>
+      <li>Nur Merkmale aufnehmen, die für die Frage zählen. IDs und vorhandene Labels bleiben draussen.</li>
+      <li>Ausreisser prüfen: Sie ziehen k-Means-Zentren und PCA-Achsen zu sich.</li>
+    </ul></div>
+    <div><b>Clustering</b><ul>
+      <li>Das Verfahren nach der Form der Cluster wählen: k-Means für runde, DBSCAN für beliebige Formen mit Rauschen, GMM für elliptische und weiche Zuordnung.</li>
+      <li>k mit mehreren Kriterien (Elbow, Silhouette) <b>und</b> Fachwissen wählen.</li>
+      <li>Stabilität prüfen: Bleiben die Cluster mit anderem Seed (<code>n_init</code>) oder auf einer Teilstichprobe gleich?</li>
+    </ul></div>
+    <div><b>Ergebnisse prüfen</b><ul>
+      <li>Jeden Cluster mit Mittelwerten der Merkmale beschreiben (Profil). Ein Cluster, den man nicht erklären kann, ist wenig wert.</li>
+      <li>Vorhandene Labels erst am Schluss zum Vergleich nutzen.</li>
+      <li>Bei Isolation Forest <code>contamination</code> aus Fachwissen schätzen und die gefundenen Fälle von Hand ansehen.</li>
+    </ul></div>
+    <div><b>Dimensionsreduktion</b><ul>
+      <li>PCA in der Pipeline nur auf den Trainingsdaten fitten und die erklärte Varianz angeben.</li>
+      <li>t-SNE und UMAP nur zum Ansehen: Abstände zwischen Clustern und ihre Grösse nicht deuten, <code>perplexity</code> bzw. <code>n_neighbors</code> variieren.</li>
+    </ul></div>
+  </div>
+  <div class="merk"><b>Merksatz</b><p>Skalieren, Verfahren nach der Clusterform wählen, k mit Kriterien und Fachwissen festlegen, Stabilität prüfen und jeden Cluster erklären können.</p></div>
 `,
     exercises: [
       {

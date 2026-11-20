@@ -190,6 +190,26 @@ model = keras.Model(inputs, outputs)                    # 3 · only the head lea
     <tr><td><b>9 · Test</b></td><td>Accuracy, confusion matrix, look at misclassified images</td><td>Once, when the setup is fixed.</td><td><code>evaluate</code></td></tr>
   </table></div>
   <div class="merk"><b>Key point</b><p>A CNN replaces the first dense layers with conv and pooling blocks: local filters with shared weights find patterns anywhere in the image, pooling shrinks it and enlarges the field of view. Data augmentation, dropout and transfer learning help against overfitting.</p></div>
+
+  <h3 id="cnn-best">10 · Best practices</h3>
+  <p>On top of the <a href="#nn-best">best practices from Neural Networks</a>, for images:</p>
+  <div class="bp-check">
+    <div><b>Pretrained or your own network?</b><ul>
+      <li>With a few thousand images, transfer learning almost always beats your own network.</li>
+      <li>Choose the network by task and constraints (accuracy, size, latency, licence), not by its release year. MobileNet for phone and edge, ResNet or EfficientNet for the server.</li>
+      <li>First train the new head with the base frozen, then for fine-tuning unfreeze the upper layers with a small learning rate (about 1e-5). Keep batch normalization in inference mode (<code>base(x, training=False)</code>).</li>
+    </ul></div>
+    <div><b>Data</b><ul>
+      <li>Take over the preprocessing of the pretrained network exactly: image size, normalisation (<code>preprocess_input</code>), channel order.</li>
+      <li>Augmentation only in training, and only changes that happen in reality (no vertical flip for digits: 6 becomes 9).</li>
+      <li>Split by source: images of the same person, object or series all belong in the same part.</li>
+    </ul></div>
+    <div><b>Evaluating</b><ul>
+      <li>Look at misclassified images: they often reveal label errors or a shortcut (the network recognises the background instead of the object).</li>
+      <li>Count parameters and check the feature map sizes before training for a long time.</li>
+    </ul></div>
+  </div>
+  <div class="merk"><b>Key point</b><p>Transfer learning first, take over the network's preprocessing, only realistic augmentation, split by source and look at the misclassified images.</p></div>
 `,
   quiz: [
     { q: `Which two ideas distinguish a conv layer from a dense layer?`, a: `<b>Local connections:</b> every neuron sees only a small patch (e.g. 3 × 3). <b>Shared weights:</b> the same filter is used at every position. Hence few parameters, the neighbourhood is kept, and a pattern is recognised everywhere.` },

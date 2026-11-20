@@ -335,6 +335,31 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
     <li><b>Time series</b>: Future in the training. Always split by time.</li>
   </ul>
   <div class="merk"><b>Key takeaway</b><p>Distrust numbers that are too good. Ask for every feature: «Would I really have this value at the time of the prediction?» Suspicious signs are strikingly good validation or test scores (which collapse in production) and a single feature with an enormous weight. A large gap between training and validation, on the other hand, is overfitting, not leakage.</p></div>
+
+  <h3 id="klass-best">8 · Best practices</h3>
+  <p>On top of the general <a href="#ml-best">best practices from Supervised ML</a>, for classification:</p>
+  <div class="bp-check">
+    <div><b>Metric and threshold</b><ul>
+      <li>Accuracy only with balanced classes. Otherwise precision, recall, F1 or PR-AUC, depending on which error is more costly.</li>
+      <li>Fix the cost of false positives and false negatives and choose the <b>threshold</b> on validation instead of blindly taking 0.5.</li>
+      <li>Always look at the confusion matrix, not just one number.</li>
+    </ul></div>
+    <div><b>Split and imbalance</b><ul>
+      <li><code>stratify=y</code> when splitting, so the class proportions stay the same.</li>
+      <li>Try <code>class_weight="balanced"</code> first. Resampling (SMOTE, undersampling) only on the training data, inside the pipeline.</li>
+      <li>The baseline is the most frequent class: with 95 % «no», 95 % accuracy is worthless.</li>
+    </ul></div>
+    <div><b>Models</b><ul>
+      <li>Logistic regression as the first model: fast, easy to explain, gives probabilities.</li>
+      <li>kNN, SVM and logistic regression need scaled features, trees do not.</li>
+      <li>On tabular data, random forest and gradient boosting are usually the strongest choice. If the probabilities themselves are used, check the calibration.</li>
+    </ul></div>
+    <div><b>Leakage</b><ul>
+      <li>Distrust numbers that are too good and check the most important features: would I have this value at the time of the prediction?</li>
+      <li>With time data split by time, with several rows per person split by person (<code>GroupKFold</code>).</li>
+    </ul></div>
+  </div>
+  <div class="merk"><b>Key point</b><p>Choose the metric by the cost of errors, set the threshold on validation, compare against the most frequent class and resample only in training.</p></div>
 `,
   quiz: [
     { q: `Why is accuracy a bad measure with 1 % fraud cases?`, a: `A model that never reports fraud has 99 % accuracy and is still useless. Precision, Recall, F1 and AUC show how well the rare class is detected.` },

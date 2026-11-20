@@ -193,6 +193,26 @@ model = keras.Model(inputs, outputs)                    # 3 · nur der Kopf lern
     <tr><td><b>9 · Test</b></td><td>Accuracy, Confusion Matrix, falsch klassierte Bilder ansehen</td><td>Einmal, wenn das Setup feststeht.</td><td><code>evaluate</code></td></tr>
   </table></div>
   <div class="merk"><b>Merksatz</b><p>Ein CNN ersetzt die ersten Dense-Schichten durch Conv- und Pooling-Blöcke: lokale Filter mit geteilten Gewichten finden Muster überall im Bild, Pooling verkleinert und vergrössert das Sichtfeld. Gegen Overfitting helfen Data Augmentation, Dropout und Transfer Learning.</p></div>
+
+  <h3 id="cnn-best">10 · Best Practices</h3>
+  <p>Ergänzend zu den <a href="#nn-best">Best Practices aus Neural Networks</a> gilt bei Bildern:</p>
+  <div class="bp-check">
+    <div><b>Vortrainiert oder eigenes Netz?</b><ul>
+      <li>Bei wenigen tausend Bildern schlägt Transfer Learning fast immer ein eigenes Netz.</li>
+      <li>Das Netz nach Aufgabe und Rahmenbedingungen wählen (Genauigkeit, Grösse, Latenz, Lizenz), nicht nach dem Erscheinungsjahr. MobileNet für Handy und Edge, ResNet oder EfficientNet für den Server.</li>
+      <li>Erst den neuen Kopf mit eingefrorener Basis trainieren, dann für Fine-Tuning obere Schichten mit kleiner Learning Rate (etwa 1e-5) freigeben. Batch Normalization dabei im Inferenzmodus lassen (<code>base(x, training=False)</code>).</li>
+    </ul></div>
+    <div><b>Daten</b><ul>
+      <li>Die Vorverarbeitung des vortrainierten Netzes genau übernehmen: Bildgrösse, Normalisierung (<code>preprocess_input</code>), Reihenfolge der Kanäle.</li>
+      <li>Augmentation nur im Training, und nur Veränderungen, die es in echt gibt (kein vertikaler Flip bei Ziffern: 6 wird 9).</li>
+      <li>Nach Quelle splitten: Bilder derselben Person, desselben Objekts oder derselben Serie gehören alle in denselben Teil.</li>
+    </ul></div>
+    <div><b>Auswerten</b><ul>
+      <li>Falsch klassifizierte Bilder ansehen: Oft zeigen sie Fehler in den Labels oder eine Abkürzung (das Netz erkennt den Hintergrund statt des Objekts).</li>
+      <li>Parameter zählen und die Feature-Map-Grössen prüfen, bevor man lange trainiert.</li>
+    </ul></div>
+  </div>
+  <div class="merk"><b>Merksatz</b><p>Zuerst Transfer Learning, die Vorverarbeitung des Netzes übernehmen, nur realistische Augmentation, nach Quelle splitten und die Fehlbilder ansehen.</p></div>
 `,
     quiz: [
       { q: `Welche zwei Ideen unterscheiden eine Conv-Schicht von einer Dense-Schicht?`, a: `<b>Lokale Verbindungen:</b> Jedes Neuron sieht nur einen kleinen Ausschnitt (z. B. 3 × 3). <b>Geteilte Gewichte:</b> Derselbe Filter wird an jeder Position verwendet. Dadurch wenige Parameter, Nachbarschaft bleibt erhalten, ein Muster wird überall erkannt.` },

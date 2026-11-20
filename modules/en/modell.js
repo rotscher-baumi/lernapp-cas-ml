@@ -2,9 +2,9 @@
 LernApp.translate('modell', {
   nav: 'Models in practice',
   title: `Models in practice`,
-  kicker: `Cross-cutting · Best practices`,
-  summary: `What a model actually is (architecture, parameters, hyperparameters), taking over pretrained models, fine-tuning, saving and loading, drift and retraining, checklist`,
-  html: `  <p>Every chapter so far said «the model learns» or «we train a model». This chapter takes a step back: <b>what actually is a model</b>, what is inside a model file, when do you take a ready-made model instead of your own, and what happens when a model in use slowly gets worse? At the end there is a checklist that holds for regression, classification, neural networks and computer vision alike.</p>
+  kicker: `Cross-cutting · Lifecycle of a model`,
+  summary: `What a model actually is (architecture, parameters, hyperparameters), taking over pretrained models, fine-tuning, saving and loading, drift and retraining, best practices`,
+  html: `  <p>Every chapter so far said «the model learns» or «we train a model». This chapter takes a step back: <b>what actually is a model</b>, what is inside a model file, when do you take a ready-made model instead of your own, and what happens when a model in use slowly gets worse? At the end are the best practices for choosing, saving and running a model; the subject-specific best practices are at the end of each chapter.</p>
   <p class="note">The demos compute in the browser. The example notebook at the end of the chapter does the same with scikit-learn: save a pipeline, load it, simulate drift, retrain.</p>
 
   <h3 id="mo-ablauf">The whole workflow at a glance</h3>
@@ -164,31 +164,24 @@ assert (pipe2.predict(X_val) == pipe.predict(X_val)).all()   # check loading</co
   <div class="merk"><b>Key point</b><p>Every model ages. Monitor inputs and metrics in use, retrain with the same pipeline on drift, check the new version against the old one on fixed and recent test data and only then swap. The old version stays saved so you can switch back (rollback).</p></div>
   <div class="falle"><b>Pitfall</b><p>Throwing the test data into the training data when retraining («we have more data now»). Then there is no honest measurement left. Likewise: feedback loops. If the model decides which cases get a label at all (e.g. only approved loans show whether they are repaid), the new training only sees the cases the old model let through.</p></div>
 
-  <h3 id="mo-best">5 · Best practices: the checklist</h3>
-  <p>These points hold for every model in this CAS, from the Titanic classifier to the CNN.</p>
-  <div class="mo-check">
-    <div><b>Before training</b><ul>
-      <li>Fix the goal and the <b>metric</b> before touching a model (think about the cost of errors).</li>
-      <li>Compute a <b>baseline</b>: most frequent class, mean, a simple rule. Every model must beat it clearly.</li>
-      <li>Split the data <b>before</b> any preprocessing; lock the test set away.</li>
-      <li>Check whether a pretrained model exists (images, text, audio).</li>
+  <h3 id="mo-best">5 · Best practices: choosing, saving, running a model</h3>
+  <p>The general rules (baseline, split, pipeline, test once) are in the <a href="#ml-best">best practices from Supervised ML</a>, the subject-specific ones at the end of each chapter. This one is about choosing, saving and running a model.</p>
+  <div class="bp-check">
+    <div><b>Choosing a model</b><ul>
+      <li>First check whether a pretrained model exists for images, text or audio, and test it zero-shot on your own data.</li>
+      <li>«Take the newest model and fine-tune it» is not a recipe for everything: on tabular data classical models are usually better, and constraints (amount of data, hardware, latency, licence, privacy) decide as well.</li>
+      <li>Fine-tune only with enough suitable data. With little data train only the head, otherwise overfitting or catastrophic forgetting threatens.</li>
+      <li>Choose on your own validation data, not by benchmark or release date.</li>
     </ul></div>
-    <div><b>During training</b><ul>
-      <li>Put preprocessing and model into <b>one pipeline</b> (no data leakage, everything in one file).</li>
-      <li>Fix the <b>seeds</b>, record the library versions (<code>requirements.txt</code>).</li>
-      <li>Choose hyperparameters only on validation or with cross-validation.</li>
-      <li>Log every run: data, hyperparameters, metrics (table, MLflow, Weights &amp; Biases).</li>
-    </ul></div>
-    <div><b>After training</b><ul>
-      <li>Measure once on the test set, report with baseline and amount of data.</li>
-      <li>Look at errors: which cases go wrong, are there groups the model is bad on?</li>
-      <li>Save the pipeline with <b>metadata</b>, test loading, assign a version.</li>
-      <li>Write a short <b>model card</b>: purpose, data, metrics, limits.</li>
+    <div><b>Saving</b><ul>
+      <li>Save the whole pipeline with <b>metadata</b> (version, date, library versions, features, seed, metrics with baseline), test loading.</li>
+      <li>Write a short <b>model card</b>: purpose, data, metrics, limits, licence.</li>
+      <li>Load foreign weights only as <code>.safetensors</code> or with <code>weights_only=True</code>.</li>
     </ul></div>
     <div><b>In use</b><ul>
       <li>Check inputs (missing columns, unknown categories, values outside the training range).</li>
       <li><b>Monitor</b> the distribution of the inputs and, once known, the metric.</li>
-      <li>Retrain with the same pipeline; new version against old on fixed test data.</li>
+      <li>Retrain with the same pipeline; new version against old on fixed and recent test data.</li>
       <li>Archive old versions so a <b>rollback</b> is possible.</li>
     </ul></div>
   </div>

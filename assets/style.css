@@ -258,11 +258,11 @@ h3[id],h4[id],.merk[id]{scroll-margin-top:72px}
 .mo-rec{border:1px solid var(--line);border-left:4px solid var(--ok);background:var(--ok-soft);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px}
 .mo-rec b{font-family:var(--f-display);font-size:16px;color:var(--ok)} .mo-rec p{margin:4px 0 0}
 .btnrow button:disabled{opacity:.45;cursor:not-allowed}
-.mo-check{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}
-@media (max-width:640px){.mo-check{grid-template-columns:1fr}}
-.mo-check>div{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:12px 14px;min-width:0}
-.mo-check>div>b{font-family:var(--f-display);font-size:15px}
-.mo-check ul{margin:6px 0 0;padding-left:20px;font-size:14.5px} .mo-check li{margin:3px 0}
+.bp-check{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}
+@media (max-width:640px){.bp-check{grid-template-columns:1fr}}
+.bp-check>div{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:12px 14px;min-width:0}
+.bp-check>div>b{font-family:var(--f-display);font-size:15px}
+.bp-check ul{margin:6px 0 0;padding-left:20px;font-size:14.5px} .bp-check li{margin:3px 0}
 
 /* Search (assets/search.js): sticky bar with the search row above the chapter chips */
 .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);

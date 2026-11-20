@@ -120,6 +120,27 @@ G lernt:  D soll G(z) für echt (1) halten</code></pre>
     <tr><td><b>GAN</b></td><td>Generator gegen Discriminator</td><td>adversarial (zwei Losses)</td><td>Sehr scharfe Bilder, Bild-zu-Bild</td><td>Instabil, Mode Collapse</td></tr>
   </table></div>
   <div class="merk"><b>Merksatz</b><p>Alle vier lernen die Datenverteilung ohne Labels. Autoencoder und VAE gehen über einen komprimierten Latent Space, PixelCNN über eine Pixelfolge, GAN über einen Wettstreit. Die Wahl ist ein Kompromiss zwischen Schärfe, Stabilität und Geschwindigkeit.</p></div>
+
+  <h3 id="gen-best">6 · Best Practices</h3>
+  <p>Bei generativen Modellen gibt es keine einzelne richtige Ausgabe. Die Loss allein sagt darum wenig über die Qualität.</p>
+  <div class="bp-check">
+    <div><b>Qualität prüfen</b><ul>
+      <li>Erzeugte Bilder regelmässig ansehen, am besten immer aus denselben festen <code>z</code>-Vektoren, damit man den Fortschritt vergleichen kann.</li>
+      <li>Vielfalt prüfen: Sehen alle Bilder fast gleich aus, ist es Mode Collapse.</li>
+      <li>Zu jedem erzeugten Bild das ähnlichste Trainingsbild suchen: Das Modell soll neue Bilder erzeugen, nicht Trainingsbilder kopieren.</li>
+      <li>Kennzahlen wie FID nur mit vielen Beispielen und gleichen Einstellungen vergleichen.</li>
+    </ul></div>
+    <div><b>Training</b><ul>
+      <li>Autoencoder und VAE: mit kleinem Latent Space anfangen. Beim VAE das Gewicht der KL-Divergenz im Blick behalten (zu gross: unscharf, zu klein: kein brauchbarer Latent Space).</li>
+      <li>GAN: Generator und Discriminator im Gleichgewicht halten. Gewinnt der Discriminator immer, lernt der Generator nichts mehr.</li>
+      <li>Seeds fixieren und Checkpoints speichern: GAN-Training kann plötzlich kippen.</li>
+    </ul></div>
+    <div><b>Verantwortung</b><ul>
+      <li>Lizenz und Herkunft der Trainingsbilder klären.</li>
+      <li>Erzeugte Bilder als solche kennzeichnen, vor allem bei Gesichtern (Deepfakes).</li>
+    </ul></div>
+  </div>
+  <div class="merk"><b>Merksatz</b><p>Bilder ansehen statt nur der Loss, Vielfalt und Kopien prüfen, Kennzahlen nur gleich eingestellt vergleichen und erzeugte Bilder kennzeichnen.</p></div>
 `,
     quiz: [
       { q: `Was unterscheidet ein generatives Modell von einem Klassifikator?`, a: `Der Klassifikator bildet ein Bild auf ein Label ab. Ein generatives Modell lernt, wie die Daten selbst aussehen, und kann neue Beispiele erzeugen. Es braucht keine Labels.` },

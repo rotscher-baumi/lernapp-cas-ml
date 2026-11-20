@@ -20,6 +20,7 @@
     <tr><td><b>Skalieren</b></td><td><code>fit</code> nur auf Train, <code>transform</code> auf allen. Nötig für Gradient Descent, Regularisierung, kNN, SVM, k-Means, PCA und Neural Networks. Nicht nötig für Bäume. Die reine lineare Regression (OLS) braucht es nicht, bei Gradient Descent hilft es.</td></tr>
     <tr><td><b>Pipeline</b></td><td>Skalieren und Modell als eine Einheit: In jedem Fold wird nur mit dessen Trainingsteil gelernt. Verhindert Data Leakage.</td></tr>
     <tr><td><b>Data Leakage</b></td><td>Testwissen fliesst ins Training: Skalieren oder Imputation vor dem Split, Feature Selection auf allen Daten, Resampling vor dem Split, Merkmale, die es zum Vorhersagezeitpunkt nicht gibt. Zu gute Zahlen sind verdächtig.</td></tr>
+    <tr><td><b>Best Practices</b></td><td>Baseline zuerst, Split vor allem anderen, alles in eine Pipeline, Wahl auf der Validation, Test genau einmal. Wer diese fünf Regeln einhält, vermeidet die meisten Fehler. <a href="index.html#ml-best">→</a></td></tr>
   </table></div>
   <p class="note"><a href="index.html#ml-ablauf">Zum Kapitel →</a></p>
 
@@ -46,6 +47,7 @@
     <tr><td><b>Unausgewogene Klassen</b></td><td>Accuracy täuscht. Auf Recall, Precision, F1, AUC schauen. Optionen: <code>class_weight</code>, Up/Downsampling, SMOTE, Threshold anpassen. Resampling nur auf Train.</td></tr>
     <tr><td><b>kNN, Naive Bayes, SVM, Baum</b></td><td>kNN: Mehrheit der k Nachbarn, skalieren, k gross = glatt. Naive Bayes: schnell, nimmt unabhängige Merkmale an. SVM: breiteste Grenze, Kernel für Krümmung, skalieren. Baum: Regeln, gut lesbar, neigt zu Overfitting (Tiefe begrenzen), skalieren unnötig.</td></tr>
     <tr><td><b>Ensembles</b></td><td><b>Bagging / Random Forest</b>: viele tiefe Bäume auf Zufallsstichproben, Mittel senkt die Variance. <b>Boosting</b>: Bäume nacheinander, jeder korrigiert die Fehler der vorigen, senkt den Bias, lernt schneller zu viel. Start: Random Forest als Baseline.</td></tr>
+    <tr><td><b>Best Practices</b></td><td>Metrik nach den Kosten der Fehler wählen, Threshold auf der Validation setzen, gegen die häufigste Klasse vergleichen und Resampling nur im Training. <a href="index.html#klass-best">→</a></td></tr>
   </table></div>
   <p class="note"><a href="index.html#klass">Zum Kapitel →</a></p>
 
@@ -62,6 +64,7 @@
     <tr><td><b>Isolation Forest</b></td><td>Zufällige Splits: Auffällige Punkte sind nach wenigen Splits allein. Liefert ein Ranking, kein Urteil. Bei geändertem Normalverhalten neu anpassen.</td></tr>
     <tr><td><b>PCA</b></td><td>Lineare Achsen mit der grössten Varianz. Vorher skalieren. Komponenten über die kumulative Explained Variance wählen (z. B. 90 %). Für Modelle und Tempo geeignet.</td></tr>
     <tr><td><b>t-SNE, UMAP</b></td><td>Nicht-lineare 2D-Karten zum Erkunden. Nur Nachbarschaft zählt, Abstände und Grössen nicht. Nicht auf der Karte clustern und nicht als Basis für Modelle.</td></tr>
+    <tr><td><b>Best Practices</b></td><td>Skalieren, Verfahren nach der Clusterform wählen, k mit Kriterien und Fachwissen festlegen, Stabilität prüfen und jeden Cluster erklären können. <a href="index.html#unsup-best">→</a></td></tr>
   </table></div>
   <p class="note"><a href="index.html#unsup">Zum Kapitel →</a></p>
 
@@ -77,6 +80,7 @@
     <tr><td><b>Optimizer</b></td><td>SGD, Momentum (dämpft Zickzack), RMSProp (Schrittgrösse pro Parameter), Adam (beides, Standard, Learning Rate 0.001).</td></tr>
     <tr><td><b>Gegen Overfitting</b></td><td>Early Stopping auf der Validation-Loss, Dropout (0.2 bis 0.5, nur beim Training), kleineres Netz, mehr Daten, Data Augmentation, L2.</td></tr>
     <tr><td><b>Loss-Kurven</b></td><td>Beide hoch: Underfitting. Train tief, Validation steigt wieder: Overfitting. Hyperparameter nur auf der Validation wählen, Test einmal.</td></tr>
+    <tr><td><b>Best Practices</b></td><td>Baseline zuerst, klein anfangen, einen Batch overfitten, Learning Rate zuerst tunen, Kurven ansehen und mit Early Stopping das beste Modell behalten. <a href="index.html#nn-best">→</a></td></tr>
   </table></div>
   <p class="note"><a href="index.html#nn">Zum Kapitel →</a></p>
 
@@ -91,6 +95,7 @@
     <tr><td><b>Architektur</b></td><td>Conv + Pooling-Blöcke, Filter pro Block verdoppeln (32, 64, 128), dann Flatten oder GlobalAveragePooling und Dense mit Softmax. Loss: (Sparse) Categorical Cross-Entropy, Adam.</td></tr>
     <tr><td><b>Gegen Overfitting</b></td><td>Data Augmentation (spiegeln, drehen, zoomen; nur beim Training, passend zur Aufgabe), Dropout, Batch Normalization, Early Stopping.</td></tr>
     <tr><td><b>Transfer Learning</b></td><td>Vortrainiertes Netz (z. B. aus <code>keras.applications</code>) einfrieren, neuen Kopf trainieren. Danach Fine-Tuning der oberen Schichten mit sehr kleiner Learning Rate. Erste Wahl bei wenigen Bildern.</td></tr>
+    <tr><td><b>Best Practices</b></td><td>Zuerst Transfer Learning, die Vorverarbeitung des Netzes übernehmen, nur realistische Augmentation, nach Quelle splitten und die Fehlbilder ansehen. <a href="index.html#cnn-best">→</a></td></tr>
   </table></div>
   <p class="note"><a href="index.html#cnn">Zum Kapitel →</a></p>
 
@@ -105,6 +110,7 @@
     <tr><td><b>Restauration</b></td><td>Denoising, Deblurring, Super-Resolution: Bild rein, Bild raus. Klassisch (Gauss, Median, Wiener, Bicubic) oder gelernt (U-Net, SwinIR, Restormer). Loss L1 oder Perceptual, Metrik PSNR und SSIM.</td></tr>
     <tr><td><b>Object Detection</b></td><td>Boxen, Klassen, Scores. Two-Stage (Faster R-CNN, genauer) oder One-Stage (YOLO, schnell). <b>IoU</b> = Schnitt / Vereinigung. <b>NMS</b> entfernt doppelte Boxen. Metrik mAP@IoU.</td></tr>
     <tr><td><b>Semantic Segmentation</b></td><td>Eine Klasse pro Pixel. U-Net (Encoder, Decoder, Skip Connections), SAM (Segment Anything) liefert per Prompt (Punkt, Box) Masken ohne eigenes Training, aber ohne Klassennamen. Loss Cross-Entropy + Dice, Metrik IoU, Dice, mIoU.</td></tr>
+    <tr><td><b>Best Practices</b></td><td>Klassische Baseline zuerst, vortrainierte Modelle zuerst zero-shot prüfen, realistisch degradieren, auf denselben Testbildern fair vergleichen und Bilder ansehen, nicht nur Zahlen. <a href="index.html#cv-best">→</a></td></tr>
   </table></div>
   <p class="note"><a href="index.html#cv">Zum Kapitel →</a></p>
 
@@ -117,6 +123,7 @@
     <tr><td><b>PixelCNN</b></td><td>Erzeugt Pixel für Pixel, jedes abhängig von den vorherigen (maskierte Faltung). Echte Wahrscheinlichkeit, einfaches Training, Generieren sehr langsam.</td></tr>
     <tr><td><b>GAN</b></td><td>Generator gegen Discriminator, zwei Losses im Wechsel. Sehr scharfe Bilder, aber instabiles Training und Mode Collapse (nur noch wenige Bilder). Varianten: CycleGAN (Stil ohne gepaarte Beispiele), ESRGAN (Super-Resolution), DeblurGAN.</td></tr>
     <tr><td><b>Wahl</b></td><td>Kompromiss zwischen Schärfe (GAN), Stabilität und Latent Space (VAE) und Wahrscheinlichkeit (PixelCNN).</td></tr>
+    <tr><td><b>Best Practices</b></td><td>Bilder ansehen statt nur der Loss, Vielfalt und Kopien prüfen, Kennzahlen nur gleich eingestellt vergleichen und erzeugte Bilder kennzeichnen. <a href="index.html#gen-best">→</a></td></tr>
   </table></div>
   <p class="note"><a href="index.html#gen">Zum Kapitel →</a></p>
 
@@ -129,7 +136,7 @@
     <tr><td><b>Formate</b></td><td>scikit-learn: joblib. Keras: <code>.keras</code>. PyTorch: <code>state_dict</code>. Austausch: ONNX. Achtung: pickle und joblib führen beim Laden Code aus; fremde Dateien nur als <code>.safetensors</code> oder mit <code>weights_only=True</code>.</td></tr>
     <tr><td><b>Drift</b></td><td>Data Drift: Die Eingaben verteilen sich anders. Concept Drift: Der Zusammenhang zwischen x und y ändert sich. Erkennen: Eingaben und Metrik im Einsatz überwachen.</td></tr>
     <tr><td><b>Neu trainieren</b></td><td>Komplett neu (alte + neue Daten), nur auf neuen Daten (vergisst seltene alte Fälle), weitertrainieren (<code>partial_fit</code>, Gefahr: Catastrophic Forgetting) oder nur den Kopf neu. Die neue Version muss auf festen und aktuellen Testdaten besser sein, sonst bleibt die alte. Testdaten nie ins Training.</td></tr>
-    <tr><td><b>Checkliste</b></td><td>Baseline, Split vor der Vorverarbeitung, Pipeline, Seed und Versionen, Hyperparameter nur auf der Validation, einmal testen, Fehler ansehen, Pipeline mit Metadaten speichern, alte Version für den Rollback behalten.</td></tr>
+    <tr><td><b>Best Practices</b></td><td>Vortrainierte Modelle zuerst zero-shot auf den eigenen Daten testen, nach Rahmenbedingungen wählen statt nach Erscheinungsdatum, Fine-Tuning nur mit genug passenden Daten. Pipeline mit Metadaten und Model Card speichern, im Einsatz Eingaben und Metrik überwachen, alte Version für den Rollback behalten. <a href="index.html#mo-best">→</a></td></tr>
   </table></div>
   <p class="note"><a href="index.html#modell">Zum Kapitel →</a></p>
 `,

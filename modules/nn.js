@@ -323,6 +323,27 @@ for x_batch, y_batch in dataset:
   </table></div>
   <p class="note">Schritte 4 bis 7 laufen je Mini-Batch, alle Batches zusammen sind eine Epoch (<code>fit(epochs=…)</code>). Schritt 8 nach jeder Epoch.</p>
   <div class="merk"><b>Merksatz</b><p>Ein Neural Network ist ein Stapel von Neuronen (gewichtete Summe plus Activation Function), dessen Gewichte mit Backpropagation und einem Optimizer wie Adam gelernt werden. Gewählt wird es wie jedes Modell: auf der Validation, mit Early Stopping und Dropout gegen Overfitting, und das Testset einmal am Schluss.</p></div>
+
+  <h3 id="nn-best">8 · Best Practices</h3>
+  <p>Ergänzend zu den allgemeinen <a href="#ml-best">Best Practices aus Supervised ML</a> gilt bei Neural Networks:</p>
+  <div class="bp-check">
+    <div><b>Bevor du ein Netz baust</b><ul>
+      <li>Eine Baseline rechnen (häufigste Klasse, logistische Regression). Bei Tabellendaten ist Gradient Boosting oft genauso gut oder besser als ein Netz.</li>
+      <li>Eingaben skalieren, den Scaler nur auf den Trainingsdaten lernen.</li>
+      <li>Output-Activation und Loss passend wählen: Sigmoid mit Binary Cross-Entropy, Softmax mit Cross-Entropy, linear mit MSE.</li>
+    </ul></div>
+    <div><b>Training</b><ul>
+      <li>Klein anfangen und prüfen, ob das Netz einen einzigen Batch auswendig lernen kann. Wenn nicht, ist etwas im Code falsch.</li>
+      <li>Adam mit Learning Rate 0.001 als Start, die Learning Rate als Erstes tunen.</li>
+      <li>Early Stopping mit <code>restore_best_weights=True</code>. Dropout oder L2 erst, wenn die Kurven Overfitting zeigen.</li>
+    </ul></div>
+    <div><b>Auswerten</b><ul>
+      <li>Loss-Kurven von Train und Validation immer ansehen, nicht nur die letzte Zahl.</li>
+      <li>Netze streuen von Lauf zu Lauf: Seed fixieren (<code>keras.utils.set_random_seed</code>) und wichtige Vergleiche mit mehreren Seeds wiederholen.</li>
+      <li>Hyperparameter auf der Validation wählen, das Testset einmal am Schluss.</li>
+    </ul></div>
+  </div>
+  <div class="merk"><b>Merksatz</b><p>Baseline zuerst, klein anfangen, einen Batch overfitten, Learning Rate zuerst tunen, Kurven ansehen und mit Early Stopping das beste Modell behalten.</p></div>
 `,
     notebooks: [
       { file: 'beispiele/08_Neuronale_Netze.ipynb', desc: `Netz von Hand in NumPy (Gradienten gegen numerische Gradienten geprüft) und mit scikit-learn: Vergleich mit Baseline und logistischer Regression, Grösse, Learning Rate, L2, Early Stopping, Loss-Kurven.` },

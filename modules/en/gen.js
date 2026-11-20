@@ -117,6 +117,27 @@ G learns:  D should take G(z) for real (1)</code></pre>
     <tr><td><b>GAN</b></td><td>Generator against discriminator</td><td>adversarial (two losses)</td><td>Very sharp images, image-to-image</td><td>Unstable, mode collapse</td></tr>
   </table></div>
   <div class="merk"><b>Key point</b><p>All four learn the data distribution without labels. Autoencoder and VAE go through a compressed latent space, PixelCNN through a pixel sequence, GAN through a contest. The choice is a trade-off between sharpness, stability and speed.</p></div>
+
+  <h3 id="gen-best">6 · Best practices</h3>
+  <p>Generative models have no single correct output. The loss alone therefore says little about the quality.</p>
+  <div class="bp-check">
+    <div><b>Checking quality</b><ul>
+      <li>Look at generated images regularly, ideally always from the same fixed <code>z</code> vectors, so you can compare the progress.</li>
+      <li>Check diversity: if all images look almost the same, it is mode collapse.</li>
+      <li>Find the most similar training image for each generated one: the model should create new images, not copy training images.</li>
+      <li>Compare scores like FID only with many samples and the same settings.</li>
+    </ul></div>
+    <div><b>Training</b><ul>
+      <li>Autoencoder and VAE: start with a small latent space. With the VAE, keep an eye on the weight of the KL divergence (too large: blurry, too small: no usable latent space).</li>
+      <li>GAN: keep generator and discriminator in balance. If the discriminator always wins, the generator stops learning.</li>
+      <li>Fix seeds and save checkpoints: GAN training can collapse suddenly.</li>
+    </ul></div>
+    <div><b>Responsibility</b><ul>
+      <li>Clarify licence and origin of the training images.</li>
+      <li>Label generated images as such, especially faces (deepfakes).</li>
+    </ul></div>
+  </div>
+  <div class="merk"><b>Key point</b><p>Look at images, not just the loss, check diversity and copies, compare scores only with the same settings and label generated images.</p></div>
 `,
   quiz: [
     { q: `What distinguishes a generative model from a classifier?`, a: `The classifier maps an image to a label. A generative model learns what the data itself looks like and can create new examples. It needs no labels.` },

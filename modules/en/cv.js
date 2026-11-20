@@ -273,6 +273,31 @@ while boxes remain:
     <tr><td><b>Semantic segmentation</b></td><td>Class per pixel</td><td>U-Net, SAM</td><td>Cross-entropy + Dice</td><td>IoU, Dice, mIoU</td></tr>
   </table></div>
   <div class="merk"><b>Key point</b><p>Same building blocks, different output: an image for restoration, boxes for detection, a pixel map for segmentation. The task determines model, loss and metric. Skip connections and pretrained backbones appear everywhere.</p></div>
+
+  <h3 id="cv-best">8 · Best practices</h3>
+  <p>On top of the <a href="#cnn-best">best practices from CNN</a>, for restoration, detection and segmentation:</p>
+  <div class="bp-check">
+    <div><b>Baseline and model choice</b><ul>
+      <li>First a classical method as the baseline: median filter for salt-and-pepper noise, Gaussian or bilateral filter and NLM for denoising, bicubic for super-resolution. Sometimes that is already enough.</li>
+      <li>Test a pretrained model zero-shot on your own images first and fine-tune only if a gap remains and suitable data is available.</li>
+      <li>The newest model is not automatically the best: what counts is whether it is built for your task, your images and your hardware.</li>
+    </ul></div>
+    <div><b>Data and degradation</b><ul>
+      <li>Train with realistic degradation: real sensor noise is not Gaussian (Poisson in low light, speckle in ultrasound and radar). Vary the noise level during training.</li>
+      <li>Watch for domain shift: a model that learned on photos helps little with X-ray or microscope images.</li>
+      <li>For detection and segmentation, check the annotations and split by scene or video, not by single frames.</li>
+    </ul></div>
+    <div><b>Comparing fairly</b><ul>
+      <li>Measure all methods on the same test images with the same metric, plus runtime and number of parameters.</li>
+      <li>Look at PSNR and SSIM <b>and</b> image crops: a good number can still look washed out.</li>
+      <li>For detection, report mAP with its IoU threshold (mAP@0.5 or mAP@0.5:0.95), for segmentation IoU or Dice per class.</li>
+    </ul></div>
+    <div><b>Limits</b><ul>
+      <li>Super-resolution and generative restoration <b>invent</b> plausible details. In medicine, forensics or metrology such an image must not be used as a measurement.</li>
+      <li>Also test on images from other cameras and lighting conditions before the model is deployed.</li>
+    </ul></div>
+  </div>
+  <div class="merk"><b>Key point</b><p>Classical baseline first, test pretrained models zero-shot first, degrade realistically, compare fairly on the same test images and look at images, not just numbers.</p></div>
 `,
   quiz: [
     { q: `What is the image formation model, and what do its three parts mean?`, a: `<code>I = f ⊛ h + n</code>. <b>f</b> is the ideal image, <b>h</b> the PSF (smearing by optics, motion, focus, as a convolution), <b>n</b> the noise. I is the capture.` },
