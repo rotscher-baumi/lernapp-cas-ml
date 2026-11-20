@@ -7,7 +7,7 @@
     order: 30,
     nav: 'Python',
     title: `Python Grundlagen`,
-    kicker: `Modul 1 · Freitag 16.10`,
+    kicker: `Modul 1 · Python · Fr 16.10.`,
     summary: `Datentypen, Funktionen, Comprehensions`,
     html: `  <p>Python ist lesbar, schnell zu lernen und hat riesige Bibliotheken für Daten und ML. Darum nutzt der ganze Kurs es.</p>
 

@@ -5,7 +5,7 @@
     order: 93,
     nav: 'CNN',
     title: `Convolutional Neural Networks`,
-    kicker: `Modul 3 · Deep Learning, Teil 2`,
+    kicker: `Modul 3 · Deep Learning: CNN`,
     summary: `Convolution, Filter, Feature Map, Padding, Stride, Pooling, Data Augmentation, Transfer Learning`,
     html: `  <p>Ein Convolutional Neural Network (CNN) ist ein <a href="#nn">Neural Network</a> mit einem anderen Baustein für Bilder: Statt dass jedes Neuron alle Pixel sieht, gleitet ein kleiner <b>Filter</b> über das Bild und sucht überall dasselbe Muster. Training, Loss, Backpropagation und Optimizer bleiben genau gleich.</p>
   <p class="note">Die Demos rechnen im Browser mit kleinen Beispielbildern. Die Keras-Codeblöcke laufen hier nicht, sondern in Jupyter oder Colab (die Kurs-Notebooks zu CIFAR-10 und SVHN).</p>

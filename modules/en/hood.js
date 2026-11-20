@@ -13,7 +13,7 @@ LernApp.translate('hood', {
     <div><h4>NumPy array</h4><p>Raw numbers, one type, packed without gaps (e.g. 8 bytes per <code>int64</code>). Fast and compact.</p></div>
   </div>
   <p>NumPy is fast for three reasons: a compiled C loop instead of a Python loop, contiguous memory with a fixed type, and SIMD (the CPU computes several numbers at once with one instruction). In the course example, <code>x * 2</code> was around 70 times faster than the list loop (measured on one computer, yours will give different numbers).</p>
-  <div class="merk"><b>Key takeaway</b><p>«Vectorised» (<code>x * 2</code>) is fast, <code>.apply()</code> and Python loops are slow.</p></div>
+  <div class="merk"><b>Key point</b><p>«Vectorised» (<code>x * 2</code>) is fast, <code>.apply()</code> and Python loops are slow.</p></div>
 
   <h3>dtype: the type determines the size</h3>
   <pre><code>a = np.array([1, 2, 3, 4, 5])   # int64: 8 bytes per value = 40 bytes

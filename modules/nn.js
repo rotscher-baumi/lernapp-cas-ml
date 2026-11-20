@@ -5,7 +5,7 @@
     order: 92,
     nav: 'Neural Networks',
     title: `Neural Networks: Einführung`,
-    kicker: `Modul 3 · Neural Networks (Fr 13. und Sa 14.11.)`,
+    kicker: `Modul 3 · Neural Networks · Fr 13. und Sa 14.11.`,
     summary: `Neuron, Activation Functions, Backpropagation, Optimizer, Dropout, Early Stopping`,
     html: `  <p>Ein Neural Network ist nichts Neues, sondern ein Stapel aus Bausteinen, die du schon kennst: Jedes Neuron rechnet wie die <a href="#klass-modelle">logistische Regression</a> eine gewichtete Summe, die Gewichte werden mit <a href="#ml-gd">Gradient Descent</a> gelernt, und über Erfolg entscheidet wie bisher die Validation. Neu sind die <b>vielen Schichten</b> und die Frage, wie der Gradient bis zur ersten Schicht gelangt (Backpropagation).</p>
   <p class="note">Dieses Kapitel deckt die Einführung ab (Perceptron bis Regularisierung). Bilder und CNNs folgen im Kapitel <a href="#cnn">Convolutional Neural Networks</a>. Die Demos laufen im Browser mit einem kleinen, selbst gerechneten Netz, die Keras-Codeblöcke am Schluss dagegen nicht.</p>

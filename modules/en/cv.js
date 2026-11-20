@@ -2,7 +2,7 @@
 LernApp.translate('cv', {
   nav: 'Computer Vision',
   title: `Computer Vision`,
-  kicker: `Module 3 · Deep Learning, part 3`,
+  kicker: `Module 3 · Computer Vision · Fri 20.11.`,
   summary: `Image formation, pixels and channels (RGB, alpha, dtype, HWC/CHW, file formats), denoising, deblurring, super-resolution, object detection (IoU, NMS, Faster R-CNN, YOLO), semantic segmentation (U-Net, SAM)`,
   html: `  <p>The <a href="#cnn">CNN</a> chapter showed how a network <i>classifies</i> images: one image in, one label out. Computer vision is broader. This chapter covers three tasks where the output itself is spatial: a <b>better image</b> (restoration), a <b>list of boxes</b> (object detection) or a <b>class per pixel</b> (semantic segmentation). The building blocks stay those of the CNN chapter: filters, feature maps, pooling, backpropagation.</p>
   <p class="note">The demos compute in the browser with small sample images. The course notebooks (image basics, denoising, deblurring, super-resolution, detection, segmentation) run in Jupyter or Colab.</p>

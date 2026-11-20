@@ -5,7 +5,7 @@
     order: 90,
     nav: 'Unsupervised',
     title: `Unsupervised Learning`,
-    kicker: `Modul 3 · Unsupervised Learning (Sa 31.10.)`,
+    kicker: `Modul 2 · Unsupervised Learning · Sa 31.10.`,
     summary: `Supervised oder Unsupervised, Clustering, Anomalien, PCA, t-SNE und UMAP`,
     html: `  <p>Bisher hatten alle Daten eine Antwort (Preis, Klasse). Beim <b>Unsupervised Learning</b> gibt es keine. Das Modell soll selbst Struktur in den Daten finden. Drei Hauptaufgaben:</p>
   <div class="grid2">
@@ -457,7 +457,24 @@ trustworthiness(X_s, Z, n_neighbors=10)  # 1 = Nachbarn gut erhalten</code></pre
 
   <p class="note">Notebooks des Dozenten (Kursordner <code>07 - UNSUPERVISED-LEARNING/code</code>): <code>clustering_k_means</code>, <code>clustering_k_means optimizing</code>, <code>hierarchical_clustering</code>, <code>dimension_reduction_pca</code>, <code>dimension_reduction_tsne</code>, jeweils mit <code>_exercise</code>-Version. Labs (Ordner <code>notebooks</code>): <code>01_clustering_lab</code> (Wein: Skalierung, k, DBSCAN, GMM, ARI), <code>02_anomaly_detection_lab</code> (Isolation Forest), <code>03_pca_lab</code> (Komponenten, Rekonstruktion), <code>04_embeddings_lab</code> (t-SNE und UMAP).</p>
 
-  <h3 id="unsup-best">13 · Best Practices</h3>
+  <h3 id="unsup-methoden">13 · Übersicht: Schritte und Methoden</h3>
+  <p>Alle Schritte des Ablaufs mit den Methoden, die du dort wählst, und dem passenden scikit-learn-Aufruf. Die Nummern entsprechen der Grafik «Der ganze Ablauf auf einen Blick».</p>
+  <div class="tablewrap"><table>
+    <tr><th>Schritt</th><th>Methoden zur Wahl</th><th>Wann welche</th><th>scikit-learn</th></tr>
+    <tr><td><b>1 · Frage klären</b></td><td>Gruppen, Ausreisser oder weniger Merkmale?</td><td>Ohne Zielspalte; sonst Supervised.</td><td>–</td></tr>
+    <tr><td><b>2 · Daten ansehen</b></td><td>Verteilungen, Ausreisser, Korrelationen</td><td>Kein Testset nötig, aber Labels nicht ins Modell.</td><td><code>df.describe()</code></td></tr>
+    <tr><td><b>3 · Vorverarbeiten</b></td><td>Fehlende Werte, One-Hot, Merkmale auswählen</td><td>Nur Merkmale, die für die Frage zählen.</td><td><code>SimpleImputer</code>, <code>OneHotEncoder</code></td></tr>
+    <tr><td><b>4 · Skalieren</b></td><td>Standard Scaling, Min-Max, robust</td><td>Immer bei Abständen (k-Means, DBSCAN, PCA).</td><td><code>StandardScaler</code></td></tr>
+    <tr><td><b>5 · Dimensionen reduzieren</b></td><td>PCA</td><td>Optional, bei vielen Merkmalen.</td><td><code>PCA</code></td></tr>
+    <tr><td><b>6 · Verfahren wählen</b></td><td>k-Means, hierarchisch, DBSCAN, GMM, Isolation Forest</td><td>Runde Gruppen: k-Means. Beliebige Form: DBSCAN. Weich: GMM. Ausreisser: Isolation Forest.</td><td><code>KMeans</code>, <code>DBSCAN</code>, <code>GaussianMixture</code>, <code>IsolationForest</code></td></tr>
+    <tr><td><b>7 · Parameter wählen</b></td><td>Elbow, Silhouette, k-Distanz-Plot, BIC</td><td>Mehrere Kriterien plus Fachwissen.</td><td><code>silhouette_score</code></td></tr>
+    <tr><td><b>8 · Stabilität prüfen</b></td><td>Anderer Seed, Teilstichprobe</td><td>Bleiben die Cluster gleich?</td><td><code>n_init</code>, <code>random_state</code></td></tr>
+    <tr><td><b>9 · Visualisieren</b></td><td>PCA, t-SNE, UMAP</td><td>t-SNE und UMAP nur zum Anschauen.</td><td><code>TSNE</code>, <code>umap.UMAP</code></td></tr>
+    <tr><td><b>10 · Interpretieren</b></td><td>Profile pro Cluster, Namen geben</td><td>Vorhandene Labels erst jetzt zum Vergleich.</td><td><code>df.groupby(labels).mean()</code></td></tr>
+  </table></div>
+  <div class="merk"><b>Merksatz</b><p>Unsupervised heisst: keine richtige Antwort zum Messen. Darum skalieren, Verfahren nach der Form der Daten wählen, Parameter mit mehreren Kriterien festlegen und jedes Ergebnis auf Stabilität und Bedeutung prüfen.</p></div>
+
+  <h3 id="unsup-best">14 · Best Practices</h3>
   <p>Ohne Zielspalte gibt es keine richtige Antwort, gegen die man messen kann. Umso wichtiger ist es, die Ergebnisse von mehreren Seiten zu prüfen.</p>
   <div class="bp-check">
     <div><b>Daten vorbereiten</b><ul>

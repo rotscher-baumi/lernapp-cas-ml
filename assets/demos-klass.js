@@ -5,6 +5,44 @@
   function gridSvg(W,H,G,GY,f){let s='';const cw=W/G,ch=H/GY;for(let i=0;i<G;i++)for(let j=0;j<GY;j++){const x=(i+0.5)/G,y=1-(j+0.5)/GY;s+='<rect x="'+(i*cw)+'" y="'+(j*ch)+'" width="'+(cw+0.5)+'" height="'+(ch+0.5)+'" style="fill:'+(f(x,y)?'var(--accent)':'var(--warn)')+';opacity:.25"/>'}return s}
 
   LernApp.demos.klass = function () {
+      // Clickable workflow figure: same pattern as the other chapters
+      (function(){
+        const fig=document.getElementById('klassFlowFig');
+        if(!fig)return;
+        const t=LernApp.t;
+        const panel=fig.querySelector('.ab-detail'),steps=fig.querySelectorAll('.ab-step');
+        const S={
+          '1':[t('1 · Daten und Split','1 · Data and split'),t('Zuerst die Klassenanteile ansehen (<code>y.value_counts(normalize=True)</code>): Sind sie stark ungleich, ist Accuracy später wenig wert. Dann sofort trennen, mit <code>stratify=y</code>, damit Train und Test dieselben Anteile haben. Das Testset bleibt gesperrt.','First look at the class proportions (<code>y.value_counts(normalize=True)</code>): if they are very unequal, accuracy will be of little value later. Then split straight away with <code>stratify=y</code>, so train and test have the same proportions. The test set stays locked.'),[[t('Unausgewogene Klassen','Imbalanced classes'),'#klass-imbal'],[t('Train, Validation, Test','Train, validation, test'),'#ml-split']]],
+          '2':[t('2 · Modell wählen','2 · Choose a model'),t('Die Baseline ist die häufigste Klasse (<code>DummyClassifier</code>). Erstes echtes Modell: logistische Regression. Für krumme Grenzen kNN, SVM oder ein Entscheidungsbaum, für die beste Leistung auf Tabellen Random Forest oder Gradient Boosting.','The baseline is the most frequent class (<code>DummyClassifier</code>). First real model: logistic regression. For curved boundaries kNN, SVM or a decision tree, for the best performance on tables random forest or gradient boosting.'),[[t('Logistische Regression','Logistic regression'),'#klass-logreg'],[t('Nicht-lineare Klassifikatoren','Non-linear classifiers'),'#klass-modelle'],['Ensembles','#klass-ens']]],
+          '3':[t('3 · Vorverarbeitung','3 · Preprocessing'),t('Fehlende Werte füllen, Kategorien mit One-Hot umwandeln, für logistische Regression, kNN und SVM skalieren. Alles in einer <code>Pipeline</code>, damit es in jedem Cross-Validation-Fold nur auf dem Trainingsteil gelernt wird.','Fill missing values, convert categories with one-hot, scale for logistic regression, kNN and SVM. Everything in one <code>Pipeline</code>, so it is learned only on the training part in every cross-validation fold.'),[['Data Leakage','#klass-leakage'],[t('Daten vorbereiten','Preparing the data'),'#ml-prep']]],
+          '4':[t('4 · Ungleichgewicht','4 · Imbalance'),t('Zuerst <code>class_weight="balanced"</code>: Fehler auf der seltenen Klasse zählen mehr. Alternativ Resampling (SMOTE, Undersampling), aber nur auf den Trainingsdaten, darum in einer <code>imblearn</code>-Pipeline.','First <code>class_weight="balanced"</code>: errors on the rare class count more. Alternatively resampling (SMOTE, undersampling), but only on the training data, hence in an <code>imblearn</code> pipeline.'),[[t('Unausgewogene Klassen','Imbalanced classes'),'#klass-imbal']]],
+          '5':[t('5 · Trainieren','5 · Train'),t('<code>fit</code> auf dem Training, Hyperparameter (z. B. <code>C</code>, <code>max_depth</code>) mit Cross-Validation suchen (<code>GridSearchCV</code>, bei Klassifikation automatisch stratifiziert).','<code>fit</code> on the training data, search hyperparameters (e.g. <code>C</code>, <code>max_depth</code>) with cross-validation (<code>GridSearchCV</code>, stratified automatically for classification).'),[[t('Hyperparameter','Hyperparameters'),'#ml-hp']]],
+          '6':[t('6 · Wahrscheinlichkeiten','6 · Probabilities'),t('Die meisten Klassifikatoren liefern mit <code>predict_proba</code> eine Wahrscheinlichkeit pro Klasse. <code>predict</code> setzt dabei stillschweigend den Threshold 0.5 (bei zwei Klassen). Für die Wahl des Thresholds braucht man die Wahrscheinlichkeiten.','Most classifiers return a probability per class with <code>predict_proba</code>. <code>predict</code> silently uses the threshold 0.5 (for two classes). To choose the threshold you need the probabilities.'),[[t('Logistische Regression','Logistic regression'),'#klass-logreg'],[t('Mehr als zwei Klassen','More than two classes'),'#klass-multi']]],
+          '7':[t('7 · Metriken','7 · Metrics'),t('Auf der Validation: Confusion Matrix, Precision, Recall, F1, ROC-AUC oder PR-AUC, immer neben der Baseline. Accuracy nur bei ausgewogenen Klassen. Ist die seltene Klasse schlecht erkannt, zurück zu Schritt 4.','On validation: confusion matrix, precision, recall, F1, ROC-AUC or PR-AUC, always next to the baseline. Accuracy only with balanced classes. If the rare class is detected poorly, back to step 4.'),[[t('Metriken','Metrics'),'#klass-metriken']]],
+          '8':[t('8 · Threshold wählen','8 · Choose the threshold'),t('Wie teuer ist ein False Negative im Vergleich zu einem False Positive? Danach den Threshold auf der Validation wählen, nicht auf dem Test. Bei zu guten Zahlen auf Leakage prüfen. Reicht das Modell nicht, zurück zur Modellwahl.','How costly is a false negative compared with a false positive? Choose the threshold on validation accordingly, not on the test set. With numbers that are too good, check for leakage. If the model is not good enough, back to the model choice.'),[[t('Metriken','Metrics'),'#klass-metriken'],['Data Leakage','#klass-leakage']]],
+          '9':[t('9 · Einmal testen','9 · Test once'),t('Das fertige Modell mit dem gewählten Threshold genau einmal auf dem Testset auswerten und mit Baseline und Zahl der Fälle pro Klasse berichten.','Evaluate the finished model with the chosen threshold exactly once on the test set and report it with the baseline and the number of cases per class.'),[['Best Practices','#klass-best']]],
+        };
+        let cur=null;
+        function close(){
+          panel.hidden=true;cur=null;
+          steps.forEach(function(g){g.classList.remove('on');g.setAttribute('aria-expanded','false')});
+        }
+        function open(k){
+          if(cur===k){close();return}
+          const d=S[k];if(!d)return;
+          cur=k;
+          panel.querySelector('.ab-dh b').textContent=d[0];
+          panel.querySelector('.ab-db').innerHTML=d[1];
+          panel.querySelector('.ab-dl').innerHTML=d[2].map(function(l){return '<a href="'+l[1]+'">'+l[0]+' →</a>'}).join('');
+          panel.hidden=false;
+          steps.forEach(function(g){const on=g.getAttribute('data-s')===k;g.classList.toggle('on',on);g.setAttribute('aria-expanded',on?'true':'false')});
+        }
+        steps.forEach(function(g){
+          g.addEventListener('click',function(){open(g.getAttribute('data-s'))});
+          g.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open(g.getAttribute('data-s'))}});
+        });
+        panel.querySelector('.ab-x').addEventListener('click',close);
+      })();
       const MU='−';
       // Demo 1: sigmoid
       (function(){

@@ -2,7 +2,7 @@
 LernApp.translate('klass', {
   nav: 'Classification',
   title: `Supervised Learning: classification`,
-  kicker: `Module 2 · Supervised Learning, day 2 (Fri 30.10.)`,
+  kicker: `Module 2 · Supervised Learning: classification · Fri 30.10.`,
   summary: `Logistic regression, metrics, imbalance, trees, ensembles, leakage`,
   html: `  <p>Same idea as on day 1 (examples with a known answer), but the answer is now a <b>class</b> instead of a number: fraud yes/no, spam yes/no, cat/dog/bird. Everything from day 1 still applies: train/test, cross-validation, scaling, regularisation, hyperparameter search.</p>
   <div class="grid2">
@@ -11,7 +11,40 @@ LernApp.translate('klass', {
   </div>
   <p class="note">Every regression problem can be turned into classes by dividing the target into ranges («bins»), for example blood pressure into normal / raised / high. This simplifies things and makes results easier to explain, but it costs information.</p>
 
-  <h3>1 · Logistic regression</h3>
+  <h3 id="klass-ablauf">The whole workflow at a glance</h3>
+  <p>The workflow is the same as for <a href="#ml-ablauf">regression</a>. Three things are new: the split with <code>stratify</code>, handling imbalanced classes and the threshold that turns probabilities into classes.</p>
+  <p class="hint">Click a step in the figure: the explanation opens below, with links to the matching places in the chapter.</p>
+  <figure class="fig ab-fig" id="klassFlowFig">
+    <div class="ab-scroll">
+    <svg viewBox="0 0 680 650" role="img" aria-label="Workflow of a classification project: data and split with stratify, choose a model, preprocessing in the pipeline, handle imbalance, train with cross-validation, predict probabilities, metrics on validation, choose the threshold, test once. Loops back to the imbalance step and to the model choice">
+      ${LernApp.nnFlow({
+        id: 'kf',
+        aria: 'Step %: open explanation',
+        steps: [
+          ['Data and split', 'class proportions, stratify, test set away'],
+          ['Choose a model', 'baseline, logistic regression, trees'],
+          ['Preprocessing', 'imputer, one-hot, scaler in the pipeline'],
+          ['Imbalance', 'class_weight, resampling in training only'],
+          ['Train', 'fit, cross-validation'],
+          ['Probabilities', 'predict_proba'],
+          ['Metrics', 'confusion matrix, precision, recall, F1'],
+          ['Choose the threshold', 'by the cost of errors'],
+          ['Test once', 'test set, only at the very end'],
+        ],
+        loopA: ['metric poor:', 'weights, resampling'],
+        loopB: ['tuning:', 'model,', 'hyperparameters'],
+      })}
+    </svg>
+    </div>
+    <div class="ab-detail" role="region" aria-live="polite" hidden>
+      <div class="ab-dh"><b></b><button type="button" class="ab-x" aria-label="Close">✕</button></div>
+      <div class="ab-db"></div>
+      <div class="ab-dl"></div>
+    </div>
+    <figcaption>The inner loop (orange dashed) adjusts how the imbalance is handled. The outer loop is tuning model and hyperparameters on validation. The test set (orange) is not used for choosing.</figcaption>
+  </figure>
+
+  <h3 id="klass-logreg">1 · Logistic regression</h3>
   <p>Despite the name, a classifier. The idea: compute <code>z = w·x + b</code> as in linear regression. This z can be arbitrarily large or small. The <b>sigmoid function</b> squeezes it into the range 0 to 1 and turns it into a <b>probability</b>:</p>
   <pre><code>p = 1 / (1 + e^(-z))      z = w1*x1 + w2*x2 + ... + b</code></pre>
   <p>A <b>threshold</b> (default 0.5) turns the probability into a class: p above the threshold means «positive», otherwise «negative». The point where p is exactly 0.5 (z = 0) is the <b>decision boundary</b>.</p>
@@ -57,7 +90,7 @@ LernApp.translate('klass', {
 clf = LogisticRegression().fit(X_train, y_train)
 clf.predict(X_test)          # classes (0/1)
 clf.predict_proba(X_test)    # probabilities per class</code></pre>
-  <div class="merk"><b>Key takeaway</b><p>Logistic regression = linear regression + sigmoid. The model first gives a probability; the class only comes from the threshold. The threshold is your decision, not the model's.</p></div>
+  <div class="merk"><b>Key point</b><p>Logistic regression = linear regression + sigmoid. The model first gives a probability; the class only comes from the threshold. The threshold is your decision, not the model's.</p></div>
 
   <h3 id="klass-metriken">2 · How good is a classifier? Confusion Matrix and metrics</h3>
   <p>Every prediction falls into one of four boxes. Memory aid: the second letter is what the model says (positive/negative), the first is whether it is correct (True/False).</p>
@@ -110,7 +143,7 @@ clf.predict_proba(X_test)    # probabilities per class</code></pre>
     <li><b>AUC:</b> Area under the ROC curve, independent of the threshold. 1 = perfect, 0.5 = chance. You then choose the threshold based on the costs of the errors.</li>
   </ul></div>
 
-  <h3>3 · More than two classes</h3>
+  <h3 id="klass-multi">3 · More than two classes</h3>
   <ul>
     <li><b>One-vs-All</b>: One two-class model per class («this class against all others»). The class with the highest probability wins.</li>
     <li><b>Softmax</b>: The generalisation of the sigmoid function to several classes. All probabilities are positive and add up to 1.</li>
@@ -125,7 +158,7 @@ clf.predict_proba(X_test)    # probabilities per class</code></pre>
 print(confusion_matrix(y_test, pred))
 print(classification_report(y_test, pred))   # Precision, Recall, F1 per class + averages</code></pre>
 
-  <h3>4 · Imbalanced classes</h3>
+  <h3 id="klass-imbal">4 · Imbalanced classes</h3>
   <p>Often the interesting thing is rare: fraud, defects, diseases. A model can then ignore the minority and still look «good». Two things need doing: measure correctly (not accuracy) and adjust the data or the training.</p>
   <div class="demo" id="imDemo">
     <div class="tag">Demo</div><h4>Why accuracy deceives</h4>
@@ -244,7 +277,7 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 per class +
     <p class="hint" id="nnMsg">&nbsp;</p>
     <p class="hint">Top: the decision region of the whole network. Middle: each neuron looks at the plane on its own (blue = positive activation, orange = negative); in brackets its weight towards the output. The network combines these simple pictures into the shape above. Bottom: the loss (error measure) falls while the network learns. «Two groups» needs just one neuron, «Circle» and XOR need several.</p>
   </div>
-  <h3>6 · Ensembles: many weak models make a strong one</h3>
+  <h3 id="klass-ens">6 · Ensembles: many weak models make a strong one</h3>
   <p>A single model makes mistakes, and a deep tree even memorises the training data. The idea of ensembles: take <b>many simple trees</b> instead of one big one and combine them. There are two ways, and the difference is the key question of this section: do the trees work <i>side by side</i> or <i>one after another</i>?</p>
   <div class="grid2">
     <div><h4>Bagging (random forest): the jury</h4>
@@ -334,9 +367,25 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
     <li><b>Preprocessing before the split</b>: Scaling, imputing or feature selection on all data before splitting. Solution: <code>Pipeline</code>.</li>
     <li><b>Time series</b>: Future in the training. Always split by time.</li>
   </ul>
-  <div class="merk"><b>Key takeaway</b><p>Distrust numbers that are too good. Ask for every feature: «Would I really have this value at the time of the prediction?» Suspicious signs are strikingly good validation or test scores (which collapse in production) and a single feature with an enormous weight. A large gap between training and validation, on the other hand, is overfitting, not leakage.</p></div>
+  <div class="merk"><b>Key point</b><p>Distrust numbers that are too good. Ask for every feature: «Would I really have this value at the time of the prediction?» Suspicious signs are strikingly good validation or test scores (which collapse in production) and a single feature with an enormous weight. A large gap between training and validation, on the other hand, is overfitting, not leakage.</p></div>
 
-  <h3 id="klass-best">8 · Best practices</h3>
+  <h3 id="klass-methoden">8 · Overview: steps and methods</h3>
+  <p>All steps of the workflow with the methods you choose there and the matching scikit-learn call. The numbers match the figure «The whole workflow at a glance».</p>
+  <div class="tablewrap"><table>
+    <tr><th>Step</th><th>Methods to choose from</th><th>When which</th><th>scikit-learn</th></tr>
+    <tr><td><b>1 · Data and split</b></td><td>check class proportions, split stratified</td><td>Always <code>stratify=y</code>.</td><td><code>train_test_split(…, stratify=y)</code></td></tr>
+    <tr><td><b>2 · Choose a model</b></td><td>most frequent class, logistic regression, kNN, naive Bayes, SVM, tree, random forest, gradient boosting</td><td>Baseline and logistic regression first. Tables: ensembles.</td><td><code>DummyClassifier</code>, <code>LogisticRegression</code>, …</td></tr>
+    <tr><td><b>3 · Preprocessing</b></td><td>imputer, one-hot, scaler</td><td>Scale for logistic regression, kNN, SVM.</td><td><code>ColumnTransformer</code>, <code>Pipeline</code></td></tr>
+    <tr><td><b>4 · Imbalance</b></td><td><code>class_weight</code>, SMOTE, undersampling</td><td>Weights first. Resampling in training only.</td><td><code>class_weight="balanced"</code>, <code>imblearn</code></td></tr>
+    <tr><td><b>5 · Train</b></td><td>split or stratified k-fold CV</td><td>Hyperparameters such as <code>C</code>, <code>max_depth</code> in the CV.</td><td><code>GridSearchCV</code>, <code>StratifiedKFold</code></td></tr>
+    <tr><td><b>6 · Probabilities</b></td><td>sigmoid (2 classes), softmax (several)</td><td>For threshold and ranking.</td><td><code>predict_proba</code></td></tr>
+    <tr><td><b>7 · Metrics</b></td><td>accuracy, precision, recall, F1, ROC-AUC, PR-AUC</td><td>Imbalanced: F1 or PR-AUC. Always the confusion matrix.</td><td><code>classification_report</code>, <code>roc_auc_score</code></td></tr>
+    <tr><td><b>8 · Threshold</b></td><td>threshold by the cost of errors</td><td>On validation, never on the test set.</td><td><code>precision_recall_curve</code></td></tr>
+    <tr><td><b>9 · Test once</b></td><td>metrics with the chosen threshold</td><td>Exactly once, with baseline.</td><td><code>confusion_matrix</code></td></tr>
+  </table></div>
+  <div class="merk"><b>Key point</b><p>Classification is regression plus three decisions: split stratified, handle the imbalance and choose the threshold by the cost of errors.</p></div>
+
+  <h3 id="klass-best">9 · Best practices</h3>
   <p>On top of the general <a href="#ml-best">best practices from Supervised ML</a>, for classification:</p>
   <div class="bp-check">
     <div><b>Metric and threshold</b><ul>

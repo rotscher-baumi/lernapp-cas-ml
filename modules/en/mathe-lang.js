@@ -15,7 +15,7 @@ summe = 0
 for i in range(n):
     summe = summe + (y[i] - y_vorhersage[i]) ** 2
 mse = summe / n</code></pre>
-  <div class="merk"><b>Key takeaway</b><p>Reading Σ means: «loop over all data points, then add up.» If a formula looks intimidating, translate it into code.</p></div>
+  <div class="merk"><b>Key point</b><p>Reading Σ means: «loop over all data points, then add up.» If a formula looks intimidating, translate it into code.</p></div>
 
   <h3>The derivative</h3>
   <p>You need the derivative in the next chapter for gradient descent. The idea is simple: it tells you <b>how steep a curve is at a particular point</b>. Or put differently: how much does <code>y</code> change when you move <code>x</code> a tiny bit?</p>
@@ -60,7 +60,7 @@ mse = summe / n</code></pre>
 
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Why this matters in machine learning</h4>
   <p>The error function (for example the MSE) depends on the coefficients of the model. Its derivative with respect to one coefficient tells you: does the error get bigger or smaller if I increase this coefficient? If you go in the opposite direction, the error drops. If the model has several coefficients, you take the derivative with respect to each one separately (holding the others fixed, which is called a <i>partial derivative</i>) and put all the values into a vector. This vector is the <b>gradient</b>. Hence the name gradient descent.</p>
-  <div class="merk"><b>Key takeaway</b><p>The derivative is the slope at a point. Positive means: to the left towards the valley. Negative: to the right. Zero: flat. Gradient descent always goes against the slope.</p></div>
+  <div class="merk"><b>Key point</b><p>The derivative is the slope at a point. Positive means: to the left towards the valley. Negative: to the right. Zero: flat. Gradient descent always goes against the slope.</p></div>
   <div class="falle"><b>Pitfall</b><p>A derivative of 0 only means «it is flat here». That can be a local minimum and not the deepest valley.</p></div>
 
   <h3>Vectors and matrices in one minute</h3>

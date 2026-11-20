@@ -2,7 +2,7 @@
 LernApp.translate('python', {
   nav: 'Python',
   title: `Python basics`,
-  kicker: `Module 1 · Friday 16.10`,
+  kicker: `Module 1 · Python · Fri 16.10.`,
   summary: `Data types, functions, comprehensions`,
   html: `  <p>Python is readable, quick to learn and has huge libraries for data and ML. That is why the whole course uses it.</p>
 
@@ -107,7 +107,7 @@ except ValueError:
 .venv\Scripts\activate          # activate (Windows)
 pip install pandas matplotlib   # install packages into this environment</code></pre>
   <div class="merk"><b>For this repo</b><p>The environment lives as <code>.venv</code> in the repo (kernel «CAS ML HS26»). In VS Code, choose this kernel at the top right when you open a notebook; the packages are listed in <code>requirements.txt</code>.</p></div>
-  <div class="merk"><b>Key takeaway</b><p>Lists are mutable, tuples are not. You find things in dicts by key, not by position. You will need this all the time later, because at its core a DataFrame is a dict of columns.</p></div>`,
+  <div class="merk"><b>Key point</b><p>Lists are mutable, tuples are not. You find things in dicts by key, not by position. You will need this all the time later, because at its core a DataFrame is a dict of columns.</p></div>`,
   quiz: [
     { q: `What does <code>l[1:3]</code> return if <code>l = [10, 20, 30, 40]</code>?`, a: `<code>[20, 30]</code>. Counting starts at 0, and the end (index 3) is not included.` },
     { q: `What is the difference between a list and a tuple?`, a: `A list is mutable, a tuple is not. Both are ordered.` },

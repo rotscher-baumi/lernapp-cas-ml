@@ -2,7 +2,7 @@
 LernApp.translate('cnn', {
   nav: 'CNN',
   title: `Convolutional Neural Networks`,
-  kicker: `Module 3 · Deep Learning, part 2`,
+  kicker: `Module 3 · Deep Learning: CNN`,
   summary: `Convolution, filter, feature map, padding, stride, pooling, data augmentation, transfer learning`,
   html: `  <p>A convolutional neural network (CNN) is a <a href="#nn">neural network</a> with a different building block for images: instead of every neuron seeing all pixels, a small <b>filter</b> slides over the image and looks for the same pattern everywhere. Training, loss, backpropagation and optimizer stay exactly the same.</p>
   <p class="note">The demos compute in the browser with small sample images. The Keras code blocks do not run here, but in Jupyter or Colab (the course notebooks on CIFAR-10 and SVHN).</p>

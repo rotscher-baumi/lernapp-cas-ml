@@ -2,7 +2,7 @@
 LernApp.translate('unsup', {
   nav: 'Unsupervised',
   title: `Unsupervised Learning`,
-  kicker: `Module 3 · Unsupervised Learning (Sat 31.10.)`,
+  kicker: `Module 2 · Unsupervised Learning · Sat 31.10.`,
   summary: `Supervised or unsupervised, clustering, anomalies, PCA, t-SNE and UMAP`,
   html: `  <p>So far, all data had an answer (price, class). In <b>Unsupervised Learning</b> there is none. The model has to find structure in the data on its own. Three main tasks:</p>
   <div class="grid2">
@@ -135,7 +135,7 @@ LernApp.translate('unsup', {
     </div>
     <figcaption>Scaling is a must (except for tree methods such as Isolation Forest), because almost all methods compute distances. There is no test set (orange): instead of the right answer, you check with the silhouette, stability and domain knowledge. The loops show that you adjust settings and preprocessing several times.</figcaption>
   </figure>
-  <div class="merk"><b>Key takeaway</b><p>Scale, compare several settings, check stability and explain the clusters in original units. A result is good if it is stable and makes sense in the domain.</p></div>
+  <div class="merk"><b>Key point</b><p>Scale, compare several settings, check stability and explain the clusters in original units. A result is good if it is stable and makes sense in the domain.</p></div>
 
   <h3 id="unsup-wahl">Which method for what?</h3>
   <p>Choose the <b>goal</b> first, then the method. The table shows when each one fits and what to watch out for.</p>
@@ -159,7 +159,7 @@ LernApp.translate('unsup', {
     <li>Do I need probabilities instead of a hard assignment? Then GMM.</li>
     <li>How many rows and features do I have? Many rows: k-Means. Very many features: PCA first.</li>
   </ol>
-  <div class="merk"><b>Key takeaway</b><p>Goal first, then group shape, then data size. All methods here need scaling except the Isolation Forest.</p></div>
+  <div class="merk"><b>Key point</b><p>Goal first, then group shape, then data size. All methods here need scaling except the Isolation Forest.</p></div>
 
   <h3 id="unsup-vs">1 · Supervised or unsupervised?</h3>
   <p>The type of problem does not depend on the method, but on the <b>data and the question</b>. What matters is: is there a column with the answer you are looking for (target column <code>y</code>, label)?</p>
@@ -239,7 +239,7 @@ km.inertia_                    # WSS</code></pre>
     <div class="stats"><span>best k by silhouette <b id="elBest"></b></span></div>
     <p class="hint">Blue: WSS (left, falls with k). Orange: silhouette (the higher, the better, from k = 2). The data has three groups: the elbow and the silhouette maximum point to k = 3.</p>
   </div>
-  <div class="merk"><b>Key takeaway</b><p>The methods give suggestions, not the truth. In the end, what matters is whether the clusters make sense in the domain and can be described.</p></div>
+  <div class="merk"><b>Key point</b><p>The methods give suggestions, not the truth. In the end, what matters is whether the clusters make sense in the domain and can be described.</p></div>
 
   <h3 id="unsup-hier">5 · Hierarchical clustering</h3>
   <p>Here you do not have to choose k in advance. Each point starts as its own cluster, then the two <b>most similar</b> clusters are always merged until everything forms a tree, the <b>dendrogram</b>. Where you «cut» the tree horizontally determines the number of clusters: the higher the cut, the fewer clusters. The height of a link shows how dissimilar the merged groups were.</p>
@@ -454,7 +454,24 @@ trustworthiness(X_s, Z, n_neighbors=10)  # 1 = neighbours well preserved</code><
 
   <p class="note">Lecturer's notebooks (course folder <code>07 - UNSUPERVISED-LEARNING/code</code>): <code>clustering_k_means</code>, <code>clustering_k_means optimizing</code>, <code>hierarchical_clustering</code>, <code>dimension_reduction_pca</code>, <code>dimension_reduction_tsne</code>, each with an <code>_exercise</code> version. Labs (folder <code>notebooks</code>): <code>01_clustering_lab</code> (wine: scaling, k, DBSCAN, GMM, ARI), <code>02_anomaly_detection_lab</code> (Isolation Forest), <code>03_pca_lab</code> (components, reconstruction), <code>04_embeddings_lab</code> (t-SNE and UMAP).</p>
 
-  <h3 id="unsup-best">13 · Best practices</h3>
+  <h3 id="unsup-methoden">13 · Overview: steps and methods</h3>
+  <p>All steps of the workflow with the methods you choose there and the matching scikit-learn call. The numbers match the figure «The whole workflow at a glance».</p>
+  <div class="tablewrap"><table>
+    <tr><th>Step</th><th>Methods to choose from</th><th>When which</th><th>scikit-learn</th></tr>
+    <tr><td><b>1 · Clarify the question</b></td><td>groups, outliers or fewer features?</td><td>Without a target column; otherwise supervised.</td><td>–</td></tr>
+    <tr><td><b>2 · Look at the data</b></td><td>distributions, outliers, correlations</td><td>No test set needed, but labels stay out of the model.</td><td><code>df.describe()</code></td></tr>
+    <tr><td><b>3 · Preprocess</b></td><td>missing values, one-hot, choose features</td><td>Only features that matter for the question.</td><td><code>SimpleImputer</code>, <code>OneHotEncoder</code></td></tr>
+    <tr><td><b>4 · Scale</b></td><td>standard scaling, min-max, robust</td><td>Always with distances (k-means, DBSCAN, PCA).</td><td><code>StandardScaler</code></td></tr>
+    <tr><td><b>5 · Reduce dimensions</b></td><td>PCA</td><td>Optional, with many features.</td><td><code>PCA</code></td></tr>
+    <tr><td><b>6 · Choose the method</b></td><td>k-means, hierarchical, DBSCAN, GMM, Isolation Forest</td><td>Round groups: k-means. Any shape: DBSCAN. Soft: GMM. Outliers: Isolation Forest.</td><td><code>KMeans</code>, <code>DBSCAN</code>, <code>GaussianMixture</code>, <code>IsolationForest</code></td></tr>
+    <tr><td><b>7 · Choose parameters</b></td><td>elbow, silhouette, k-distance plot, BIC</td><td>Several criteria plus domain knowledge.</td><td><code>silhouette_score</code></td></tr>
+    <tr><td><b>8 · Check stability</b></td><td>another seed, subsample</td><td>Do the clusters stay the same?</td><td><code>n_init</code>, <code>random_state</code></td></tr>
+    <tr><td><b>9 · Visualise</b></td><td>PCA, t-SNE, UMAP</td><td>t-SNE and UMAP only for looking.</td><td><code>TSNE</code>, <code>umap.UMAP</code></td></tr>
+    <tr><td><b>10 · Interpret</b></td><td>profile per cluster, give names</td><td>Existing labels only now, for comparison.</td><td><code>df.groupby(labels).mean()</code></td></tr>
+  </table></div>
+  <div class="merk"><b>Key point</b><p>Unsupervised means: no correct answer to measure against. So scale, choose the method by the shape of the data, set parameters with several criteria and check every result for stability and meaning.</p></div>
+
+  <h3 id="unsup-best">14 · Best practices</h3>
   <p>Without a target column there is no correct answer to measure against. That makes it all the more important to check the results from several sides.</p>
   <div class="bp-check">
     <div><b>Preparing the data</b><ul>

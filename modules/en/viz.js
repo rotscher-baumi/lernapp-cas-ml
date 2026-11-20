@@ -2,7 +2,7 @@
 LernApp.translate('viz', {
   nav: 'Charts',
   title: `Charts: Matplotlib and Seaborn`,
-  kicker: `Module 1 · Saturday 17.10`,
+  kicker: `Module 1 · Charts · Sat 17.10.`,
   summary: `Which chart for which question`,
   html: `  <p>Good charts start before the code: first the question, then the chart type.</p>
 
@@ -66,7 +66,7 @@ sns.lineplot(data=lang, x="month", y="temperature", hue="city")</code></pre>
     <li>Histogram: the number of <code>bins</code> changes the story, try several.</li>
   </ul>
 
-  <div class="merk"><b>Key takeaway</b><p>Question first, then chart. After that: title, axes with units, zero baseline, tidy up.</p></div>`,
+  <div class="merk"><b>Key point</b><p>Question first, then chart. After that: title, axes with units, zero baseline, tidy up.</p></div>`,
   quiz: [
     { q: `When is a pie chart not a good choice?`, a: `With many parts, or when you want to compare or rank precisely. We read lengths (bars) better than angles.` },
     { q: `Why should bars start at zero?`, a: `A truncated axis exaggerates differences. In the course example, 720 versus 290 looked like twelve times as much instead of 2.5 times.` },

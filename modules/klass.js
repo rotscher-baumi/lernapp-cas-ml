@@ -5,7 +5,7 @@
     order: 80,
     nav: 'Klassifikation',
     title: `Supervised Learning: Klassifikation`,
-    kicker: `Modul 2 · Supervised Learning, Tag 2 (Fr 30.10.)`,
+    kicker: `Modul 2 · Supervised Learning: Klassifikation · Fr 30.10.`,
     summary: `Logistische Regression, Metriken, Ungleichgewicht, Bäume, Ensembles, Leakage`,
     html: `  <p>Gleiche Idee wie am Tag 1 (Beispiele mit bekannter Antwort), aber die Antwort ist jetzt eine <b>Klasse</b> statt einer Zahl: Betrug ja/nein, Spam ja/nein, Katze/Hund/Vogel. Alles von Tag 1 gilt weiter: Train/Test, Cross-Validation, Skalieren, Regularisierung, Hyperparameter-Suche.</p>
   <div class="grid2">
@@ -14,7 +14,40 @@
   </div>
   <p class="note">Jedes Regressionsproblem lässt sich in Klassen umbauen, indem man das Ziel in Bereiche («Bins») einteilt, zum Beispiel Blutdruck in normal / erhöht / hoch. Das vereinfacht und macht Ergebnisse leichter erklärbar, kostet aber Information.</p>
 
-  <h3>1 · Logistische Regression</h3>
+  <h3 id="klass-ablauf">Der ganze Ablauf auf einen Blick</h3>
+  <p>Der Ablauf ist derselbe wie bei der <a href="#ml-ablauf">Regression</a>. Neu sind drei Dinge: der Split mit <code>stratify</code>, der Umgang mit unausgewogenen Klassen und der Threshold, der aus Wahrscheinlichkeiten Klassen macht.</p>
+  <p class="hint">Klicke auf einen Schritt in der Grafik: Darunter klappt die Erklärung auf, mit Links zu den passenden Stellen im Kapitel.</p>
+  <figure class="fig ab-fig" id="klassFlowFig">
+    <div class="ab-scroll">
+    <svg viewBox="0 0 680 650" role="img" aria-label="Ablauf eines Klassifikationsprojekts: Daten und Split mit stratify, Modell wählen, Vorverarbeitung in der Pipeline, Ungleichgewicht behandeln, trainieren mit Cross-Validation, Wahrscheinlichkeiten vorhersagen, Metriken auf der Validation, Threshold wählen, einmal testen. Schleifen zurück zum Ungleichgewicht und zur Modellwahl">
+      ${LernApp.nnFlow({
+        id: 'kf',
+        aria: 'Schritt %: Erklärung aufklappen',
+        steps: [
+          ['Daten und Split', 'Klassenanteile, stratify, Testset weg'],
+          ['Modell wählen', 'Baseline, logistische Regression, Bäume'],
+          ['Vorverarbeitung', 'Imputer, One-Hot, Scaler in der Pipeline'],
+          ['Ungleichgewicht', 'class_weight, Resampling nur im Training'],
+          ['Trainieren', 'fit, Cross-Validation'],
+          ['Wahrscheinlichkeiten', 'predict_proba'],
+          ['Metriken', 'Confusion Matrix, Precision, Recall, F1'],
+          ['Threshold wählen', 'nach den Kosten der Fehler'],
+          ['Einmal testen', 'Testset, erst ganz am Schluss'],
+        ],
+        loopA: ['Metrik schlecht:', 'Gewichte, Resampling'],
+        loopB: ['Tuning:', 'Modell,', 'Hyperparameter'],
+      })}
+    </svg>
+    </div>
+    <div class="ab-detail" role="region" aria-live="polite" hidden>
+      <div class="ab-dh"><b></b><button type="button" class="ab-x" aria-label="Schliessen">✕</button></div>
+      <div class="ab-db"></div>
+      <div class="ab-dl"></div>
+    </div>
+    <figcaption>Der innere Loop (orange gestrichelt) passt an, wie das Ungleichgewicht behandelt wird. Der äussere Loop ist das Tuning von Modell und Hyperparametern auf der Validation. Das Testset (orange) wird nicht zum Wählen benutzt.</figcaption>
+  </figure>
+
+  <h3 id="klass-logreg">1 · Logistische Regression</h3>
   <p>Trotz des Namens ein Klassifikator. Die Idee: Rechne wie bei der linearen Regression <code>z = w·x + b</code>. Dieses z kann beliebig gross oder klein sein. Die <b>Sigmoid-Funktion</b> presst es in den Bereich 0 bis 1 und macht daraus eine <b>Wahrscheinlichkeit</b>:</p>
   <pre><code>p = 1 / (1 + e^(-z))      z = w1*x1 + w2*x2 + ... + b</code></pre>
   <p>Aus der Wahrscheinlichkeit wird eine Klasse über einen <b>Threshold</b> (Standard 0,5): p über dem Threshold heisst «positiv», sonst «negativ». Die Stelle, wo p genau 0,5 ist (z = 0), ist die <b>Entscheidungsgrenze</b>.</p>
@@ -113,7 +146,7 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
     <li><b>AUC:</b> Fläche unter der ROC-Kurve, unabhängig vom Threshold. 1 = perfekt, 0,5 = Zufall. Den Threshold wählst du danach nach den Kosten der Fehler.</li>
   </ul></div>
 
-  <h3>3 · Mehr als zwei Klassen</h3>
+  <h3 id="klass-multi">3 · Mehr als zwei Klassen</h3>
   <ul>
     <li><b>One-vs-All</b>: Pro Klasse ein Zweiklassen-Modell («diese Klasse gegen alle anderen»). Die Klasse mit der höchsten Wahrscheinlichkeit gewinnt.</li>
     <li><b>Softmax</b>: Die Verallgemeinerung der Sigmoid-Funktion auf mehrere Klassen. Alle Wahrscheinlichkeiten sind positiv und summieren sich zu 1.</li>
@@ -128,7 +161,7 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
 print(confusion_matrix(y_test, pred))
 print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse + Mittel</code></pre>
 
-  <h3>4 · Unausgewogene Klassen</h3>
+  <h3 id="klass-imbal">4 · Unausgewogene Klassen</h3>
   <p>Oft ist das Interessante selten: Betrug, Defekte, Krankheiten. Ein Modell kann dann die Minderheit ignorieren und trotzdem «gut» aussehen. Zwei Dinge sind zu tun: richtig messen (nicht Accuracy) und die Daten oder das Training anpassen.</p>
   <div class="demo" id="imDemo">
     <div class="tag">Demo</div><h4>Warum Accuracy täuscht</h4>
@@ -247,7 +280,7 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
     <p class="hint" id="nnMsg">&nbsp;</p>
     <p class="hint">Oben: die Entscheidungsfläche des ganzen Netzes. Mitte: Jedes Neuron schaut für sich auf die Ebene (blau = Aktivierung positiv, orange = negativ); in Klammern sein Gewicht zur Ausgabe. Das Netz kombiniert diese einfachen Bilder zur Form oben. Unten: Der Loss (Fehlermass) sinkt, solange das Netz lernt. «Zwei Gruppen» braucht nur ein Neuron, «Kreis» und XOR mehrere.</p>
   </div>
-  <h3>6 · Ensembles: viele schwache Modelle ergeben ein starkes</h3>
+  <h3 id="klass-ens">6 · Ensembles: viele schwache Modelle ergeben ein starkes</h3>
   <p>Ein einzelnes Modell macht Fehler, ein tiefer Baum lernt die Trainingsdaten sogar auswendig. Die Idee der Ensembles: Nimm <b>viele einfache Bäume</b> statt eines grossen und kombiniere sie. Es gibt zwei Wege, und der Unterschied ist die wichtigste Frage dieses Abschnitts: Arbeiten die Bäume <i>nebeneinander</i> oder <i>nacheinander</i>?</p>
   <div class="grid2">
     <div><h4>Bagging (Random Forest): die Jury</h4>
@@ -339,7 +372,23 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
   </ul>
   <div class="merk"><b>Merksatz</b><p>Misstraue zu guten Zahlen. Frage bei jedem Merkmal: «Hätte ich diesen Wert zum Zeitpunkt der Vorhersage wirklich?» Verdächtig sind auffällig gute Validierungs- oder Testwerte (die im Einsatz einbrechen) und ein einzelnes Merkmal mit enormem Gewicht. Ein grosser Abstand Training zu Validation ist dagegen Overfitting, nicht Leakage.</p></div>
 
-  <h3 id="klass-best">8 · Best Practices</h3>
+  <h3 id="klass-methoden">8 · Übersicht: Schritte und Methoden</h3>
+  <p>Alle Schritte des Ablaufs mit den Methoden, die du dort wählst, und dem passenden scikit-learn-Aufruf. Die Nummern entsprechen der Grafik «Der ganze Ablauf auf einen Blick».</p>
+  <div class="tablewrap"><table>
+    <tr><th>Schritt</th><th>Methoden zur Wahl</th><th>Wann welche</th><th>scikit-learn</th></tr>
+    <tr><td><b>1 · Daten und Split</b></td><td>Klassenanteile prüfen, stratifiziert splitten</td><td>Immer <code>stratify=y</code>.</td><td><code>train_test_split(…, stratify=y)</code></td></tr>
+    <tr><td><b>2 · Modell wählen</b></td><td>Häufigste Klasse, logistische Regression, kNN, Naive Bayes, SVM, Baum, Random Forest, Gradient Boosting</td><td>Baseline und logistische Regression zuerst. Tabellen: Ensembles.</td><td><code>DummyClassifier</code>, <code>LogisticRegression</code>, …</td></tr>
+    <tr><td><b>3 · Vorverarbeitung</b></td><td>Imputer, One-Hot, Scaler</td><td>Skalieren für logistische Regression, kNN, SVM.</td><td><code>ColumnTransformer</code>, <code>Pipeline</code></td></tr>
+    <tr><td><b>4 · Ungleichgewicht</b></td><td><code>class_weight</code>, SMOTE, Undersampling</td><td>Zuerst Gewichte. Resampling nur im Training.</td><td><code>class_weight="balanced"</code>, <code>imblearn</code></td></tr>
+    <tr><td><b>5 · Trainieren</b></td><td>Split oder stratifizierte k-fache CV</td><td>Hyperparameter wie <code>C</code>, <code>max_depth</code> in der CV.</td><td><code>GridSearchCV</code>, <code>StratifiedKFold</code></td></tr>
+    <tr><td><b>6 · Wahrscheinlichkeiten</b></td><td>Sigmoid (2 Klassen), Softmax (mehrere)</td><td>Für Threshold und Ranking.</td><td><code>predict_proba</code></td></tr>
+    <tr><td><b>7 · Metriken</b></td><td>Accuracy, Precision, Recall, F1, ROC-AUC, PR-AUC</td><td>Unausgewogen: F1 oder PR-AUC. Immer die Confusion Matrix.</td><td><code>classification_report</code>, <code>roc_auc_score</code></td></tr>
+    <tr><td><b>8 · Threshold</b></td><td>Threshold nach den Kosten der Fehler</td><td>Auf der Validation, nie auf dem Test.</td><td><code>precision_recall_curve</code></td></tr>
+    <tr><td><b>9 · Einmal testen</b></td><td>Metriken mit gewähltem Threshold</td><td>Genau einmal, mit Baseline.</td><td><code>confusion_matrix</code></td></tr>
+  </table></div>
+  <div class="merk"><b>Merksatz</b><p>Klassifikation ist Regression plus drei Entscheidungen: stratifiziert splitten, das Ungleichgewicht behandeln und den Threshold nach den Kosten der Fehler wählen.</p></div>
+
+  <h3 id="klass-best">9 · Best Practices</h3>
   <p>Ergänzend zu den allgemeinen <a href="#ml-best">Best Practices aus Supervised ML</a> gilt bei Klassifikation:</p>
   <div class="bp-check">
     <div><b>Metrik und Threshold</b><ul>

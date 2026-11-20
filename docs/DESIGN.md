@@ -32,6 +32,7 @@ Stand: 2026-11-01. Ergänzt [ARCHITECTURE.md](ARCHITECTURE.md) um Ziele, Entsche
 | D11 | Workflow-Übersicht am Kapitelanfang | Erst der Ablauf, dann die Teile (Projektregel) | Klickbare SVG-Grafik mit Erklärungen pro Schritt |
 | D12 | Werte, die einer Stelle im Plot entsprechen, werden direkt im Plot gezogen (`LernApp.drag`) | Ziehen am Objekt ist anschaulicher als ein Slider daneben | Der Slider bleibt als genaue Anzeige und für die Tastatur; das Ziehen setzt ihn über `setRange`, die Demo-Logik bleibt unverändert. Abstrakte Grössen (Learning Rate, k, Epochs) bleiben reine Slider |
 | D13 | Best Practices als letzter Abschnitt jedes Fachkapitels (`<id>-best`), keine separate Checkliste | Regeln stehen dort, wo das Thema erklärt wird; ein Querschnittskapitel allein wird übersehen | Allgemeine Regeln stehen einmal in `ml-best`, spätere Kapitel verlinken darauf und ergänzen nur Fachliches; Raster mit der Klasse `.bp-check`, Spickzettel mit je einer Zeile «Best Practices» |
+| D14 | Jedes Fachkapitel hat denselben Rahmen: Ablauf-Grafik am Anfang, «Übersicht: Schritte und Methoden» und «Best Practices» am Schluss, eine ID pro Abschnitt | Gleiche Struktur macht Kapitel vergleichbar und jede Stelle verlinkbar | Neue Kapitel übernehmen den Rahmen; englische Merksätze heissen einheitlich «Key point» |
 
 ## 4. Theming
 
@@ -61,7 +62,7 @@ Objekt, das `LernApp.register` übergeben wird.
 | `title` | string (HTML) | ja | Kapitelüberschrift |
 | `order` | number | nein (100) | Sortierung in Leiste und Seite, klein = früh |
 | `nav` | string | nein (= title) | Kurzname in der Kapitel-Leiste |
-| `kicker` | string | nein | kleine Zeile über dem Titel, z. B. Modul und Datum |
+| `kicker` | string | nein | kleine Zeile über dem Titel: `Modul N · Thema · Datum` (Datum aus dem Stundenplan, z. B. `Fr 30.10.`; ohne gesichertes Datum weglassen) |
 | `summary` | string | nein | ein Satz für die Übersichtskarte |
 | `html` | string (HTML) | nein | Inhalt; CSS-Klassen `.merk`, `.falle`, `.demo`, `.fig`, `.box`, `.tablewrap`, `.steps`, `.grid2`, `.toc` |
 | `quiz` | QuizItem[] | nein | Selbsttest am Kapitelende |

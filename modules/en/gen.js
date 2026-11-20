@@ -2,7 +2,7 @@
 LernApp.translate('gen', {
   nav: 'Generative Models',
   title: `Generative Models`,
-  kicker: `Module 3 · Deep Learning, part 4`,
+  kicker: `Module 3 · Generative Models · Sat 21.11.`,
   summary: `Autoencoder, VAE (latent space, KL, reparameterization), PixelCNN, GAN (generator against discriminator)`,
   html: `  <p>So far a model mapped an input to a result (label, number, box). A <b>generative model</b> instead learns <b>what the data itself looks like</b> and can then produce new, similar examples: new digits, new faces, a summer picture as a winter picture. It needs no labels for this. The chapter shows four ways: autoencoder, VAE, PixelCNN and GAN.</p>
   <p class="note">The demos compute in the browser with small examples. The course notebooks (PixelCNN on MNIST, VAE with faces, CycleGAN and ESRGAN) run in Jupyter or Colab.</p>

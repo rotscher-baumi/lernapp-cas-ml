@@ -5,7 +5,7 @@
     order: 94.5,
     nav: 'Generative Models',
     title: `Generative Models`,
-    kicker: `Modul 3 · Deep Learning, Teil 4`,
+    kicker: `Modul 3 · Generative Models · Sa 21.11.`,
     summary: `Autoencoder, VAE (Latent Space, KL, Reparametrisierung), PixelCNN, GAN (Generator gegen Discriminator)`,
     html: `  <p>Bisher hat ein Modell eine Eingabe auf ein Ergebnis abgebildet (Label, Zahl, Box). Ein <b>generatives Modell</b> lernt dagegen, <b>wie die Daten selbst aussehen</b>, und kann danach neue, ähnliche Beispiele erzeugen: neue Ziffern, neue Gesichter, ein Sommerbild als Winterbild. Es braucht dafür keine Labels. Das Kapitel zeigt vier Wege: Autoencoder, VAE, PixelCNN und GAN.</p>
   <p class="note">Die Demos rechnen im Browser mit kleinen Beispielen. Die Kurs-Notebooks (PixelCNN auf MNIST, VAE mit Gesichtern, CycleGAN und ESRGAN) laufen in Jupyter oder Colab.</p>

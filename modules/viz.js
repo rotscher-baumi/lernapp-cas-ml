@@ -7,7 +7,7 @@
     order: 50,
     nav: 'Grafiken',
     title: `Grafiken: Matplotlib und Seaborn`,
-    kicker: `Modul 1 · Samstag 17.10`,
+    kicker: `Modul 1 · Grafiken · Sa 17.10.`,
     summary: `Welcher Chart für welche Frage`,
     html: `  <p>Gute Grafiken beginnen vor dem Code: Zuerst die Frage, dann der Charttyp.</p>
 

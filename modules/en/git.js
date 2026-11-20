@@ -2,7 +2,7 @@
 LernApp.translate('git', {
   nav: 'Git',
   title: `Git: versions of your work`,
-  kicker: `Module 1 · Friday 16.10`,
+  kicker: `Module 1 · Git · Fri 16.10.`,
   summary: `3 states, 5 commands`,
   html: `  <p>Git stores a <b>snapshot</b> of your files with every commit. You can go back to an older version, work in parallel with several people and see who changed what, when and why. GitHub and GitLab are just websites that host Git repositories (HSLU uses GitLab, your study repo lives on GitHub).</p>
 

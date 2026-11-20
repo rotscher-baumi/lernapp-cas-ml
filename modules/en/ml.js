@@ -2,7 +2,7 @@
 LernApp.translate('ml', {
   nav: 'Supervised ML',
   title: `Supervised Learning: regression`,
-  kicker: `Module 2 · Supervised Learning, day 1`,
+  kicker: `Module 2 · Supervised Learning: regression · Fri 23.10.`,
   summary: `Gradient descent to hyperparameters`,
   html: `  <p>In supervised learning you give the model examples with a known answer. In <b>regression</b> the answer is a number (e.g. a house price). The model should learn from this to make good guesses for <i>new</i> cases. One rule applies: the quality of the data limits the quality of the model (<i>garbage in, garbage out</i>), and this holds for the features just as much as for the labels.</p>
 
@@ -252,7 +252,7 @@ imputer = SimpleImputer(strategy="median")
 X_train_clean = imputer.fit_transform(X_train)  # learns medians and fills training
 X_val_clean = imputer.transform(X_val)          # uses the same medians
 X_test_clean = imputer.transform(X_test)        # uses the same medians</code></pre>
-  <div class="merk"><b>Key takeaway</b><p><code>fit</code> only on training data, <code>transform</code> on all data sets. This way, for example, the test median is not used and data leakage is avoided. The separate notebook shows this with 10 rows and 4 features.</p></div>
+  <div class="merk"><b>Key point</b><p><code>fit</code> only on training data, <code>transform</code> on all data sets. This way, for example, the test median is not used and data leakage is avoided. The separate notebook shows this with 10 rows and 4 features.</p></div>
   <p class="note"><b>With the 10 apartments:</b> If the m² value is missing for the largest apartment (130 m², 5.5 rooms), the mean of the other nine gives 71 m²: far off, because it ignores the rooms. A regression of m² on rooms estimates 132 m², and k-nearest neighbours (the apartment with the most similar number of rooms, 4.5 rooms) gives 110 m². Both use the relationship between the features.</p>
   <h4 id="ml-scaling" style="margin:12px 0 4px;font-family:var(--f-display)">Scaling</h4>
   <p>Features have very different orders of magnitude (consumption 8 l/100km, engine size 3600 cc). Without scaling, the large numbers dominate. That is why you bring them all onto a comparable scale.</p>
@@ -311,7 +311,7 @@ scores = cross_val_score(pipe, X, y, cv=10,    # 10 folds
     <p class="hint" id="cvMsg"></p>
     <p class="hint">Bars: validation error per run, the selected run is blue, later runs are still open (faint). Dashed: the mean of the runs so far, at the end the CV estimate. Each run has a different scaler mean and a different curve, because it sees different training points. The test error only appears in the last run.</p>
   </div>
-  <div class="merk" id="ml-pipeline"><b>Key takeaway</b><p>Pipeline = steps (scaling, model) are handled together, and in each fold they are learned only from that fold's training part. This prevents leakage and keeps the code clean.</p></div>
+  <div class="merk" id="ml-pipeline"><b>Key point</b><p>Pipeline = steps (scaling, model) are handled together, and in each fold they are learned only from that fold's training part. This prevents leakage and keeps the code clean.</p></div>
 
   <h3 id="ml-fs">5 · Feature selection</h3>
   <p>More features are not automatically better. With many dimensions, data becomes «sparse» and models become harder to train (<i>curse of dimensionality</i>). Superfluous features raise the risk of overfitting and make the model hard to explain.</p>
@@ -378,7 +378,7 @@ sns.heatmap(data.corr(), annot=True, cmap="Reds")</code></pre>
     <tr><td><b>ElasticNet</b></td><td>L1 and L2 mixed</td><td>compromise, more robust than either alone</td></tr>
   </table></div>
   <p class="note"><b>With the 10 apartments:</b> All three features (m², rooms, location) scaled, weights in CHF per standard deviation. Without regularisation: <code>190 / 157 / 103</code>. With <b>Ridge</b> (alpha = 10) they all shrink: <code>119 / 119 / 67</code>; m² and rooms share the influence because they are almost the same. With <b>Lasso</b> (alpha = 150) only one feature remains: <code>225 / 0 / 0</code>. Rooms are dropped, as explained above. But location is dropped too, even though it is useful (with location, R² rises from 0.93 to 0.99): the alpha is too large. At alpha = 50 location stays in (211 / 96 / 64). That is why you choose alpha by cross-validation, and a low individual correlation does not mean that a feature is unimportant.</p>
-  <div class="merk"><b>Key takeaway</b><p>Ridge shrinks, Lasso removes. The larger alpha, the stronger the brake (with a very large alpha there is a risk of underfitting).</p></div>
+  <div class="merk"><b>Key point</b><p>Ridge shrinks, Lasso removes. The larger alpha, the stronger the brake (with a very large alpha there is a risk of underfitting).</p></div>
 
   <h3 id="ml-hp">8 · Hyperparameters and model selection</h3>
   <p>The model learns <b>parameters</b> by itself (the coefficients). <b>Hyperparameters</b> you set beforehand (learning rate, alpha, polynomial degree). You find good values by searching, each time with cross-validation:</p>
@@ -428,7 +428,24 @@ print(&quot;CV-Accuracy:&quot;, round(search.best_score_, 3), &quot;| Test-Accur
   </div>
   <p class="note"><b>With the 10 apartments:</b> The hyperparameters here are the polynomial degree (1 to 9) and, for Ridge/Lasso, the alpha. You try out each setting, measure the error on the left-out apartment each time (cross-validation) and take the best. For the polynomial degree, degree 1 wins (123 CHF), not degree 9 (training 0 CHF, but several 100,000 on the left-out apartment). With real data you would also keep a test set untouched until the end; with only 10 apartments we do without it.</p>
 
-  <h3 id="ml-best">10 · Best practices</h3>
+  <h3 id="ml-methoden">10 · Overview: steps and methods</h3>
+  <p>All steps of the workflow with the methods you choose there and the matching scikit-learn call. The numbers match the figure «The whole workflow at a glance».</p>
+  <div class="tablewrap"><table>
+    <tr><th>Step</th><th>Methods to choose from</th><th>When which</th><th>scikit-learn</th></tr>
+    <tr><td><b>1 · Load raw data</b></td><td>shape, data types, first rows</td><td>Find numbers stored as text and odd values («?», «-») early.</td><td><code>pd.read_csv</code>, <code>df.info()</code></td></tr>
+    <tr><td><b>2 · Split</b></td><td>train/test 80/20, for classes with <code>stratify</code></td><td>Always first, before any analysis.</td><td><code>train_test_split</code></td></tr>
+    <tr><td><b>3 · EDA</b></td><td>distributions, outliers, correlations, missing values</td><td>On the training data only.</td><td><code>df.describe()</code>, <code>df.corr()</code></td></tr>
+    <tr><td><b>4 · Feature selection (manual)</b></td><td>remove IDs, names, leakage columns, almost empty columns</td><td>With domain knowledge, before the model.</td><td><code>df.drop(columns=…)</code></td></tr>
+    <tr><td><b>5 · Preprocessing</b></td><td>median, mean, mode, kNN imputer; one-hot</td><td>Median with outliers. One-hot for categories without order.</td><td><code>SimpleImputer</code>, <code>OneHotEncoder</code></td></tr>
+    <tr><td><b>6 · Scale</b></td><td>standard scaling, min-max</td><td>For gradient descent, kNN, SVM, regularisation; not for trees.</td><td><code>StandardScaler</code>, <code>MinMaxScaler</code></td></tr>
+    <tr><td><b>7 · Feature selection (automatic)</b></td><td>filter, wrapper, Lasso</td><td>Optional, with many features.</td><td><code>SelectKBest</code>, <code>RFE</code>, <code>Lasso</code></td></tr>
+    <tr><td><b>8 · Train and validate</b></td><td>linear, polynomial, Ridge, Lasso, ElasticNet; split or k-fold CV</td><td>Start simple, hyperparameters in the CV loop.</td><td><code>Pipeline</code>, <code>GridSearchCV</code></td></tr>
+    <tr><td><b>9 · Choose the best model</b></td><td>by validation error, then refit on all training data</td><td>Never choose by the test set.</td><td><code>search.best_estimator_</code></td></tr>
+    <tr><td><b>10 · Test once</b></td><td>MAE, RMSE, R² next to the baseline</td><td>Exactly once, at the very end.</td><td><code>mean_absolute_error</code>, <code>score</code></td></tr>
+  </table></div>
+  <div class="merk"><b>Key point</b><p>Regression is the workflow all later chapters reuse: split first, preprocessing in the pipeline, choose on validation, test once. Later only model, loss and metric change.</p></div>
+
+  <h3 id="ml-best">11 · Best practices</h3>
   <p>These points hold for every supervised model, from linear regression to the CNN. The later chapters only add what matters on top.</p>
   <div class="bp-check">
     <div><b>Before training</b><ul>

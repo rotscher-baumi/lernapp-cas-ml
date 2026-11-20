@@ -5,7 +5,7 @@
     order: 70,
     nav: 'Supervised ML',
     title: `Supervised Learning: Regression`,
-    kicker: `Modul 2 · Supervised Learning, Tag 1`,
+    kicker: `Modul 2 · Supervised Learning: Regression · Fr 23.10.`,
     summary: `Gradient Descent bis Hyperparameter`,
     html: `  <p>Beim Supervised Learning gibst du dem Modell Beispiele mit bekannter Antwort. Bei der <b>Regression</b> ist die Antwort eine Zahl (z. B. Hauspreis). Das Modell soll lernen, daraus für <i>neue</i> Fälle gut zu raten. Dabei gilt: Die Qualität der Daten begrenzt die Qualität des Modells (<i>garbage in, garbage out</i>), und das gilt für die Merkmale genauso wie für die Labels.</p>
 
@@ -431,7 +431,24 @@ print(&quot;CV-Accuracy:&quot;, round(search.best_score_, 3), &quot;| Test-Accur
   </div>
   <p class="note"><b>Mit den 10 Wohnungen:</b> Hyperparameter sind hier der Polynomgrad (1 bis 9) und bei Ridge/Lasso das alpha. Du probierst jede Einstellung aus, misst jeweils den Fehler bei fehlender Wohnung (Cross-Validation) und nimmst die beste. Beim Polynomgrad gewinnt Grad 1 (123 CHF), nicht Grad 9 (Training 0 CHF, aber mehrere 100 000 bei fehlender Wohnung). Bei echten Daten bliebe zusätzlich ein Test-Set bis zum Schluss unberührt, bei nur 10 Wohnungen verzichten wir darauf.</p>
 
-  <h3 id="ml-best">10 · Best Practices</h3>
+  <h3 id="ml-methoden">10 · Übersicht: Schritte und Methoden</h3>
+  <p>Alle Schritte des Ablaufs mit den Methoden, die du dort wählst, und dem passenden scikit-learn-Aufruf. Die Nummern entsprechen der Grafik «Der ganze Ablauf auf einen Blick».</p>
+  <div class="tablewrap"><table>
+    <tr><th>Schritt</th><th>Methoden zur Wahl</th><th>Wann welche</th><th>scikit-learn</th></tr>
+    <tr><td><b>1 · Rohdaten laden</b></td><td>Form, Datentypen, erste Zeilen</td><td>Zahlen als Text und Fremdwerte («?», «-») früh finden.</td><td><code>pd.read_csv</code>, <code>df.info()</code></td></tr>
+    <tr><td><b>2 · Aufteilen</b></td><td>Train/Test 80/20, bei Klassen mit <code>stratify</code></td><td>Immer zuerst, vor jeder Auswertung.</td><td><code>train_test_split</code></td></tr>
+    <tr><td><b>3 · EDA</b></td><td>Verteilungen, Ausreisser, Korrelationen, fehlende Werte</td><td>Nur auf den Trainingsdaten.</td><td><code>df.describe()</code>, <code>df.corr()</code></td></tr>
+    <tr><td><b>4 · Feature Selection (manuell)</b></td><td>IDs, Namen, Leakage-Spalten, fast leere Spalten entfernen</td><td>Mit Fachwissen, vor dem Modell.</td><td><code>df.drop(columns=…)</code></td></tr>
+    <tr><td><b>5 · Vorverarbeitung</b></td><td>Median, Mittelwert, Modus, kNN-Imputer; One-Hot</td><td>Median bei Ausreissern. One-Hot für Kategorien ohne Reihenfolge.</td><td><code>SimpleImputer</code>, <code>OneHotEncoder</code></td></tr>
+    <tr><td><b>6 · Skalieren</b></td><td>Standard Scaling, Min-Max</td><td>Für Gradient Descent, kNN, SVM, Regularisierung; nicht für Bäume.</td><td><code>StandardScaler</code>, <code>MinMaxScaler</code></td></tr>
+    <tr><td><b>7 · Feature Selection (automatisch)</b></td><td>Filter, Wrapper, Lasso</td><td>Optional, bei vielen Merkmalen.</td><td><code>SelectKBest</code>, <code>RFE</code>, <code>Lasso</code></td></tr>
+    <tr><td><b>8 · Trainieren und validieren</b></td><td>Linear, Polynom, Ridge, Lasso, ElasticNet; Split oder k-fache CV</td><td>Einfach anfangen, Hyperparameter in der CV-Schleife.</td><td><code>Pipeline</code>, <code>GridSearchCV</code></td></tr>
+    <tr><td><b>9 · Bestes Modell wählen</b></td><td>Nach dem Validierungsfehler, dann auf allen Trainingsdaten neu fitten</td><td>Nie nach dem Test wählen.</td><td><code>search.best_estimator_</code></td></tr>
+    <tr><td><b>10 · Einmal testen</b></td><td>MAE, RMSE, R² neben der Baseline</td><td>Genau einmal, ganz am Schluss.</td><td><code>mean_absolute_error</code>, <code>score</code></td></tr>
+  </table></div>
+  <div class="merk"><b>Merksatz</b><p>Regression ist der Ablauf, den alle späteren Kapitel wiederverwenden: Split zuerst, Vorverarbeitung in der Pipeline, Wahl auf der Validation, Test einmal. Später ändern sich nur Modell, Loss und Metrik.</p></div>
+
+  <h3 id="ml-best">11 · Best Practices</h3>
   <p>Diese Punkte gelten für jedes Supervised-Modell, von der linearen Regression bis zum CNN. Die späteren Kapitel ergänzen nur, was dort zusätzlich wichtig ist.</p>
   <div class="bp-check">
     <div><b>Vor dem Training</b><ul>

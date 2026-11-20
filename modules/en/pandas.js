@@ -2,7 +2,7 @@
 LernApp.translate('pandas', {
   nav: 'Pandas',
   title: `Pandas: Excel, but programmable`,
-  kicker: `Module 1 · Friday 16.10 and Saturday 17.10`,
+  kicker: `Module 1 · Pandas · Fri 16 and Sat 17.10.`,
   summary: `DataFrame, filters, groupby, merge`,
   html: `  <p>Pandas is the library for tables. Rows are observations (a customer, a sale), columns are variables (age, price). It is the most important tool for cleaning and preparing data.</p>
 
@@ -92,7 +92,7 @@ df["kategorie"] = pd.cut(df["preis_pro_sqft"], bins=bins, labels=labels)</code><
     <li><b>A proxy is not the truth:</b> a sale price of 0 dollars was interpreted as «parents to children». That is an assumption; it could also be a divorce or an estate.</li>
     <li><b>Fair comparison:</b> 2017 «won» because it had 8 months in the data, 2016 only 4. Calculated per month, the picture flips.</li>
   </ol>
-  <div class="merk"><b>Key takeaway</b><p>First the question, then check the data (<code>info</code>, <code>describe</code>, <code>isna</code>), then compute. Clean code with a wrong assumption still gives a wrong result.</p></div>`,
+  <div class="merk"><b>Key point</b><p>First the question, then check the data (<code>info</code>, <code>describe</code>, <code>isna</code>), then compute. Clean code with a wrong assumption still gives a wrong result.</p></div>`,
   notebooks: [{ file: 'Python_Pandas_Uebungen_own.ipynb', desc: `12 exercises with real Pandas: lists, comprehensions, filters, groupby, merge, dates, pd.cut and a chart.` }],
   quiz: [
     { q: `What is the difference between <code>loc</code> and <code>iloc</code>?`, a: `<code>loc</code> selects by labels (index and column names), <code>iloc</code> by positions (0, 1, 2 …).` },

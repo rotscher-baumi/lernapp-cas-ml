@@ -5,7 +5,7 @@
     order: 94,
     nav: 'Computer Vision',
     title: `Computer Vision`,
-    kicker: `Modul 3 · Deep Learning, Teil 3`,
+    kicker: `Modul 3 · Computer Vision · Fr 20.11.`,
     summary: `Bildentstehung, Pixel und Channels (RGB, Alpha, dtype, HWC/CHW, Dateiformate), Denoising, Deblurring, Super-Resolution, Object Detection (IoU, NMS, Faster R-CNN, YOLO), Semantic Segmentation (U-Net, SAM)`,
     html: `  <p>Das Kapitel <a href="#cnn">CNN</a> hat gezeigt, wie ein Netz Bilder <i>klassifiziert</i>: ein Bild rein, ein Label raus. Computer Vision umfasst mehr. Hier geht es um drei Aufgaben, bei denen die Ausgabe selbst räumlich ist: ein <b>besseres Bild</b> (Restauration), eine <b>Liste von Boxen</b> (Object Detection) oder eine <b>Klasse pro Pixel</b> (Semantic Segmentation). Die Bausteine bleiben die aus dem CNN-Kapitel: Filter, Feature Maps, Pooling, Backpropagation.</p>
   <p class="note">Die Demos rechnen im Browser mit kleinen Beispielbildern. Die Kurs-Notebooks (Bildgrundlagen, Denoising, Deblurring, Super-Resolution, Detection, Segmentation) laufen in Jupyter oder Colab.</p>

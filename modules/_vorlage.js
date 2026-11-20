@@ -12,7 +12,7 @@
     order: 80, // position in the navigation (smaller = earlier)
     nav: 'Neu', // short label in the top bar
     title: 'Titel des Kapitels',
-    kicker: 'Modul 3 · Datum', // small line above the title
+    kicker: 'Modul N · Thema · Fr TT.MM.', // small line above the title
     summary: 'Ein Satz für die Übersichtskarte',
 
     // Chapter content. CSS classes available: .merk (tip), .falle (pitfall),

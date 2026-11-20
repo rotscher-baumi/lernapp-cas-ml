@@ -12,7 +12,7 @@
     order: 40,
     nav: 'Pandas',
     title: `Pandas: Excel, aber programmierbar`,
-    kicker: `Modul 1 · Freitag 16.10 und Samstag 17.10`,
+    kicker: `Modul 1 · Pandas · Fr 16. und Sa 17.10.`,
     summary: `DataFrame, Filter, groupby, merge`,
     html: `  <p>Pandas ist die Bibliothek für Tabellen. Zeilen sind Beobachtungen (ein Kunde, ein Verkauf), Spalten sind Variablen (Alter, Preis). Sie ist das wichtigste Werkzeug zum Aufräumen und Vorbereiten von Daten.</p>
 
