@@ -24,7 +24,7 @@ lernapp/
     style.css       Design (hell und dunkel)
     core.js         Navigation, Sprache, Theme, Selbsttest; gemeinsame Helfer (mulberry32, gauss, drag, setRange)
     demos-<id>.js   Demo-Code der grossen Kapitel (ml, klass, unsup, nn, cnn, cv, det, gen, modell), das Kapitel in modules/ ruft ihn in init() auf
-                    (`demos-nn.js` liefert auch die zwei klickbaren SVG-Grafiken des Kapitels Neural Networks: `LernApp.nnFlow` Ablauf, `LernApp.nnConcept` Hauptkonzept; die Kapitel CNN, Image Processing, Object Detection & Segmentation und Generative Models nutzen `nnFlow` mit eigenem `id` für die Pfeil-Marker)
+                    (`demos-nn.js` liefert auch die zwei klickbaren SVG-Grafiken des Kapitels Neural Networks: `LernApp.nnFlow` Ablauf, `LernApp.nnConcept` Hauptkonzept; die Kapitel CNN, Image Processing, Object Detection & Segmentation und Generative Models nutzen `nnFlow` mit eigenem `id` für die Pfeil-Marker; `demos-det.js` liefert zusätzlich `LernApp.detFig` mit den statischen SVG-Grafiken des Kapitels Object Detection & Segmentation, die `modules/det.js` und `modules/en/det.js` in ihrem `html` aufrufen)
     demos-*.js      geteilte Demos (Mathe, k-Means)
     search.js       Volltextsuche der Hauptseite: klebende Leiste über den Kapitel-Chips, Trefferliste, ▲▼, Markierung (CSS Custom Highlight API)
     notebook-data.js  aus den Notebooks erzeugt (nicht von Hand ändern)

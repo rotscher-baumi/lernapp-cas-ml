@@ -247,28 +247,28 @@
       [EING, t('Pixel skalieren, Bildgrösse durch 2<sup>Tiefe</sup> teilbar', 'scale pixels, image size divisible by 2<sup>depth</sup>')],
       ['+', t('genaue Kanten, auch mit wenigen Bildern trainierbar', 'precise edges, trainable even with few images')],
       ['−', t('ein Modell pro Aufgabe, braucht pixelgenaue Labels oder saubere Zielbilder', 'one model per task, needs pixel-exact labels or clean target images')],
-    ], 'keras.Model (Encoder-Decoder)', '#det-seg'),
+    ], 'keras.Model (Encoder-Decoder)', '#det-unet'),
     card('Faster R-CNN', t('Detection in zwei Stufen: Ein Region Proposal Network schlägt Kandidaten vor, ein Kopf bestimmt pro Kandidat Klasse und genaue Box.', 'Two-stage detection: a region proposal network suggests candidates, a head determines class and exact box for each.'), [
       [WANN, t('höchste Genauigkeit, kleine Objekte, Zeit spielt keine Rolle', 'highest accuracy, small objects, time does not matter')],
       [HP, t('Score-Threshold, NMS-IoU-Threshold, Anker', 'score threshold, NMS IoU threshold, anchors')],
       [EING, t('wie der vortrainierte Backbone', 'as the pretrained backbone')],
       ['+', t('genau, gut für kleine Objekte', 'accurate, good for small objects')],
       ['−', t('langsamer als YOLO, komplexer', 'slower than YOLO, more complex')],
-    ], 'torchvision.models.detection', '#det-detection'),
+    ], 'torchvision.models.detection', '#det-rcnn'),
     card('YOLO', t('Detection in einer Stufe: Das Netz sagt auf einem Gitter direkt Klassen und Boxen voraus (anchor-free ab v8), NMS räumt Duplikate weg.', 'One-stage detection: the network predicts classes and boxes directly on a grid (anchor-free from v8), NMS removes duplicates.'), [
       [WANN, t('Echtzeit, Video, Edge-Geräte', 'real time, video, edge devices')],
       [HP, t('Modellgrösse (n, s, m, l, x), Score- und NMS-Threshold, Bildgrösse', 'model size (n, s, m, l, x), score and NMS threshold, image size')],
       [EING, t('Labels als <code>class cx cy w h</code>, auf 0 bis 1 normiert', 'labels as <code>class cx cy w h</code>, normalised to 0 to 1')],
       ['+', t('schnell, einfach zu fine-tunen', 'fast, easy to fine-tune')],
       ['−', t('etwas schwächer bei sehr kleinen, dicht gedrängten Objekten', 'somewhat weaker on very small, densely packed objects')],
-    ], 'ultralytics.YOLO', '#det-detection'),
+    ], 'ultralytics.YOLO', '#det-yolo'),
     card('SAM (Segment Anything)', t('Foundation Model für Segmentation, auf einer Milliarde Masken trainiert. Ein Prompt (Punkt, Box) genügt, und es liefert die Maske des Objekts.', 'Foundation model for segmentation, trained on a billion masks. A prompt (point, box) is enough and it returns the object’s mask.'), [
       [WANN, t('Masken ohne eigenes Training (zero-shot), Labels schneller erstellen', 'masks without own training (zero-shot), creating labels faster')],
       [HP, t('Prompt, Modellgrösse', 'prompt, model size')],
       [EING, t('RGB-Bild, Prompt-Koordinaten', 'RGB image, prompt coordinates')],
       ['+', t('kein Training, funktioniert auf sehr vielen Bildarten', 'no training, works on very many kinds of images')],
       ['−', t('kennt keine Klassennamen, gross; für Klassen mit einem Klassifikator kombinieren', 'knows no class names, large; combine with a classifier for classes')],
-    ], 'segment_anything.SamPredictor', '#det-seg'),
+    ], 'segment_anything.SamPredictor', '#det-sam'),
   ];
   const gen = [
     card('Autoencoder', t('Encoder drückt das Bild in einen kleinen Code <code>z</code>, der Decoder rekonstruiert es daraus. Gelernt wird nur mit der Rekonstruktion, ohne Labels.', 'The encoder squeezes the image into a small code <code>z</code>, the decoder reconstructs it. It learns only from the reconstruction, without labels.'), [

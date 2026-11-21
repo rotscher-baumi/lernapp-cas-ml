@@ -115,9 +115,15 @@
   <h3 id="k-det">Object Detection &amp; Segmentation</h3>
   <div class="tablewrap"><table>
     <tr><th>Thema</th><th>Merke</th></tr>
-    <tr><td><b>Object Detection</b></td><td>Boxen, Klassen, Scores. Two-Stage (Faster R-CNN, genauer) oder One-Stage (YOLO, schnell). <b>IoU</b> = Schnitt / Vereinigung. <b>NMS</b> entfernt doppelte Boxen. Metrik mAP@IoU. Aufbau: Backbone → Neck → Head → Post-Processing (Score-Threshold + NMS).</td></tr>
-    <tr><td><b>Semantic Segmentation</b></td><td>Eine Klasse pro Pixel. U-Net (Encoder, Decoder, Skip Connections), SAM (Segment Anything) liefert per Prompt (Punkt, Box) Masken ohne eigenes Training, aber ohne Klassennamen. Loss Cross-Entropy + Dice, Metrik IoU, Dice, mIoU.</td></tr>
-    <tr><td><b>Best Practices</b></td><td>Vortrainierte Modelle zuerst zero-shot prüfen, Annotationen kontrollieren und nach Szene oder Video splitten, mAP immer mit IoU-Threshold angeben (mAP@0.5 oder mAP@0.5:0.95), Score-Threshold und τ auf der Validation wählen und Boxen und Masken ansehen. <a href="index.html#det-best">→</a></td></tr>
+    <tr><td><b>Vier Aufgaben</b></td><td>Klassifikation (ein Label), Object Detection (Boxen), Semantic Segmentation (Klasse pro Pixel), Instance Segmentation (Maske pro Objekt). Je feiner die Ausgabe, desto teurer die Labels.</td></tr>
+    <tr><td><b>Box-Formate</b></td><td>xyxy (Ecken, Pixel; VOC, torchvision), xywh (Ecke + Grösse, Pixel; COCO), YOLO <code>class cx cy w h</code> auf 0 bis 1 normiert, eine <code>.txt</code> pro Bild. Index → Name über <code>names</code> (<code>model.names</code>).</td></tr>
+    <tr><td><b>Object Detection</b></td><td>Boxen, Klassen, Scores. Aufbau: Backbone → Neck → Head → Post-Processing (Score-Threshold + NMS). <b>IoU</b> = Schnitt / Vereinigung. <b>NMS</b> entfernt doppelte Boxen.</td></tr>
+    <tr><td><b>Faster R-CNN</b></td><td>Zwei Stufen: RPN schlägt mit Ankern Regionen vor, RoI Align schneidet 7 × 7 Features aus, der Head bestimmt Klasse (C + 1 mit Hintergrund) und Box. Genau, langsamer. Mask R-CNN ergänzt eine Maske pro Region.</td></tr>
+    <tr><td><b>YOLO</b></td><td>Eine Stufe, anchor-free ab v8: Gitter 80 / 40 / 20 (Stride 8 / 16 / 32) bei 640 px, pro Ankerpunkt Box + Klassen-Scores, 8400 Kandidaten. Kleine Objekte auf P3, grosse auf P5. Loss BCE + CIoU + DFL. Grössen n bis x.</td></tr>
+    <tr><td><b>mAP</b></td><td>TP: IoU ≥ Threshold mit freier Ground-Truth-Box; FP: keine oder schon vergeben; FN: verpasst. AP = Fläche unter der Precision-Recall-Kurve (alle Score-Thresholds), mAP = Mittel über Klassen. mAP@0.5 (VOC) oder mAP@0.5:0.95 (COCO, 10 Thresholds).</td></tr>
+    <tr><td><b>Semantic Segmentation</b></td><td>Eine Klasse pro Pixel; die Maske ist ein PNG mit einer Klassen-ID pro Pixel. Ausgabe H × W × C, <code>argmax</code> ergibt die Maske. Loss Cross-Entropy + Dice, Metrik IoU, Dice, mIoU; Pixel-Accuracy täuscht bei Klassen-Imbalance.</td></tr>
+    <tr><td><b>U-Net und SAM</b></td><td>U-Net: Encoder verkleinert, Decoder vergrössert, Skip Connections hängen die feinen Maps an; Bildgrösse durch 2<sup>Tiefe</sup> teilbar, pro Aufgabe trainiert. SAM: Foundation Model (SA-1B, 1.1 Mrd. Masken), Image Encoder einmal pro Bild, Prompt (Punkt, Box) → drei Masken mit Score, kennt keine Klassennamen; gut zum Labeln.</td></tr>
+    <tr><td><b>Best Practices</b></td><td>Vortrainierte Modelle zuerst zero-shot prüfen, klein anfangen (YOLOv8n), Annotationen kontrollieren und nach Szene oder Video splitten, mAP immer mit IoU-Threshold angeben (mAP@0.5 oder mAP@0.5:0.95), Score-Threshold und τ auf der Validation wählen und Boxen und Masken ansehen. <a href="index.html#det-best">→</a></td></tr>
   </table></div>
   <p class="note"><a href="index.html#det">Zum Kapitel →</a></p>
 
