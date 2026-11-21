@@ -25,13 +25,13 @@
           ['Loss und Optimizer', 'Cross-Entropy, Adam, Learning Rate'],
           ['Forward Pass', 'Filter → Feature Maps → Softmax'],
           ['Loss berechnen', 'Abstand zwischen ŷ und y'],
-          ['Backpropagation', 'Gradienten auch für die filter'],
+          ['Backpropagation', 'Gradienten auch für die Filter'],
           ['Parameter aktualisieren', 'w ← w − α · ∂L/∂w'],
           ['Validation prüfen', 'Overfitting? Augmentation, Dropout'],
           ['Einmal testen', 'Testset, erst ganz am Schluss'],
         ],
         loopA: ['pro Mini-Batch,', 'viele Epochs'],
-        loopB: ['Tuning:', 'filter, Blöcke,', 'Augmentation'],
+        loopB: ['Tuning:', 'Filter, Blöcke,', 'Augmentation'],
       })}
     </svg>
     </div>
@@ -61,7 +61,7 @@ a[r, c] = ReLU(z[r, c])</code></pre>
     <div class="tag">Demo</div><h4>Ein Filter auf einem 8 × 8-Bild</h4>
     <p class="hint">Wähle Bild und Filter. Der orange Rahmen links ist das aktuelle Fenster, rechts daneben sein Wert in der Feature Map. Klicke auf ein Feld der Feature Map oder schiebe das Fenster mit den Pfeilen. Ganz rechts: Feature Map nach ReLU und 2 × 2-Pooling.</p>
     <div class="btnrow" id="ccImg" role="group" aria-label="Bild"><button data-v="seven" class="pri" aria-pressed="true">Ziffer 7</button><button data-v="square" aria-pressed="false">Quadrat</button><button data-v="cross" aria-pressed="false">Kreuz</button></div>
-    <div class="btnrow" id="ccKer" role="group" aria-label="filter"><button data-v="vert" class="pri" aria-pressed="true">Vertikale Kante</button><button data-v="horiz" aria-pressed="false">Horizontale Kante</button><button data-v="diag" aria-pressed="false">Diagonale</button><button data-v="blur" aria-pressed="false">Weichzeichner</button></div>
+    <div class="btnrow" id="ccKer" role="group" aria-label="Filter"><button data-v="vert" class="pri" aria-pressed="true">Vertikale Kante</button><button data-v="horiz" aria-pressed="false">Horizontale Kante</button><button data-v="diag" aria-pressed="false">Diagonale</button><button data-v="blur" aria-pressed="false">Weichzeichner</button></div>
     <svg class="plot" id="ccSvg" viewBox="0 0 490 190" style="max-width:560px" role="img" aria-label="8 × 8-Bild mit Fenster, 3 × 3-Filter, 6 × 6-Feature-Map und 3 × 3-Ergebnis nach Pooling"></svg>
     <div class="btnrow"><button id="ccPrev" aria-label="Fenster zurück">◀ Fenster</button><button id="ccNext" aria-label="Fenster weiter">Fenster ▶</button></div>
     <div class="btnrow" id="ccMode" role="group" aria-label="Pooling"><button data-v="max" class="pri" aria-pressed="true">Max-Pooling</button><button data-v="avg" aria-pressed="false">Average-Pooling</button></div>
@@ -101,7 +101,7 @@ Conv2D(32, (3, 3), padding='same')    # p = 1: 32 → 32 (bei stride 1)</code></
   <div class="falle"><b>Falle</b><p>Pooling und Stride werfen Information über die genaue Lage weg. Für Klassifikation («ist eine Katze im Bild?») ist das gewollt. Für Aufgaben, die Pixel genau zuordnen (Segmentierung), braucht es andere Architekturen.</p></div>
 
   <h3 id="cnn-kanal">5 · Mehrere Filter und Kanäle: Parameter zählen</h3>
-  <p>Eine Conv-Schicht hat nicht einen, sondern viele Filter (32, 64, …). Jeder liefert eine eigene Feature Map; zusammen bilden sie die Ausgabe der Form <code>(Höhe, Breite, Anzahl filter)</code>. Diese Kanäle sind die Eingabe der nächsten Schicht. Darum reicht jeder Filter durch <b>alle</b> Eingabekanäle: Ein 3 × 3-Filter auf einem RGB-Bild hat <code>3 · 3 · 3 = 27</code> Gewichte plus Bias.</p>
+  <p>Eine Conv-Schicht hat nicht einen, sondern viele Filter (32, 64, …). Jeder liefert eine eigene Feature Map; zusammen bilden sie die Ausgabe der Form <code>(Höhe, Breite, Anzahl Filter)</code>. Diese Kanäle sind die Eingabe der nächsten Schicht. Darum reicht jeder Filter durch <b>alle</b> Eingabekanäle: Ein 3 × 3-Filter auf einem RGB-Bild hat <code>3 · 3 · 3 = 27</code> Gewichte plus Bias.</p>
   <pre><code>Parameter Conv2D = (k · k · C_in + 1) · C_out
 Beispiel:  Conv2D(32, (3, 3)) auf 32 × 32 × 3   → (3·3·3 + 1) · 32  =    896
            Conv2D(64, (3, 3)) auf 16 × 16 × 32  → (3·3·32 + 1) · 64 = 18'496</code></pre>
@@ -110,7 +110,7 @@ Beispiel:  Conv2D(32, (3, 3)) auf 32 × 32 × 3   → (3·3·3 + 1) · 32  =    
     <div class="tag">Demo</div><h4>Ein CNN zusammenstellen</h4>
     <p class="hint">Startwerte ähnlich wie im Kurs-Beispiel zu CIFAR-10: drei Blöcke mit je zwei Conv-Schichten (erste <code>same</code>, zweite <code>valid</code>) und Max-Pooling, dann Dense 512. Die Filter verdoppeln sich hier pro Block (im Kurs-Beispiel bleibt der dritte Block bei 64). Die Tabelle entspricht <code>model.summary()</code> (ohne Dropout, das keine Parameter hat).</p>
     <div class="btnrow" id="cpIn" role="group" aria-label="Eingabe"><button data-v="cifar" class="pri" aria-pressed="true">CIFAR-10 (32×32×3)</button><button data-v="mnist" aria-pressed="false">MNIST (28×28×1)</button></div>
-    <div class="btnrow" id="cpPad" role="group" aria-label="padding"><button data-v="mixed" class="pri" aria-pressed="true">same, dann valid</button><button data-v="same" aria-pressed="false">immer same</button><button data-v="valid" aria-pressed="false">immer valid</button></div>
+    <div class="btnrow" id="cpPad" role="group" aria-label="Padding"><button data-v="mixed" class="pri" aria-pressed="true">same, dann valid</button><button data-v="same" aria-pressed="false">immer same</button><button data-v="valid" aria-pressed="false">immer valid</button></div>
     <div class="ctl"><label for="cpB">Blöcke</label><input type="range" id="cpB" min="1" max="4" step="1" value="3"><output id="cpBO"></output></div>
     <div class="ctl"><label for="cpC">Conv-Schichten je Block</label><input type="range" id="cpC" min="1" max="2" step="1" value="2"><output id="cpCO"></output></div>
     <div class="ctl"><label for="cpF">Filter im ersten Block</label><input type="range" id="cpF" min="8" max="64" step="8" value="32"><output id="cpFO"></output></div>
