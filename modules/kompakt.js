@@ -130,13 +130,17 @@
   <h3 id="k-gen">Generative Models</h3>
   <div class="tablewrap"><table>
     <tr><th>Thema</th><th>Merke</th></tr>
-    <tr><td><b>Idee</b></td><td>Ein generatives Modell lernt die Verteilung der Daten (ohne Labels) und erzeugt neue Beispiele, die aussehen wie die echten.</td></tr>
-    <tr><td><b>Autoencoder</b></td><td>Encoder → Latent Space <code>z</code> (klein) → Decoder. Loss: Rekonstruktion. Gut für Kompression, Denoising, Anomalien (hoher Rekonstruktionsfehler). Kein brauchbarer Generator, weil der Latent Space Lücken hat.</td></tr>
-    <tr><td><b>VAE</b></td><td>Encoder gibt μ und σ, <code>z = μ + σ · ε</code> (Reparametrisierungs-Trick, damit Backpropagation durchläuft). Loss: Rekonstruktion + KL zu N(0, 1). Geordneter Latent Space, stabil, Bilder etwas unscharf.</td></tr>
-    <tr><td><b>PixelCNN</b></td><td>Erzeugt Pixel für Pixel, jedes abhängig von den vorherigen (maskierte Faltung). Echte Wahrscheinlichkeit, einfaches Training, Generieren sehr langsam.</td></tr>
-    <tr><td><b>GAN</b></td><td>Generator gegen Discriminator, zwei Losses im Wechsel. Sehr scharfe Bilder, aber instabiles Training und Mode Collapse (nur noch wenige Bilder). Varianten: CycleGAN (Stil ohne gepaarte Beispiele), ESRGAN (Super-Resolution), DeblurGAN.</td></tr>
-    <tr><td><b>Wahl</b></td><td>Kompromiss zwischen Schärfe (GAN), Stabilität und Latent Space (VAE) und Wahrscheinlichkeit (PixelCNN).</td></tr>
-    <tr><td><b>Best Practices</b></td><td>Bilder ansehen statt nur der Loss, Vielfalt und Kopien prüfen, Kennzahlen nur gleich eingestellt vergleichen und erzeugte Bilder kennzeichnen. <a href="index.html#gen-best">→</a></td></tr>
+    <tr><td><b>Idee</b></td><td>Diskriminativ: <code>x → y</code>, <code>p(y | x)</code>, eine richtige Antwort. Generativ: lernt die Verteilung <code>p(x)</code> oder <code>p(x | y)</code> ohne Labels und zieht daraus neue Beispiele. Drei Teile: Darstellung (Netz), Training (Loss), Sampling.</td></tr>
+    <tr><td><b>Taxonomie</b></td><td>Explizit, exakt: PixelCNN (autoregressiv). Explizit, angenähert: VAE, Diffusion. Implizit (nur Sampling): GAN. Trilemma: Qualität, Vielfalt, Tempo nie alle zugleich.</td></tr>
+    <tr><td><b>Autoencoder</b></td><td>Encoder → Latent Space <code>z</code> (klein) → Decoder, <code>g(f(x)) ≈ x</code>. Loss: Rekonstruktion. Gut für Kompression, Denoising, Anomalien (hoher Rekonstruktionsfehler). Kein Generator: Lücken im Latent Space.</td></tr>
+    <tr><td><b>VAE</b></td><td>Encoder gibt μ und σ, <code>z = μ + σ · ε</code> (Reparametrisierungs-Trick). Loss: Rekonstruktion + β · KL zu N(0, I), KL pro Dimension <code>½ (μ² + σ² − ln σ² − 1)</code>. Generieren: nur Decoder mit z ~ N(0, I). Geordneter Latent Space, Interpolation, aber unscharf. Steckt in Stable Diffusion (512² × 3 → 64² × 4).</td></tr>
+    <tr><td><b>PixelCNN</b></td><td>Kettenregel: jeder Pixel abhängig von den vorherigen, maskierte Faltung (Maske A, dann B). Echte Wahrscheinlichkeit, paralleles Training, Generieren sehr langsam (ein Durchlauf pro Pixel).</td></tr>
+    <tr><td><b>GAN</b></td><td><code>min_G max_D E[log D(x)] + E[log(1 − D(G(z)))]</code>. D-Schritt: echt → 1, falsch → 0. G-Schritt: D(G(z)) → 1 (non-saturating: <code>log D(G(z))</code> maximieren). Sehr scharf, ein Durchlauf; instabil, Mode Collapse. DCGAN: Adam 2·10⁻⁴, β₁ = 0,5. Varianten: cGAN, Pix2Pix, CycleGAN, ESRGAN, StyleGAN.</td></tr>
+    <tr><td><b>Diffusion</b></td><td>Vorwärts (fest): T = 1000 Schritte Rauschen, direkt <code>x_t = √ᾱ_t · x₀ + √(1 − ᾱ_t) · ε</code>. Training: zufälliges t, U-Net schätzt ε, Loss = MSE(ε, ε̂). Sampling: von Rauschen aus Schritt für Schritt entrauschen (DDPM 1000, DDIM 20 bis 50 Schritte). Stabil, beste Qualität und Vielfalt, aber langsam.</td></tr>
+    <tr><td><b>Text-zu-Bild</b></td><td>Bedingung y (Klasse, Text über Cross-Attention). Classifier-free Guidance: <code>ε̂ = ε_∅ + w · (ε_y − ε_∅)</code>, Guidance Scale w ≈ 7,5 (gross: treuer, weniger vielfältig). Stable Diffusion = Text-Encoder (CLIP) + U-Net im Latent Space + VAE-Decoder; Seed fixiert das Bild.</td></tr>
+    <tr><td><b>Bewerten</b></td><td>Bilder aus festen Seeds ansehen, FID (tiefer ist besser, viele Bilder), nächste Nachbarn gegen Kopien, CLIP Score für Prompt-Treue. Der Loss sagt wenig über die Qualität.</td></tr>
+    <tr><td><b>Wahl</b></td><td>Text-zu-Bild, hohe Qualität: vortrainiertes Diffusionsmodell. Bild zu Bild in Echtzeit: GAN. Kompakte Darstellung, Interpolation: VAE. Wahrscheinlichkeit: PixelCNN.</td></tr>
+    <tr><td><b>Best Practices</b></td><td>Vortrainiert vor selbst trainiert, klein anfangen, Bilder aus festen Seeds ansehen statt nur den Loss, Vielfalt und Kopien prüfen, FID nur gleich eingestellt vergleichen und erzeugte Bilder kennzeichnen. <a href="index.html#gen-best">→</a></td></tr>
   </table></div>
   <p class="note"><a href="index.html#gen">Zum Kapitel →</a></p>
 

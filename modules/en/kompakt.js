@@ -126,13 +126,17 @@ LernApp.translate('kompakt', {
   <h3 id="k-gen">Generative models</h3>
   <div class="tablewrap"><table>
     <tr><th>Topic</th><th>Remember</th></tr>
-    <tr><td><b>Idea</b></td><td>A generative model learns the distribution of the data (without labels) and creates new examples that look like the real ones.</td></tr>
-    <tr><td><b>Autoencoder</b></td><td>Encoder → latent space <code>z</code> (small) → decoder. Loss: reconstruction. Good for compression, denoising, anomalies (high reconstruction error). Not a usable generator, because the latent space has gaps.</td></tr>
-    <tr><td><b>VAE</b></td><td>The encoder outputs μ and σ, <code>z = μ + σ · ε</code> (reparameterization trick, so backpropagation can pass). Loss: reconstruction + KL to N(0, 1). Ordered latent space, stable, images somewhat blurry.</td></tr>
-    <tr><td><b>PixelCNN</b></td><td>Creates pixel by pixel, each depending on the previous ones (masked convolution). True likelihood, simple training, very slow generation.</td></tr>
-    <tr><td><b>GAN</b></td><td>Generator against discriminator, two losses in turn. Very sharp images, but unstable training and mode collapse (only a few images left). Variants: CycleGAN (style without paired examples), ESRGAN (super-resolution), DeblurGAN.</td></tr>
-    <tr><td><b>Choice</b></td><td>A trade-off between sharpness (GAN), stability and latent space (VAE) and likelihood (PixelCNN).</td></tr>
-    <tr><td><b>Best practices</b></td><td>Look at images, not just the loss, check diversity and copies, compare scores only with the same settings and label generated images. <a href="index.html#gen-best">→</a></td></tr>
+    <tr><td><b>Idea</b></td><td>Discriminative: <code>x → y</code>, <code>p(y | x)</code>, one correct answer. Generative: learns the distribution <code>p(x)</code> or <code>p(x | y)</code> without labels and draws new examples from it. Three parts: representation (network), training (loss), sampling.</td></tr>
+    <tr><td><b>Taxonomy</b></td><td>Explicit, exact: PixelCNN (autoregressive). Explicit, approximate: VAE, diffusion. Implicit (sampling only): GAN. Trilemma: quality, diversity, speed never all at once.</td></tr>
+    <tr><td><b>Autoencoder</b></td><td>Encoder → latent space <code>z</code> (small) → decoder, <code>g(f(x)) ≈ x</code>. Loss: reconstruction. Good for compression, denoising, anomalies (high reconstruction error). Not a generator: gaps in the latent space.</td></tr>
+    <tr><td><b>VAE</b></td><td>The encoder outputs μ and σ, <code>z = μ + σ · ε</code> (reparameterization trick). Loss: reconstruction + β · KL to N(0, I), KL per dimension <code>½ (μ² + σ² − ln σ² − 1)</code>. Generating: decoder only with z ~ N(0, I). Ordered latent space, interpolation, but blurry. Inside Stable Diffusion (512² × 3 → 64² × 4).</td></tr>
+    <tr><td><b>PixelCNN</b></td><td>Chain rule: every pixel depends on the previous ones, masked convolution (mask A, then B). Real probability, parallel training, generation very slow (one pass per pixel).</td></tr>
+    <tr><td><b>GAN</b></td><td><code>min_G max_D E[log D(x)] + E[log(1 − D(G(z)))]</code>. D step: real → 1, fake → 0. G step: D(G(z)) → 1 (non-saturating: maximise <code>log D(G(z))</code>). Very sharp, one pass; unstable, mode collapse. DCGAN: Adam 2·10⁻⁴, β₁ = 0.5. Variants: cGAN, Pix2Pix, CycleGAN, ESRGAN, StyleGAN.</td></tr>
+    <tr><td><b>Diffusion</b></td><td>Forward (fixed): T = 1000 noise steps, directly <code>x_t = √ᾱ_t · x₀ + √(1 − ᾱ_t) · ε</code>. Training: random t, a U-Net estimates ε, loss = MSE(ε, ε̂). Sampling: denoise step by step from noise (DDPM 1000, DDIM 20 to 50 steps). Stable, best quality and diversity, but slow.</td></tr>
+    <tr><td><b>Text-to-image</b></td><td>Condition y (class, text via cross-attention). Classifier-free guidance: <code>ε̂ = ε_∅ + w · (ε_y − ε_∅)</code>, guidance scale w ≈ 7.5 (large: more faithful, less diverse). Stable Diffusion = text encoder (CLIP) + U-Net in latent space + VAE decoder; the seed fixes the image.</td></tr>
+    <tr><td><b>Evaluation</b></td><td>Look at images from fixed seeds, FID (lower is better, many images), nearest neighbours against copies, CLIP score for prompt faithfulness. The loss says little about quality.</td></tr>
+    <tr><td><b>Choice</b></td><td>Text-to-image, high quality: a pretrained diffusion model. Image to image in real time: GAN. Compact representation, interpolation: VAE. Probability: PixelCNN.</td></tr>
+    <tr><td><b>Best practices</b></td><td>Pretrained before self-trained, start small, look at images from fixed seeds instead of just the loss, check diversity and copies, compare FID only with equal settings and label generated images. <a href="index.html#gen-best">→</a></td></tr>
   </table></div>
   <p class="note"><a href="index.html#gen">To the chapter →</a></p>
 
