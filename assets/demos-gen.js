@@ -209,32 +209,39 @@
       return '<svg viewBox="0 0 640 216" role="img" aria-label="' + T('Diffusion: Oben wird ein Bild in vielen Schritten verrauscht, bis nur Rauschen bleibt. Unten lernt ein Netz, jeden Schritt rückwärts zu gehen und so aus Rauschen ein Bild zu machen.', 'Diffusion: at the top an image is noised in many steps until only noise remains. At the bottom a network learns to go each step backwards and so to turn noise into an image.') + '">' + s + '</svg>';
     },
 
-    // Reverse process seen as distributions: from N(0, 1) at x_T to the multi-peaked data distribution at x₀.
-    // Data: mixture of three Gaussians. Because x_t = √ᾱ·x₀ + √(1−ᾱ)·ε, the density of x_t is again a mixture
-    // with means √ᾱ·μ_k and variances ᾱ·σ_k² + (1 − ᾱ), so every panel is computed exactly.
+    // Reverse process seen as distributions, drawn as 3D surfaces: from N(0, I) at x_T to the multi-peaked data
+    // distribution at x₀. Data: mixture of three 2D Gaussians. Because x_t = √ᾱ·x₀ + √(1−ᾱ)·ε, the density of x_t
+    // is again a mixture with means √ᾱ·μ_k and variances ᾱ·σ_k² + (1 − ᾱ) per axis, so every panel is exact.
     diffDist() {
-      const MIX = [[0.3, -2.2, 0.35], [0.45, 0.3, 0.45], [0.25, 2.4, 0.3]];
-      const dens = (x, ab) => MIX.reduce((s, m) => {
-        const mu = Math.sqrt(ab) * m[1], v = ab * m[2] * m[2] + (1 - ab);
-        return s + m[0] * Math.exp(-0.5 * (x - mu) ** 2 / v) / Math.sqrt(2 * Math.PI * v);
+      const MIX = [[0.34, -1.6, -1.2, 0.55], [0.33, 1.5, -0.8, 0.5], [0.33, 0.2, 1.6, 0.52]];
+      const dens = (x, y, ab) => MIX.reduce((s, m) => {
+        const v = ab * m[3] * m[3] + (1 - ab), dx = x - Math.sqrt(ab) * m[1], dy = y - Math.sqrt(ab) * m[2];
+        return s + m[0] * Math.exp(-0.5 * (dx * dx + dy * dy) / v) / (2 * Math.PI * v);
       }, 0);
       const P = [[0, 'x_T', T('reines Rauschen N(0, I)', 'pure noise N(0, I)')], [0.25, 'x_t', T('grob, ein breiter Hügel', 'coarse, one broad hill')], [0.65, 'x_{t−1}', T('Gruppen trennen sich', 'groups separate')], [1, 'x₀', T('Daten: drei Gipfel', 'data: three peaks')]];
+      const G = 20, L = 3.6, SX = 3.3, SY = 1.5, H = 52;
+      const val = (ab, i, j) => dens(-L + 2 * L * i / G, -L + 2 * L * j / G, ab);
       const n = 16, img = testImg(n), eps = noiseVec(n * n, 5);
-      let s = '', top = 0;
-      P.forEach((p) => { for (let k = 0; k <= 80; k++) top = Math.max(top, dens(-4 + 8 * k / 80, p[0])); });
-      P.forEach((p, i) => {
-        const x0 = 12 + i * 158, w = 136, base = 196, hgt = 96;
-        let d = '';
-        for (let k = 0; k <= 80; k++) { const x = -4 + 8 * k / 80; d += (k ? 'L' : 'M') + fmt(x0 + w * k / 80, 1) + ' ' + fmt(base - dens(x, p[0]) / top * hgt, 1); }
-        s += '<path d="' + d + 'L' + (x0 + w) + ' ' + base + 'L' + x0 + ' ' + base + 'Z" style="fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.8"/>';
-        s += '<line class="ax" x1="' + x0 + '" y1="' + base + '" x2="' + (x0 + w) + '" y2="' + base + '"/>';
-        s += pix(x0 + w / 2 - 22, 14, 44, noisy(img, eps, p[0]), n);
-        s += txt(x0 + w / 2, 74, p[1], 'd-t') + txt(x0 + w / 2, 212, p[2]);
-        if (i < 3) s += '<line class="d-arrb" x1="' + (x0 + w + 2) + '" y1="36" x2="' + (x0 + 156) + '" y2="36"/>';
+      let s = '';
+      P.forEach((p, k) => {
+        const cx = 12 + k * 158 + 68, cy = 140;
+        // every panel is scaled to its own highest point, so the shapes are comparable
+        const h = [];
+        let top = 0;
+        for (let i = 0; i <= G; i++) { h.push([]); for (let j = 0; j <= G; j++) { h[i].push(val(p[0], i, j)); top = Math.max(top, h[i][j]); } }
+        h.forEach((r) => r.forEach((v, j) => { r[j] = v / top; }));
+        const pt = (i, j) => fmt(cx + (i - j) * SX, 1) + ',' + fmt(cy + (i + j) * SY - h[i][j] * H, 1);
+        // painter's order: from the back corner (i + j small) to the front
+        for (let d = 0; d <= 2 * (G - 1); d++) for (let i = Math.max(0, d - G + 1); i <= Math.min(G - 1, d); i++) {
+          const j = d - i, z = (h[i][j] + h[i + 1][j] + h[i][j + 1] + h[i + 1][j + 1]) / 4;
+          s += '<path d="M' + pt(i, j) + 'L' + pt(i + 1, j) + 'L' + pt(i + 1, j + 1) + 'L' + pt(i, j + 1) + 'Z" style="fill:var(--accent);fill-opacity:' + fmt(0.12 + 0.8 * Math.sqrt(z), 2) + ';stroke:var(--surface);stroke-width:.5"/>';
+        }
+        s += pix(cx - 22, 14, 44, noisy(img, eps, p[0]), n) + txt(cx, 72, p[1], 'd-t') + txt(cx, 214, p[2]);
+        if (k < 3) s += '<line class="d-arrb" x1="' + (cx + 70) + '" y1="36" x2="' + (cx + 88) + '" y2="36"/>';
       });
       s += txt(317, 58, 'p_θ(x_{t−1} | x_t)', 'd-m', 'fill:var(--accent)');
-      s += '<rect x="12" y="226" width="610" height="24" rx="4" class="d-hl"/>' + txt(317, 238, T('Rückwärtsprozess: Schritt für Schritt von N(0, I) zur Datenverteilung', 'Reverse process: step by step from N(0, I) to the data distribution'), 'd-tb', 'font-size:12px');
-      return '<svg viewBox="0 0 640 258" role="img" aria-label="' + T('Rückwärtsprozess als Verteilungen: Bei x_T eine einfache Glockenkurve, bei x_t ein breiter Hügel, bei x_{t−1} trennen sich Gruppen, bei x₀ die Datenverteilung mit drei Gipfeln. Darüber die passenden Bilder vom Rauschen bis zum sauberen Bild.', 'Reverse process as distributions: at x_T a simple bell curve, at x_t one broad hill, at x_{t−1} groups separate, at x₀ the data distribution with three peaks. Above them the matching images from noise to the clean image.') + '">' + s + '</svg>';
+      s += '<rect x="12" y="228" width="610" height="24" rx="4" class="d-hl"/>' + txt(317, 240, T('Rückwärtsprozess: Schritt für Schritt von N(0, I) zur Datenverteilung', 'Reverse process: step by step from N(0, I) to the data distribution'), 'd-tb', 'font-size:12px');
+      return '<svg viewBox="0 0 640 260" role="img" aria-label="' + T('Rückwärtsprozess als Verteilungen, als 3D-Flächen gezeichnet: Bei x_T ein einzelner runder Berg (Normalverteilung), bei x_t ein breiter Hügel, bei x_{t−1} trennen sich drei Gruppen, bei x₀ die Datenverteilung mit drei Gipfeln. Darüber die passenden Bilder vom Rauschen bis zum sauberen Bild.', 'Reverse process as distributions, drawn as 3D surfaces: at x_T a single round mountain (normal distribution), at x_t one broad hill, at x_{t−1} three groups separate, at x₀ the data distribution with three peaks. Above them the matching images from noise to the clean image.') + '">' + s + '</svg>';
     },
 
     // Latent diffusion (Stable Diffusion): text encoder, U-Net loop in latent space, VAE decoder

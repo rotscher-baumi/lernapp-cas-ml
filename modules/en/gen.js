@@ -257,7 +257,7 @@ for x in loader:
   <h4>Reverse process: remove noise (learned)</h4>
   <p>The way back <code>p_θ(x_{t−1} | x_t)</code> cannot be computed; a neural network learns it. Usually the network <code>ε_θ(x_t, t)</code> does not predict the clean image but <b>the noise contained in x_t</b>. Subtracting part of it brings you one step closer to the image. The network is a <b>U-Net</b> (encoder-decoder with skip connections, as in <a href="#det-seg">segmentation</a>): input and output have the same size. Because the same network serves all 1000 levels, it gets the time step <b>t as an extra input</b> (timestep conditioning, as an embedding in every block).</p>
   <p>You can also see the reverse process as reshaping a <b>distribution</b>: at x_T everything is a simple normal distribution that is easy to sample from. Every step reshapes it a little until at x₀ the complex distribution of the data with several peaks emerges. A single small step is simple enough for a network to learn; the chain of many steps covers the long way.</p>
-  <figure class="fig" style="max-width:660px">${F.diffDist()}<figcaption>Computed in one dimension for data from three groups: the curve of x_t follows exactly from x_t = √ᾱ_t · x₀ + √(1 − ᾱ_t) · ε. Above it the same for an image: from noise to the clean image.</figcaption></figure>
+  <figure class="fig" style="max-width:660px">${F.diffDist()}<figcaption>Computed for data from three groups in two dimensions (height is density, each surface scaled to its highest point): the surface of x_t follows exactly from x_t = √ᾱ_t · x₀ + √(1 − ᾱ_t) · ε. Above it the same for an image: from noise to the clean image.</figcaption></figure>
   <h4>Training workflow (DDPM)</h4>
   <ol>
     <li>Take a real image <code>x₀</code> from the data.</li>
