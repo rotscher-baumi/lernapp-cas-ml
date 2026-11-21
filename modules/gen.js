@@ -413,6 +413,7 @@ image = pipe("a photo of a dog on a beach at sunset",
       { q: `Welche Bausteine hat Stable Diffusion?`, a: `Ein Text-Encoder (CLIP) für den Prompt, ein U-Net, das im Latent Space (64 × 64 × 4) in 20 bis 50 Schritten entrauscht und über Cross-Attention auf den Text schaut, ein Scheduler und ein VAE-Decoder, der das Latent in ein Bild verwandelt.` },
       { q: `Warum reicht bei generativen Modellen eine Loss-Kurve zur Validation nicht, und was nimmt man stattdessen?`, a: `Der Loss sagt wenig über Schärfe und Vielfalt (beim GAN schwanken zwei Losses gegeneinander). Man sieht Bilder aus festen Seeds an, misst FID, sucht nächste Nachbarn im Trainingsset gegen Kopien und prüft bei Text-zu-Bild, ob das Bild zum Prompt passt.` },
       { q: `Welches Modell würdest du für ein 4×-Upscaling mit scharfen Details wählen, und was ist der Haken?`, a: `Ein GAN wie ESRGAN (oder ein Diffusionsmodell): schärfer als Bicubic. Haken: Die Details sind erfunden und stimmen nicht mit der Wirklichkeit überein, was bei Messbildern ein Risiko ist.` },
+      { q: `VAE oder GAN, um neue Bilder zu erzeugen?`, a: `VAE für stabiles Training und einen geordneten Latent Space zum Ziehen und Interpolieren, dafür etwas unscharf. GAN für sehr scharfe Bilder, dafür instabil und mit Gefahr von Mode Collapse.` },
     ],
     init() {
       LernApp.demos.gen();

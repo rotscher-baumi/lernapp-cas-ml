@@ -335,6 +335,7 @@ best = masks[scores.argmax()]</code></pre>
       { q: `Wozu dienen die Skip Connections im U-Net?`, a: `Sie führen die fein aufgelösten Feature Maps des Encoders direkt zum Decoder. Dort werden sie angehängt, damit die genauen Kanten nicht aus dem groben Engpass rekonstruiert werden müssen.` },
       { q: `Was ist der Unterschied zwischen U-Net und SAM?`, a: `U-Net wird auf eigenen Labels pro Aufgabe trainiert und gibt Klassen pro Pixel aus. SAM ist einmal auf sehr vielen Masken trainiert und segmentiert per Prompt (Punkt, Box) ohne neues Training, kennt aber keine Klassennamen.` },
       { q: `Warum gibt SAM bei einem einzigen Klick drei Masken zurück?`, a: `Ein Punkt ist mehrdeutig: Er kann einen Teil (Hemd), das ganze Objekt (Person) oder eine Gruppe meinen. SAM gibt drei Masken mit einem geschätzten IoU-Score zurück; man nimmt die passende.` },
+      { q: `Ein vortrainierter Detektor (COCO) erkennt deine Fabrikteile schlecht. Warum, und was tust du?`, a: `Domain Shift: Das Modell kennt Alltagsfotos, nicht deine Teile und deine Bedingungen. Eigene Bilder aus der Einsatzumgebung labeln und das Modell nachtrainieren, mit wenig Daten nur den Head (Feature Extraction), mit mehr Daten Fine-Tuning mit kleiner Learning Rate.` },
     ],
     init() {
       LernApp.demos.det();

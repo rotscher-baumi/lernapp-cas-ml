@@ -357,5 +357,7 @@ for x_batch, y_batch in dataset:
     { q: `How does dropout work, and does it apply at prediction time too?`, a: `During training, activations are set to 0 at random (for example 30 %). The network cannot rely on single neurons. At prediction time all neurons are active.` },
     { q: `Why do you scale the inputs of a network, and what do you learn the scaler on?`, a: `Very different number ranges make gradient descent slow and the initial weights unsuitable. The scaler is learned on the training data only (otherwise data leakage) and then applied to validation and test.` },
     { q: `Why must you not choose hyperparameters on the test set?`, a: `The test set would indirectly learn along. The estimate would be too optimistic. Choose on the validation set, test once at the very end.` },
+    { q: `Roughly how large is a network with 25.6 million parameters in float32?`, a: `25.6 million × 4 bytes ≈ 102 MB, so about 100 MB.` },
+    { q: `What is catastrophic forgetting?`, a: `A network that keeps training on new data only unlearns what it could do on the old data. Remedies: mix old and new data, a small learning rate, check on a fixed old test set.` },
   ],
 });

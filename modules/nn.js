@@ -363,6 +363,8 @@ for x_batch, y_batch in dataset:
       { q: `Wie arbeitet Dropout, und gilt es auch bei der Vorhersage?`, a: `Beim Training werden zufällig Aktivierungen auf 0 gesetzt (zum Beispiel 30 %). Das Netz kann sich nicht auf einzelne Neuronen verlassen. Bei der Vorhersage sind alle Neuronen aktiv.` },
       { q: `Warum skalierst du die Eingaben eines Netzes, und womit lernst du den Scaler?`, a: `Sehr verschiedene Zahlenbereiche machen Gradient Descent langsam und die Startgewichte unpassend. Der Scaler wird nur auf den Trainingsdaten gelernt (sonst Data Leakage) und danach auf Validation und Test angewendet.` },
       { q: `Warum darfst du Hyperparameter nicht am Testset wählen?`, a: `Das Testset würde indirekt mitlernen. Die Schätzung wäre zu optimistisch. Wähle auf der Validation, teste einmal ganz am Schluss.` },
+      { q: `Wie gross ist ein Netz mit 25,6 Mio. Parametern in float32 ungefähr?`, a: `25,6 Mio. × 4 Bytes ≈ 102 MB, also etwa 100 MB.` },
+      { q: `Was ist Catastrophic Forgetting?`, a: `Ein Netz, das nur auf neuen Daten weitertrainiert wird, verlernt, was es auf den alten Daten konnte. Gegenmittel: alte und neue Daten mischen, kleine Learning Rate, auf einem festen alten Testset prüfen.` },
     ],
     init() {
       LernApp.demos.nn();

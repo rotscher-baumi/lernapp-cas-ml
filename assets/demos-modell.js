@@ -1,4 +1,4 @@
-/* Demos of the «Modelle in der Praxis» chapter. modules/modell.js calls LernApp.demos.modell() once the chapter is in the page. */
+/* Demos of the practice part of «Übersicht & Praxis» (model file, which way, drift). modules/uebersicht.js calls LernApp.demos.modell() once the chapter is in the page. */
 (function () {
   const { $, fmt } = LernApp;
 
@@ -45,44 +45,6 @@
 
   LernApp.demos.modell = function () {
     const T = LernApp.t;
-
-    // Clickable workflow figure: same pattern as the other chapters
-    (function () {
-      const fig = $('moFlowFig');
-      if (!fig) return;
-      const panel = fig.querySelector('.ab-detail'), steps = fig.querySelectorAll('.ab-step');
-      const S = {
-        '1': [T('1 · Problem und Baseline', '1 · Problem and baseline'), T('Was soll vorhergesagt werden, und welcher Fehler kostet wie viel? Daraus folgt die <b>Metrik</b>. Dann die <b>Baseline</b>: häufigste Klasse, Mittelwert oder eine einfache Regel. Jedes Modell muss sie deutlich schlagen.', 'What should be predicted, and what does each error cost? That gives the <b>metric</b>. Then the <b>baseline</b>: most frequent class, mean or a simple rule. Every model must beat it clearly.'), [[T('Checkliste', 'Checklist'), '#mo-best']]],
-        '2': [T('2 · Modell wählen', '2 · Choose the model'), T('Drei Wege: <b>von null</b> trainieren (Tabellen fast immer), ein <b>vortrainiertes</b> Modell unverändert nehmen, oder es mit <b>Transfer Learning</b> und <b>Fine-Tuning</b> anpassen (Bilder, Text, Audio).', 'Three ways: train <b>from scratch</b> (almost always for tables), take a <b>pretrained</b> model as it is, or adapt it with <b>transfer learning</b> and <b>fine-tuning</b> (images, text, audio).'), [[T('Woher kommt ein Modell?', 'Where does a model come from?'), '#mo-quelle']]],
-        '3': [T('3 · Daten und Pipeline', '3 · Data and pipeline'), T('Zuerst splitten, dann Vorverarbeitung und Modell in <b>eine Pipeline</b> packen. So wird der Scaler nur auf den Trainingsdaten gelernt, und beim Speichern ist alles in einer Datei.', 'Split first, then put preprocessing and model into <b>one pipeline</b>. That way the scaler is learned on the training data only, and saving puts everything into one file.'), [[T('Was ist ein Modell?', 'What is a model?'), '#mo-was']]],
-        '4': [T('4 · Trainieren', '4 · Train'), T('<code>fit</code> sucht die <b>Parameter</b>: Gewichte, Bias, Splits. Die <b>Hyperparameter</b> legst du vorher fest. Seed fixieren, damit der Lauf wiederholbar ist.', '<code>fit</code> searches for the <b>parameters</b>: weights, bias, splits. You set the <b>hyperparameters</b> beforehand. Fix the seed so the run can be repeated.'), [[T('Architektur, Parameter, Hyperparameter', 'Architecture, parameters, hyperparameters'), '#mo-was']]],
-        '5': [T('5 · Bewerten', '5 · Evaluate'), T('Auf der Validation messen, immer neben der Baseline und mit der Zahl der Beispiele. Fehler ansehen: Welche Fälle gehen schief?', 'Measure on validation, always next to the baseline and with the number of examples. Look at errors: which cases go wrong?'), [[T('Checkliste', 'Checklist'), '#mo-best']]],
-        '6': [T('6 · Speichern und versionieren', '6 · Save and version'), T('Die ganze Pipeline speichern (<code>joblib</code>, <code>.keras</code>, <code>state_dict</code>), dazu Metadaten: Version, Datum, Library-Versionen, Features, Seed, Metriken. Laden einmal testen.', 'Save the whole pipeline (<code>joblib</code>, <code>.keras</code>, <code>state_dict</code>) plus metadata: version, date, library versions, features, seed, metrics. Test loading once.'), [[T('Speichern und laden', 'Save and load'), '#mo-speichern']]],
-        '7': [T('7 · Einsetzen und überwachen', '7 · Deploy and monitor'), T('Im Einsatz macht das Modell nur noch Inferenz (<code>predict</code>). Eingaben prüfen und ihre Verteilung mit den Trainingsdaten vergleichen. Wird die Metrik schlechter: <b>Drift</b>, zurück zu Schritt 4.', 'In use the model only does inference (<code>predict</code>). Check the inputs and compare their distribution with the training data. If the metric gets worse: <b>drift</b>, back to step 4.'), [[T('Neu trainieren', 'Retrain'), '#mo-neu']]],
-        '8': [T('8 · Neu gegen alt vergleichen', '8 · Compare new with old'), T('Die neue Version muss auf <b>denselben Testdaten mit derselben Metrik</b> besser sein: auf einem festen Testset (nichts vergessen) und auf aktuellen Daten (Drift aufgefangen). Hat sich die Aufgabe geändert, zurück zur Modellwahl.', 'The new version must be better on <b>the same test data with the same metric</b>: on a fixed test set (nothing forgotten) and on recent data (drift handled). If the task itself has changed, go back to choosing the model.'), [[T('Neu trainieren', 'Retrain'), '#mo-neu']]],
-        '9': [T('9 · Alte Version ablösen', '9 · Retire the old version'), T('Erst wenn die neue Version nachweislich besser ist, wird sie eingesetzt. Die alte bleibt archiviert (Model Registry), damit ein <b>Rollback</b> möglich ist.', 'Only when the new version is shown to be better is it deployed. The old one stays archived (model registry) so a <b>rollback</b> is possible.'), [[T('Begriffe', 'Terms'), '#mo-best']]],
-      };
-      let cur = null;
-      function close() {
-        panel.hidden = true; cur = null;
-        steps.forEach((g) => { g.classList.remove('on'); g.setAttribute('aria-expanded', 'false'); });
-      }
-      function open(k) {
-        if (cur === k) { close(); return; }
-        const d = S[k]; if (!d) return;
-        cur = k;
-        panel.querySelector('.ab-dh b').textContent = d[0];
-        panel.querySelector('.ab-db').innerHTML = d[1];
-        panel.querySelector('.ab-dl').innerHTML = d[2].map((l) => '<a href="' + l[1] + '">' + l[0] + ' →</a>').join('');
-        panel.hidden = false;
-        steps.forEach((g) => { const on = g.getAttribute('data-s') === k; g.classList.toggle('on', on); g.setAttribute('aria-expanded', on ? 'true' : 'false'); });
-      }
-      steps.forEach((g) => {
-        g.addEventListener('click', () => open(g.getAttribute('data-s')));
-        g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(g.getAttribute('data-s')); } });
-      });
-      panel.querySelector('.ab-x').addEventListener('click', close);
-    })();
 
     // Button group helper: one pressed button, set(value) on click
     function group(id, set, draw) {

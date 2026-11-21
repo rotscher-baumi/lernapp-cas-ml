@@ -510,5 +510,6 @@ trustworthiness(X_s, Z, n_neighbors=10)  # 1 = neighbours well preserved</code><
     { q: `What does a GMM give you that k-Means does not?`, a: `A probability per cluster for each point (row sum 1). This shows which assignments are uncertain. The clusters may also be elliptical.` },
     { q: `How does the Isolation Forest find outliers?`, a: `It splits the data with random splits. Suspicious points are alone after only a few splits, normal ones need many. A short path means a high anomaly score. The result is a ranking to check, not a verdict.` },
     { q: `How do you choose the number of PCA components?`, a: `For a picture, 2. For further computation, as many as needed for the cumulative explained variance to reach a threshold such as 90 % (PCA(n_components=0.90)), or until the curve flattens out.` },
+    { q: `What is PCA for, what is t-SNE for?`, a: `PCA for compressing and further computation (linear, applicable to new data). t-SNE only for looking; distances between the groups mean nothing there.` },
   ],
 });

@@ -334,6 +334,7 @@ best = masks[scores.argmax()]</code></pre>
     { q: `What are the skip connections in U-Net for?`, a: `They lead the finely resolved feature maps of the encoder directly to the decoder. There they are concatenated, so the exact edges do not have to be reconstructed from the coarse bottleneck.` },
     { q: `What is the difference between U-Net and SAM?`, a: `U-Net is trained on your own labels per task and outputs classes per pixel. SAM is trained once on very many masks and segments by prompt (point, box) without new training, but knows no class names.` },
     { q: `Why does SAM return three masks for a single click?`, a: `A point is ambiguous: it can mean a part (shirt), the whole object (person) or a group. SAM returns three masks with an estimated IoU score; you pick the fitting one.` },
+    { q: `A pretrained detector (COCO) recognises your factory parts poorly. Why, and what do you do?`, a: `Domain shift: the model knows everyday photos, not your parts and your conditions. Label your own images from the deployment environment and retrain the model, with little data only the head (feature extraction), with more data fine-tuning with a small learning rate.` },
   ],
 });
 })();

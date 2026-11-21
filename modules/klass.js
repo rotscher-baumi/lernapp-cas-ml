@@ -444,6 +444,8 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
       { q: `Worin unterscheiden sich Bagging und Boosting?`, a: `Bagging trainiert viele Modelle parallel auf Zufallsstichproben und mittelt (senkt Varianz). Boosting trainiert nacheinander, jedes Modell korrigiert die Restfehler des bisherigen Gesamtmodells (senkt Bias, anfälliger für Rauschen).` },
       { q: `Wie entsteht Data Leakage, und wie verhinderst du es bei Skalierung und Imputation?`, a: `Information aus Test- oder Zukunftsdaten fliesst ins Training. Alle lernenden Vorverarbeitungsschritte nur auf den Trainingsdaten fitten, am einfachsten mit einer Pipeline in der Cross-Validation.` },
       { q: `Wann darfst du ein Resampling (z. B. SMOTE) anwenden?`, a: `Nur auf die Trainingsdaten, nie auf Validation oder Test. Sonst wird auf künstlichen Daten bewertet.` },
+      { q: `Warum ist ein kNN-Modell so gross wie seine Trainingsdaten?`, a: `kNN lernt keine Parameter, sondern speichert alle Trainingspunkte und sucht bei jeder Vorhersage die k nächsten davon. Das Modell <i>ist</i> der Datensatz.` },
+      { q: `Was ist ein Feedback Loop beim Retraining?`, a: `Das Modell bestimmt, welche Fälle ein Label bekommen (z. B. nur genehmigte Kredite zeigen, ob sie zurückbezahlt werden). Das neue Training sieht dann nur die Fälle, die das alte Modell durchgelassen hat, und kann seine Fehler nicht korrigieren.` },
     ],
     init() { LernApp.demos.klass(); },
   });

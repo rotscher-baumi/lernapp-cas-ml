@@ -536,6 +536,7 @@ trustworthiness(X_s, Z, n_neighbors=10)  # 1 = Nachbarn gut erhalten</code></pre
       { q: `Was liefert ein GMM, was k-Means nicht liefert?`, a: `Eine Wahrscheinlichkeit pro Cluster für jeden Punkt (Zeilensumme 1). So sieht man, welche Zuordnungen unsicher sind. Die Cluster dürfen zudem elliptisch sein.` },
       { q: `Wie findet der Isolation Forest Ausreisser?`, a: `Er teilt die Daten mit zufälligen Splits. Auffällige Punkte sind schon nach wenigen Splits allein, normale brauchen viele. Kurzer Weg heisst hoher Anomalie-Score. Das Ergebnis ist eine Rangliste zum Prüfen, kein Urteil.` },
       { q: `Wie wählst du die Anzahl PCA-Komponenten?`, a: `Für ein Bild 2. Zum Weiterrechnen so viele, bis die kumulierte erklärte Varianz einen Threshold wie 90 % erreicht (PCA(n_components=0.90)) oder die Kurve abflacht.` },
+      { q: `Wofür PCA, wofür t-SNE?`, a: `PCA zum Verdichten und Weiterrechnen (linear, auf neue Daten anwendbar). t-SNE nur zum Anschauen; Abstände zwischen den Gruppen bedeuten dort nichts.` },
     ],
     init() { LernApp.demos.unsup(); },
   });

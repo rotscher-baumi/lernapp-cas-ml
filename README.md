@@ -16,20 +16,20 @@ lernapp/
   notebook.html     Übungs-Notebook (lokal mit Jupyter oder in Colab)
   titanic.html      Titanic-Seite
   mathe-kompakt.html, mathe-ausfuehrlich.html   eigene Mathe-Seiten
-  kompakt.html      Spickzettel über Supervised ML, Klassifikation, Unsupervised, Neural Networks, CNN, Image Processing, Object Detection & Segmentation, Generative Models und Modelle in der Praxis (Modul `kompakt`; wird bei jeder inhaltlichen Änderung dieser Kapitel nachgeführt; auf der Hauptseite verlinkt die Linkleiste oben darauf)
+  kompakt.html      Spickzettel über Supervised ML, Klassifikation, Unsupervised, Neural Networks, CNN, Image Processing, Object Detection & Segmentation, Generative Models und die Praxis aus Übersicht & Praxis (Modell, Speichern, Drift)
   server.py         lokaler Server (Zustand, Jupyter-Start, Proxy)
   run.sh            Jupyter und Server unter Linux/macOS starten
   requirements.txt, requirements-dev.txt   Laufzeit- und Entwicklungspakete
   assets/
     style.css       Design (hell und dunkel)
     core.js         Navigation, Sprache, Theme, Selbsttest; gemeinsame Helfer (mulberry32, gauss, drag, setRange)
-    demos-<id>.js   Demo-Code der grossen Kapitel (ml, klass, unsup, nn, cnn, cv, det, gen, modell), das Kapitel in modules/ ruft ihn in init() auf
+    demos-<id>.js   Demo-Code der grossen Kapitel (ml, klass, unsup, nn, cnn, cv, det, gen; `demos-modell.js` für den Praxis-Teil von `uebersicht.js`), das Kapitel in modules/ ruft ihn in init() auf
                     (`demos-nn.js` liefert auch die zwei klickbaren SVG-Grafiken des Kapitels Neural Networks: `LernApp.nnFlow` Ablauf, `LernApp.nnConcept` Hauptkonzept; die Kapitel CNN, Image Processing, Object Detection & Segmentation und Generative Models nutzen `nnFlow` mit eigenem `id` für die Pfeil-Marker; `demos-det.js` liefert zusätzlich `LernApp.detFig` mit den statischen SVG-Grafiken des Kapitels Object Detection & Segmentation, die `modules/det.js` und `modules/en/det.js` in ihrem `html` aufrufen; ebenso `demos-gen.js` mit `LernApp.genFig` für Generative Models)
     demos-*.js      geteilte Demos (Mathe, k-Means)
     search.js       Volltextsuche der Hauptseite: klebende Leiste über den Kapitel-Chips, Trefferliste, ▲▼, Markierung (CSS Custom Highlight API)
     notebook-data.js  aus den Notebooks erzeugt (nicht von Hand ändern)
   modules/          ein Kapitel pro Datei
-    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js nn.js cnn.js cv.js det.js gen.js modell.js uebersicht.js kompakt.js titanic.js
+    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js nn.js cnn.js cv.js det.js gen.js uebersicht.js kompakt.js titanic.js
     en/             englische Texte je Kapitel
     _vorlage.js     Vorlage für ein neues Kapitel
   notebooks/        Übungs-Notebooks (Jupyter / VS Code)

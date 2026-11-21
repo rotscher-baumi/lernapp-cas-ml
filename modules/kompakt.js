@@ -7,9 +7,9 @@
     nav: 'Kompakt',
     title: 'Alles kompakt',
     kicker: 'Spickzettel · Module 2 und 3',
-    summary: `Supervised ML, Klassifikation, Unsupervised, Neural Networks, CNN, Computer Vision, Generative Models und Modelle in der Praxis auf einer Seite`,
+    summary: `Supervised ML, Klassifikation, Unsupervised, Neural Networks, CNN, Computer Vision, Generative Models und ein Modell in der Praxis auf einer Seite`,
     html: `
-  <p>Der Spickzettel über die Kapitel <a href="index.html#ml">Supervised ML</a>, <a href="index.html#klass">Klassifikation</a>, <a href="index.html#unsup">Unsupervised</a>, <a href="index.html#nn">Neural Networks</a>, <a href="index.html#cnn">CNN</a>, <a href="index.html#cv">Image Processing</a>, <a href="index.html#det">Object Detection &amp; Segmentation</a>, <a href="index.html#gen">Generative Models</a> und <a href="index.html#modell">Modelle in der Praxis</a>. Die Erklärungen, Demos und der Selbsttest stehen in den Kapiteln, die Steckbriefe einzelner Modelle in der <a href="index.html#uebersicht">Übersicht</a>.</p>
+  <p>Der Spickzettel über die Kapitel <a href="index.html#ml">Supervised ML</a>, <a href="index.html#klass">Klassifikation</a>, <a href="index.html#unsup">Unsupervised</a>, <a href="index.html#nn">Neural Networks</a>, <a href="index.html#cnn">CNN</a>, <a href="index.html#cv">Image Processing</a>, <a href="index.html#det">Object Detection &amp; Segmentation</a>, <a href="index.html#gen">Generative Models</a> und den Praxis-Teil von <a href="index.html#ue-praxis">Übersicht &amp; Praxis</a>. Die Erklärungen, Demos und der Selbsttest stehen in den Kapiteln, die Steckbriefe einzelner Modelle in <a href="index.html#uebersicht">Übersicht &amp; Praxis</a>.</p>
 
   <h3 id="k-ablauf">Supervised ML: Ablauf und Daten</h3>
   <div class="tablewrap"><table>
@@ -144,7 +144,7 @@
   </table></div>
   <p class="note"><a href="index.html#gen">Zum Kapitel →</a></p>
 
-  <h3 id="k-modell">Modelle in der Praxis</h3>
+  <h3 id="k-modell">Ein Modell in der Praxis</h3>
   <div class="tablewrap"><table>
     <tr><th>Thema</th><th>Merke</th></tr>
     <tr><td><b>Was ist ein Modell?</b></td><td><code>ŷ = f(x; θ)</code>: Architektur (Form der Funktion, wählst du), Parameter θ (lernt das Training), Hyperparameter (steuern das Training, wählst du auf der Validation). Training ändert die Parameter, Inferenz (<code>predict</code>) nicht.</td></tr>
@@ -155,7 +155,7 @@
     <tr><td><b>Neu trainieren</b></td><td>Komplett neu (alte + neue Daten), nur auf neuen Daten (vergisst seltene alte Fälle), weitertrainieren (<code>partial_fit</code>, Gefahr: Catastrophic Forgetting) oder nur den Kopf neu. Die neue Version muss auf festen und aktuellen Testdaten besser sein, sonst bleibt die alte. Testdaten nie ins Training.</td></tr>
     <tr><td><b>Best Practices</b></td><td>Vortrainierte Modelle zuerst zero-shot auf den eigenen Daten testen, nach Rahmenbedingungen wählen statt nach Erscheinungsdatum, Fine-Tuning nur mit genug passenden Daten. Pipeline mit Metadaten und Model Card speichern, im Einsatz Eingaben und Metrik überwachen, alte Version für den Rollback behalten. <a href="index.html#mo-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#modell">Zum Kapitel →</a></p>
+  <p class="note"><a href="index.html#ue-praxis">Zum Kapitel →</a></p>
 `,
   });
 })();

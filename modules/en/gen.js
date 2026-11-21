@@ -411,6 +411,7 @@ image = pipe("a photo of a dog on a beach at sunset",
     { q: `Which building blocks does Stable Diffusion have?`, a: `A text encoder (CLIP) for the prompt, a U-Net that denoises in latent space (64 × 64 × 4) in 20 to 50 steps and looks at the text via cross-attention, a scheduler and a VAE decoder that turns the latent into an image.` },
     { q: `Why is a loss curve not enough for validating generative models, and what do you use instead?`, a: `The loss says little about sharpness and diversity (in the GAN two losses swing against each other). You look at images from fixed seeds, measure FID, search nearest neighbours in the training set against copies and, for text-to-image, check whether the image matches the prompt.` },
     { q: `Which model would you choose for a 4× upscaling with sharp details, and what is the catch?`, a: `A GAN such as ESRGAN (or a diffusion model): sharper than bicubic. Catch: the details are invented and do not match reality, which is a risk for measurement images.` },
+    { q: `VAE or GAN to generate new images?`, a: `VAE for stable training and an ordered latent space for sampling and interpolating, but somewhat blurry. GAN for very sharp images, but unstable and at risk of mode collapse.` },
   ],
 });
 })();

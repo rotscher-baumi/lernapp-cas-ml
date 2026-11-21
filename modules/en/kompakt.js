@@ -5,7 +5,7 @@ LernApp.translate('kompakt', {
   kicker: 'Cheat sheet · Modules 2 and 3',
   summary: `Supervised ML, classification, unsupervised, neural networks, CNN, computer vision, generative models and models in practice on one page`,
   html: `
-  <p>The cheat sheet over the chapters <a href="index.html#ml">Supervised ML</a>, <a href="index.html#klass">Classification</a>, <a href="index.html#unsup">Unsupervised</a>, <a href="index.html#nn">Neural Networks</a>, <a href="index.html#cnn">CNN</a>, <a href="index.html#cv">Image Processing</a>, <a href="index.html#det">Object Detection &amp; Segmentation</a>, <a href="index.html#gen">Generative Models</a> and <a href="index.html#modell">Models in practice</a>. The explanations, demos and self-test are in the chapters, profiles of single models in the <a href="index.html#uebersicht">Overview</a>.</p>
+  <p>The cheat sheet over the chapters <a href="index.html#ml">Supervised ML</a>, <a href="index.html#klass">Classification</a>, <a href="index.html#unsup">Unsupervised</a>, <a href="index.html#nn">Neural Networks</a>, <a href="index.html#cnn">CNN</a>, <a href="index.html#cv">Image Processing</a>, <a href="index.html#det">Object Detection &amp; Segmentation</a>, <a href="index.html#gen">Generative Models</a> and the practice part of <a href="index.html#ue-praxis">Overview &amp; practice</a>. The explanations, demos and self-test are in the chapters, profiles of single models in <a href="index.html#uebersicht">Overview &amp; practice</a>.</p>
 
   <h3 id="k-ablauf">Supervised ML: workflow and data</h3>
   <div class="tablewrap"><table>
@@ -140,7 +140,7 @@ LernApp.translate('kompakt', {
   </table></div>
   <p class="note"><a href="index.html#gen">To the chapter →</a></p>
 
-  <h3 id="k-modell">Models in practice</h3>
+  <h3 id="k-modell">A model in practice</h3>
   <div class="tablewrap"><table>
     <tr><th>Topic</th><th>Remember</th></tr>
     <tr><td><b>What is a model?</b></td><td><code>ŷ = f(x; θ)</code>: architecture (shape of the function, you choose it), parameters θ (learned by training), hyperparameters (steer the training, you choose them on validation). Training changes the parameters, inference (<code>predict</code>) does not.</td></tr>
@@ -151,6 +151,6 @@ LernApp.translate('kompakt', {
     <tr><td><b>Retraining</b></td><td>Completely new (old + new data), only on new data (forgets rare old cases), continue training (<code>partial_fit</code>, risk: catastrophic forgetting) or only a new head. The new version must be better on fixed and current test data, otherwise the old one stays. Never put test data into training.</td></tr>
     <tr><td><b>Best practices</b></td><td>Test pretrained models zero-shot on your own data first, choose by constraints rather than release date, fine-tune only with enough suitable data. Save the pipeline with metadata and a model card, monitor inputs and metric in use, keep the old version for a rollback. <a href="index.html#mo-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#modell">To the chapter →</a></p>
+  <p class="note"><a href="index.html#ue-praxis">To the chapter →</a></p>
 `,
 });
