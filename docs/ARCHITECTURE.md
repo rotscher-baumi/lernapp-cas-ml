@@ -21,7 +21,7 @@ lernapp-cas-ml/
   index.html                 Hauptseite: Kopf, Überblick, alle Kapitel
   titanic.html               Unterseite: Titanic-Beispiel ausführlich
   mathe-kompakt.html         Unterseite: Mathe-Spickzettel
-  kompakt.html               Unterseite: Spickzettel über die ML- und Deep-Learning-Kapitel (ml, klass, unsup, nn, cnn, cv, gen, modell; Link in der Linkleiste von index.html)
+  kompakt.html               Unterseite: Spickzettel über die ML- und Deep-Learning-Kapitel (ml, klass, unsup, nn, cnn, cv, det, gen, modell; Link in der Linkleiste von index.html)
   mathe-ausfuehrlich.html    Unterseite: Mathe ausführlich
   notebook.html              zwei Modi: lokal (JupyterLab im iframe, nur mit Server auf dem eigenen Rechner) oder Colab (Links)
   assets/
@@ -29,7 +29,7 @@ lernapp-cas-ml/
     style.css                Design-Tokens hell/dunkel und alle Komponenten
     demos-mathe.js           MatheDemos: Demos, die beide Mathe-Seiten teilen
     demos-kmeans.js          KMeansDemo: k-Means-Demo und gemeinsame k-Means-Helfer (`KMeansDemo.lib`)
-    demos-ml.js, demos-klass.js, demos-unsup.js, demos-nn.js, demos-cnn.js, demos-cv.js, demos-gen.js, demos-modell.js   Demo-Code der Kapitel ml, klass, unsup, nn, cnn, cv, gen und modell (`LernApp.demos.<id>`)
+    demos-ml.js, demos-klass.js, demos-unsup.js, demos-nn.js, demos-cnn.js, demos-cv.js, demos-det.js, demos-gen.js, demos-modell.js   Demo-Code der Kapitel ml, klass, unsup, nn, cnn, cv, det, gen und modell (`LernApp.demos.<id>`)
     search.js                Volltextsuche der Hauptseite (klebende Leiste `.topbar` um `nav.chips`)
     img/                     Grafiken, aus echten Läufen erzeugt (Titanic)
     notebook-data.js         generiert aus den Notebooks (zurzeit von keiner Seite geladen)

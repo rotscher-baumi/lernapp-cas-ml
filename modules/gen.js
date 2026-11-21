@@ -108,7 +108,7 @@ G lernt:  D soll G(z) für echt (1) halten</code></pre>
     <li><b>Mode Collapse:</b> G findet ein paar Bilder, die D täuschen, und erzeugt nur noch diese.</li>
     <li><b>Kein Loss, der Qualität zeigt:</b> Die Kurven sagen wenig; man muss Bilder ansehen.</li>
   </ul>
-  <p>Wichtige Varianten aus dem Kurs: <b>CycleGAN</b> übersetzt ein Bild in einen anderen Stil ohne gepaarte Beispiele (Sommer ↔ Winter; der Zyklus A → B → A soll das Original ergeben). <b>ESRGAN</b> ist ein GAN für Super-Resolution (4× grösser): schärfer als Bicubic, aber mit <i>erfundenen</i> Details. <b>DeblurGAN</b> nutzt dasselbe Prinzip zum Entschärfen von Unschärfe (siehe <a href="#cv-restauration">Computer Vision</a>).</p>
+  <p>Wichtige Varianten aus dem Kurs: <b>CycleGAN</b> übersetzt ein Bild in einen anderen Stil ohne gepaarte Beispiele (Sommer ↔ Winter; der Zyklus A → B → A soll das Original ergeben). <b>ESRGAN</b> ist ein GAN für Super-Resolution (4× grösser): schärfer als Bicubic, aber mit <i>erfundenen</i> Details. <b>DeblurGAN</b> nutzt dasselbe Prinzip zum Entschärfen von Unschärfe (siehe <a href="#cv-restauration">Image Processing</a>).</p>
   <div class="merk"><b>Merksatz</b><p>GAN = Wettlauf zwischen Generator und Discriminator. Ergebnis: scharfe, realistische Bilder; Preis: instabiles Training und Mode Collapse.</p></div>
 
   <h3 id="gen-methoden">5 · Übersicht: vier Wege zu neuen Bildern</h3>

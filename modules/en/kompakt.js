@@ -5,7 +5,7 @@ LernApp.translate('kompakt', {
   kicker: 'Cheat sheet · Modules 2 and 3',
   summary: `Supervised ML, classification, unsupervised, neural networks, CNN, computer vision, generative models and models in practice on one page`,
   html: `
-  <p>The cheat sheet over the chapters <a href="index.html#ml">Supervised ML</a>, <a href="index.html#klass">Classification</a>, <a href="index.html#unsup">Unsupervised</a>, <a href="index.html#nn">Neural Networks</a>, <a href="index.html#cnn">CNN</a>, <a href="index.html#cv">Computer Vision</a>, <a href="index.html#gen">Generative Models</a> and <a href="index.html#modell">Models in practice</a>. The explanations, demos and self-test are in the chapters, profiles of single models in the <a href="index.html#uebersicht">Overview</a>.</p>
+  <p>The cheat sheet over the chapters <a href="index.html#ml">Supervised ML</a>, <a href="index.html#klass">Classification</a>, <a href="index.html#unsup">Unsupervised</a>, <a href="index.html#nn">Neural Networks</a>, <a href="index.html#cnn">CNN</a>, <a href="index.html#cv">Image Processing</a>, <a href="index.html#det">Object Detection &amp; Segmentation</a>, <a href="index.html#gen">Generative Models</a> and <a href="index.html#modell">Models in practice</a>. The explanations, demos and self-test are in the chapters, profiles of single models in the <a href="index.html#uebersicht">Overview</a>.</p>
 
   <h3 id="k-ablauf">Supervised ML: workflow and data</h3>
   <div class="tablewrap"><table>
@@ -95,7 +95,7 @@ LernApp.translate('kompakt', {
   </table></div>
   <p class="note"><a href="index.html#cnn">To the chapter →</a></p>
 
-  <h3 id="k-cv">Computer vision</h3>
+  <h3 id="k-cv">Image Processing</h3>
   <div class="tablewrap"><table>
     <tr><th>Topic</th><th>Remember</th></tr>
     <tr><td><b>Image formation</b></td><td>The measured image is the true image, blurred by the optics (PSF), plus noise, then demosaicing and compression. That is why no image is perfect.</td></tr>
@@ -104,11 +104,18 @@ LernApp.translate('kompakt', {
     <tr><td><b>HWC or CHW</b></td><td>NumPy, PIL, OpenCV and TensorFlow: HWC (channels last). PyTorch: CHW. The wrong order gives errors or nonsense.</td></tr>
     <tr><td><b>File formats</b></td><td>PNG lossless, good for masks and graphics. JPEG lossy, small, for photos; never for label masks. Metadata (EXIF) can hold the orientation.</td></tr>
     <tr><td><b>Restoration</b></td><td>Denoising, deblurring, super-resolution: image in, image out. Classical (Gaussian, median, Wiener, bicubic) or learned (U-Net, SwinIR, Restormer). Loss L1 or perceptual, metric PSNR and SSIM.</td></tr>
-    <tr><td><b>Object detection</b></td><td>Boxes, classes, scores. Two-stage (Faster R-CNN, more accurate) or one-stage (YOLO, fast). <b>IoU</b> = intersection / union. <b>NMS</b> removes duplicate boxes. Metric mAP@IoU.</td></tr>
-    <tr><td><b>Semantic segmentation</b></td><td>One class per pixel. U-Net (encoder, decoder, skip connections). SAM (Segment Anything) returns masks from a prompt (point, box) without training of your own, but without class names. Loss cross-entropy + Dice, metric IoU, Dice, mIoU.</td></tr>
-    <tr><td><b>Best practices</b></td><td>Classical baseline first, test pretrained models zero-shot first, degrade realistically, compare fairly on the same test images and look at images, not just numbers. <a href="index.html#cv-best">→</a></td></tr>
+    <tr><td><b>Best practices</b></td><td>Classical baseline first, test pretrained models zero-shot first, degrade realistically (alter clean training images to look like the images at the deployment site: blur, noise, colour cast), compare fairly on the same test images (a few hundredths of a dB PSNR are chance, good networks are 2 to 4 dB above bicubic) and look at images, not just numbers. <a href="index.html#cv-best">→</a></td></tr>
   </table></div>
   <p class="note"><a href="index.html#cv">To the chapter →</a></p>
+
+  <h3 id="k-det">Object Detection &amp; Segmentation</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Topic</th><th>Remember</th></tr>
+    <tr><td><b>Object detection</b></td><td>Boxes, classes, scores. Two-stage (Faster R-CNN, more accurate) or one-stage (YOLO, fast). <b>IoU</b> = intersection / union. <b>NMS</b> removes duplicate boxes. Metric mAP@IoU. Structure: backbone → neck → head → post-processing (score threshold + NMS).</td></tr>
+    <tr><td><b>Semantic segmentation</b></td><td>One class per pixel. U-Net (encoder, decoder, skip connections). SAM (Segment Anything) returns masks from a prompt (point, box) without training of your own, but without class names. Loss cross-entropy + Dice, metric IoU, Dice, mIoU.</td></tr>
+    <tr><td><b>Best practices</b></td><td>Test pretrained models zero-shot first, check the annotations and split by scene or video, always report mAP with its IoU threshold (mAP@0.5 or mAP@0.5:0.95), choose the score threshold and τ on validation and look at boxes and masks. <a href="index.html#det-best">→</a></td></tr>
+  </table></div>
+  <p class="note"><a href="index.html#det">To the chapter →</a></p>
 
   <h3 id="k-gen">Generative models</h3>
   <div class="tablewrap"><table>

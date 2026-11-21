@@ -1,4 +1,4 @@
-/* Module: Kompakt (own page kompakt.html). One-page cheat sheet over the ML chapters; the content is a short form of ml, klass, unsup, nn, cnn, cv, gen and modell.
+/* Module: Kompakt (own page kompakt.html). One-page cheat sheet over the ML chapters; the content is a short form of ml, klass, unsup, nn, cnn, cv, det, gen and modell.
  * Rule (AGENTS.project.md): whenever one of these chapters changes in content, update the matching table here and in modules/en/kompakt.js. */
 (function () {
   LernApp.register({
@@ -9,7 +9,7 @@
     kicker: 'Spickzettel · Module 2 und 3',
     summary: `Supervised ML, Klassifikation, Unsupervised, Neural Networks, CNN, Computer Vision, Generative Models und Modelle in der Praxis auf einer Seite`,
     html: `
-  <p>Der Spickzettel über die Kapitel <a href="index.html#ml">Supervised ML</a>, <a href="index.html#klass">Klassifikation</a>, <a href="index.html#unsup">Unsupervised</a>, <a href="index.html#nn">Neural Networks</a>, <a href="index.html#cnn">CNN</a>, <a href="index.html#cv">Computer Vision</a>, <a href="index.html#gen">Generative Models</a> und <a href="index.html#modell">Modelle in der Praxis</a>. Die Erklärungen, Demos und der Selbsttest stehen in den Kapiteln, die Steckbriefe einzelner Modelle in der <a href="index.html#uebersicht">Übersicht</a>.</p>
+  <p>Der Spickzettel über die Kapitel <a href="index.html#ml">Supervised ML</a>, <a href="index.html#klass">Klassifikation</a>, <a href="index.html#unsup">Unsupervised</a>, <a href="index.html#nn">Neural Networks</a>, <a href="index.html#cnn">CNN</a>, <a href="index.html#cv">Image Processing</a>, <a href="index.html#det">Object Detection &amp; Segmentation</a>, <a href="index.html#gen">Generative Models</a> und <a href="index.html#modell">Modelle in der Praxis</a>. Die Erklärungen, Demos und der Selbsttest stehen in den Kapiteln, die Steckbriefe einzelner Modelle in der <a href="index.html#uebersicht">Übersicht</a>.</p>
 
   <h3 id="k-ablauf">Supervised ML: Ablauf und Daten</h3>
   <div class="tablewrap"><table>
@@ -99,7 +99,7 @@
   </table></div>
   <p class="note"><a href="index.html#cnn">Zum Kapitel →</a></p>
 
-  <h3 id="k-cv">Computer Vision</h3>
+  <h3 id="k-cv">Image Processing</h3>
   <div class="tablewrap"><table>
     <tr><th>Thema</th><th>Merke</th></tr>
     <tr><td><b>Bildentstehung</b></td><td>Das gemessene Bild ist das echte Bild, verschmiert durch die Optik (PSF), plus Rauschen, dazu Demosaicing und Kompression. Darum ist kein Bild perfekt.</td></tr>
@@ -108,11 +108,18 @@
     <tr><td><b>HWC oder CHW</b></td><td>NumPy, PIL, OpenCV und TensorFlow: HWC (Channels zuletzt). PyTorch: CHW. Falsche Reihenfolge gibt Fehler oder Unsinn.</td></tr>
     <tr><td><b>Dateiformate</b></td><td>PNG verlustfrei, gut für Masken und Grafiken. JPEG verlustbehaftet, klein, für Fotos; nie für Label-Masken. Metadaten (EXIF) können die Orientation enthalten.</td></tr>
     <tr><td><b>Restauration</b></td><td>Denoising, Deblurring, Super-Resolution: Bild rein, Bild raus. Klassisch (Gauss, Median, Wiener, Bicubic) oder gelernt (U-Net, SwinIR, Restormer). Loss L1 oder Perceptual, Metrik PSNR und SSIM.</td></tr>
-    <tr><td><b>Object Detection</b></td><td>Boxen, Klassen, Scores. Two-Stage (Faster R-CNN, genauer) oder One-Stage (YOLO, schnell). <b>IoU</b> = Schnitt / Vereinigung. <b>NMS</b> entfernt doppelte Boxen. Metrik mAP@IoU.</td></tr>
-    <tr><td><b>Semantic Segmentation</b></td><td>Eine Klasse pro Pixel. U-Net (Encoder, Decoder, Skip Connections), SAM (Segment Anything) liefert per Prompt (Punkt, Box) Masken ohne eigenes Training, aber ohne Klassennamen. Loss Cross-Entropy + Dice, Metrik IoU, Dice, mIoU.</td></tr>
-    <tr><td><b>Best Practices</b></td><td>Klassische Baseline zuerst, vortrainierte Modelle zuerst zero-shot prüfen, realistisch degradieren, auf denselben Testbildern fair vergleichen und Bilder ansehen, nicht nur Zahlen. <a href="index.html#cv-best">→</a></td></tr>
+    <tr><td><b>Best Practices</b></td><td>Klassische Baseline zuerst, vortrainierte Modelle zuerst zero-shot prüfen, realistisch degradieren (saubere Trainingsbilder so verändern, wie die Bilder am Einsatzort aussehen: Blur, Rauschen, Farbstich), auf denselben Testbildern fair vergleichen (wenige Hundertstel dB PSNR sind Zufall, gute Netze liegen 2 bis 4 dB über Bicubic) und Bilder ansehen, nicht nur Zahlen. <a href="index.html#cv-best">→</a></td></tr>
   </table></div>
   <p class="note"><a href="index.html#cv">Zum Kapitel →</a></p>
+
+  <h3 id="k-det">Object Detection &amp; Segmentation</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Thema</th><th>Merke</th></tr>
+    <tr><td><b>Object Detection</b></td><td>Boxen, Klassen, Scores. Two-Stage (Faster R-CNN, genauer) oder One-Stage (YOLO, schnell). <b>IoU</b> = Schnitt / Vereinigung. <b>NMS</b> entfernt doppelte Boxen. Metrik mAP@IoU. Aufbau: Backbone → Neck → Head → Post-Processing (Score-Threshold + NMS).</td></tr>
+    <tr><td><b>Semantic Segmentation</b></td><td>Eine Klasse pro Pixel. U-Net (Encoder, Decoder, Skip Connections), SAM (Segment Anything) liefert per Prompt (Punkt, Box) Masken ohne eigenes Training, aber ohne Klassennamen. Loss Cross-Entropy + Dice, Metrik IoU, Dice, mIoU.</td></tr>
+    <tr><td><b>Best Practices</b></td><td>Vortrainierte Modelle zuerst zero-shot prüfen, Annotationen kontrollieren und nach Szene oder Video splitten, mAP immer mit IoU-Threshold angeben (mAP@0.5 oder mAP@0.5:0.95), Score-Threshold und τ auf der Validation wählen und Boxen und Masken ansehen. <a href="index.html#det-best">→</a></td></tr>
+  </table></div>
+  <p class="note"><a href="index.html#det">Zum Kapitel →</a></p>
 
   <h3 id="k-gen">Generative Models</h3>
   <div class="tablewrap"><table>

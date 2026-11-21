@@ -1,7 +1,7 @@
 /*
  * Overview chapter: one card per model and one checklist per strategy, as a
  * study sheet across all ML chapters. Content only summarises what ml.js,
- * klass.js, unsup.js, nn.js, cnn.js, cv.js and gen.js already explain.
+ * klass.js, unsup.js, nn.js, cnn.js, cv.js, det.js and gen.js already explain.
  * Translated in place: every text is t('deutsch', 'english') via LernApp.t.
  */
 (function () {
@@ -195,7 +195,7 @@
     ], 'umap.UMAP', '#unsup-tsne'),
   ];
 
-  /* Deep learning: Neural Networks, CNN, Computer Vision, Generative Models (summarise nn.js, cnn.js, cv.js, gen.js). */
+  /* Deep learning: Neural Networks, CNN, Image Processing, Object Detection & Segmentation, Generative Models (summarise nn.js, cnn.js, cv.js, det.js, gen.js). */
   const EING = t('Eingaben', 'Inputs');
   NB = '08_Neuronale_Netze';
   const dl = [
@@ -232,13 +232,6 @@
       ['+', t('schnell, nachvollziehbar, erfindet nichts', 'fast, traceable, invents nothing')],
       ['−', t('verwischt Kanten und feine Details stärker als gelernte Modelle', 'blurs edges and fine detail more than learned models')],
     ], 'scipy.ndimage, cv2', '#cv-restauration'),
-    card('U-Net', t('Encoder-Decoder mit Skip Connections: Der Encoder versteht, was im Bild ist, der Decoder baut die volle Auflösung wieder auf, die Skips liefern die Kanten.', 'Encoder-decoder with skip connections: the encoder understands what is in the image, the decoder rebuilds full resolution, the skips provide the edges.'), [
-      [WANN, t('Bild zu Bild: Denoising, Deblurring, Segmentation mit eigenen Labels', 'image to image: denoising, deblurring, segmentation with own labels')],
-      [HP, t('Tiefe, Zahl der Channels, Loss (L1, Cross-Entropy + Dice)', 'depth, number of channels, loss (L1, cross-entropy + Dice)')],
-      [EING, t('Pixel skalieren, Bildgrösse durch 2<sup>Tiefe</sup> teilbar', 'scale pixels, image size divisible by 2<sup>depth</sup>')],
-      ['+', t('genaue Kanten, auch mit wenigen Bildern trainierbar', 'precise edges, trainable even with few images')],
-      ['−', t('ein Modell pro Aufgabe, braucht pixelgenaue Labels oder saubere Zielbilder', 'one model per task, needs pixel-exact labels or clean target images')],
-    ], 'keras.Model (Encoder-Decoder)', '#cv-seg'),
     card(t('Restaurations-Transformer', 'Restoration transformer'), t('SwinIR und Restormer: Self-Attention in Fenstern oder über Channels sieht grosse Bildteile auf einmal und nutzt ähnliche Stellen im ganzen Bild.', 'SwinIR and Restormer: self-attention in windows or across channels sees large image regions at once and uses similar places across the whole image.'), [
       [WANN, t('beste Bildqualität bei Denoising, Deblurring, Super-Resolution, meist vortrainiert übernommen', 'best image quality for denoising, deblurring, super-resolution, usually taken over pretrained')],
       [HP, t('Variante wählen (Aufgabe, Rauschstärke, Vergrösserung)', 'choose the variant (task, noise level, scale factor)')],
@@ -246,27 +239,36 @@
       ['+', t('Stand der Technik auf Benchmarks', 'state of the art on benchmarks')],
       ['−', t('gross und langsam, kann Details erfinden, nur für die trainierte Degradation gut', 'large and slow, can invent details, only good for the degradation it was trained on')],
     ], 'transformers.Swin2SRForImageSuperResolution', '#cv-restauration'),
+  ];
+  const det = [
+    card('U-Net', t('Encoder-Decoder mit Skip Connections: Der Encoder versteht, was im Bild ist, der Decoder baut die volle Auflösung wieder auf, die Skips liefern die Kanten.', 'Encoder-decoder with skip connections: the encoder understands what is in the image, the decoder rebuilds full resolution, the skips provide the edges.'), [
+      [WANN, t('Bild zu Bild: Denoising, Deblurring, Segmentation mit eigenen Labels', 'image to image: denoising, deblurring, segmentation with own labels')],
+      [HP, t('Tiefe, Zahl der Channels, Loss (L1, Cross-Entropy + Dice)', 'depth, number of channels, loss (L1, cross-entropy + Dice)')],
+      [EING, t('Pixel skalieren, Bildgrösse durch 2<sup>Tiefe</sup> teilbar', 'scale pixels, image size divisible by 2<sup>depth</sup>')],
+      ['+', t('genaue Kanten, auch mit wenigen Bildern trainierbar', 'precise edges, trainable even with few images')],
+      ['−', t('ein Modell pro Aufgabe, braucht pixelgenaue Labels oder saubere Zielbilder', 'one model per task, needs pixel-exact labels or clean target images')],
+    ], 'keras.Model (Encoder-Decoder)', '#det-seg'),
     card('Faster R-CNN', t('Detection in zwei Stufen: Ein Region Proposal Network schlägt Kandidaten vor, ein Kopf bestimmt pro Kandidat Klasse und genaue Box.', 'Two-stage detection: a region proposal network suggests candidates, a head determines class and exact box for each.'), [
       [WANN, t('höchste Genauigkeit, kleine Objekte, Zeit spielt keine Rolle', 'highest accuracy, small objects, time does not matter')],
       [HP, t('Score-Threshold, NMS-IoU-Threshold, Anker', 'score threshold, NMS IoU threshold, anchors')],
       [EING, t('wie der vortrainierte Backbone', 'as the pretrained backbone')],
       ['+', t('genau, gut für kleine Objekte', 'accurate, good for small objects')],
       ['−', t('langsamer als YOLO, komplexer', 'slower than YOLO, more complex')],
-    ], 'torchvision.models.detection', '#cv-detection'),
+    ], 'torchvision.models.detection', '#det-detection'),
     card('YOLO', t('Detection in einer Stufe: Das Netz sagt auf einem Gitter direkt Klassen und Boxen voraus (anchor-free ab v8), NMS räumt Duplikate weg.', 'One-stage detection: the network predicts classes and boxes directly on a grid (anchor-free from v8), NMS removes duplicates.'), [
       [WANN, t('Echtzeit, Video, Edge-Geräte', 'real time, video, edge devices')],
       [HP, t('Modellgrösse (n, s, m, l, x), Score- und NMS-Threshold, Bildgrösse', 'model size (n, s, m, l, x), score and NMS threshold, image size')],
       [EING, t('Labels als <code>class cx cy w h</code>, auf 0 bis 1 normiert', 'labels as <code>class cx cy w h</code>, normalised to 0 to 1')],
       ['+', t('schnell, einfach zu fine-tunen', 'fast, easy to fine-tune')],
       ['−', t('etwas schwächer bei sehr kleinen, dicht gedrängten Objekten', 'somewhat weaker on very small, densely packed objects')],
-    ], 'ultralytics.YOLO', '#cv-detection'),
+    ], 'ultralytics.YOLO', '#det-detection'),
     card('SAM (Segment Anything)', t('Foundation Model für Segmentation, auf einer Milliarde Masken trainiert. Ein Prompt (Punkt, Box) genügt, und es liefert die Maske des Objekts.', 'Foundation model for segmentation, trained on a billion masks. A prompt (point, box) is enough and it returns the object’s mask.'), [
       [WANN, t('Masken ohne eigenes Training (zero-shot), Labels schneller erstellen', 'masks without own training (zero-shot), creating labels faster')],
       [HP, t('Prompt, Modellgrösse', 'prompt, model size')],
       [EING, t('RGB-Bild, Prompt-Koordinaten', 'RGB image, prompt coordinates')],
       ['+', t('kein Training, funktioniert auf sehr vielen Bildarten', 'no training, works on very many kinds of images')],
       ['−', t('kennt keine Klassennamen, gross; für Klassen mit einem Klassifikator kombinieren', 'knows no class names, large; combine with a classifier for classes')],
-    ], 'segment_anything.SamPredictor', '#cv-seg'),
+    ], 'segment_anything.SamPredictor', '#det-seg'),
   ];
   const gen = [
     card('Autoencoder', t('Encoder drückt das Bild in einen kleinen Code <code>z</code>, der Decoder rekonstruiert es daraus. Gelernt wird nur mit der Rekonstruktion, ohne Labels.', 'The encoder squeezes the image into a small code <code>z</code>, the decoder reconstructs it. It learns only from the reconstruction, without labels.'), [
@@ -309,7 +311,7 @@
     kicker: t('Zum Lernen · Module 2 und 3', 'For revision · Modules 2 and 3'),
     summary: t('Steckbriefe aller Modelle von der linearen Regression bis zum GAN, Checklisten der Strategien und eine Entscheidungshilfe', 'Profiles of all models from linear regression to the GAN, strategy checklists and a decision guide'),
     html: `
-  <p>${t('Diese Seite fasst die Kapitel <a href="#ml">Supervised ML</a>, <a href="#klass">Klassifikation</a>, <a href="#unsup">Unsupervised</a>, <a href="#nn">Neural Networks</a>, <a href="#cnn">CNN</a>, <a href="#cv">Computer Vision</a> und <a href="#gen">Generative Models</a> zum Lernen zusammen. Zu jedem Modell gibt es einen Steckbrief, zu jeder Strategie eine kurze Checkliste. Über «ausführlich →» kommst du zur Erklärung mit Demo, über «Beispiele →» zu einem Notebook mit lauffähigem Code (lokal mit Jupyter oder in Google Colab), wo es eines gibt.', 'This page summarises the chapters <a href="#ml">Supervised ML</a>, <a href="#klass">Classification</a>, <a href="#unsup">Unsupervised</a>, <a href="#nn">Neural Networks</a>, <a href="#cnn">CNN</a>, <a href="#cv">Computer Vision</a> and <a href="#gen">Generative Models</a> for revision. Each model has a profile, each strategy a short checklist. “in detail →” takes you to the explanation with a demo, “Examples →” to a notebook with runnable code (locally with Jupyter or in Google Colab) where there is one.')}</p>
+  <p>${t('Diese Seite fasst die Kapitel <a href="#ml">Supervised ML</a>, <a href="#klass">Klassifikation</a>, <a href="#unsup">Unsupervised</a>, <a href="#nn">Neural Networks</a>, <a href="#cnn">CNN</a>, <a href="#cv">Image Processing</a>, <a href="#det">Object Detection</a> und <a href="#gen">Generative Models</a> zum Lernen zusammen. Zu jedem Modell gibt es einen Steckbrief, zu jeder Strategie eine kurze Checkliste. Über «ausführlich →» kommst du zur Erklärung mit Demo, über «Beispiele →» zu einem Notebook mit lauffähigem Code (lokal mit Jupyter oder in Google Colab), wo es eines gibt.', 'This page summarises the chapters <a href="#ml">Supervised ML</a>, <a href="#klass">Classification</a>, <a href="#unsup">Unsupervised</a>, <a href="#nn">Neural Networks</a>, <a href="#cnn">CNN</a>, <a href="#cv">Image Processing</a>, <a href="#det">Object Detection</a> and <a href="#gen">Generative Models</a> for revision. Each model has a profile, each strategy a short checklist. “in detail →” takes you to the explanation with a demo, “Examples →” to a notebook with runnable code (locally with Jupyter or in Google Colab) where there is one.')}</p>
 
   <h3 id="ue-wahl">${t('Welches Modell wann?', 'Which model when?')}</h3>
   <div class="ue-tree">
@@ -391,8 +393,11 @@
   <h3 id="ue-cnn">CNN</h3>
   ${grid(cnn)}
 
-  <h3 id="ue-cv">Computer Vision</h3>
+  <h3 id="ue-cv">Image Processing</h3>
   ${grid(cv)}
+
+  <h3 id="ue-det">Object Detection &amp; Segmentation</h3>
+  ${grid(det)}
 
   <h3 id="ue-gen">Generative Models</h3>
   ${grid(gen)}

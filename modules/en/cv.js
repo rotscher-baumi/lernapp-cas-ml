@@ -1,30 +1,30 @@
-/* English texts for the module "cv" (Computer Vision). Fields replace the German ones when the language is EN. */
+/* English texts for the module "cv" (Image Processing). Fields replace the German ones when the language is EN. */
 LernApp.translate('cv', {
-  nav: 'Computer Vision',
-  title: `Computer Vision`,
+  nav: `Image Processing`,
+  title: `Image Processing`,
   kicker: `Module 3 · Computer Vision · Fri 20.11.`,
-  summary: `Image formation, pixels and channels (RGB, alpha, dtype, HWC/CHW, file formats), denoising, deblurring, super-resolution, object detection (IoU, NMS, Faster R-CNN, YOLO), semantic segmentation (U-Net, SAM)`,
-  html: `  <p>The <a href="#cnn">CNN</a> chapter showed how a network <i>classifies</i> images: one image in, one label out. Computer vision is broader. This chapter covers three tasks where the output itself is spatial: a <b>better image</b> (restoration), a <b>list of boxes</b> (object detection) or a <b>class per pixel</b> (semantic segmentation). The building blocks stay those of the CNN chapter: filters, feature maps, pooling, backpropagation.</p>
-  <p class="note">The demos compute in the browser with small sample images. The course notebooks (image basics, denoising, deblurring, super-resolution, detection, segmentation) run in Jupyter or Colab.</p>
+  summary: `Image formation, pixels and channels (RGB, alpha, dtype, HWC/CHW, file formats), denoising, deblurring, super-resolution`,
+  html: `  <p>The <a href="#cnn">CNN</a> chapter showed how a network <i>classifies</i> images: one image in, one label out. Computer vision is broader. This chapter is about the image itself: how it is formed, what it contains and how a degraded image is recovered (<b>restoration</b>: image in, image out). How a network finds <i>what is where</i> in the image is the topic of the chapter <a href="#det">Object Detection &amp; Segmentation</a>. The building blocks stay those of the CNN chapter: filters, feature maps, pooling, backpropagation.</p>
+  <p class="note">The demos compute in the browser with small sample images. The course notebooks (image basics, denoising, deblurring, super-resolution) run in Jupyter or Colab.</p>
 
   <h3 id="cv-ablauf">The whole workflow at a glance</h3>
   <p>The workflow is the same as for the <a href="#cnn-ablauf">CNN</a>. What changes are the task (step 1), the model (2), the loss (3) and the metric in validation (8).</p>
   <p class="hint">Click a step in the figure: the explanation opens below it, with links to the matching places in the chapter.</p>
   <figure class="fig ab-fig" id="cvFlowFig">
     <div class="ab-scroll">
-    <svg viewBox="0 0 680 650" role="img" aria-label="Workflow of a computer vision project: fix the task and images, choose the model, set loss and optimizer, then the training loop of forward pass, loss, backpropagation and update, then validation with a task-specific metric and finally one test">
+    <svg viewBox="0 0 680 650" role="img" aria-label="Workflow of a restoration project: fix the task and image pairs, choose the model, set loss and optimizer, then the training loop of forward pass, loss, backpropagation and update, then validation with PSNR and SSIM and finally one test">
       ${LernApp.nnFlow({
         id: 'cv',
         aria: 'Step %: open explanation',
         steps: [
-          ['Images and task', 'restoration, detection, segmentation'],
-          ['Choose the model', 'U-Net, Faster R-CNN, YOLO, SAM'],
-          ['Loss and optimizer', 'L1, IoU loss, cross-entropy + Dice'],
-          ['Forward pass', 'image, boxes or pixel classes'],
-          ['Compute the loss', 'distance to target (image, box, mask)'],
+          ['Image pairs and task', 'denoising, deblurring, SR'],
+          ['Choose the model', 'U-Net, SwinIR, Restormer'],
+          ['Loss and optimizer', 'L1, perceptual, GAN'],
+          ['Forward pass', 'restored image'],
+          ['Compute the loss', 'distance to the clean image'],
           ['Backpropagation', 'gradients for all filters'],
           ['Update parameters', 'w ← w − α · ∂L/∂w'],
-          ['Check validation', 'PSNR, mAP, IoU / Dice'],
+          ['Check validation', 'PSNR, SSIM, look at images'],
           ['Test once', 'test set, also foreign cameras'],
         ],
         loopA: ['per mini-batch,', 'many epochs'],
@@ -100,7 +100,7 @@ LernApp.translate('cv', {
     <tr><td><b>RGB-D</b></td><td>4</td><td>RGB + depth (distance to the camera)</td><td>Kinect, RealSense, LiDAR</td></tr>
     <tr><td><b>Multispectral</b></td><td>4–13</td><td>RGB + near infrared and more bands</td><td>satellites (Sentinel-2: 13 bands)</td></tr>
     <tr><td><b>Hyperspectral</b></td><td>100+</td><td>many narrow wavelengths</td><td>agriculture, medicine</td></tr>
-    <tr><td><b>Label mask</b></td><td>1</td><td>class ID per pixel</td><td>ground truth for <a href="#cv-seg">segmentation</a></td></tr>
+    <tr><td><b>Label mask</b></td><td>1</td><td>class ID per pixel</td><td>ground truth for <a href="#det-seg">segmentation</a></td></tr>
     <tr><td><b>HSV, LAB, YCbCr</b></td><td>3</td><td>the same information in another colour space</td><td>colour segmentation; JPEG works in YCbCr internally</td></tr>
   </table></div>
 
@@ -211,71 +211,18 @@ LernApp.translate('cv', {
   </ul>
   <div class="falle"><b>Pitfall</b><p>PSNR rewards pixel closeness, not good looks. An L2-trained network reaches high PSNR with a soft image; a GAN network looks sharper but has lower PSNR because it <i>invents</i> plausible detail. For medical or forensic images invented detail is a risk.</p></div>
 
-  <h3 id="cv-detection">4 · Object detection: what is where?</h3>
-  <p>The output is a <b>set</b> of predictions, and its size is unknown:</p>
-  <pre><code>y = { (b₁, c₁, s₁), (b₂, c₂, s₂), … (bₖ, cₖ, sₖ) }
-b = box (x0, y0, x1, y1)    c = class    s = score in [0, 1]    k = unknown</code></pre>
-  <p>What makes it hard: 0 to about 100 objects per image, objects overlap, they have very different sizes, and every prediction needs a confidence. There are two designs:</p>
-  <div class="tablewrap"><table>
-    <tr><th></th><th>Two stages: Faster R-CNN</th><th>One stage: YOLO (v8)</th></tr>
-    <tr><td><b>Flow</b></td><td>1. Backbone makes feature maps. 2. The <b>RPN</b> (region proposal network) proposes candidate regions (~2000, ~300 after NMS). 3. Per candidate: determine the class and refine the box.</td><td>1. Backbone makes feature maps. 2. Heads at several scales. 3. Every grid cell predicts class and box; the cell containing the object centre is responsible.</td></tr>
-    <tr><td><b>Anchors</b></td><td>9 <i>anchors</i> per position (3 sizes × 3 aspect ratios); the network predicts offsets from them</td><td>Anchor-free: predicts the box directly</td></tr>
-    <tr><td><b>Loss</b></td><td>RPN: objectness + box; head: class + box (trained jointly)</td><td>Class loss (BCE) + box loss (CIoU, DFL)</td></tr>
-    <tr><td><b>Strength</b></td><td>Highest accuracy, small objects</td><td>Real time, edge devices</td></tr>
-  </table></div>
-  <p>Labels in YOLO format are one row per object: <code>class_id cx cy w h</code>, all coordinates normalised to 0 to 1. An anchor is simply a predefined box that the network shifts and stretches slightly; this way it does not have to guess every box from scratch.</p>
-
-  <h3 id="cv-iou">5 · IoU and NMS: counting hits and removing duplicates</h3>
-  <p><b>IoU</b> (intersection over union) measures how well two boxes overlap: area of the intersection divided by area of the union. 0 means no contact, 1 means identical. IoU is used in three places: when <b>assigning</b> anchors to ground-truth boxes in training, as a <b>box loss</b>, and in <b>evaluation</b>: a prediction counts as a hit if its IoU with a ground-truth box is above a threshold (usually 0.5).</p>
-  <div class="demo" id="ioDemo">
-    <div class="tag">Demo</div><h4>IoU of two boxes</h4>
-    <p class="hint">Drag the boxes with the mouse (or a finger) to a new place; resize them with the corner handle at the bottom right. The green intersection divided by the union is the IoU. Keyboard: select a box with Tab, arrow keys move it, Shift + arrow keys resize it.</p>
-    <svg class="plot" id="ioSvg" viewBox="0 0 400 300" style="max-width:420px" role="group" aria-label="Two draggable boxes with the intersection marked in green"></svg>
-    <pre><code id="ioCalc"></code></pre>
-    <div class="stats"><span>Intersection <b id="ioI"></b></span><span>Union <b id="ioU"></b></span><span>IoU <b id="ioV"></b></span></div>
-  </div>
-  <p>A detector first outputs <b>many overlapping boxes</b> for the same object. <b>Non-maximum suppression (NMS)</b> cleans up:</p>
-  <pre><code>sort boxes by score
-while boxes remain:
-    keep the best box
-    remove all remaining boxes with IoU &gt; τ to the best one</code></pre>
-  <p>Before that a <b>score threshold</b> (e.g. 0.25) removes the uncertain boxes. NMS runs per class: boxes of different classes may overlap freely.</p>
-  <div class="demo" id="nmDemo">
-    <div class="tag">Demo</div><h4>NMS with a movable threshold τ</h4>
-    <p class="hint">Five candidates for two objects (number = score). Green = kept, grey dashed = suppressed.</p>
-    <div class="ctl"><label for="nmT">IoU threshold τ</label><input type="range" id="nmT" min="0.05" max="0.95" step="0.05" value="0.5"><output id="nmTO"></output></div>
-    <svg class="plot" id="nmSvg" viewBox="0 0 300 150" style="max-width:460px" role="img" aria-label="Five candidate boxes for two objects, kept boxes in green"></svg>
-    <div class="stats"><span>Kept <b id="nmN"></b></span></div>
-    <p class="hint" id="nmMsg"></p>
-  </div>
-  <div class="merk"><b>Key point</b><p>Detection = predict boxes, then reduce them to a clean list with a score threshold and NMS. IoU is used for assigning, training and evaluating. The metric <b>mAP</b> averages precision over classes and IoU thresholds.</p></div>
-
-  <h3 id="cv-seg">6 · Semantic segmentation: one class per pixel</h3>
-  <p>The output has <b>the same height and width as the input image</b>: every pixel gets exactly one class (<code>y ∈ {1…C}^(H×W)</code>). There are no boxes and no single objects; two cars side by side are the same class «car». Hard parts are precise edges (every wrong border pixel counts), strong <b>class imbalance</b> (background often over 95 % of pixels, a naive network says «background» everywhere), the mix of small and large structures and the cost of pixel-accurate labels (10 to 100 times more expensive than boxes).</p>
-  <div class="tablewrap"><table>
-    <tr><th></th><th>U-Net</th><th>SAM (Segment Anything)</th></tr>
-    <tr><td><b>Idea</b></td><td>Encoder-decoder with skip connections. The encoder understands <i>what</i> is in the image, the decoder turns that back into a full-resolution map, the skips supply the precise edges.</td><td>Foundation model, trained once on a billion masks. You give a <b>prompt</b> (point, box, mask, text) and get the mask of the object.</td></tr>
-    <tr><td><b>Training</b></td><td>On your own labels, one model per task</td><td>None needed (zero-shot)</td></tr>
-    <tr><td><b>Loss</b></td><td>Cross-entropy + λ · Dice</td><td>–</td></tr>
-    <tr><td><b>Limit</b></td><td>Needs labels, transfers poorly</td><td>Knows no class names, only «object»; combine with a classifier for classes</td></tr>
-  </table></div>
-  <p><b>Dice</b> measures the overlap of predicted and true mask: <code>2·|A∩B| / (|A| + |B|)</code>. As a loss it complements cross-entropy because it does not average rare classes away: a network that says «background» everywhere has high pixel accuracy but Dice 0 for the object. It holds that <code>Dice = 2·IoU / (1 + IoU)</code>, so Dice ≥ IoU. Evaluation uses the <b>IoU</b> per class (averaged: mIoU).</p>
-  <div class="falle"><b>Pitfall</b><p>Pixel accuracy is almost worthless in segmentation. With 95 % background «everything background» reaches 95 %. Always report IoU or Dice per class.</p></div>
-
-  <h3 id="cv-methoden">7 · Overview: tasks, models, loss, metric</h3>
+  <h3 id="cv-methoden">4 · Overview: tasks, models, loss, metric</h3>
   <p>The rows correspond to steps 1 to 3 and 8 of the figure «The whole workflow at a glance».</p>
   <div class="tablewrap"><table>
     <tr><th>Task</th><th>Output</th><th>Models</th><th>Loss</th><th>Metric</th></tr>
     <tr><td><b>denoising</b></td><td>Image</td><td>Gaussian, BM3D; U-Net, SwinIR, Restormer</td><td>L1, perceptual</td><td>PSNR, SSIM</td></tr>
     <tr><td><b>deblurring</b></td><td>Image</td><td>Wiener, Richardson-Lucy; DeblurGAN, Restormer</td><td>L1, frequency loss, GAN</td><td>PSNR, SSIM</td></tr>
     <tr><td><b>super-resolution</b></td><td>Image, larger</td><td>bicubic; SRCNN, EDSR, SwinIR, ESRGAN</td><td>L1 / MSE, GAN</td><td>PSNR, SSIM, appearance</td></tr>
-    <tr><td><b>Object detection</b></td><td>Boxes, classes, scores</td><td>Faster R-CNN, YOLO</td><td>Class (BCE/CE) + box (IoU-based)</td><td>mAP@IoU</td></tr>
-    <tr><td><b>Semantic segmentation</b></td><td>Class per pixel</td><td>U-Net, SAM</td><td>Cross-entropy + Dice</td><td>IoU, Dice, mIoU</td></tr>
   </table></div>
-  <div class="merk"><b>Key point</b><p>Same building blocks, different output: an image for restoration, boxes for detection, a pixel map for segmentation. The task determines model, loss and metric. Skip connections and pretrained backbones appear everywhere.</p></div>
+  <div class="merk"><b>Key point</b><p>All three tasks are image in, image out. They differ in the degradation that is undone, hardly in the model: a U-Net with skip connections or a transformer, L1 loss, PSNR and SSIM as the metric.</p></div>
 
-  <h3 id="cv-best">8 · Best practices</h3>
-  <p>On top of the <a href="#cnn-best">best practices from CNN</a>, for restoration, detection and segmentation:</p>
+  <h3 id="cv-best">5 · Best practices</h3>
+  <p>On top of the <a href="#cnn-best">best practices from CNN</a>, for restoration:</p>
   <div class="bp-check">
     <div><b>Baseline and model choice</b><ul>
       <li>First a classical method as the baseline: median filter for salt-and-pepper noise, Gaussian or bilateral filter and NLM for denoising, bicubic for super-resolution. Sometimes that is already enough.</li>
@@ -284,13 +231,13 @@ while boxes remain:
     </ul></div>
     <div><b>Data and degradation</b><ul>
       <li>Train with realistic degradation: real sensor noise is not Gaussian (Poisson in low light, speckle in ultrasound and radar). Vary the noise level during training.</li>
+      <li>Adapt the training images to the deployment site: ready-made models and datasets mostly consist of clean images. If the images in use are blurry, noisy or have a blue tint, alter the clean images in exactly that way (blur, noise, colour cast) and fine-tune on them.</li>
       <li>Watch for domain shift: a model that learned on photos helps little with X-ray or microscope images.</li>
-      <li>For detection and segmentation, check the annotations and split by scene or video, not by single frames.</li>
     </ul></div>
     <div><b>Comparing fairly</b><ul>
       <li>Measure all methods on the same test images with the same metric, plus runtime and number of parameters.</li>
+      <li>Do not overrate small differences: +0.05 dB PSNR over bicubic is about 1 % less MSE and lies within normal variation (another seed, other test images). Good networks are 2 to 4 dB above bicubic. Compute PSNR per image and compare over several seeds.</li>
       <li>Look at PSNR and SSIM <b>and</b> image crops: a good number can still look washed out.</li>
-      <li>For detection, report mAP with its IoU threshold (mAP@0.5 or mAP@0.5:0.95), for segmentation IoU or Dice per class.</li>
     </ul></div>
     <div><b>Limits</b><ul>
       <li>Super-resolution and generative restoration <b>invent</b> plausible details. In medicine, forensics or metrology such an image must not be used as a measurement.</li>
@@ -312,13 +259,5 @@ while boxes remain:
     { q: `When is the median filter better than the mean filter?`, a: `With outliers such as salt-and-pepper noise: a single extreme value does not move the median, but moves the mean a lot. The median also preserves edges better.` },
     { q: `Why L1 instead of L2 as the loss in restoration?`, a: `L2 (MSE) tends towards the mean of all plausible images and gives washed-out results; L1 usually gives sharper images.` },
     { q: `What are skip connections in the U-Net for?`, a: `They carry fine detail (edges, textures) from the encoder straight to the decoder, which would be lost in the bottleneck. They also shorten the path for the gradient.` },
-    { q: `How does the output of classification differ from object detection?`, a: `Classification: one label per image. Detection: a set of (box, class, score) of unknown size that depends on the image.` },
-    { q: `Compute the IoU: box A has area 100, box B area 100, the intersection 50.`, a: `Union = 100 + 100 − 50 = 150, IoU = 50 / 150 = 0.33. At threshold 0.5 that is no hit.` },
-    { q: `What does NMS do, and what happens with a threshold τ that is too low?`, a: `Keeps the box with the highest score, removes all others whose IoU with it is above τ, then repeats. With τ too low, boxes of real neighbouring objects are suppressed too; with τ too high, duplicates stay.` },
-    { q: `Faster R-CNN or YOLO: when which?`, a: `Faster R-CNN (two stages) when top accuracy and small objects matter. YOLO (one stage, anchor-free) when speed matters, e.g. real time or edge devices.` },
-    { q: `What is an anchor?`, a: `A predefined box (size and aspect ratio) at every position of the feature map. The network only predicts whether an object is there and how the box must be shifted and stretched.` },
-    { q: `How does semantic segmentation differ from detection?`, a: `The output is a class per pixel at the size of the image, with no boxes and no separation of single objects of the same class.` },
-    { q: `Why is pixel accuracy misleading in segmentation, and what is used instead?`, a: `Background often makes up over 95 % of pixels; «all background» would have 95 % accuracy. Better IoU or Dice per class (mIoU), and Dice as a loss next to cross-entropy.` },
-    { q: `What is the difference between U-Net and SAM?`, a: `U-Net is trained per task on your own labels. SAM is trained once on very many masks and segments by prompt (point, box) without new training, but knows no class names.` },
   ],
 });

@@ -105,7 +105,7 @@ G learns:  D should take G(z) for real (1)</code></pre>
     <li><b>Mode collapse:</b> G finds a few images that fool D and only produces those.</li>
     <li><b>No loss that shows quality:</b> the curves say little; you have to look at images.</li>
   </ul>
-  <p>Important variants from the course: <b>CycleGAN</b> translates an image into another style without paired examples (summer ↔ winter; the cycle A → B → A should give back the original). <b>ESRGAN</b> is a GAN for super-resolution (4× larger): sharper than bicubic, but with <i>invented</i> details. <b>DeblurGAN</b> uses the same principle to remove blur (see <a href="#cv-restauration">Computer Vision</a>).</p>
+  <p>Important variants from the course: <b>CycleGAN</b> translates an image into another style without paired examples (summer ↔ winter; the cycle A → B → A should give back the original). <b>ESRGAN</b> is a GAN for super-resolution (4× larger): sharper than bicubic, but with <i>invented</i> details. <b>DeblurGAN</b> uses the same principle to remove blur (see <a href="#cv-restauration">Image Processing</a>).</p>
   <div class="merk"><b>Key point</b><p>GAN = race between generator and discriminator. Result: sharp, realistic images; price: unstable training and mode collapse.</p></div>
 
   <h3 id="gen-methoden">5 · Overview: four ways to new images</h3>
