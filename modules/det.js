@@ -3,7 +3,7 @@
   LernApp.register({
     id: 'det',
     order: 94.2,
-    nav: `Detection & Segmentation`,
+    nav: `Object Detection & Segmentation`,
     title: `Object Detection & Segmentation`,
     kicker: `Modul 3 · Computer Vision · Fr 20.11.`,
     summary: `Aufbau eines Detectors (Backbone, Neck, Head, Post-Processing), Faster R-CNN, YOLO, IoU, NMS, Semantic Segmentation (U-Net, SAM)`,

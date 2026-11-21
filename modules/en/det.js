@@ -1,6 +1,6 @@
 /* English texts for the module "det" (Object Detection & Segmentation). Fields replace the German ones when the language is EN. */
 LernApp.translate('det', {
-  nav: `Detection & Segmentation`,
+  nav: `Object Detection & Segmentation`,
   title: `Object Detection & Segmentation`,
   kicker: `Module 3 · Computer Vision · Fri 20.11.`,
   summary: `Structure of a detector (backbone, neck, head, post-processing), Faster R-CNN, YOLO, IoU, NMS, semantic segmentation (U-Net, SAM)`,
