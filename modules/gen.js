@@ -258,6 +258,8 @@ for x in loader:
   </div>
   <h4>Rückwärtsprozess: Rauschen entfernen (gelernt)</h4>
   <p>Den Rückweg <code>p_θ(x_{t−1} | x_t)</code> kann man nicht ausrechnen; ein neuronales Netz lernt ihn. Meist sagt das Netz <code>ε_θ(x_t, t)</code> nicht das saubere Bild voraus, sondern <b>das Rauschen, das in x_t steckt</b>. Zieht man einen Teil davon ab, ist man einen Schritt näher am Bild. Als Netz dient ein <b>U-Net</b> (Encoder-Decoder mit Skip Connections, wie bei der <a href="#det-seg">Segmentation</a>): Ein- und Ausgabe haben dieselbe Grösse. Weil dasselbe Netz alle 1000 Stufen bedient, bekommt es den Zeitschritt <b>t als zusätzliche Eingabe</b> (Timestep Conditioning, als Embedding in jedem Block).</p>
+  <p>Man kann den Rückwärtsprozess auch als Umformen einer <b>Verteilung</b> sehen: Bei x_T ist alles eine einfache Normalverteilung, aus der man leicht ziehen kann. Jeder Schritt formt sie ein wenig um, bis bei x₀ die komplexe Verteilung der Daten mit mehreren Gipfeln entsteht. Ein einzelner kleiner Schritt ist einfach genug, dass ihn ein Netz lernen kann; die Kette aus vielen Schritten schafft den grossen Weg.</p>
+  <figure class="fig" style="max-width:660px">${F.diffDist()}<figcaption>Eindimensional gerechnet für Daten aus drei Gruppen: Die Kurve von x_t folgt exakt aus x_t = √ᾱ_t · x₀ + √(1 − ᾱ_t) · ε. Darüber dasselbe für ein Bild: vom Rauschen bis zum sauberen Bild.</figcaption></figure>
   <h4>Ablauf des Trainings (DDPM)</h4>
   <ol>
     <li>Ein echtes Bild <code>x₀</code> aus den Daten nehmen.</li>
