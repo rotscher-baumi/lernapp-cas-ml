@@ -34,6 +34,7 @@ Stand: 2026-11-01. Ergänzt [ARCHITECTURE.md](ARCHITECTURE.md) um Ziele, Entsche
 | D13 | Best Practices als letzter Abschnitt jedes Fachkapitels (`<id>-best`), keine separate Checkliste | Regeln stehen dort, wo das Thema erklärt wird; ein Querschnittskapitel allein wird übersehen | Allgemeine Regeln stehen einmal in `ml-best`, spätere Kapitel verlinken darauf und ergänzen nur Fachliches; Raster mit der Klasse `.bp-check`, Spickzettel mit je einer Zeile «Best Practices» |
 | D14 | Jedes Fachkapitel hat denselben Rahmen: Ablauf-Grafik am Anfang, «Übersicht: Schritte und Methoden» und «Best Practices» am Schluss, eine ID pro Abschnitt | Gleiche Struktur macht Kapitel vergleichbar und jede Stelle verlinkbar | Neue Kapitel übernehmen den Rahmen; englische Merksätze heissen einheitlich «Key point» |
 | D15 | Die Hauptseite zeigt ein Kapitel aufs Mal (Hash-Routing in `core.js`), mit «Auf dieser Seite» und Zurück/Weiter | Mit 16 Kapiteln war die eine lange Seite mühsam zu scrollen | Kein Build-Schritt, Doppelklick funktioniert weiter; alle Kapitel bleiben im DOM (Demos, Suche), inaktive sind nur ausgeblendet. Links zwischen Kapiteln bleiben `#id` |
+| D16 | Die Übersicht beginnt mit «Neues ML-Problem: So gehst du vor»: klickbare Ablauf-Grafik über alle Kapitel, Do & Don’t und eine Projekt-Checkliste zum Abhaken (2026-11-21, Wunsch des Nutzers) | Ein Handlungsleitfaden über alle Kapitel fehlte: wann Baseline, wann Gradient Boosting, wann ein vortrainiertes Modell, wann Fine-Tuning | Ergänzt D13, ersetzt es nicht: Die Regeln stehen weiter in `<id>-best`, die Übersicht fasst nur zusammen und verlinkt dorthin. Neue Kapitel ergänzen Grafik, Do & Don’t und Checkliste im selben Schritt |
 
 ## 4. Theming
 
@@ -112,6 +113,7 @@ Invariante: Die Menge der `id="…"` in `html` ist in Deutsch und Englisch gleic
 |---|---|---|
 | `cas-ml-lang` | `de`, `en` | `de` |
 | `cas-ml-theme` | `light`, `dark`, `auto` | `auto` |
+| `cas-ml-checklist` | JSON-Liste der abgehakten Checkbox-IDs der Projekt-Checkliste in der Übersicht (`ue-c1` … `ue-c12`) | `[]` |
 
 Ältere Schlüssel aus den entfernten Übungen können in bestehenden Browsern noch liegen; der Kern liest sie nicht mehr.
 

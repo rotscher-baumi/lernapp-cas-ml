@@ -116,6 +116,7 @@ Konfiguration über Umgebungsvariablen: `HOST`, `PORT`, `STATE_FILE`, `JUPYTER_H
 |---|---|---|
 | Sprache | `localStorage` | `cas-ml-lang` = `de` oder `en` |
 | Farbschema | `localStorage` | `cas-ml-theme` = `light`, `dark` oder `auto` |
+| Projekt-Checkliste der Übersicht | `localStorage` über `LernApp.store` | `cas-ml-checklist` = JSON-Liste der abgehakten IDs |
 | Kopie aller Schlüssel | `data/state.json` (nur mit Server) | flaches Objekt Schlüssel → Text |
 
 In der Adresse gewinnen `?lang=en` und `?theme=dark` über den gespeicherten Wert, ohne ihn zu ändern; das dient Links und Tests. Die Sprache wird mit `location.reload()` umgeschaltet, weil sie die Kapitel neu aufbaut. Das Theme wechselt sofort über das Attribut `data-theme`.

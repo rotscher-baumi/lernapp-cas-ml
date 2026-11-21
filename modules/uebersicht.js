@@ -301,6 +301,172 @@
     ], 'keras.Model', '#gen-gan'),
   ];
 
+  /* «Neues ML-Problem: so gehst du vor»: clickable workflow figure (same pattern as the chapter figures),
+     do/don't cards and a checklist whose ticks are kept with LernApp.store under 'cas-ml-checklist'. */
+  const SVGT = 'font-family:var(--f-body)';
+  function vbox(k, x, y, w, title, sub, kind) {
+    const f = kind === 'q' ? 'fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5'
+      : kind === 'rare' ? 'fill:var(--bg);stroke:var(--line);stroke-width:1.5;stroke-dasharray:6 4'
+        : 'fill:var(--surface);stroke:var(--line);stroke-width:1.5';
+    const h = sub ? 52 : 44;
+    const cx = x + w / 2;
+    const tc = kind === 'q' ? 'var(--accent)' : 'var(--fg)';
+    return '<g class="ab-step" data-s="' + k + '" tabindex="0" role="button" aria-expanded="false" aria-label="' + title + t(': Erklärung aufklappen', ': open explanation') + '">' +
+      '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="6" style="' + f + '"/>' +
+      '<text x="' + cx + '" y="' + (y + (sub ? 22 : 27)) + '" text-anchor="middle" style="fill:' + tc + ';font-size:14px;font-weight:600;' + SVGT + '">' + title + '</text>' +
+      (sub ? '<text x="' + cx + '" y="' + (y + 40) + '" text-anchor="middle" style="fill:var(--muted);font-size:12px;' + SVGT + '">' + sub + '</text>' : '') +
+      '</g>';
+  }
+  function vline(d, kind) {
+    const c = kind === 'ok' ? 'var(--ok)' : kind === 'warn' ? 'var(--warn)' : 'var(--line)';
+    const m = kind === 'ok' ? 'ue-ao' : kind === 'warn' ? 'ue-aw' : 'ue-a';
+    const dash = kind ? ';stroke-dasharray:6 4' : '';
+    return '<path d="' + d + '" marker-end="url(#' + m + ')" style="stroke:' + c + ';stroke-width:1.5;fill:none' + dash + '"/>';
+  }
+  function vlabel(x, y, text, anchor, color) {
+    return '<text x="' + x + '" y="' + y + '" text-anchor="' + (anchor || 'start') + '" style="fill:' + (color || 'var(--muted)') + ';font-size:11.5px;font-family:var(--f-mono)">' + text + '</text>';
+  }
+  function marker(id, color) {
+    return '<marker id="' + id + '" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:' + color + '"/></marker>';
+  }
+
+  const vorgehenFig = `
+  <figure class="fig ab-fig" id="ueFlowFig">
+    <div class="ab-scroll">
+    <svg viewBox="0 0 790 930" role="img" aria-label="${t('Vorgehen bei einem neuen ML-Problem: Problem und Metrik festlegen, Baseline bauen, dann je nach Daten Gradient Boosting mit Feature Engineering (Tabellen) oder ein vortrainiertes Modell ohne Training testen (Bild, Text, Audio); reicht es nicht, Feature Extraction oder Fine-Tuning, im Sonderfall eine eigene Architektur. Danach Pipeline und Training, einmal testen, Threshold wählen, einsetzen und beobachten; bei Domain Shift nachtrainieren.', 'How to approach a new ML problem: define the problem and metric, build a baseline, then depending on the data gradient boosting with feature engineering (tables) or test a pretrained model without training (image, text, audio); if that is not enough, feature extraction or fine-tuning, in special cases your own architecture. Then pipeline and training, test once, choose the threshold, deploy and monitor; retrain on domain shift.')}">
+      <defs>${marker('ue-a', 'var(--line)')}${marker('ue-ao', 'var(--ok)')}${marker('ue-aw', 'var(--warn)')}</defs>
+      ${vbox('1', 240, 20, 300, t('1 · Problem und Metrik', '1 · Problem and metric'), t('Input, Output, was heisst «gut genug»?', 'input, output, what is “good enough”?'))}
+      ${vline('M390,72 V104')}
+      ${vbox('2', 240, 104, 300, t('2 · Baseline bauen', '2 · Build a baseline'), t('einfachstes Modell oder eine Regel', 'simplest model or a rule'))}
+      ${vline('M390,156 V188')}
+      ${vbox('d', 290, 188, 200, t('Welche Daten?', 'Which data?'), '', 'q')}
+      ${vline('M290,210 H170 V270')}
+      ${vlabel(160, 248, t('Tabellen', 'Tables'), 'end')}
+      ${vline('M490,210 H600 V270')}
+      ${vlabel(610, 248, t('Bild · Text · Audio', 'Image · text · audio'))}
+
+      ${vbox('gb', 40, 270, 260, t('3a · Gradient Boosting', '3a · Gradient Boosting'), 'XGBoost, LightGBM, CatBoost')}
+      ${vline('M170,322 V354')}
+      ${vbox('fe', 40, 354, 260, 'Feature Engineering', t('Merkmale bauen und auswählen', 'build and select features'))}
+      ${vline('M170,406 V636 H240')}
+
+      ${vbox('pre', 460, 270, 280, t('3b · Vortrainiert, ohne Training', '3b · Pretrained, no training'), t('zero-shot testen oder LLM mit Prompt', 'test zero-shot or an LLM with a prompt'))}
+      ${vline('M600,322 V354')}
+      ${vbox('r', 520, 354, 160, t('Reicht das?', 'Good enough?'), '', 'q')}
+      ${vline('M680,376 H774 V720 H540', 'ok')}
+      ${vlabel(690, 368, t('ja', 'yes'), 'start', 'var(--ok)')}
+      <path d="M600,398 V414 M517,414 H682" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      ${vline('M517,414 V430')}
+      ${vline('M682,414 V430')}
+      ${vlabel(608, 410, t('nein', 'no'), 'start', 'var(--bad)')}
+      ${vbox('fx', 440, 430, 155, 'Feature Extraction', t('nur neuen Head', 'new head only'))}
+      ${vbox('ft', 605, 430, 155, 'Fine-Tuning', t('obere Layers auftauen', 'unfreeze top layers'))}
+      <path d="M517,482 V496 H682 V482" style="stroke:var(--line);stroke-width:1.5;fill:none"/>
+      ${vline('M517,496 H420 V610')}
+      ${vline('M600,496 V514', 'warn')}
+      ${vlabel(612, 509, t('nur falls nötig', 'only if needed'), 'start', 'var(--warn)')}
+      ${vbox('own', 470, 514, 260, t('Sonderfall: eigene Architektur', 'Special case: own architecture'), t('exotische Daten, Edge, Forschung', 'exotic data, edge, research'), 'rare')}
+      ${vline('M600,566 V636 H540')}
+
+      ${vbox('pipe', 240, 610, 300, t('4 · Pipeline und Training', '4 · Pipeline and training'), t('Split, Imputer und Scaler nur auf Train', 'split, imputer and scaler on train only'))}
+      ${vline('M390,662 V694')}
+      ${vbox('test', 240, 694, 300, t('5 · Einmal testen', '5 · Test once'), t('Testset, Vergleich mit der Baseline', 'test set, compare with the baseline'))}
+      ${vline('M390,746 V778')}
+      ${vbox('thr', 240, 778, 300, t('6 · Threshold wählen', '6 · Choose the threshold'), t('Precision oder Recall wichtiger?', 'precision or recall more important?'))}
+      ${vline('M390,830 V862')}
+      ${vbox('ein', 240, 862, 300, t('7 · Einsetzen und beobachten', '7 · Deploy and monitor'), t('Latenz, Lizenz, Domain Shift', 'latency, licence, domain shift'))}
+      ${vline('M240,888 H200 V650 H240', 'warn')}
+      ${vlabel(192, 766, 'Domain Shift:', 'end', 'var(--warn)')}
+      ${vlabel(192, 782, t('nachtrainieren', 'retrain'), 'end', 'var(--warn)')}
+    </svg>
+    </div>
+    <div class="ab-detail" role="region" aria-live="polite" hidden>
+      <div class="ab-dh"><b></b><button type="button" class="ab-x" aria-label="${t('Schliessen', 'Close')}">✕</button></div>
+      <div class="ab-db"></div>
+      <div class="ab-dl"></div>
+    </div>
+    <figcaption>${t('Vom Einfachen zum Aufwändigen: Jede Stufe nur nehmen, wenn die vorige auf der Validierung nicht reicht. Grün gestrichelt: Das vortrainierte Modell reicht schon, es muss nur noch auf den eigenen Testdaten bestätigt werden. Orange gestrichelt: nur im Ausnahmefall.', 'From simple to elaborate: take each stage only if the previous one is not enough on the validation set. Green dashed: the pretrained model is already good enough and only needs to be confirmed on your own test data. Orange dashed: exceptions only.')}</figcaption>
+  </figure>`;
+
+  /* Explanations of the figure steps: [title, text, [[link text, href], …]] */
+  const VS = {
+    '1': [t('1 · Problem und Metrik festlegen', '1 · Define the problem and metric'), t('Was ist der Input, was soll herauskommen? Eine Zahl (Regression), eine Klasse (Klassifikation), Gruppen ohne Labels (Unsupervised), Boxen oder Masken (Object Detection, Segmentation)? Lege vor dem ersten Modell fest, woran du Erfolg misst und was «gut genug» ist, zum Beispiel Recall ≥ 0.9 bei höchstens 10 % falschem Alarm.', 'What is the input, what should come out? A number (regression), a class (classification), groups without labels (unsupervised), boxes or masks (object detection, segmentation)? Before the first model, decide how you measure success and what is “good enough”, for example recall ≥ 0.9 with at most 10 % false alarms.'), [[t('Welches Modell wann?', 'Which model when?'), '#ue-wahl'], [t('Metriken', 'Metrics'), '#klass-metriken']]],
+    '2': [t('2 · Baseline bauen', '2 · Build a baseline'), t('Das einfachste mögliche Modell: Mittelwert oder häufigste Klasse, lineare oder logistische Regression, bei Super-Resolution bicubic. Ohne Baseline weisst du nicht, ob das grosse Modell überhaupt etwas bringt. Jedes spätere Ergebnis steht neben der Baseline.', 'The simplest possible model: mean or most frequent class, linear or logistic regression, bicubic for super-resolution. Without a baseline you do not know whether the big model helps at all. Every later result is shown next to the baseline.'), [[t('Lineare Regression', 'Linear regression'), '#ml-linreg'], [t('Logistische Regression', 'Logistic regression'), '#klass-logreg']]],
+    'd': [t('Welche Daten?', 'Which data?'), t('Die wichtigste Weiche. <b>Tabellen</b> (CSV, Datenbank, Sensorwerte) haben wenige, schon sinnvolle Spalten: Hier gewinnen Baum-Ensembles. <b>Bilder, Text und Audio</b> sind unstrukturiert: Die Features muss ein Netz erst lernen, und dafür gibt es vortrainierte Modelle mit Millionen von Beispielen.', 'The most important fork. <b>Tables</b> (CSV, database, sensor values) have few columns that already mean something: tree ensembles win here. <b>Images, text and audio</b> are unstructured: a network has to learn the features first, and there are pretrained models with millions of examples for that.'), [[t('Welches Modell wann?', 'Which model when?'), '#ue-wahl']]],
+    'gb': [t('3a · Gradient Boosting bei Tabellen', '3a · Gradient Boosting on tables'), t('Auf Tabellendaten ist Gradient Boosting (XGBoost, LightGBM, CatBoost, in scikit-learn <code>HistGradientBoostingClassifier</code>) meist das genaueste Modell, oft genauer als jedes Deep-Learning-Modell. Random Forest ist robuster und braucht weniger Tuning. Ein MLP lohnt sich auf Tabellen selten.', 'On tabular data gradient boosting (XGBoost, LightGBM, CatBoost, in scikit-learn <code>HistGradientBoostingClassifier</code>) is usually the most accurate model, often more accurate than any deep learning model. Random Forest is more robust and needs less tuning. An MLP rarely pays off on tables.'), [['Ensembles', '#klass-ens'], [t('Steckbriefe', 'Profiles'), '#ue-ens']]],
+    'fe': ['Feature Engineering', t('Bei Tabellen steckt der grösste Hebel in den Merkmalen: sinnvolle neue Spalten (Verhältnisse, Datumsteile, Gruppen), Kategorien kodieren, unnütze oder verräterische Spalten entfernen. «Garbage in, garbage out»: Die Qualität der Features und Labels bestimmt die Qualität des Ergebnisses.', 'With tables, the biggest lever is in the features: meaningful new columns (ratios, date parts, groups), encoding categories, removing useless or revealing columns. “Garbage in, garbage out”: the quality of the features and labels determines the quality of the result.'), [['Feature Selection', '#ml-fs'], ['Data Leakage', '#klass-leakage']]],
+    'pre': [t('3b · Vortrainiertes Modell ohne Training', '3b · Pretrained model without training'), t('Bei Bild, Text und Audio zuerst ein fertiges Modell nehmen (Hugging Face, torchvision, Keras Applications, Ultralytics) und auf den <b>eigenen</b> Daten testen, noch ohne Training: zero-shot (zum Beispiel CLIP für Bildklassen, SAM für Masken), ein COCO-Detektor wie YOLO, oder ein LLM mit gutem Prompt. Wertvoll sind die trainierten Gewichte, nicht die Architektur. Prüfe Lizenz (YOLOv8: AGPL), Grösse und Latenz und übernimm die Vorverarbeitung des Modells.', 'With image, text and audio, first take a finished model (Hugging Face, torchvision, Keras Applications, Ultralytics) and test it on your <b>own</b> data, still without training: zero-shot (for example CLIP for image classes, SAM for masks), a COCO detector such as YOLO, or an LLM with a good prompt. The trained weights are what is valuable, not the architecture. Check the licence (YOLOv8: AGPL), size and latency, and take over the model’s preprocessing.'), [[t('Woher kommt ein Modell?', 'Where does a model come from?'), '#mo-quelle'], ['Faster R-CNN und YOLO', '#det-modelle'], ['U-Net und SAM', '#det-segmodelle']]],
+    'r': [t('Reicht das?', 'Good enough?'), t('Vergleiche das vortrainierte Modell auf deinen Validierungsdaten mit der Metrik aus Schritt 1 und mit der Baseline. <b>Ja:</b> Kein Training nötig, weiter zum einmaligen Test. <b>Nein:</b> Meist liegt es an Domain Shift: Das Modell kennt Alltagsfotos (COCO, ImageNet), deine Bilder sind aber Röntgenbilder, unscharf oder haben einen Blaustich, oder es fehlen deine Klassen.', 'Compare the pretrained model on your validation data with the metric from step 1 and with the baseline. <b>Yes:</b> no training needed, go on to the one-off test. <b>No:</b> usually because of domain shift: the model knows everyday photos (COCO, ImageNet), but your images are X-rays, blurry or have a blue cast, or your classes are missing.'), [['Best Practices Object Detection', '#det-best']]],
+    'fx': ['Feature Extraction', t('Wenig Daten und eine ähnliche Aufgabe: den alten Head entfernen, alle Conv-Layers einfrieren (<code>base.trainable = False</code>), einen neuen Head mit deiner Zahl Klassen aufsetzen und nur diesen trainieren. Die frühen Layers kennen Kanten und Texturen schon.', 'Little data and a similar task: remove the old head, freeze all conv layers (<code>base.trainable = False</code>), put on a new head with your number of classes and train only that. The early layers already know edges and textures.'), [['Transfer Learning', '#cnn-transfer']]],
+    'ft': ['Fine-Tuning', t('Mehr Daten oder eine andere Domäne: zuerst den neuen Head trainieren, dann die oberen Layers auftauen und mit kleiner Learning Rate (zum Beispiel 1e-5) weitertrainieren. Die untersten Layers bleiben meist eingefroren. Trainiere mit Daten aus der echten Einsatzumgebung, also auch mit den Störungen, die dort vorkommen.', 'More data or a different domain: first train the new head, then unfreeze the top layers and continue training with a small learning rate (for example 1e-5). The lowest layers usually stay frozen. Train with data from the real deployment environment, including the disturbances that occur there.'), [['Transfer Learning', '#cnn-transfer'], [t('Bildstörungen', 'Image degradations'), '#cv-bild']]],
+    'own': [t('Sonderfall: eigene Architektur', 'Special case: own architecture'), t('Ein Netz von Grund auf lohnt sich fast nur bei exotischen Daten ohne passendes vortrainiertes Modell (Radar, spezielle Sensoren), bei harten Hardware-Limits (Mikrocontroller, Edge) oder in der Forschung. Dann klein anfangen (wenige Layers) und nur bei Bedarf tiefer werden.', 'A network from scratch is almost only worth it for exotic data with no suitable pretrained model (radar, special sensors), with hard hardware limits (microcontroller, edge) or in research. Then start small (few layers) and only go deeper if needed.'), [[t('Ein CNN in Keras', 'A CNN in Keras'), '#cnn-keras'], ['Neural Networks', '#nn']]],
+    'pipe': [t('4 · Pipeline und Training', '4 · Pipeline and training'), t('Zuerst das Testset abtrennen (zum Beispiel 80 / 20), dann Train und Validation (75 : 25) oder Cross-Validation. Alles, was aus Daten lernt (Imputer, Scaler, Feature Selection, Modell), wird nur auf Train gefittet, am sichersten in einer <code>Pipeline</code>. Hyperparameter auf der Validierung wählen, das beste Setup auf Train + Validation neu trainieren. Der ganze Ablauf mit allen Schritten steht im Kapitel Supervised ML.', 'First split off the test set (for example 80 / 20), then train and validation (75 : 25) or cross-validation. Everything that learns from data (imputer, scaler, feature selection, model) is fitted on train only, safest in a <code>Pipeline</code>. Choose hyperparameters on the validation set, retrain the best setup on train + validation. The whole workflow with all steps is in the Supervised ML chapter.'), [[t('Ablauf Supervised ML', 'Supervised ML workflow'), '#ml-ablauf'], ['Train, Validation, Test', '#ml-split'], [t('Hyperparameter', 'Hyperparameters'), '#ml-hp']]],
+    'test': [t('5 · Einmal testen', '5 · Test once'), t('Das Testset geht ganz am Schluss einmal durch dieselbe Pipeline (Imputer, Scaler, Modell, alles mit den Train-Werten). Das Ergebnis schätzt die Leistung auf neuen Daten und steht neben der Baseline. Wer danach noch am Modell dreht, macht das Testset zur zweiten Validierung.', 'At the very end the test set goes once through the same pipeline (imputer, scaler, model, all with the training values). The result estimates the performance on new data and is shown next to the baseline. Whoever keeps tuning the model afterwards turns the test set into a second validation set.'), [['Train, Validation, Test', '#ml-split']]],
+    'thr': [t('6 · Threshold wählen', '6 · Choose the threshold'), t('Ein höherer Threshold gibt mehr Precision und weniger Recall, ein tieferer umgekehrt. Was teurer ist, entscheidet die Anwendung: verpasste Fälle (Krankheit, Defekt: Recall zählt) oder falscher Alarm (Spam-Filter, automatisches Sortieren: Precision zählt). Bei Object Detection gibt es zusätzlich den NMS-IoU-Threshold.', 'A higher threshold gives more precision and less recall, a lower one the other way round. The application decides what is more costly: missed cases (illness, defect: recall counts) or false alarms (spam filter, automatic sorting: precision counts). Object detection also has the NMS IoU threshold.'), [[t('Unausgewogene Klassen', 'Imbalanced classes'), '#klass-imbal'], ['Precision, Recall, mAP', '#det-map']]],
+    'ein': [t('7 · Einsetzen und beobachten', '7 · Deploy and monitor'), t('Passt das Modell auf die Zielhardware (Grösse, Latenz, Echtzeit)? Ist die Lizenz für den Einsatz erlaubt? Modell mit Vorverarbeitung und Metadaten speichern. Im Betrieb die Eingaben beobachten: Ändern sie sich (Domain Shift, Drift), wird die Leistung schlechter, dann mit neuen Daten aus der Einsatzumgebung nachtrainieren.', 'Does the model fit the target hardware (size, latency, real time)? Does the licence allow the use? Save the model with its preprocessing and metadata. In operation, watch the inputs: if they change (domain shift, drift), performance drops, and you retrain with new data from the deployment environment.'), [[t('Speichern und laden', 'Saving and loading'), '#mo-speichern'], [t('Neu trainieren', 'Retraining'), '#mo-neu']]],
+  };
+
+  const CHECKS = [
+    [t('Vor dem Training', 'Before training'), [
+      t('Input, Output und Art des Problems festgelegt', 'Input, output and type of problem defined'),
+      t('Metrik und Zielwert definiert («gut genug»)', 'Metric and target value defined (“good enough”)'),
+      t('Daten angeschaut: fehlende Werte, Ausreisser, Klassenverteilung', 'Data inspected: missing values, outliers, class distribution'),
+      t('Testset abgetrennt und weggelegt', 'Test set split off and put aside'),
+      t('Baseline gebaut und gemessen', 'Baseline built and measured'),
+      t('Vortrainierte Modelle gesucht, Lizenz geprüft', 'Pretrained models searched, licence checked'),
+    ]],
+    [t('Training und Abschluss', 'Training and wrap-up'), [
+      t('Imputer und Scaler in einer Pipeline, nur auf Train gefittet', 'Imputer and scaler in a pipeline, fitted on train only'),
+      t('Hyperparameter mit Validation oder Cross-Validation gewählt', 'Hyperparameters chosen with validation or cross-validation'),
+      t('Bestes Setup auf Train + Validation neu trainiert', 'Best setup retrained on train + validation'),
+      t('Einmal auf dem Testset gemessen, mit der Baseline verglichen', 'Measured once on the test set, compared with the baseline'),
+      t('Threshold passend zur Anwendung gewählt', 'Threshold chosen to suit the application'),
+      t('Grösse, Latenz und Zielhardware geprüft, Seed notiert', 'Size, latency and target hardware checked, seed noted'),
+    ]],
+  ];
+  let ci = 0;
+  const checklist = '<div class="ue-checkbar"><span class="ue-prog" id="ueCheckProg"></span><button type="button" class="ue-reset" id="ueCheckReset">' + t('Alle Häkchen entfernen', 'Clear all ticks') + '</button></div>' +
+    '<div class="sbgrid" id="ueChecks">' + CHECKS.map(function (g) {
+      return '<div class="sb ue-check"><h4>' + g[0] + '</h4>' + g[1].map(function (txt) {
+        ci += 1;
+        return '<label><input type="checkbox" id="ue-c' + ci + '"><span>' + txt + '</span></label>';
+      }).join('') + '</div>';
+    }).join('') + '</div>';
+
+  const vorgehen = `
+  <h3 id="ue-vorgehen">${t('Neues ML-Problem: So gehst du vor', 'A new ML problem: how to approach it')}</h3>
+  <p>${t('Bevor du ein Modell auswählst, kommt die Frage nach dem Vorgehen. Die Faustregel: Bei Bild, Text und Audio fängst du mit einem vortrainierten Modell an und trainierst es höchstens nach. Bei Tabellen fängst du mit Gradient Boosting an. Und vor allem anderen steht eine Baseline.', 'Before you choose a model comes the question of how to proceed. The rule of thumb: with images, text and audio you start with a pretrained model and at most fine-tune it. With tables you start with gradient boosting. And a baseline comes before everything else.')}</p>
+  <p class="hint">${t('Klicke auf einen Schritt in der Grafik: Darunter klappt die Erklärung auf, mit Links zu den passenden Kapiteln.', 'Click a step in the figure: the explanation opens below, with links to the matching chapters.')}</p>
+  ${vorgehenFig}
+  <div class="merk">${t('<b>Merksatz</b><p>Vom Einfachen zum Aufwändigen: Baseline, dann fertiges Modell, dann nachtrainieren, und eine eigene Architektur nur im Sonderfall. Gute Labels und Daten aus der echten Einsatzumgebung bringen oft mehr als ein grösseres Modell.</p>', '<b>Key point</b><p>From simple to elaborate: baseline, then a finished model, then fine-tuning, and your own architecture only in special cases. Good labels and data from the real deployment environment often help more than a bigger model.</p>')}</div>
+
+  <h3 id="ue-dodont">Do &amp; Don’t</h3>
+  <div class="sbgrid">
+    <div class="sb ue-do"><h4>Do</h4><ul>
+      <li>${t('Einfach starten (wenige Layers, kleines Modell wie YOLOv8n), Komplexität nur bei Bedarf erhöhen', 'Start simple (few layers, a small model such as YOLOv8n), add complexity only when needed')}</li>
+      <li>${t('Bei Bild, Text, Audio: vortrainiertes Modell, zuerst zero-shot testen', 'With images, text, audio: a pretrained model, test it zero-shot first')}</li>
+      <li>${t('Bei Tabellen: Gradient Boosting vor Deep Learning', 'With tables: gradient boosting before deep learning')}</li>
+      <li>${t('In Datenqualität investieren: saubere Labels, Daten aus der Einsatzumgebung', 'Invest in data quality: clean labels, data from the deployment environment')}</li>
+      <li>${t('Alles, was aus Daten lernt, in eine <code>Pipeline</code>', 'Put everything that learns from data in a <code>Pipeline</code>')}</li>
+      <li>${t('Lieber in bestehende Prozesse einbauen als neue erfinden', 'Rather build into existing processes than invent new ones')}</li>
+      <li>${t('Seed setzen und notieren', 'Set and note the seed')}</li>
+    </ul><div class="sb-f"><a href="#ml-best">${t('Best Practices Supervised ML →', 'Best practices supervised ML →')}</a><a href="#cnn-best">${t('CNN →', 'CNN →')}</a><a href="#det-best">${t('Detection →', 'Detection →')}</a></div></div>
+    <div class="sb ue-dont"><h4>Don’t</h4><ul>
+      <li>${t('Imputer oder Scaler auf allen Daten fitten (Data Leakage)', 'Fit the imputer or scaler on all data (data leakage)')}</li>
+      <li>${t('Hyperparameter am Testset wählen oder das Testset mehrfach benutzen', 'Choose hyperparameters on the test set or use the test set several times')}</li>
+      <li>${t('Testdaten ohne dieselbe Vorverarbeitung ins Modell geben', 'Feed test data to the model without the same preprocessing')}</li>
+      <li>${t('Ohne Baseline behaupten, das Modell sei gut', 'Claim the model is good without a baseline')}</li>
+      <li>${t('Das grösste Modell nehmen, ohne Latenz und Hardware zu prüfen', 'Take the biggest model without checking latency and hardware')}</li>
+      <li>${t('Die Lizenz ignorieren', 'Ignore the licence')}</li>
+      <li>${t('Ein schweres Modell zu kurz trainieren: Es bleibt auf dem Niveau der Baseline', 'Train a heavy model too briefly: it stays at the level of the baseline')}</li>
+    </ul><div class="sb-f"><a href="#klass-leakage">Data Leakage →</a><a href="#mo-best">${t('Modell einsetzen →', 'Deploying a model →')}</a></div></div>
+  </div>
+
+  <h3 id="ue-check">${t('Checkliste für ein neues Projekt', 'Checklist for a new project')}</h3>
+  <p>${t('Zum Abhaken. Die Häkchen bleiben in diesem Browser gespeichert (mit dem lokalen Server auch browserübergreifend).', 'To tick off. The ticks are kept in this browser (with the local server also across browsers).')}</p>
+  ${checklist}
+`;
+
   function grid(cards) { return '<div class="sbgrid">' + cards.join('') + '</div>'; }
 
   LernApp.register({
@@ -309,10 +475,11 @@
     nav: t('Übersicht', 'Overview'),
     title: t('Alle Modelle und Strategien auf einen Blick', 'All models and strategies at a glance'),
     kicker: t('Zum Lernen · Module 2 und 3', 'For revision · Modules 2 and 3'),
-    summary: t('Steckbriefe aller Modelle von der linearen Regression bis zum GAN, Checklisten der Strategien und eine Entscheidungshilfe', 'Profiles of all models from linear regression to the GAN, strategy checklists and a decision guide'),
+    summary: t('Vorgehen bei einem neuen ML-Problem mit Checkliste, Steckbriefe aller Modelle von der linearen Regression bis zum GAN, Checklisten der Strategien und eine Entscheidungshilfe', 'How to approach a new ML problem with a checklist, profiles of all models from linear regression to the GAN, strategy checklists and a decision guide'),
     html: `
   <p>${t('Diese Seite fasst die Kapitel <a href="#ml">Supervised ML</a>, <a href="#klass">Klassifikation</a>, <a href="#unsup">Unsupervised</a>, <a href="#nn">Neural Networks</a>, <a href="#cnn">CNN</a>, <a href="#cv">Image Processing</a>, <a href="#det">Object Detection</a> und <a href="#gen">Generative Models</a> zum Lernen zusammen. Zu jedem Modell gibt es einen Steckbrief, zu jeder Strategie eine kurze Checkliste. Über «ausführlich →» kommst du zur Erklärung mit Demo, über «Beispiele →» zu einem Notebook mit lauffähigem Code (lokal mit Jupyter oder in Google Colab), wo es eines gibt.', 'This page summarises the chapters <a href="#ml">Supervised ML</a>, <a href="#klass">Classification</a>, <a href="#unsup">Unsupervised</a>, <a href="#nn">Neural Networks</a>, <a href="#cnn">CNN</a>, <a href="#cv">Image Processing</a>, <a href="#det">Object Detection</a> and <a href="#gen">Generative Models</a> for revision. Each model has a profile, each strategy a short checklist. “in detail →” takes you to the explanation with a demo, “Examples →” to a notebook with runnable code (locally with Jupyter or in Google Colab) where there is one.')}</p>
 
+${vorgehen}
   <h3 id="ue-wahl">${t('Welches Modell wann?', 'Which model when?')}</h3>
   <div class="ue-tree">
     <div class="ue-q">${t('Gibt es eine Zielspalte <code>y</code> mit der richtigen Antwort?', 'Is there a target column <code>y</code> with the right answer?')}</div>
@@ -453,6 +620,20 @@
       <li>${t('Am sichersten: alle Schritte in eine <code>Pipeline</code>, dann macht Cross-Validation es automatisch richtig', 'Safest: put all steps in a <code>Pipeline</code>, then Cross-Validation does it right automatically')}</li>
       <li>${t('Merkmale, die die Antwort schon verraten, entfernen', 'Remove features that already give away the answer')}</li>
     </ul><div class="sb-f"><a href="#klass-leakage">${MEHR}</a> ${bsp('06_Strategien')}</div></div>
+    <div class="sb"><h4>${t('Vortrainiertes Modell prüfen', 'Checking a pretrained model')}</h4><ul>
+      <li>${t('<b>Lizenz:</b> nicht jedes Modell ist kommerziell nutzbar (YOLOv8: AGPL)', '<b>Licence:</b> not every model may be used commercially (YOLOv8: AGPL)')}</li>
+      <li>${t('<b>Domain Shift:</b> Trainiert auf Alltagsfotos (COCO, ImageNet)? Bei Röntgen, Mikroskop oder Blaustich mehr Fine-Tuning nötig', '<b>Domain shift:</b> trained on everyday photos (COCO, ImageNet)? X-ray, microscope or a blue cast need more fine-tuning')}</li>
+      <li>${t('<b>Grösse und Latenz:</b> Läuft es auf der Zielhardware, in Echtzeit? (YOLOv8n gegen YOLOv8x)', '<b>Size and latency:</b> does it run on the target hardware, in real time? (YOLOv8n vs YOLOv8x)')}</li>
+      <li>${t('<b>Vorverarbeitung:</b> Grösse, Normalisierung und Klassen-IDs des Modells übernehmen (COCO: 91 gegen 80 IDs)', '<b>Preprocessing:</b> take over the model’s size, normalisation and class IDs (COCO: 91 vs 80 IDs)')}</li>
+      <li>${t('<b>Datenqualität:</b> saubere Labels bringen oft mehr als ein grösseres Modell', '<b>Data quality:</b> clean labels often help more than a bigger model')}</li>
+    </ul><div class="sb-f"><a href="#mo-quelle">${MEHR}</a></div></div>
+    <div class="sb"><h4>${t('Formeln zum Merken', 'Formulas to remember')}</h4><ul>
+      <li><code>Precision = TP / (TP + FP)</code></li>
+      <li><code>Recall = TP / (TP + FN)</code></li>
+      <li><code>F1 = 2·P·R / (P + R)</code></li>
+      <li>${t('<code>IoU = Schnittfläche / Vereinigungsfläche</code>, vergleicht immer zwei Boxen: Vorhersage gegen Ground Truth (Treffer ab IoU ≥ 0.5), Box gegen Box (NMS) oder zwei Detektoren untereinander', '<code>IoU = intersection / union</code>, always compares two boxes: prediction vs ground truth (hit from IoU ≥ 0.5), box vs box (NMS) or two detectors with each other')}</li>
+      <li>${t('Threshold hoch: Precision ↑, Recall ↓; tief: umgekehrt', 'High threshold: precision ↑, recall ↓; low: the other way round')}</li>
+    </ul><div class="sb-f"><a href="#det-iou">${MEHR}</a></div></div>
   </div>
   <div class="falle">${t('<b>Falle</b><p>Das Test-Set mehrfach zum Vergleichen benutzen. Dann wird es zur zweiten Validierung, und die Endzahl ist zu optimistisch.</p>', '<b>Pitfall</b><p>Using the test set several times for comparisons. It then becomes a second validation set, and the final number is too optimistic.</p>')}</div>
 `,
@@ -472,6 +653,58 @@
       { q: t(`Wann U-Net, wann SAM für Segmentation?`, `When U-Net, when SAM for segmentation?`), a: t(`U-Net, wenn es eigene pixelgenaue Labels gibt und feste Klassen gebraucht werden. SAM ohne Training (zero-shot) mit einem Prompt; es kennt keine Klassennamen und wird dafür mit einem Klassifikator kombiniert.`, `U-Net when there are own pixel-exact labels and fixed classes are needed. SAM without training (zero-shot) with a prompt; it knows no class names and is combined with a classifier for that.`) },
       { q: t(`Ist das neueste vortrainierte Modell plus Fine-Tuning immer die beste Wahl?`, `Is the newest pretrained model plus fine-tuning always the best choice?`), a: t(`Nein. Zuerst eine einfache Baseline und das vortrainierte Modell zero-shot auf den eigenen Daten testen. Fine-Tuning nur mit genug passenden Daten. Bei Tabellendaten sind klassische Modelle meist besser, und Rahmenbedingungen (Hardware, Latenz, Lizenz, Domain Shift, erfundene Details) entscheiden mit.`, `No. First test a simple baseline and the pretrained model zero-shot on your own data. Fine-tune only with enough suitable data. On tabular data classical models are usually better, and constraints (hardware, latency, licence, domain shift, invented details) decide as well.`) },
       { q: t(`VAE oder GAN, um neue Bilder zu erzeugen?`, `VAE or GAN to generate new images?`), a: t(`VAE für stabiles Training und einen geordneten Latent Space zum Ziehen und Interpolieren, dafür etwas unscharf. GAN für sehr scharfe Bilder, dafür instabil und mit Gefahr von Mode Collapse.`, `VAE for stable training and an ordered latent space for sampling and interpolating, but somewhat blurry. GAN for very sharp images, but unstable and at risk of mode collapse.`) },
+      { q: t(`Neues Problem mit Tabellendaten (CSV). Womit fängst du an?`, `A new problem with tabular data (CSV). What do you start with?`), a: t(`Mit einer Baseline (Mittelwert oder logistische Regression), dann Gradient Boosting oder Random Forest. Deep Learning bringt auf Tabellen selten mehr; der grösste Hebel liegt im Feature Engineering.`, `With a baseline (mean or logistic regression), then gradient boosting or Random Forest. Deep learning rarely helps more on tables; the biggest lever is feature engineering.`) },
+      { q: t(`Ein vortrainierter Detektor (COCO) erkennt deine Fabrikteile schlecht. Warum, und was tust du?`, `A pretrained detector (COCO) recognises your factory parts poorly. Why, and what do you do?`), a: t(`Domain Shift: Das Modell kennt Alltagsfotos, nicht deine Teile und deine Bedingungen. Eigene Bilder aus der Einsatzumgebung labeln und das Modell nachtrainieren, mit wenig Daten nur den Head (Feature Extraction), mit mehr Daten Fine-Tuning mit kleiner Learning Rate.`, `Domain shift: the model knows everyday photos, not your parts and your conditions. Label your own images from the deployment environment and retrain the model, with little data only the head (feature extraction), with more data fine-tuning with a small learning rate.`) },
+      { q: t(`Wann lohnt sich eine eigene Architektur statt eines vortrainierten Modells?`, `When is your own architecture worth it instead of a pretrained model?`), a: t(`Fast nur bei exotischen Daten ohne passendes Modell (Radar, spezielle Sensoren), bei harten Hardware-Limits (Mikrocontroller) oder in der Forschung. Dann klein anfangen und nur bei Bedarf tiefer werden.`, `Almost only for exotic data without a suitable model (radar, special sensors), with hard hardware limits (microcontroller) or in research. Then start small and only go deeper if needed.`) },
     ],
+    init() {
+      // Clickable workflow figure (same pattern as the chapter figures)
+      const fig = document.getElementById('ueFlowFig');
+      if (fig) {
+        const panel = fig.querySelector('.ab-detail'), steps = fig.querySelectorAll('.ab-step');
+        let cur = null;
+        const close = function () {
+          panel.hidden = true; cur = null;
+          steps.forEach(function (g) { g.classList.remove('on'); g.setAttribute('aria-expanded', 'false'); });
+        };
+        const open = function (k) {
+          if (cur === k) { close(); return; }
+          const d = VS[k]; if (!d) return;
+          cur = k;
+          panel.querySelector('.ab-dh b').textContent = d[0];
+          panel.querySelector('.ab-db').innerHTML = d[1];
+          panel.querySelector('.ab-dl').innerHTML = d[2].map(function (l) { return '<a href="' + l[1] + '">' + l[0] + ' →</a>'; }).join('');
+          panel.hidden = false;
+          steps.forEach(function (g) { const on = g.getAttribute('data-s') === k; g.classList.toggle('on', on); g.setAttribute('aria-expanded', on ? 'true' : 'false'); });
+        };
+        steps.forEach(function (g) {
+          g.addEventListener('click', function () { open(g.getAttribute('data-s')); });
+          g.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(g.getAttribute('data-s')); } });
+        });
+        panel.querySelector('.ab-x').addEventListener('click', close);
+      }
+      // Checklist: ticks kept under 'cas-ml-checklist' as a JSON list of checkbox ids
+      const KEY = 'cas-ml-checklist';
+      const boxes = Array.prototype.slice.call(document.querySelectorAll('#ueChecks input[type=checkbox]'));
+      const prog = document.getElementById('ueCheckProg');
+      if (!boxes.length || !prog) return;
+      let done = [];
+      try { done = JSON.parse(LernApp.store(KEY) || '[]'); } catch (e) { done = []; }
+      if (!Array.isArray(done)) done = [];
+      const render = function () {
+        const n = boxes.filter(function (b) { return b.checked; }).length;
+        prog.textContent = t(n + ' von ' + boxes.length + ' erledigt', n + ' of ' + boxes.length + ' done');
+      };
+      const save = function () {
+        LernApp.store(KEY, JSON.stringify(boxes.filter(function (b) { return b.checked; }).map(function (b) { return b.id; })));
+        render();
+      };
+      boxes.forEach(function (b) { b.checked = done.indexOf(b.id) >= 0; b.addEventListener('change', save); });
+      document.getElementById('ueCheckReset').addEventListener('click', function () {
+        boxes.forEach(function (b) { b.checked = false; });
+        save();
+      });
+      render();
+    },
   });
 })();

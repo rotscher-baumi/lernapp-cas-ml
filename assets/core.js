@@ -57,6 +57,8 @@
     },
     translate: function (id, fields) { EN[id] = fields; },
     t: t,
+    // store(key) reads, store(key, text) writes localStorage (and the server copy); errors return null
+    store: function (key, val) { return store(key, val); },
     lang: 'de',
     // Set a range slider from a demo (drag in a plot): clamp, snap to its step, then fire 'input'
     // so the demo redraws through its normal slider listener and the shown value follows.
