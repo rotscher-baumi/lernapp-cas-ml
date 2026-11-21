@@ -213,6 +213,110 @@
     update();
   }
 
+  /* ---------- Chapter view (main page only) ----------
+   * index.html shows one chapter at a time. The address decides: #<chapter id> or #<element inside a chapter>
+   * shows that chapter, an empty hash or #ueberblick the overview. All chapters stay in the DOM (init() runs once for
+   * all of them, the search indexes all of them); the inactive ones only get the class "off" (display: none). */
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+  // "On this page": links to the h3 headings of a chapter (not those inside demos, boxes or self-test answers)
+  function chapterToc(sec, m) {
+    const hs = Array.prototype.filter.call(sec.querySelectorAll('h3'), function (h) { return !h.closest('details, .demo, .box'); });
+    if (hs.length < 2) return;
+    hs.forEach(function (h, i) { if (!h.id) h.id = m.id + '-h' + (i + 1); });
+    const label = t('Auf dieser Seite', 'On this page');
+    const nav = document.createElement('nav');
+    nav.className = 'ctoc';
+    nav.setAttribute('aria-label', label);
+    nav.innerHTML = '<details><summary>' + label + '</summary><div>' +
+      hs.map(function (h) { return '<a href="#' + h.id + '">' + esc(h.textContent.trim()) + '</a>'; }).join('') + '</div></details>';
+    nav.querySelector('details').open = window.matchMedia('(min-width: 1280px)').matches;
+    sec.querySelector('h2').after(nav);
+  }
+
+  function pager(sec, prev, next) {
+    const link = function (m, cls, dir) {
+      return m ? '<a class="' + cls + '" href="#' + m.id + '"><span>' + dir + '</span><b>' + (m.nav || m.title) + '</b></a>' : '<span></span>';
+    };
+    sec.insertAdjacentHTML('beforeend', '<nav class="pager" aria-label="' + t('Kapitel blättern', 'Chapter navigation') + '">' +
+      link(prev, 'prev', '← ' + t('Zurück', 'Previous')) + link(next, 'next', t('Weiter', 'Next') + ' →') + '</nav>');
+  }
+
+  function wireRouter(mods) {
+    const over = $('ueberblick'), chips = $('chips'), baseTitle = document.title;
+    const secs = mods.map(function (m) { return $(m.id); }).filter(Boolean);
+    const navOf = {};
+    mods.forEach(function (m) { navOf[m.id] = m.nav || m.title; });
+    let current = null;
+
+    mods.forEach(function (m, i) {
+      const sec = $(m.id);
+      if (!sec) return;
+      chapterToc(sec, m);
+      pager(sec, i ? mods[i - 1] : { id: 'ueberblick', nav: t('Überblick', 'Overview') }, mods[i + 1]);
+    });
+
+    const barH = function () {
+      const bar = document.querySelector('.topbar') || chips;
+      const h = Math.round(bar.getBoundingClientRect().height) + 12;
+      document.documentElement.style.setProperty('--barh', h + 'px');
+      return h;
+    };
+    const chapterOf = function (el) { return (el && el.closest('#modules > section')) || over; };
+
+    // Highlight the heading of the "On this page" list that is being read
+    function spy() {
+      const nav = current && current !== over ? current.querySelector('.ctoc') : null;
+      if (!nav) return;
+      const y = barH() + Math.min(160, window.innerHeight / 4), links = nav.querySelectorAll('a');
+      let on = -1;
+      links.forEach(function (a, i) { const h = $(a.getAttribute('href').slice(1)); if (h && h.getBoundingClientRect().top <= y) on = i; });
+      links.forEach(function (a, i) { a.classList.toggle('on', i === on); });
+    }
+
+    function show(id, scroll) {
+      const target = id ? document.getElementById(id) : null;
+      const sec = chapterOf(target);
+      const changed = sec !== current;
+      [over].concat(secs).forEach(function (s) { s.classList.toggle('off', s !== sec); });
+      current = sec;
+      document.title = sec === over ? baseTitle : navOf[sec.id] + ' · ' + baseTitle;
+      chips.querySelectorAll('a').forEach(function (a) {
+        const on = a.getAttribute('href') === '#' + sec.id;
+        a.classList.toggle('on', on);
+        if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+        if (on) {
+          const r = a.getBoundingClientRect(), cr = chips.getBoundingClientRect();
+          if (r.left < cr.left || r.right > cr.right) chips.scrollLeft += r.left - cr.left - 16;
+        }
+      });
+      if (scroll !== false) {
+        barH();
+        // A new chapter jumps at once (the page has changed anyway); within a chapter the CSS smooth scrolling applies
+        const how = changed ? { behavior: 'instant' } : {};
+        if (target && target !== sec && target !== over) target.scrollIntoView(how);
+        else if (changed) { if (sec === over) window.scrollTo({ top: 0, behavior: 'instant' }); else sec.scrollIntoView(how); }
+      }
+      spy();
+    }
+
+    // For the search: open the chapter of a match without scrolling (the search scrolls to the match itself)
+    LernApp.showChapter = function (id) {
+      if ('#' + id !== location.hash) history.pushState(null, '', '#' + id);
+      show(id, false);
+    };
+    window.addEventListener('hashchange', function () { show(decodeURIComponent(location.hash.slice(1))); });
+    window.addEventListener('scroll', spy, { passive: true });
+    const first = decodeURIComponent(location.hash.slice(1));
+    show(first, false);
+    // Jump to a deep link only when the page has its final height: after the search has built the sticky bar (its
+    // height is the offset under the bar), the load event and the web fonts (they reflow the text above the target)
+    if (first) {
+      const loaded = new Promise(function (r) { if (document.readyState === 'complete') r(); else window.addEventListener('load', r); });
+      Promise.all([loaded, document.fonts ? document.fonts.ready : null]).then(function () { show(first, true); });
+    }
+  }
+
   function applyEn(m, e) {
     Object.keys(e).forEach(function (k) {
       m[k] = e[k];
@@ -284,6 +388,7 @@
       }
     });
 
+    if (hasOverview) { wireRouter(mods); return; }
     wireNav();
     if (location.hash.length > 1) {
       const t = document.getElementById(decodeURIComponent(location.hash.slice(1)));

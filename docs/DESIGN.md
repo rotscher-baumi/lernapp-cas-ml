@@ -33,6 +33,7 @@ Stand: 2026-11-01. Ergänzt [ARCHITECTURE.md](ARCHITECTURE.md) um Ziele, Entsche
 | D12 | Werte, die einer Stelle im Plot entsprechen, werden direkt im Plot gezogen (`LernApp.drag`) | Ziehen am Objekt ist anschaulicher als ein Slider daneben | Der Slider bleibt als genaue Anzeige und für die Tastatur; das Ziehen setzt ihn über `setRange`, die Demo-Logik bleibt unverändert. Abstrakte Grössen (Learning Rate, k, Epochs) bleiben reine Slider |
 | D13 | Best Practices als letzter Abschnitt jedes Fachkapitels (`<id>-best`), keine separate Checkliste | Regeln stehen dort, wo das Thema erklärt wird; ein Querschnittskapitel allein wird übersehen | Allgemeine Regeln stehen einmal in `ml-best`, spätere Kapitel verlinken darauf und ergänzen nur Fachliches; Raster mit der Klasse `.bp-check`, Spickzettel mit je einer Zeile «Best Practices» |
 | D14 | Jedes Fachkapitel hat denselben Rahmen: Ablauf-Grafik am Anfang, «Übersicht: Schritte und Methoden» und «Best Practices» am Schluss, eine ID pro Abschnitt | Gleiche Struktur macht Kapitel vergleichbar und jede Stelle verlinkbar | Neue Kapitel übernehmen den Rahmen; englische Merksätze heissen einheitlich «Key point» |
+| D15 | Die Hauptseite zeigt ein Kapitel aufs Mal (Hash-Routing in `core.js`), mit «Auf dieser Seite» und Zurück/Weiter | Mit 16 Kapiteln war die eine lange Seite mühsam zu scrollen | Kein Build-Schritt, Doppelklick funktioniert weiter; alle Kapitel bleiben im DOM (Demos, Suche), inaktive sind nur ausgeblendet. Links zwischen Kapiteln bleiben `#id` |
 
 ## 4. Theming
 

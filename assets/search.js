@@ -4,7 +4,8 @@
  * ignores case and accents and treats ä/ö/ü/ß like ae/oe/ue/ss. Matches are marked with the CSS Custom Highlight API
  * (no DOM changes, so demos keep working); browsers without it still get the result list and jumping.
  * Keys: / or Ctrl+K focus the field, Enter / Shift+Enter next / previous, ↓ into the list, Esc clears.
- * Runs after core.js has rendered the chapters (DOMContentLoaded listener registered later).
+ * Runs after core.js has rendered the chapters (DOMContentLoaded listener registered later). Hidden chapters (class "off",
+ * one chapter view) are searched too; jumping to a match there opens its chapter through LernApp.showChapter.
  */
 (function () {
   'use strict';
@@ -142,6 +143,9 @@
       if (!hits.length) return;
       cur = (i + hits.length) % hits.length;
       const h = hits[cur];
+      // index.html shows one chapter at a time: a match in a hidden chapter (class "off") opens that chapter first
+      const off = h.node.parentElement.closest('section.off');
+      if (off && window.LernApp && window.LernApp.showChapter) window.LernApp.showChapter(off.id);
       // Matches inside a closed self-test answer or a collapsed block: open it first
       for (let d = h.node.parentElement.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) d.open = true;
       const el = h.node.parentElement;

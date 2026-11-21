@@ -286,3 +286,29 @@ h3[id],h4[id],.merk[id]{scroll-margin-top:72px}
 ::highlight(srch-cur){background-color:rgba(255,128,0,.8);color:#111}
 .srch-flash{outline:3px solid var(--warn);outline-offset:2px;border-radius:4px}
 .srch input::-webkit-search-cancel-button{display:none}
+
+/* Chapter view (core.js wireRouter, index.html only): one chapter at a time, "On this page" list, previous/next */
+#ueberblick.off,#modules>section.off{display:none}
+html:has(#ueberblick){scroll-padding-top:calc(var(--barh,112px) + env(safe-area-inset-top,0px))}
+html:has(#ueberblick) #modules [id]{scroll-margin-top:0}
+.ctoc{margin:14px 0 4px}
+.ctoc details{border:1px solid var(--line);background:var(--surface);border-radius:10px}
+.ctoc summary{cursor:pointer;padding:10px 14px;font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ctoc details>div{display:flex;flex-direction:column;padding:0 8px 10px}
+.ctoc a{font-size:14px;line-height:1.35;color:var(--fg);text-decoration:none;padding:6px 8px;border-radius:6px;border-left:3px solid transparent}
+.ctoc a:hover{background:var(--accent-soft)}
+.ctoc a.on{border-left-color:var(--accent);color:var(--accent);font-weight:600}
+@media (min-width:1280px){
+  .ctoc{position:fixed;top:calc(var(--barh,120px) + 8px);left:calc(50% + 400px);width:min(260px,calc(50vw - 420px));margin:0;z-index:10}
+  .ctoc details{border:0;background:none;max-height:calc(100vh - var(--barh,120px) - 32px);overflow:auto}
+  .ctoc summary{padding:0 8px 8px;list-style:none;pointer-events:none}
+  .ctoc summary::-webkit-details-marker{display:none}
+  .ctoc details>div{padding:0}
+  .ctoc a{font-size:13.5px;padding:4px 8px}
+}
+.pager{display:flex;justify-content:space-between;gap:12px;margin:40px 0 0;padding-top:16px;border-top:1px solid var(--line)}
+.pager a{display:flex;flex-direction:column;gap:2px;max-width:48%;text-decoration:none;color:var(--fg);border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 14px}
+.pager a.next{text-align:right;margin-left:auto}
+.pager a span{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.pager a b{font-family:var(--f-display);color:var(--accent)}
+.pager a:hover{border-color:var(--accent)}

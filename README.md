@@ -40,9 +40,13 @@ lernapp/
   docs/             Architektur, PlantUML-Diagramme, Design-Dokument
 ```
 
+## Navigation
+
+Die Hauptseite zeigt immer ein Kapitel aufs Mal: Ein Chip oben, ein Link oder Zurück/Weiter am Ende des Kapitels wechselt es; die Zurück-Taste des Browsers funktioniert. Die Adresse sagt, was zu sehen ist: `index.html` oder `#ueberblick` die Übersicht, `#cv` das Kapitel, `#cv-pixel` ein Abschnitt darin. Unter dem Titel jedes Kapitels steht «Auf dieser Seite» mit allen Abschnitten (h3); ab 1280 px Breite fest rechts neben dem Text, mit Markierung des aktuellen Abschnitts. Code: `wireRouter()` in `assets/core.js`.
+
 ## Suche
 
-Oben in der klebenden Leiste über den Kapiteln steht ein Suchfeld (Taste `/` oder `Ctrl+K`). Gesucht wird im sichtbaren Text der gewählten Sprache, auch in den zugeklappten Antworten des Selbsttests; Gross- und Kleinschreibung und Akzente zählen nicht, «groesse» findet «Grösse». Die Liste zeigt Kapitel › Abschnitt und einen Ausschnitt; Enter und ▼ springen zum nächsten Treffer, Shift+Enter und ▲ zum vorherigen, Esc schliesst. Die Markierung im Text braucht die CSS Custom Highlight API (Chrome, Edge, Safari 17.2+, Firefox 140+); ohne sie funktionieren Liste und Springen trotzdem. Code: `assets/search.js`, nur auf `index.html` eingebunden.
+Oben in der klebenden Leiste über den Kapiteln steht ein Suchfeld (Taste `/` oder `Ctrl+K`). Gesucht wird im Text der gewählten Sprache in allen Kapiteln, auch in den gerade ausgeblendeten (ein Treffer dort öffnet sein Kapitel), auch in den zugeklappten Antworten des Selbsttests; Gross- und Kleinschreibung und Akzente zählen nicht, «groesse» findet «Grösse». Die Liste zeigt Kapitel › Abschnitt und einen Ausschnitt; Enter und ▼ springen zum nächsten Treffer, Shift+Enter und ▲ zum vorherigen, Esc schliesst. Die Markierung im Text braucht die CSS Custom Highlight API (Chrome, Edge, Safari 17.2+, Firefox 140+); ohne sie funktionieren Liste und Springen trotzdem. Code: `assets/search.js`, nur auf `index.html` eingebunden.
 
 ## Neues Kapitel hinzufügen
 

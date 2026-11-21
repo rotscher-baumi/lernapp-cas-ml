@@ -52,7 +52,13 @@ loop pro Modul
   mod -> dom : Demos verdrahten (Slider, Buttons, SVG)
   note right : Fehler in init() werden abgefangen\nund als Hinweis im Kapitel gezeigt
 end
-core -> dom : Navigation verdrahten,\nzum #anker springen
+alt index.html (hat #ueberblick)
+  core -> dom : wireRouter(): pro Kapitel «Auf dieser Seite» (h3)\nund Zurück/Weiter einfügen
+  core -> dom : nur das Kapitel aus location.hash zeigen,\nalle anderen mit Klasse .off ausblenden
+  core -> dom : nach load und document.fonts.ready\nzum #anker springen
+else Unterseite
+  core -> dom : Navigation verdrahten,\nzum #anker springen
+end
 
 == Später: Nutzer:in ändert eine Einstellung ==
 b -> core : Klick auf «Dunkel»
@@ -62,5 +68,7 @@ core -> srv : PUT /api/state (Kopie aller Schlüssel, 500 ms gebündelt)
 b -> core : Klick auf «EN»
 core -> ls : cas-ml-lang = en
 core -> b : location.reload()
+b -> core : Klick auf Chip, «Auf dieser Seite» oder Zurück/Weiter (hashchange)
+core -> dom : Kapitel des Ziels zeigen, die anderen .off,\nChip markieren, Titel setzen, scrollen
 
 @enduml
