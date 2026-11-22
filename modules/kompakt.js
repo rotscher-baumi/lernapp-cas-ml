@@ -4,7 +4,7 @@
 (function () {
   LernApp.register({
     id: 'kompakt',
-    order: 96,
+    order: 95.5,
     nav: 'Kompakt',
     title: 'Alles kompakt',
     kicker: 'Spickzettel · Module 2 und 3',

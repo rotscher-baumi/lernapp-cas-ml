@@ -1,6 +1,6 @@
 # Design-Dokument Lernapp CAS ML
 
-Stand: 2026-11-01. Ergänzt [ARCHITECTURE.md](ARCHITECTURE.md) um Ziele, Entscheidungen und das Datenobjektmodell.
+Stand: 2026-11-22. Ergänzt [ARCHITECTURE.md](ARCHITECTURE.md) um Ziele, Entscheidungen und das Datenobjektmodell.
 
 ## 1. Ziele
 
@@ -35,6 +35,7 @@ Stand: 2026-11-01. Ergänzt [ARCHITECTURE.md](ARCHITECTURE.md) um Ziele, Entsche
 | D14 | Jedes Fachkapitel hat denselben Rahmen: Ablauf-Grafik am Anfang, «Übersicht: Schritte und Methoden» und «Best Practices» am Schluss, eine ID pro Abschnitt | Gleiche Struktur macht Kapitel vergleichbar und jede Stelle verlinkbar | Neue Kapitel übernehmen den Rahmen; englische Merksätze heissen einheitlich «Key point» |
 | D15 | Die Hauptseite zeigt ein Kapitel aufs Mal (Hash-Routing in `core.js`), mit «Auf dieser Seite» und Zurück/Weiter | Mit 16 Kapiteln war die eine lange Seite mühsam zu scrollen | Kein Build-Schritt, Doppelklick funktioniert weiter; alle Kapitel bleiben im DOM (Demos, Suche), inaktive sind nur ausgeblendet. Links zwischen Kapiteln bleiben `#id` |
 | D16 | Die Übersicht beginnt mit «Neues ML-Problem: So gehst du vor»: klickbare Ablauf-Grafik über alle Kapitel, Do & Don’t und eine Projekt-Checkliste zum Abhaken (2026-11-21, Wunsch des Nutzers) | Ein Handlungsleitfaden über alle Kapitel fehlte: wann Baseline, wann Gradient Boosting, wann ein vortrainiertes Modell, wann Fine-Tuning | Ergänzt D13, ersetzt es nicht: Die Regeln stehen weiter in `<id>-best`, die Übersicht fasst nur zusammen und verlinkt dorthin. Neue Kapitel ergänzen Grafik, Do & Don’t und Checkliste im selben Schritt |
+| D17 | Kapitel «Quiz» am Ende der Hauptseite: alle Selbsttest-Fragen mit Wiederholung nach Plan (Leitner, 1/3/7/14/30 Tage), gemischt über die Kapitel, dazu leeres Blatt und Fortschritt (2026-11-22, Wunsch des Nutzers) | Übersichten lesen ist passiv; aktives Abrufen mit Abständen und gemischten Themen bleibt besser hängen | Keine eigenen Fragen, Quelle bleibt das Feld `quiz` der Kapitel. Karten-ID aus Kapitel und deutschem Fragetext (`quizDe`), darum setzt Umformulieren den Fortschritt einer Frage zurück. Kein Ablauf-SVG wie in den Fachkapiteln, sondern eine `.steps`-Zeile, weil das Kapitel ein Werkzeug ist und keinen Stoff erklärt. Kein Eintrag im Spickzettel und im Leitfaden der Übersicht |
 
 ## 4. Theming
 
@@ -67,7 +68,8 @@ Objekt, das `LernApp.register` übergeben wird.
 | `kicker` | string | nein | kleine Zeile über dem Titel: `Modul N · Thema · Datum` (Datum aus dem Stundenplan, z. B. `Fr 30.10.`; ohne gesichertes Datum weglassen) |
 | `summary` | string | nein | ein Satz für die Übersichtskarte |
 | `html` | string (HTML) | nein | Inhalt; CSS-Klassen `.merk`, `.falle`, `.demo`, `.fig`, `.box`, `.tablewrap`, `.steps`, `.grid2`, `.toc` |
-| `quiz` | QuizItem[] | nein | Selbsttest am Kapitelende |
+| `quiz` | QuizItem[] | nein | Selbsttest am Kapitelende; erscheint auch im Kapitel Quiz |
+| `quizDe` | QuizItem[] | gesetzt vom Kern | Kopie der deutschen Liste, die `register()` anlegt; bleibt nach der englischen Überlagerung erhalten und liefert die Karten-IDs des Quiz |
 | `notebooks` | NotebookRef[] | nein | Hinweiskasten auf Übungs-Notebooks |
 | `init` | function | nein | wird einmal nach dem Einfügen aufgerufen; Demos verdrahten |
 | `exercises` | Exercise[] | veraltet | wird nicht mehr gerendert; noch von `scripts/build_notebook.js` gelesen |
@@ -116,6 +118,7 @@ Invariante: Die Menge der `id="…"` in `html` ist in Deutsch und Englisch gleic
 | `cas-ml-lang` | `de`, `en` | `de` |
 | `cas-ml-theme` | `light`, `dark`, `auto` | `auto` |
 | `cas-ml-checklist` | JSON-Liste der abgehakten Checkbox-IDs der Projekt-Checkliste in der Übersicht (`ue-c1` … `ue-c12`) | `[]` |
+| `cas-ml-quiz` | JSON `{ v: 1, cards: { <kapitel>:<hash>: { box 1–5, due, seen, last } }, filter: [Kapitel-IDs] oder null (= alle), newMax (−1 = alle), blank: { <kapitel>: { date, got, total } }, drafts: { <kapitel>: Text }, blankCh }`; Daten als lokales `YYYY-MM-DD`. Unlesbarer Inhalt oder andere Version beginnt leer | leer |
 
 Ältere Schlüssel aus den entfernten Übungen können in bestehenden Browsern noch liegen; der Kern liest sie nicht mehr.
 
@@ -129,7 +132,7 @@ Flaches JSON-Objekt: jeder `localStorage`-Schlüssel als Text. Der Server prüft
 
 ## 7. Qualitätssicherung
 
-Es gibt keine automatischen Tests. Geprüft wird so:
+Automatische Tests: `pytest` (Server, Notebooks, JS-Syntax, Planung des Quiz). Zusätzlich wird so geprüft:
 
 - `node --check` für jede JS-Datei.
 - Jede Seite auf Deutsch und Englisch in Chrome headless laden: keine Konsolenfehler, kein Kapitel mit Fehlerhinweis.

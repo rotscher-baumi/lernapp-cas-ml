@@ -1,25 +1,17 @@
-// Loads chapter files with a stub LernApp and checks the self-test items that have keyword groups (k) and choices (c):
-// the model answer must contain every keyword group, and there must be at least three choices. Prints one line per problem.
+// Loads assets/demos-quiz.js without a DOM and runs one call of LernApp.quizLogic; prints the result as JSON.
+// Input on stdin: {fn: 'name', args: [...], seed?: number}; used by tests/test_quiz.py.
+// A seed replaces the random source (last argument of interleave, opts.rnd of queue) with a fixed sequence.
 const fs = require('fs');
-const norm = (x) => String(x).toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').normalize('NFD')
-  .replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss').replace(/[^a-z0-9α-ω]+/g, ' ').trim();
-const deep = new Proxy(function () { return ''; }, { get: () => deep, apply: () => '' });
-let cap = null;
-const base = { t: (d) => d, register: (o) => { cap = o; }, translate: (id, o) => { cap = o; }, demos: {}, $: () => null, fmt: (x) => x };
-global.LernApp = new Proxy(base, { get: (o, k) => (k in o ? o[k] : deep) });
+const path = require('path');
+const { fn, args, seed } = JSON.parse(fs.readFileSync(0, 'utf8'));
 global.window = global;
-global.document = {};
-let checked = 0;
-for (const f of process.argv.slice(2)) {
-  cap = null;
-  new Function(fs.readFileSync(f, 'utf8')).call(global);
-  for (const it of (cap && cap.quiz) || []) {
-    if (!it.k && !it.c) continue;
-    checked++;
-    const a = ' ' + norm(it.a.replace(/<[^>]+>/g, ' ')) + ' ';
-    const miss = (it.k || []).filter((g) => !g.some((x) => a.includes(norm(x)))).map((g) => g[0]);
-    if (miss.length) console.log(f + ' | ' + it.q.slice(0, 50) + ' | model answer lacks: ' + miss.join('; '));
-    if (it.c && it.c.length < 3) console.log(f + ' | ' + it.q.slice(0, 50) + ' | fewer than 3 choices');
-  }
+global.LernApp = { demos: {} };
+eval(fs.readFileSync(path.join(__dirname, '..', 'assets', 'demos-quiz.js'), 'utf8')); // eslint-disable-line no-eval
+const Q = global.LernApp.quizLogic;
+const rnd = (a) => () => { a = (a * 1103515245 + 12345) % 2147483648; return a / 2147483648; };
+if (seed !== undefined) {
+  if (fn === 'interleave') args[1] = rnd(seed);
+  if (fn === 'queue') args[3].rnd = rnd(seed);
 }
-console.log('checked ' + checked);
+if (fn === 'parse' && args[0] !== null && typeof args[0] !== 'string') args[0] = JSON.stringify(args[0]);
+process.stdout.write(JSON.stringify(Q[fn].apply(null, args)));

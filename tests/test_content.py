@@ -136,7 +136,7 @@ def test_quiz_keywords_match_their_own_model_answer() -> None:
     files = [str(p) for p in sorted((ROOT / "modules").glob("**/*.js")) if " k: [[" in p.read_text(encoding="utf-8")]
     assert files, "no chapter has self-test items with a check"
     result = subprocess.run(
-        ["node", str(ROOT / "tests" / "quiz_harness.js"), *files], capture_output=True, text=True, check=False
+        ["node", str(ROOT / "tests" / "quiz_check_harness.js"), *files], capture_output=True, text=True, check=False
     )
     problems = [line for line in result.stdout.splitlines() if " | " in line]
     assert result.returncode == 0, result.stderr

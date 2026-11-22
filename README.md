@@ -24,11 +24,12 @@ lernapp/
     core.js         Navigation, Sprache, Theme, Selbsttest; gemeinsame Helfer (mulberry32, gauss, drag, setRange)
     demos-<id>.js   Demo-Code der grossen Kapitel (ml, klass, unsup, nn, cnn, cv, det, gen; `demos-modell.js` für den Praxis-Teil von `uebersicht.js`), das Kapitel in modules/ ruft ihn in init() auf
                     (`demos-nn.js` liefert auch die zwei klickbaren SVG-Grafiken des Kapitels Neural Networks: `LernApp.nnFlow` Ablauf, `LernApp.nnConcept` Hauptkonzept; die Kapitel CNN, Image Processing, Object Detection & Segmentation und Generative Models nutzen `nnFlow` mit eigenem `id` für die Pfeil-Marker; `demos-det.js` liefert zusätzlich `LernApp.detFig` mit den statischen SVG-Grafiken des Kapitels Object Detection & Segmentation, die `modules/det.js` und `modules/en/det.js` in ihrem `html` aufrufen; ebenso `demos-gen.js` mit `LernApp.genFig` für Generative Models)
+    demos-quiz.js   Kapitel Quiz: Wiederholung nach Plan (Leitner), leeres Blatt, Fortschritt; reine Logik in `LernApp.quizLogic`
     demos-*.js      geteilte Demos (Mathe, k-Means)
     search.js       Volltextsuche der Hauptseite: klebende Leiste über den Kapitel-Chips, Trefferliste, ▲▼, Markierung (CSS Custom Highlight API)
     notebook-data.js  aus den Notebooks erzeugt (nicht von Hand ändern)
   modules/          ein Kapitel pro Datei
-    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js nn.js cnn.js cv.js det.js gen.js uebersicht.js kompakt.js titanic.js
+    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js nn.js cnn.js cv.js det.js gen.js uebersicht.js quiz.js kompakt.js titanic.js
     en/             englische Texte je Kapitel
     _vorlage.js     Vorlage für ein neues Kapitel
   notebooks/        Übungs-Notebooks (Jupyter / VS Code)
@@ -46,6 +47,10 @@ Die Hauptseite zeigt immer ein Kapitel aufs Mal: Ein Chip oben, ein Link oder Zu
 ## Suche
 
 Oben in der klebenden Leiste über den Kapiteln steht ein Suchfeld (Taste `/` oder `Ctrl+K`). Gesucht wird im Text der gewählten Sprache in allen Kapiteln, auch in den gerade ausgeblendeten (ein Treffer dort öffnet sein Kapitel), auch in den zugeklappten Antworten des Selbsttests; Gross- und Kleinschreibung und Akzente zählen nicht, «groesse» findet «Grösse». Die Liste zeigt Kapitel › Abschnitt und einen Ausschnitt; Enter und ▼ springen zum nächsten Treffer, Shift+Enter und ▲ zum vorherigen, Esc schliesst. Die Markierung im Text braucht die CSS Custom Highlight API (Chrome, Edge, Safari 17.2+, Firefox 140+); ohne sie funktionieren Liste und Springen trotzdem. Code: `assets/search.js`, nur auf `index.html` eingebunden.
+
+## Quiz
+
+Das letzte Kapitel (`#quiz`) fragt die Selbsttest-Fragen aller Kapitel der Hauptseite ab. Eigene Fragen hat es nicht: Neue Fragen im Feld `quiz` eines Kapitels erscheinen dort automatisch. Eine Runde enthält alle fälligen Fragen der gewählten Kapitel und eine wählbare Zahl neuer Fragen, gemischt über die Kapitel. Nach dem Aufdecken bewertest du dich: «Nicht gewusst» schickt die Frage zurück in Fach 1, «Knapp» lässt sie im Fach, «Sicher» schiebt sie ein Fach weiter. Die Fächer 1 bis 5 sind nach 1, 3, 7, 14 und 30 Tagen wieder fällig. Dazu kommen das leere Blatt (Kapitel aus dem Kopf aufschreiben, dann mit den Abschnitten und Merksätzen vergleichen) und eine Fortschrittstabelle. Der Zustand liegt unter `cas-ml-quiz` (Browser und mit Server in `data/state.json`). Die ID einer Frage entsteht aus Kapitel und deutschem Fragetext: Wer eine Frage umformuliert, setzt ihren Fortschritt zurück. Code: `assets/demos-quiz.js`, Tests: `tests/test_quiz.py`.
 
 ## Neues Kapitel hinzufügen
 
@@ -134,5 +139,5 @@ Einmal einrichten (Python 3.12): `py -3.12 -m venv .venv`, dann `.venv\Scripts\p
 .venv\Scripts\pytest -m slow      # führt alle Beispiel-Notebooks aus, etwa 2 Minuten
 ```
 
-Die Tests decken `server.py` (Dateien, Zustandsspeicher, Jupyter-Start, Proxy), die Notebooks (gültig, ohne gespeicherte Ausgaben, Kernel `python3`, Colab-Link), die Links der Übersicht und die Syntax aller JavaScript-Module ab. Das Aussehen im Browser prüft keiner dieser Tests.
+Die Tests decken `server.py` (Dateien, Zustandsspeicher, Jupyter-Start, Proxy), die Planung des Quiz (`LernApp.quizLogic` über Node), die Notebooks (gültig, ohne gespeicherte Ausgaben, Kernel `python3`, Colab-Link), die Links der Übersicht und die Syntax aller JavaScript-Module ab. Das Aussehen im Browser prüft keiner dieser Tests.
 

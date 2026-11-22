@@ -68,6 +68,8 @@ core -> srv : PUT /api/state (Kopie aller Schlüssel, 500 ms gebündelt)
 b -> core : Klick auf «EN»
 core -> ls : cas-ml-lang = en
 core -> b : location.reload()
+b -> mod : Quiz: Frage bewerten
+mod -> ls : cas-ml-quiz = Fächer und Fälligkeiten (LernApp.store)
 b -> core : Klick auf Chip, «Auf dieser Seite» oder Zurück/Weiter (hashchange)
 core -> dom : Kapitel des Ziels zeigen, die anderen .off,\nChip markieren, Titel setzen, scrollen
 
