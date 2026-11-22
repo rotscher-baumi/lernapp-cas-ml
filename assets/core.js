@@ -198,7 +198,7 @@
   //   k: [['label shown when missing', 'variant', 'variant'], ...]  every group needs one variant in the typed text
   //   c: ['correct answer', 'wrong 1', 'wrong 2', ...]              shown in random order
   function norm(x) {
-    return String(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss')
+    return String(x).toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss')
       .replace(/[^a-z0-9\u03b1-\u03c9]+/g, ' ').trim();
   }
   function quizItem(it) {

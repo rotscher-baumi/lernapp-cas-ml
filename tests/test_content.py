@@ -128,3 +128,16 @@ def test_decision_tree_links_to_existing_method_cards() -> None:
     links = set(re.findall(r'href="#(v-\w+)"', tree))
     assert links, "the decision tree no longer links to method cards"
     assert not links - cards, f"decision tree links to missing cards: {sorted(links - cards)}"
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="Node.js is not installed")
+def test_quiz_keywords_match_their_own_model_answer() -> None:
+    """The keyword groups of a self-test item must all occur in its model answer; each item needs 3+ choices."""
+    files = [str(p) for p in sorted((ROOT / "modules").glob("**/*.js")) if " k: [[" in p.read_text(encoding="utf-8")]
+    assert files, "no chapter has self-test items with a check"
+    result = subprocess.run(
+        ["node", str(ROOT / "tests" / "quiz_harness.js"), *files], capture_output=True, text=True, check=False
+    )
+    problems = [line for line in result.stdout.splitlines() if " | " in line]
+    assert result.returncode == 0, result.stderr
+    assert not problems, "\n".join(problems)
