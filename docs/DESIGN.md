@@ -80,7 +80,9 @@ Invarianten: `id` ist über alle geladenen Kapitel eindeutig (der Kern weist Dop
 | Feld | Typ | Bedeutung |
 |---|---|---|
 | `q` | string (HTML) | Frage, als `<summary>` |
-| `a` | string (HTML) | Antwort, aufklappbar |
+| `a` | string (HTML) | Musterantwort, aufklappbar; bei Fragen mit Check erst nach dem Prüfen sichtbar |
+| `k` | string[][] | nein: Stichwort-Gruppen für die Freitext-Prüfung. Jede Gruppe: `[Anzeigename, Variante, …]`; sie gilt als genannt, wenn eine Variante im getippten Text vorkommt (ohne Gross/Klein und Akzente). Je Sprache eigene Stichwörter |
+| `c` | string[] | nein: Antworten zur Auswahl, die richtige zuerst (wird beim Anzeigen gemischt) |
 
 ### 6.3 NotebookRef
 

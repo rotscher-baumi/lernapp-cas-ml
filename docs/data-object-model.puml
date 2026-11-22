@@ -25,7 +25,9 @@ package "Kapitel (modules/<id>.js)" {
 
   class QuizItem {
     +q : string  <<Frage, HTML erlaubt>>
-    +a : string  <<Antwort, aufklappbar>>
+    +a : string  <<Musterantwort, aufklappbar>>
+    +k : string[][]  <<Stichwort-Gruppen für die Freitext-Prüfung, optional>>
+    +c : string[]  <<Auswahlantworten, richtige zuerst, optional>>
   }
 
   class NotebookRef {
