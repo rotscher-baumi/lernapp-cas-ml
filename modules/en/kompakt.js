@@ -5,7 +5,7 @@ LernApp.translate('kompakt', {
   kicker: 'Cheat sheet · Modules 2 and 3',
   summary: `Supervised ML, classification, unsupervised, neural networks, CNN, computer vision, generative models and models in practice on one page`,
   html: `
-  <p>The cheat sheet over the chapters <a href="index.html#ml">Supervised ML</a>, <a href="index.html#klass">Classification</a>, <a href="index.html#unsup">Unsupervised</a>, <a href="index.html#nn">Neural Networks</a>, <a href="index.html#cnn">CNN</a>, <a href="index.html#cv">Image Processing</a>, <a href="index.html#det">Object Detection &amp; Segmentation</a>, <a href="index.html#gen">Generative Models</a> and the practice part of <a href="index.html#ue-praxis">Overview &amp; practice</a>. The explanations, demos and self-test are in the chapters, profiles of single models in <a href="index.html#uebersicht">Overview &amp; practice</a>.</p>
+  <p>The cheat sheet over the chapters <a href="#ml">Supervised ML</a>, <a href="#klass">Classification</a>, <a href="#unsup">Unsupervised</a>, <a href="#nn">Neural Networks</a>, <a href="#cnn">CNN</a>, <a href="#cv">Image Processing</a>, <a href="#det">Object Detection &amp; Segmentation</a>, <a href="#gen">Generative Models</a> and the practice part of <a href="#ue-praxis">Overview &amp; practice</a>. The explanations, demos and self-test are in the chapters, profiles of single models in <a href="#uebersicht">Overview &amp; practice</a>.</p>
 
   <h3 id="k-ablauf">Supervised ML: workflow and data</h3>
   <div class="tablewrap"><table>
@@ -16,9 +16,9 @@ LernApp.translate('kompakt', {
     <tr><td><b>Scaling</b></td><td><code>fit</code> on train only, <code>transform</code> on all. Needed for gradient descent, regularisation, kNN, SVM, k-means, PCA and neural networks. Not needed for trees. Plain linear regression (OLS) does not need it, with gradient descent it helps.</td></tr>
     <tr><td><b>Pipeline</b></td><td>Scaling and model as one unit: in every fold it learns from that fold’s training part only. Prevents data leakage.</td></tr>
     <tr><td><b>Data leakage</b></td><td>Test knowledge flows into training: scaling or imputation before the split, feature selection on all data, resampling before the split, features that do not exist at prediction time. Numbers that look too good are suspicious.</td></tr>
-    <tr><td><b>Best practices</b></td><td>Baseline first, split before anything else, everything in one pipeline, choose on validation, test exactly once. Following these five rules avoids most mistakes. <a href="index.html#ml-best">→</a></td></tr>
+    <tr><td><b>Best practices</b></td><td>Baseline first, split before anything else, everything in one pipeline, choose on validation, test exactly once. Following these five rules avoids most mistakes. <a href="#ml-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#ml-ablauf">To the chapter →</a></p>
+  <p class="note"><a href="#ml-ablauf">To the chapter →</a></p>
 
   <h3 id="k-reg">Regression, bias/variance, regularisation</h3>
   <div class="tablewrap"><table>
@@ -31,7 +31,7 @@ LernApp.translate('kompakt', {
     <tr><td><b>Hyperparameters</b></td><td>The model learns parameters, you set hyperparameters (alpha, polynomial degree, learning rate). Search with grid search or random search, each with cross-validation.</td></tr>
     <tr><td><b>Feature selection</b></td><td>Filter (correlation, variance), wrapper (RFE), embedded (lasso, trees). Always on train only or inside the CV. Correlation is not causation.</td></tr>
   </table></div>
-  <p class="note"><a href="index.html#ml-gd">To the chapter →</a></p>
+  <p class="note"><a href="#ml-gd">To the chapter →</a></p>
 
   <h3 id="k-klass">Classification</h3>
   <div class="tablewrap"><table>
@@ -43,9 +43,9 @@ LernApp.translate('kompakt', {
     <tr><td><b>Imbalanced classes</b></td><td>Accuracy misleads. Look at recall, precision, F1, AUC. Options: <code>class_weight</code>, up/downsampling, SMOTE, adjust threshold. Resampling on train only.</td></tr>
     <tr><td><b>kNN, naive Bayes, SVM, tree</b></td><td>kNN: majority of the k neighbours, scale, large k = smooth. Naive Bayes: fast, assumes independent features. SVM: widest margin, kernel for curvature, scale. Tree: rules, easy to read, tends to overfit (limit depth), no scaling needed.</td></tr>
     <tr><td><b>Ensembles</b></td><td><b>Bagging / random forest</b>: many deep trees on random samples, averaging lowers variance. <b>Boosting</b>: trees one after another, each corrects the errors of the previous, lowers bias, overfits more easily. Start: random forest as baseline.</td></tr>
-    <tr><td><b>Best practices</b></td><td>Choose the metric by the cost of errors, set the threshold on validation, compare against the most frequent class and resample only in training. <a href="index.html#klass-best">→</a></td></tr>
+    <tr><td><b>Best practices</b></td><td>Choose the metric by the cost of errors, set the threshold on validation, compare against the most frequent class and resample only in training. <a href="#klass-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#klass">To the chapter →</a></p>
+  <p class="note"><a href="#klass">To the chapter →</a></p>
 
   <h3 id="k-unsup">Unsupervised learning</h3>
   <div class="tablewrap"><table>
@@ -60,9 +60,9 @@ LernApp.translate('kompakt', {
     <tr><td><b>Isolation forest</b></td><td>Random splits: suspicious points are alone after few splits. Gives a ranking, not a verdict. Refit when normal behaviour changes.</td></tr>
     <tr><td><b>PCA</b></td><td>Linear axes with the largest variance. Scale first. Choose components via cumulative explained variance (e.g. 90 %). Suitable for models and speed.</td></tr>
     <tr><td><b>t-SNE, UMAP</b></td><td>Non-linear 2D maps for exploring. Only neighbourhood counts, not distances or sizes. Do not cluster on the map and do not use it as a basis for models.</td></tr>
-    <tr><td><b>Best practices</b></td><td>Scale, choose the method by the cluster shape, fix k with criteria and domain knowledge, check stability and be able to explain every cluster. <a href="index.html#unsup-best">→</a></td></tr>
+    <tr><td><b>Best practices</b></td><td>Scale, choose the method by the cluster shape, fix k with criteria and domain knowledge, check stability and be able to explain every cluster. <a href="#unsup-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#unsup">To the chapter →</a></p>
+  <p class="note"><a href="#unsup">To the chapter →</a></p>
 
   <h3 id="k-nn">Neural networks</h3>
   <div class="tablewrap"><table>
@@ -76,9 +76,9 @@ LernApp.translate('kompakt', {
     <tr><td><b>Optimizers</b></td><td>SGD, momentum (damps zigzag), RMSProp (step size per parameter), Adam (both, default, learning rate 0.001).</td></tr>
     <tr><td><b>Against overfitting</b></td><td>Early stopping on the validation loss, dropout (0.2 to 0.5, training only), smaller network, more data, data augmentation, L2.</td></tr>
     <tr><td><b>Loss curves</b></td><td>Both high: underfitting. Train low, validation rising again: overfitting. Choose hyperparameters on validation only, test once.</td></tr>
-    <tr><td><b>Best practices</b></td><td>Baseline first, start small, overfit one batch, tune the learning rate first, look at the curves and keep the best model with early stopping. <a href="index.html#nn-best">→</a></td></tr>
+    <tr><td><b>Best practices</b></td><td>Baseline first, start small, overfit one batch, tune the learning rate first, look at the curves and keep the best model with early stopping. <a href="#nn-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#nn">To the chapter →</a></p>
+  <p class="note"><a href="#nn">To the chapter →</a></p>
 
   <h3 id="k-cnn">CNN</h3>
   <div class="tablewrap"><table>
@@ -91,9 +91,9 @@ LernApp.translate('kompakt', {
     <tr><td><b>Architecture</b></td><td>Conv + pooling blocks, double the filters per block (32, 64, 128), then Flatten or GlobalAveragePooling and Dense with softmax. Loss: (sparse) categorical cross-entropy, Adam.</td></tr>
     <tr><td><b>Against overfitting</b></td><td>Data augmentation (flip, rotate, zoom; only in training, suited to the task), dropout, batch normalization, early stopping.</td></tr>
     <tr><td><b>Transfer learning</b></td><td>Freeze a pretrained network (e.g. from <code>keras.applications</code>), train a new head. Then fine-tune the upper layers with a very small learning rate. First choice with few images.</td></tr>
-    <tr><td><b>Best practices</b></td><td>Transfer learning first, take over the network's preprocessing, only realistic augmentation, split by source and look at the misclassified images. <a href="index.html#cnn-best">→</a></td></tr>
+    <tr><td><b>Best practices</b></td><td>Transfer learning first, take over the network's preprocessing, only realistic augmentation, split by source and look at the misclassified images. <a href="#cnn-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#cnn">To the chapter →</a></p>
+  <p class="note"><a href="#cnn">To the chapter →</a></p>
 
   <h3 id="k-cv">Image Processing</h3>
   <div class="tablewrap"><table>
@@ -104,9 +104,9 @@ LernApp.translate('kompakt', {
     <tr><td><b>HWC or CHW</b></td><td>NumPy, PIL, OpenCV and TensorFlow: HWC (channels last). PyTorch: CHW. The wrong order gives errors or nonsense.</td></tr>
     <tr><td><b>File formats</b></td><td>PNG lossless, good for masks and graphics. JPEG lossy, small, for photos; never for label masks. Metadata (EXIF) can hold the orientation.</td></tr>
     <tr><td><b>Restoration</b></td><td>Denoising, deblurring, super-resolution: image in, image out. Classical (Gaussian, median, Wiener, bicubic) or learned (U-Net, SwinIR, Restormer). Loss L1 or perceptual, metric PSNR and SSIM.</td></tr>
-    <tr><td><b>Best practices</b></td><td>Classical baseline first, test pretrained models zero-shot first, degrade realistically (alter clean training images to look like the images at the deployment site: blur, noise, colour cast), compare fairly on the same test images (a few hundredths of a dB PSNR are chance, good networks are 2 to 4 dB above bicubic) and look at images, not just numbers. <a href="index.html#cv-best">→</a></td></tr>
+    <tr><td><b>Best practices</b></td><td>Classical baseline first, test pretrained models zero-shot first, degrade realistically (alter clean training images to look like the images at the deployment site: blur, noise, colour cast), compare fairly on the same test images (a few hundredths of a dB PSNR are chance, good networks are 2 to 4 dB above bicubic) and look at images, not just numbers. <a href="#cv-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#cv">To the chapter →</a></p>
+  <p class="note"><a href="#cv">To the chapter →</a></p>
 
   <h3 id="k-det">Object Detection &amp; Segmentation</h3>
   <div class="tablewrap"><table>
@@ -119,9 +119,9 @@ LernApp.translate('kompakt', {
     <tr><td><b>mAP</b></td><td>TP: IoU ≥ threshold with a free ground-truth box; FP: none or already taken; FN: missed. AP = area under the precision-recall curve (all score thresholds), mAP = mean over classes. mAP@0.5 (VOC) or mAP@0.5:0.95 (COCO, 10 thresholds).</td></tr>
     <tr><td><b>Semantic segmentation</b></td><td>One class per pixel; the mask is a PNG with one class ID per pixel. Output H × W × C, <code>argmax</code> gives the mask. Loss cross-entropy + Dice, metric IoU, Dice, mIoU; pixel accuracy deceives under class imbalance.</td></tr>
     <tr><td><b>U-Net and SAM</b></td><td>U-Net: the encoder shrinks, the decoder enlarges, skip connections concatenate the fine maps; image size divisible by 2<sup>depth</sup>, trained per task. SAM: foundation model (SA-1B, 1.1 billion masks), image encoder once per image, prompt (point, box) → three masks with a score, knows no class names; good for labelling.</td></tr>
-    <tr><td><b>Best practices</b></td><td>Test pretrained models zero-shot first, start small (YOLOv8n), check the annotations and split by scene or video, always report mAP with its IoU threshold (mAP@0.5 or mAP@0.5:0.95), choose the score threshold and τ on validation and look at boxes and masks. <a href="index.html#det-best">→</a></td></tr>
+    <tr><td><b>Best practices</b></td><td>Test pretrained models zero-shot first, start small (YOLOv8n), check the annotations and split by scene or video, always report mAP with its IoU threshold (mAP@0.5 or mAP@0.5:0.95), choose the score threshold and τ on validation and look at boxes and masks. <a href="#det-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#det">To the chapter →</a></p>
+  <p class="note"><a href="#det">To the chapter →</a></p>
 
   <h3 id="k-gen">Generative models</h3>
   <div class="tablewrap"><table>
@@ -136,9 +136,9 @@ LernApp.translate('kompakt', {
     <tr><td><b>Text-to-image</b></td><td>Condition y (class, text via cross-attention). Classifier-free guidance: <code>ε̂ = ε_∅ + w · (ε_y − ε_∅)</code>, guidance scale w ≈ 7.5 (large: more faithful, less diverse). Stable Diffusion = text encoder (CLIP) + U-Net in latent space + VAE decoder; the seed fixes the image.</td></tr>
     <tr><td><b>Evaluation</b></td><td>Look at images from fixed seeds, FID (lower is better, many images), nearest neighbours against copies, CLIP score for prompt faithfulness. The loss says little about quality.</td></tr>
     <tr><td><b>Choice</b></td><td>Text-to-image, high quality: a pretrained diffusion model. Image to image in real time: GAN. Compact representation, interpolation: VAE. Probability: PixelCNN.</td></tr>
-    <tr><td><b>Best practices</b></td><td>Pretrained before self-trained, start small, look at images from fixed seeds instead of just the loss, check diversity and copies, compare FID only with equal settings and label generated images. <a href="index.html#gen-best">→</a></td></tr>
+    <tr><td><b>Best practices</b></td><td>Pretrained before self-trained, start small, look at images from fixed seeds instead of just the loss, check diversity and copies, compare FID only with equal settings and label generated images. <a href="#gen-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#gen">To the chapter →</a></p>
+  <p class="note"><a href="#gen">To the chapter →</a></p>
 
   <h3 id="k-modell">A model in practice</h3>
   <div class="tablewrap"><table>
@@ -149,8 +149,8 @@ LernApp.translate('kompakt', {
     <tr><td><b>Formats</b></td><td>scikit-learn: joblib. Keras: <code>.keras</code>. PyTorch: <code>state_dict</code>. Exchange: ONNX. Careful: pickle and joblib run code when loading; load foreign files only as <code>.safetensors</code> or with <code>weights_only=True</code>.</td></tr>
     <tr><td><b>Drift</b></td><td>Data drift: the inputs are distributed differently. Concept drift: the relationship between x and y changes. Detect it by monitoring inputs and the metric in production.</td></tr>
     <tr><td><b>Retraining</b></td><td>Completely new (old + new data), only on new data (forgets rare old cases), continue training (<code>partial_fit</code>, risk: catastrophic forgetting) or only a new head. The new version must be better on fixed and current test data, otherwise the old one stays. Never put test data into training.</td></tr>
-    <tr><td><b>Best practices</b></td><td>Test pretrained models zero-shot on your own data first, choose by constraints rather than release date, fine-tune only with enough suitable data. Save the pipeline with metadata and a model card, monitor inputs and metric in use, keep the old version for a rollback. <a href="index.html#mo-best">→</a></td></tr>
+    <tr><td><b>Best practices</b></td><td>Test pretrained models zero-shot on your own data first, choose by constraints rather than release date, fine-tune only with enough suitable data. Save the pipeline with metadata and a model card, monitor inputs and metric in use, keep the old version for a rollback. <a href="#ue-dodont">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#ue-praxis">To the chapter →</a></p>
+  <p class="note"><a href="#ue-praxis">To the chapter →</a></p>
 `,
 });

@@ -1,15 +1,15 @@
-/* Module: Kompakt (own page kompakt.html). One-page cheat sheet over the ML chapters; the content is a short form of ml, klass, unsup, nn, cnn, cv, det, gen and modell.
+/* Module: Kompakt, the last chapter. Cheat sheet over the ML chapters; the content is a short form of ml, klass, unsup, nn, cnn, cv, det, gen and modell.
  * Rule (AGENTS.project.md): whenever one of these chapters changes in content, update the matching table here and in modules/en/kompakt.js. */
 (function () {
   LernApp.register({
     id: 'kompakt',
-    order: 10,
+    order: 96,
     nav: 'Kompakt',
     title: 'Alles kompakt',
     kicker: 'Spickzettel · Module 2 und 3',
     summary: `Supervised ML, Klassifikation, Unsupervised, Neural Networks, CNN, Computer Vision, Generative Models und ein Modell in der Praxis auf einer Seite`,
     html: `
-  <p>Der Spickzettel über die Kapitel <a href="index.html#ml">Supervised ML</a>, <a href="index.html#klass">Klassifikation</a>, <a href="index.html#unsup">Unsupervised</a>, <a href="index.html#nn">Neural Networks</a>, <a href="index.html#cnn">CNN</a>, <a href="index.html#cv">Image Processing</a>, <a href="index.html#det">Object Detection &amp; Segmentation</a>, <a href="index.html#gen">Generative Models</a> und den Praxis-Teil von <a href="index.html#ue-praxis">Übersicht &amp; Praxis</a>. Die Erklärungen, Demos und der Selbsttest stehen in den Kapiteln, die Steckbriefe einzelner Modelle in <a href="index.html#uebersicht">Übersicht &amp; Praxis</a>.</p>
+  <p>Der Spickzettel über die Kapitel <a href="#ml">Supervised ML</a>, <a href="#klass">Klassifikation</a>, <a href="#unsup">Unsupervised</a>, <a href="#nn">Neural Networks</a>, <a href="#cnn">CNN</a>, <a href="#cv">Image Processing</a>, <a href="#det">Object Detection &amp; Segmentation</a>, <a href="#gen">Generative Models</a> und den Praxis-Teil von <a href="#ue-praxis">Übersicht &amp; Praxis</a>. Die Erklärungen, Demos und der Selbsttest stehen in den Kapiteln, die Steckbriefe einzelner Modelle in <a href="#uebersicht">Übersicht &amp; Praxis</a>.</p>
 
   <h3 id="k-ablauf">Supervised ML: Ablauf und Daten</h3>
   <div class="tablewrap"><table>
@@ -20,9 +20,9 @@
     <tr><td><b>Skalieren</b></td><td><code>fit</code> nur auf Train, <code>transform</code> auf allen. Nötig für Gradient Descent, Regularisierung, kNN, SVM, k-Means, PCA und Neural Networks. Nicht nötig für Bäume. Die reine lineare Regression (OLS) braucht es nicht, bei Gradient Descent hilft es.</td></tr>
     <tr><td><b>Pipeline</b></td><td>Skalieren und Modell als eine Einheit: In jedem Fold wird nur mit dessen Trainingsteil gelernt. Verhindert Data Leakage.</td></tr>
     <tr><td><b>Data Leakage</b></td><td>Testwissen fliesst ins Training: Skalieren oder Imputation vor dem Split, Feature Selection auf allen Daten, Resampling vor dem Split, Merkmale, die es zum Vorhersagezeitpunkt nicht gibt. Zu gute Zahlen sind verdächtig.</td></tr>
-    <tr><td><b>Best Practices</b></td><td>Baseline zuerst, Split vor allem anderen, alles in eine Pipeline, Wahl auf der Validation, Test genau einmal. Wer diese fünf Regeln einhält, vermeidet die meisten Fehler. <a href="index.html#ml-best">→</a></td></tr>
+    <tr><td><b>Best Practices</b></td><td>Baseline zuerst, Split vor allem anderen, alles in eine Pipeline, Wahl auf der Validation, Test genau einmal. Wer diese fünf Regeln einhält, vermeidet die meisten Fehler. <a href="#ml-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#ml-ablauf">Zum Kapitel →</a></p>
+  <p class="note"><a href="#ml-ablauf">Zum Kapitel →</a></p>
 
   <h3 id="k-reg">Regression, Bias/Variance, Regularisierung</h3>
   <div class="tablewrap"><table>
@@ -35,7 +35,7 @@
     <tr><td><b>Hyperparameter</b></td><td>Parameter lernt das Modell, Hyperparameter stellst du ein (alpha, Polynomgrad, Learning Rate). Suche mit Grid Search oder Random Search, jeweils mit Cross-Validation.</td></tr>
     <tr><td><b>Feature Selection</b></td><td>Filter (Korrelation, Varianz), Wrapper (RFE), Embedded (Lasso, Bäume). Immer nur auf Train oder innerhalb der CV. Korrelation ist keine Ursache.</td></tr>
   </table></div>
-  <p class="note"><a href="index.html#ml-gd">Zum Kapitel →</a></p>
+  <p class="note"><a href="#ml-gd">Zum Kapitel →</a></p>
 
   <h3 id="k-klass">Klassifikation</h3>
   <div class="tablewrap"><table>
@@ -47,9 +47,9 @@
     <tr><td><b>Unausgewogene Klassen</b></td><td>Accuracy täuscht. Auf Recall, Precision, F1, AUC schauen. Optionen: <code>class_weight</code>, Up/Downsampling, SMOTE, Threshold anpassen. Resampling nur auf Train.</td></tr>
     <tr><td><b>kNN, Naive Bayes, SVM, Baum</b></td><td>kNN: Mehrheit der k Nachbarn, skalieren, k gross = glatt. Naive Bayes: schnell, nimmt unabhängige Merkmale an. SVM: breiteste Grenze, Kernel für Krümmung, skalieren. Baum: Regeln, gut lesbar, neigt zu Overfitting (Tiefe begrenzen), skalieren unnötig.</td></tr>
     <tr><td><b>Ensembles</b></td><td><b>Bagging / Random Forest</b>: viele tiefe Bäume auf Zufallsstichproben, Mittel senkt die Variance. <b>Boosting</b>: Bäume nacheinander, jeder korrigiert die Fehler der vorigen, senkt den Bias, lernt schneller zu viel. Start: Random Forest als Baseline.</td></tr>
-    <tr><td><b>Best Practices</b></td><td>Metrik nach den Kosten der Fehler wählen, Threshold auf der Validation setzen, gegen die häufigste Klasse vergleichen und Resampling nur im Training. <a href="index.html#klass-best">→</a></td></tr>
+    <tr><td><b>Best Practices</b></td><td>Metrik nach den Kosten der Fehler wählen, Threshold auf der Validation setzen, gegen die häufigste Klasse vergleichen und Resampling nur im Training. <a href="#klass-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#klass">Zum Kapitel →</a></p>
+  <p class="note"><a href="#klass">Zum Kapitel →</a></p>
 
   <h3 id="k-unsup">Unsupervised Learning</h3>
   <div class="tablewrap"><table>
@@ -64,9 +64,9 @@
     <tr><td><b>Isolation Forest</b></td><td>Zufällige Splits: Auffällige Punkte sind nach wenigen Splits allein. Liefert ein Ranking, kein Urteil. Bei geändertem Normalverhalten neu anpassen.</td></tr>
     <tr><td><b>PCA</b></td><td>Lineare Achsen mit der grössten Varianz. Vorher skalieren. Komponenten über die kumulative Explained Variance wählen (z. B. 90 %). Für Modelle und Tempo geeignet.</td></tr>
     <tr><td><b>t-SNE, UMAP</b></td><td>Nicht-lineare 2D-Karten zum Erkunden. Nur Nachbarschaft zählt, Abstände und Grössen nicht. Nicht auf der Karte clustern und nicht als Basis für Modelle.</td></tr>
-    <tr><td><b>Best Practices</b></td><td>Skalieren, Verfahren nach der Clusterform wählen, k mit Kriterien und Fachwissen festlegen, Stabilität prüfen und jeden Cluster erklären können. <a href="index.html#unsup-best">→</a></td></tr>
+    <tr><td><b>Best Practices</b></td><td>Skalieren, Verfahren nach der Clusterform wählen, k mit Kriterien und Fachwissen festlegen, Stabilität prüfen und jeden Cluster erklären können. <a href="#unsup-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#unsup">Zum Kapitel →</a></p>
+  <p class="note"><a href="#unsup">Zum Kapitel →</a></p>
 
   <h3 id="k-nn">Neural Networks</h3>
   <div class="tablewrap"><table>
@@ -80,9 +80,9 @@
     <tr><td><b>Optimizer</b></td><td>SGD, Momentum (dämpft Zickzack), RMSProp (Schrittgrösse pro Parameter), Adam (beides, Standard, Learning Rate 0.001).</td></tr>
     <tr><td><b>Gegen Overfitting</b></td><td>Early Stopping auf der Validation-Loss, Dropout (0.2 bis 0.5, nur beim Training), kleineres Netz, mehr Daten, Data Augmentation, L2.</td></tr>
     <tr><td><b>Loss-Kurven</b></td><td>Beide hoch: Underfitting. Train tief, Validation steigt wieder: Overfitting. Hyperparameter nur auf der Validation wählen, Test einmal.</td></tr>
-    <tr><td><b>Best Practices</b></td><td>Baseline zuerst, klein anfangen, einen Batch overfitten, Learning Rate zuerst tunen, Kurven ansehen und mit Early Stopping das beste Modell behalten. <a href="index.html#nn-best">→</a></td></tr>
+    <tr><td><b>Best Practices</b></td><td>Baseline zuerst, klein anfangen, einen Batch overfitten, Learning Rate zuerst tunen, Kurven ansehen und mit Early Stopping das beste Modell behalten. <a href="#nn-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#nn">Zum Kapitel →</a></p>
+  <p class="note"><a href="#nn">Zum Kapitel →</a></p>
 
   <h3 id="k-cnn">CNN</h3>
   <div class="tablewrap"><table>
@@ -95,9 +95,9 @@
     <tr><td><b>Architektur</b></td><td>Conv + Pooling-Blöcke, Filter pro Block verdoppeln (32, 64, 128), dann Flatten oder GlobalAveragePooling und Dense mit Softmax. Loss: (Sparse) Categorical Cross-Entropy, Adam.</td></tr>
     <tr><td><b>Gegen Overfitting</b></td><td>Data Augmentation (spiegeln, drehen, zoomen; nur beim Training, passend zur Aufgabe), Dropout, Batch Normalization, Early Stopping.</td></tr>
     <tr><td><b>Transfer Learning</b></td><td>Vortrainiertes Netz (z. B. aus <code>keras.applications</code>) einfrieren, neuen Kopf trainieren. Danach Fine-Tuning der oberen Schichten mit sehr kleiner Learning Rate. Erste Wahl bei wenigen Bildern.</td></tr>
-    <tr><td><b>Best Practices</b></td><td>Zuerst Transfer Learning, die Vorverarbeitung des Netzes übernehmen, nur realistische Augmentation, nach Quelle splitten und die Fehlbilder ansehen. <a href="index.html#cnn-best">→</a></td></tr>
+    <tr><td><b>Best Practices</b></td><td>Zuerst Transfer Learning, die Vorverarbeitung des Netzes übernehmen, nur realistische Augmentation, nach Quelle splitten und die Fehlbilder ansehen. <a href="#cnn-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#cnn">Zum Kapitel →</a></p>
+  <p class="note"><a href="#cnn">Zum Kapitel →</a></p>
 
   <h3 id="k-cv">Image Processing</h3>
   <div class="tablewrap"><table>
@@ -108,9 +108,9 @@
     <tr><td><b>HWC oder CHW</b></td><td>NumPy, PIL, OpenCV und TensorFlow: HWC (Channels zuletzt). PyTorch: CHW. Falsche Reihenfolge gibt Fehler oder Unsinn.</td></tr>
     <tr><td><b>Dateiformate</b></td><td>PNG verlustfrei, gut für Masken und Grafiken. JPEG verlustbehaftet, klein, für Fotos; nie für Label-Masken. Metadaten (EXIF) können die Orientation enthalten.</td></tr>
     <tr><td><b>Restauration</b></td><td>Denoising, Deblurring, Super-Resolution: Bild rein, Bild raus. Klassisch (Gauss, Median, Wiener, Bicubic) oder gelernt (U-Net, SwinIR, Restormer). Loss L1 oder Perceptual, Metrik PSNR und SSIM.</td></tr>
-    <tr><td><b>Best Practices</b></td><td>Klassische Baseline zuerst, vortrainierte Modelle zuerst zero-shot prüfen, realistisch degradieren (saubere Trainingsbilder so verändern, wie die Bilder am Einsatzort aussehen: Blur, Rauschen, Farbstich), auf denselben Testbildern fair vergleichen (wenige Hundertstel dB PSNR sind Zufall, gute Netze liegen 2 bis 4 dB über Bicubic) und Bilder ansehen, nicht nur Zahlen. <a href="index.html#cv-best">→</a></td></tr>
+    <tr><td><b>Best Practices</b></td><td>Klassische Baseline zuerst, vortrainierte Modelle zuerst zero-shot prüfen, realistisch degradieren (saubere Trainingsbilder so verändern, wie die Bilder am Einsatzort aussehen: Blur, Rauschen, Farbstich), auf denselben Testbildern fair vergleichen (wenige Hundertstel dB PSNR sind Zufall, gute Netze liegen 2 bis 4 dB über Bicubic) und Bilder ansehen, nicht nur Zahlen. <a href="#cv-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#cv">Zum Kapitel →</a></p>
+  <p class="note"><a href="#cv">Zum Kapitel →</a></p>
 
   <h3 id="k-det">Object Detection &amp; Segmentation</h3>
   <div class="tablewrap"><table>
@@ -123,9 +123,9 @@
     <tr><td><b>mAP</b></td><td>TP: IoU ≥ Threshold mit freier Ground-Truth-Box; FP: keine oder schon vergeben; FN: verpasst. AP = Fläche unter der Precision-Recall-Kurve (alle Score-Thresholds), mAP = Mittel über Klassen. mAP@0.5 (VOC) oder mAP@0.5:0.95 (COCO, 10 Thresholds).</td></tr>
     <tr><td><b>Semantic Segmentation</b></td><td>Eine Klasse pro Pixel; die Maske ist ein PNG mit einer Klassen-ID pro Pixel. Ausgabe H × W × C, <code>argmax</code> ergibt die Maske. Loss Cross-Entropy + Dice, Metrik IoU, Dice, mIoU; Pixel-Accuracy täuscht bei Klassen-Imbalance.</td></tr>
     <tr><td><b>U-Net und SAM</b></td><td>U-Net: Encoder verkleinert, Decoder vergrössert, Skip Connections hängen die feinen Maps an; Bildgrösse durch 2<sup>Tiefe</sup> teilbar, pro Aufgabe trainiert. SAM: Foundation Model (SA-1B, 1.1 Mrd. Masken), Image Encoder einmal pro Bild, Prompt (Punkt, Box) → drei Masken mit Score, kennt keine Klassennamen; gut zum Labeln.</td></tr>
-    <tr><td><b>Best Practices</b></td><td>Vortrainierte Modelle zuerst zero-shot prüfen, klein anfangen (YOLOv8n), Annotationen kontrollieren und nach Szene oder Video splitten, mAP immer mit IoU-Threshold angeben (mAP@0.5 oder mAP@0.5:0.95), Score-Threshold und τ auf der Validation wählen und Boxen und Masken ansehen. <a href="index.html#det-best">→</a></td></tr>
+    <tr><td><b>Best Practices</b></td><td>Vortrainierte Modelle zuerst zero-shot prüfen, klein anfangen (YOLOv8n), Annotationen kontrollieren und nach Szene oder Video splitten, mAP immer mit IoU-Threshold angeben (mAP@0.5 oder mAP@0.5:0.95), Score-Threshold und τ auf der Validation wählen und Boxen und Masken ansehen. <a href="#det-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#det">Zum Kapitel →</a></p>
+  <p class="note"><a href="#det">Zum Kapitel →</a></p>
 
   <h3 id="k-gen">Generative Models</h3>
   <div class="tablewrap"><table>
@@ -140,9 +140,9 @@
     <tr><td><b>Text-zu-Bild</b></td><td>Bedingung y (Klasse, Text über Cross-Attention). Classifier-free Guidance: <code>ε̂ = ε_∅ + w · (ε_y − ε_∅)</code>, Guidance Scale w ≈ 7,5 (gross: treuer, weniger vielfältig). Stable Diffusion = Text-Encoder (CLIP) + U-Net im Latent Space + VAE-Decoder; Seed fixiert das Bild.</td></tr>
     <tr><td><b>Bewerten</b></td><td>Bilder aus festen Seeds ansehen, FID (tiefer ist besser, viele Bilder), nächste Nachbarn gegen Kopien, CLIP Score für Prompt-Treue. Der Loss sagt wenig über die Qualität.</td></tr>
     <tr><td><b>Wahl</b></td><td>Text-zu-Bild, hohe Qualität: vortrainiertes Diffusionsmodell. Bild zu Bild in Echtzeit: GAN. Kompakte Darstellung, Interpolation: VAE. Wahrscheinlichkeit: PixelCNN.</td></tr>
-    <tr><td><b>Best Practices</b></td><td>Vortrainiert vor selbst trainiert, klein anfangen, Bilder aus festen Seeds ansehen statt nur den Loss, Vielfalt und Kopien prüfen, FID nur gleich eingestellt vergleichen und erzeugte Bilder kennzeichnen. <a href="index.html#gen-best">→</a></td></tr>
+    <tr><td><b>Best Practices</b></td><td>Vortrainiert vor selbst trainiert, klein anfangen, Bilder aus festen Seeds ansehen statt nur den Loss, Vielfalt und Kopien prüfen, FID nur gleich eingestellt vergleichen und erzeugte Bilder kennzeichnen. <a href="#gen-best">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#gen">Zum Kapitel →</a></p>
+  <p class="note"><a href="#gen">Zum Kapitel →</a></p>
 
   <h3 id="k-modell">Ein Modell in der Praxis</h3>
   <div class="tablewrap"><table>
@@ -153,9 +153,9 @@
     <tr><td><b>Formate</b></td><td>scikit-learn: joblib. Keras: <code>.keras</code>. PyTorch: <code>state_dict</code>. Austausch: ONNX. Achtung: pickle und joblib führen beim Laden Code aus; fremde Dateien nur als <code>.safetensors</code> oder mit <code>weights_only=True</code>.</td></tr>
     <tr><td><b>Drift</b></td><td>Data Drift: Die Eingaben verteilen sich anders. Concept Drift: Der Zusammenhang zwischen x und y ändert sich. Erkennen: Eingaben und Metrik im Einsatz überwachen.</td></tr>
     <tr><td><b>Neu trainieren</b></td><td>Komplett neu (alte + neue Daten), nur auf neuen Daten (vergisst seltene alte Fälle), weitertrainieren (<code>partial_fit</code>, Gefahr: Catastrophic Forgetting) oder nur den Kopf neu. Die neue Version muss auf festen und aktuellen Testdaten besser sein, sonst bleibt die alte. Testdaten nie ins Training.</td></tr>
-    <tr><td><b>Best Practices</b></td><td>Vortrainierte Modelle zuerst zero-shot auf den eigenen Daten testen, nach Rahmenbedingungen wählen statt nach Erscheinungsdatum, Fine-Tuning nur mit genug passenden Daten. Pipeline mit Metadaten und Model Card speichern, im Einsatz Eingaben und Metrik überwachen, alte Version für den Rollback behalten. <a href="index.html#mo-best">→</a></td></tr>
+    <tr><td><b>Best Practices</b></td><td>Vortrainierte Modelle zuerst zero-shot auf den eigenen Daten testen, nach Rahmenbedingungen wählen statt nach Erscheinungsdatum, Fine-Tuning nur mit genug passenden Daten. Pipeline mit Metadaten und Model Card speichern, im Einsatz Eingaben und Metrik überwachen, alte Version für den Rollback behalten. <a href="#ue-dodont">→</a></td></tr>
   </table></div>
-  <p class="note"><a href="index.html#ue-praxis">Zum Kapitel →</a></p>
+  <p class="note"><a href="#ue-praxis">Zum Kapitel →</a></p>
 `,
   });
 })();

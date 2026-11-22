@@ -73,7 +73,7 @@ def test_overview_links_only_to_existing_notebooks() -> None:
 def test_index_loads_every_chapter_and_the_search() -> None:
     """Every chapter of the main page (and its English file, if any) is loaded; search.js is the last script."""
     index = (ROOT / "index.html").read_text(encoding="utf-8")
-    own_pages = {"mathe-kompakt", "mathe-lang", "kompakt", "titanic"}  # chapters that only appear on their own page
+    own_pages = {"mathe-kompakt", "mathe-lang", "titanic"}  # chapters that only appear on their own page
     for path in sorted((ROOT / "modules").glob("*.js")):
         if path.stem.startswith("_") or path.stem in own_pages:
             continue
