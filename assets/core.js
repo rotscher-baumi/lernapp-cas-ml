@@ -10,8 +10,9 @@
  *   kicker    small line above the heading, e.g. "Modul 1 · Freitag 16.10"
  *   summary   one short line for the overview card
  *   html      chapter content (HTML string)
- *   quiz      optional [{ q, a }] self-test questions (HTML allowed); register() keeps the German list as quizDe,
- *             the quiz chapter (modules/quiz.js) asks them all with spaced repetition
+ *   quiz      optional [{ q, a, k?, c? }] self-test questions (HTML allowed); register() keeps the German list as quizDe,
+ *             the quiz chapter (modules/quiz.js) asks them all with spaced repetition.
+ *             k = keyword groups and c = answer choices add the answer check
  *   notebooks optional [{ file, desc }] files in lernapp/notebooks
  *   init()    optional, called once after the chapter is in the page; the larger chapters only call
  *             their demos from assets/demos-<id>.js (LernApp.demos.<id>()), so modules stay content only
@@ -59,6 +60,16 @@
       modules.push(mod);
     },
     translate: function (id, fields) { EN[id] = fields; },
+    // Keyword check of a typed answer: groups = [[label, variant, ...], ...]. Returns { rows: [{ label, hit }], n, all }.
+    checkHtml: function (r) { return checkHtml(r); },
+    checkAnswer: function (text, groups) {
+      const x = ' ' + norm(text) + ' ';
+      const rows = groups.map(function (g) {
+        return { label: g[0], hit: g.some(function (alt) { return x.indexOf(norm(alt)) >= 0; }) };
+      });
+      const n = rows.filter(function (r) { return r.hit; }).length;
+      return { rows: rows, n: n, all: n === rows.length, level: n === rows.length ? 'ok' : n * 2 >= rows.length ? 'part' : 'no' };
+    },
     t: t,
     // store(key) reads, store(key, text) writes localStorage (and the server copy); errors return null
     store: function (key, val) { return store(key, val); },
@@ -189,13 +200,76 @@
       html += '<div class="merk"><b>' + t('Übungs-Notebook', 'Exercise notebook') + '</b><p><code class="nbfile">lernapp/notebooks/' + nb.file + '</code><br>' + nb.desc + '</p></div>';
     });
     if (m.quiz && m.quiz.length) {
-      html += '<h3>' + t('Selbsttest', 'Self-test') + '</h3><p class="note">' + t('Antworte zuerst im Kopf, dann klappe auf.', 'Answer in your head first, then open the answer.') + '</p>' +
-        m.quiz.map(function (it) {
-          return '<details class="q"><summary>' + it.q + '</summary><div class="a">' + it.a + '</div></details>';
-        }).join('');
+      html += '<h3>' + t('Selbsttest', 'Self-test') + '</h3><p class="note">' + t('Tippe deine Antwort und lass sie prüfen, oder wähle eine Antwort. Ohne Eingabe kannst du auch nur aufklappen.', 'Type your answer and have it checked, or pick an answer. Without input you can also just open the question.') + '</p>' +
+        m.quiz.map(function (it) { return quizItem(it); }).join('');
     }
     sec.innerHTML = html;
+    sec.querySelectorAll('details.q[data-check]').forEach(wireQuiz);
     return sec;
+  }
+
+  // Self-test items: { q, a } as before; optional k (keyword groups) and c (answer choices) add the check.
+  //   k: [['label shown when missing', 'variant', 'variant'], ...]  every group needs one variant in the typed text
+  //   c: ['correct answer', 'wrong 1', 'wrong 2', ...]              shown in random order
+  function norm(x) {
+    return String(x).toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss')
+      .replace(/[^a-z0-9\u03b1-\u03c9]+/g, ' ').trim();
+  }
+  function quizItem(it) {
+    const check = !!(it.k && it.k.length) || !!(it.c && it.c.length);
+    const kAttr = it.k && it.k.length ? ' data-k="' + esc(JSON.stringify(it.k)) + '"' : '';
+    let h = '<details class="q"' + (check ? ' data-check="1"' + kAttr : '') + '><summary>' + it.q + '</summary>';
+    if (check) {
+      h += '<div class="qa">';
+      if (it.k && it.k.length) {
+        h += '<textarea class="qin" rows="3" placeholder="' + t('Deine Antwort in eigenen Worten …', 'Your answer in your own words …') + '" aria-label="' + t('Deine Antwort', 'Your answer') + '"></textarea>' +
+          '<button type="button" class="qchk">' + t('Antwort prüfen', 'Check answer') + '</button><div class="qres" aria-live="polite"></div>';
+      }
+      if (it.c && it.c.length) {
+        const opts = it.c.map(function (txt, i) { return { txt: txt, ok: i === 0 }; });
+        for (let i = opts.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const x = opts[i]; opts[i] = opts[j]; opts[j] = x; }
+        h += '<p class="qor">' + (it.k && it.k.length ? t('Oder wähle:', 'Or pick one:') : t('Wähle:', 'Pick one:')) + '</p><div class="qopts">' +
+          opts.map(function (o) { return '<button type="button" class="qopt" data-ok="' + (o.ok ? 1 : 0) + '">' + o.txt + '</button>'; }).join('') + '</div><div class="qcres" aria-live="polite"></div>';
+      }
+      h += '<button type="button" class="qshow">' + t('Musterantwort zeigen', 'Show model answer') + '</button></div>';
+    }
+    return h + '<div class="a">' + it.a + '</div></details>';
+  }
+  // Result of checkAnswer as HTML (shared by the chapter self-test and the quiz chapter)
+  function checkHtml(r) {
+    const total = r.rows.length;
+    return '<b>' + (r.all ? t('Vollständig: alle Kernbegriffe sind drin.', 'Complete: all key terms are there.')
+      : r.level === 'part' ? t('Teilweise: ', 'Partly: ') + r.n + ' / ' + total
+      : t('Es fehlt noch viel: ', 'Much is missing: ') + r.n + ' / ' + total) + '</b><ul>' +
+      r.rows.map(function (x) { return '<li class="' + (x.hit ? 'ok' : 'no') + '">' + (x.hit ? '✓ ' : '✗ ' + t('fehlt: ', 'missing: ')) + esc(x.label) + '</li>'; }).join('') + '</ul>' +
+      '<p class="hint">' + t('Der Check sucht Begriffe, nicht Sinn. Vergleiche mit der Musterantwort.', 'The check looks for terms, not meaning. Compare with the model answer.') + '</p>';
+  }
+  function wireQuiz(d) {
+    const groups = JSON.parse(d.getAttribute('data-k') || '[]');
+    const btn = d.querySelector('.qchk');
+    if (btn) {
+      btn.addEventListener('click', function () {
+        const res = d.querySelector('.qres');
+        const val = d.querySelector('.qin').value;
+        if (val.trim() === '') { res.className = 'qres'; res.textContent = t('Schreibe zuerst etwas.', 'Write something first.'); return; }
+        const r = LernApp.checkAnswer(val, groups);
+        res.className = 'qres ' + r.level;
+        res.innerHTML = checkHtml(r);
+        d.classList.add('checked');
+      });
+    }
+    d.querySelector('.qshow').addEventListener('click', function () { d.classList.add('checked'); });
+    d.querySelectorAll('.qopt').forEach(function (b) {
+      b.addEventListener('click', function () {
+        const right = b.getAttribute('data-ok') === '1';
+        d.querySelectorAll('.qopt').forEach(function (o) { o.disabled = true; o.classList.toggle('ok', o.getAttribute('data-ok') === '1'); });
+        if (!right) b.classList.add('no');
+        const res = d.querySelector('.qcres');
+        res.className = 'qcres ' + (right ? 'ok' : 'no');
+        res.textContent = right ? t('Richtig.', 'Correct.') : t('Nicht ganz. Die richtige Antwort ist grün markiert.', 'Not quite. The correct answer is marked green.');
+        d.classList.add('checked');
+      });
+    });
   }
 
   function wireNav() {

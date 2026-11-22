@@ -62,10 +62,10 @@ def test_example_links_to_existing_notebooks(path: Path) -> None:
 
 
 def test_overview_links_only_to_existing_notebooks() -> None:
-    source = (ROOT / "modules" / "uebersicht.js").read_text(encoding="utf-8")
+    source = "".join((ROOT / "modules" / f).read_text(encoding="utf-8") for f in ("uebersicht.js", "kompakt.js"))
     names = set(re.findall(r"bsp\('(\w+)'\)|NB = '(\w+)'|beispiele/(\w+)\.ipynb", source))
     flat = {n for group in names for n in group if n}
-    assert flat, "the overview no longer links to example notebooks"
+    assert flat, "overview and cheat sheet no longer link to example notebooks"
     for name in flat:
         assert (NOTEBOOK_DIR / "beispiele" / f"{name}.ipynb").exists(), f"overview links to missing {name}"
 
@@ -73,7 +73,7 @@ def test_overview_links_only_to_existing_notebooks() -> None:
 def test_index_loads_every_chapter_and_the_search() -> None:
     """Every chapter of the main page (and its English file, if any) is loaded; search.js is the last script."""
     index = (ROOT / "index.html").read_text(encoding="utf-8")
-    own_pages = {"mathe-kompakt", "mathe-lang", "kompakt", "titanic"}  # chapters that only appear on their own page
+    own_pages = {"mathe-kompakt", "mathe-lang", "titanic"}  # chapters that only appear on their own page
     for path in sorted((ROOT / "modules").glob("*.js")):
         if path.stem.startswith("_") or path.stem in own_pages:
             continue
@@ -119,3 +119,25 @@ def test_example_runs_end_to_end(path: Path) -> None:
     ).execute()
     errors = [o for c in notebook.cells if c.cell_type == "code" for o in c.outputs if o.output_type == "error"]
     assert not errors
+
+
+def test_decision_tree_links_to_existing_method_cards() -> None:
+    """Every #v-<method> link of the overview points to a card in the cheat sheet."""
+    tree = (ROOT / "modules" / "uebersicht.js").read_text(encoding="utf-8")
+    cards = set(re.findall(r'id="(v-\w+)"', (ROOT / "modules" / "kompakt.js").read_text(encoding="utf-8")))
+    links = set(re.findall(r'href="#(v-\w+)"', tree))
+    assert links, "the decision tree no longer links to method cards"
+    assert not links - cards, f"decision tree links to missing cards: {sorted(links - cards)}"
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="Node.js is not installed")
+def test_quiz_keywords_match_their_own_model_answer() -> None:
+    """The keyword groups of a self-test item must all occur in its model answer; each item needs 3+ choices."""
+    files = [str(p) for p in sorted((ROOT / "modules").glob("**/*.js")) if " k: [[" in p.read_text(encoding="utf-8")]
+    assert files, "no chapter has self-test items with a check"
+    result = subprocess.run(
+        ["node", str(ROOT / "tests" / "quiz_check_harness.js"), *files], capture_output=True, text=True, check=False
+    )
+    problems = [line for line in result.stdout.splitlines() if " | " in line]
+    assert result.returncode == 0, result.stderr
+    assert not problems, "\n".join(problems)

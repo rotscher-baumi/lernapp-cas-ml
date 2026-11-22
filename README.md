@@ -16,7 +16,6 @@ lernapp/
   notebook.html     Übungs-Notebook (lokal mit Jupyter oder in Colab)
   titanic.html      Titanic-Seite
   mathe-kompakt.html, mathe-ausfuehrlich.html   eigene Mathe-Seiten
-  kompakt.html      Spickzettel über Supervised ML, Klassifikation, Unsupervised, Neural Networks, CNN, Image Processing, Object Detection & Segmentation, Generative Models und die Praxis aus Übersicht & Praxis (Modell, Speichern, Drift)
   server.py         lokaler Server (Zustand, Jupyter-Start, Proxy)
   run.sh            Jupyter und Server unter Linux/macOS starten
   requirements.txt, requirements-dev.txt   Laufzeit- und Entwicklungspakete
@@ -52,6 +51,8 @@ Oben in der klebenden Leiste über den Kapiteln steht ein Suchfeld (Taste `/` od
 ## Quiz
 
 Das letzte Kapitel (`#quiz`) fragt die Selbsttest-Fragen aller Kapitel der Hauptseite ab. Eigene Fragen hat es nicht: Neue Fragen im Feld `quiz` eines Kapitels erscheinen dort automatisch. Eine Runde enthält alle fälligen Fragen der gewählten Kapitel und eine wählbare Zahl neuer Fragen, gemischt über die Kapitel. Nach dem Aufdecken bewertest du dich: «Nicht gewusst» schickt die Frage zurück in Fach 1, «Knapp» lässt sie im Fach, «Sicher» schiebt sie ein Fach weiter. Die Fächer 1 bis 5 sind nach 1, 3, 7, 14 und 30 Tagen wieder fällig. Dazu kommen das leere Blatt (Kapitel aus dem Kopf aufschreiben, dann mit den Abschnitten und Merksätzen vergleichen) und eine Fortschrittstabelle. Der Zustand liegt unter `cas-ml-quiz` (Browser und mit Server in `data/state.json`). Die ID einer Frage entsteht aus Kapitel und deutschem Fragetext: Wer eine Frage umformuliert, setzt ihren Fortschritt zurück. Code: `assets/demos-quiz.js`, Tests: `tests/test_quiz.py`.
+
+**Antwort prüfen lassen:** Eine Frage kann zusätzlich `k` (Stichwort-Gruppen, je Sprache) und `c` (Auswahlantworten, die richtige zuerst) haben. Dann prüft die App die getippte Antwort auf die Begriffe, im Selbsttest eines Kapitels wie im Kapitel Quiz (dort schlägt sie zusätzlich eine Bewertung vor). Ohne `k` und `c` bleibt es beim Aufdecken. Format: `docs/DESIGN.md` (QuizItem). Der Test `test_quiz_keywords_match_their_own_model_answer` prüft, dass jede Musterantwort ihre eigenen Stichwörter enthält.
 
 ## Neues Kapitel hinzufügen
 

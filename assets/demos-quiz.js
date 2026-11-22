@@ -38,7 +38,7 @@
     return (h >>> 0).toString(36);
   }
 
-  // All cards of the chapters in course order: { id, ch, nav, i, q, a }
+  // All cards of the chapters in course order: { id, ch, nav, i, q, a, k, c } (k, c: optional keyword groups and choices)
   function collect(mods) {
     const cards = [];
     mods.forEach(function (m) {
@@ -46,7 +46,7 @@
       qs.forEach(function (it, i) {
         let id = m.id + ':' + hash(plain((de[i] || it).q));
         if (used[id]) id += '-' + (++used[id]); else used[id] = 1;
-        cards.push({ id: id, ch: m.id, nav: plain(m.nav || m.title), i: i, q: it.q, a: it.a });
+        cards.push({ id: id, ch: m.id, nav: plain(m.nav || m.title), i: i, q: it.q, a: it.a, k: it.k, c: it.c });
       });
     });
     return cards;
@@ -224,6 +224,7 @@
       $('qzAns').hidden = true;
       $('qzRate').hidden = true;
       $('qzShow').hidden = false;
+      ['again', 'hard', 'good'].forEach(function (g) { $('qzR' + g).classList.remove('sug'); });
       // labels with the next interval of each choice
       const d = today();
       [['again', 'Nicht gewusst', 'Didn’t know'], ['hard', 'Knapp', 'Barely'], ['good', 'Sicher', 'Knew it']].forEach(function (g, k) {
@@ -236,13 +237,25 @@
       $('qzA').innerHTML = c.a;
       $('qzMine').hidden = !own;
       $('qzMineText').textContent = own;
+      // keyword check of the typed answer (items with k); suggests, but does not set, the rating
+      let sug = 'good';
+      const chk = $('qzCheck');
+      chk.className = 'qres';
+      chk.innerHTML = '';
+      if (own && c.k && c.k.length) {
+        const r = L.checkAnswer(own, c.k);
+        chk.className = 'qres ' + r.level;
+        chk.innerHTML = L.checkHtml(r);
+        sug = r.all ? 'good' : r.level === 'part' ? 'hard' : 'again';
+        $('qzR' + sug).classList.add('sug');
+      }
       $('qzLink').href = '#' + c.ch;
       $('qzLink').textContent = t('Im Kapitel nachlesen', 'Read up in the chapter') + ': ' + c.nav + ' →';
       $('qzOwn').hidden = true; // shown again as «Deine Antwort» next to the solution
       $('qzAns').hidden = false;
       $('qzRate').hidden = false;
       $('qzShow').hidden = true;
-      $('qzRgood').focus({ preventScroll: true });
+      $('qzR' + sug).focus({ preventScroll: true });
     }
     function grade(g) {
       const c = round.list[round.pos];

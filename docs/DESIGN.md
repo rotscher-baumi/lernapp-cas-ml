@@ -27,7 +27,7 @@ Stand: 2026-11-22. Ergänzt [ARCHITECTURE.md](ARCHITECTURE.md) um Ziele, Entsche
 | D6 | Theming über CSS-Tokens und `data-theme` auf `<html>` | Demos und SVG benutzen dieselben Farben; Systemeinstellung soll ohne Wahl funktionieren | Drei Stellungen Hell/Dunkel/Auto; Inline-Skript im `<head>` gegen Aufblitzen |
 | D7 | Persistenz-Kaskade: `localStorage` zuerst, Server-Kopie optional | Ohne Server soll alles funktionieren; mit Server sollen Einstellungen Browser-übergreifend bleiben | `state.json` ist eine flache Kopie aller Schlüssel; der Server kennt keine Struktur |
 | D8 | Server nur mit Standardbibliothek | Keine Installation ausser Python | Proxy und JSON-Endpunkt sind von Hand geschrieben, kein Framework |
-| D9 | Unterseiten für lange Beispiele (Titanic, Mathe) und den Spickzettel (Kompakt) | Hauptseite bleibt lesbar; Beispiel darf wirklich ausführlich sein | Hauptseite verlinkt mit Kurzversion oder Teaser-Modul; der Spickzettel nur mit einem Knopf in der Linkleiste (2026-11-16: kein eigener Abschnitt unten nötig) |
+| D9 | Unterseiten für lange Beispiele (Titanic, Mathe). Der Spickzettel «Kompakt» ist seit 2026-11-22 ein normales Kapitel (`kompakt`, zuletzt in der Navigation) | Hauptseite bleibt lesbar; Beispiel darf wirklich ausführlich sein | Hauptseite verlinkt mit Kurzversion oder Teaser-Modul; der Spickzettel als letztes Kapitel |
 | D10 | Grafiken als PNG aus echten Läufen, Code und Ausgabe daneben | Lernende sollen den Code nachspielen und dasselbe sehen | Code im Kapitel darf nicht ohne neuen Lauf geändert werden; Ausgaben sind byte-identisch zu halten |
 | D11 | Workflow-Übersicht am Kapitelanfang | Erst der Ablauf, dann die Teile (Projektregel) | Klickbare SVG-Grafik mit Erklärungen pro Schritt |
 | D12 | Werte, die einer Stelle im Plot entsprechen, werden direkt im Plot gezogen (`LernApp.drag`) | Ziehen am Objekt ist anschaulicher als ein Slider daneben | Der Slider bleibt als genaue Anzeige und für die Tastatur; das Ziehen setzt ihn über `setRange`, die Demo-Logik bleibt unverändert. Abstrakte Grössen (Learning Rate, k, Epochs) bleiben reine Slider |
@@ -82,7 +82,9 @@ Invarianten: `id` ist über alle geladenen Kapitel eindeutig (der Kern weist Dop
 | Feld | Typ | Bedeutung |
 |---|---|---|
 | `q` | string (HTML) | Frage, als `<summary>` |
-| `a` | string (HTML) | Antwort, aufklappbar |
+| `a` | string (HTML) | Musterantwort, aufklappbar; bei Fragen mit Check erst nach dem Prüfen sichtbar |
+| `k` | string[][] | nein: Stichwort-Gruppen für die Freitext-Prüfung. Jede Gruppe: `[Anzeigename, Variante, …]`; sie gilt als genannt, wenn eine Variante im getippten Text vorkommt (ohne Gross/Klein und Akzente). Je Sprache eigene Stichwörter |
+| `c` | string[] | nein: Antworten zur Auswahl, die richtige zuerst (wird beim Anzeigen gemischt) |
 
 ### 6.3 NotebookRef
 
