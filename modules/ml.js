@@ -399,37 +399,10 @@ search.fit(X_trainval, y_trainval)
 search.best_params_, search.best_estimator_</code></pre>
   <p>Der Name vor dem doppelten Unterstrich (<code>lasso__alpha</code>) ist der Name des Schritts in der Pipeline.</p>
 
-  <h3 id="ml-titanic">9 · Zum Schluss: Titanic in 10 Schritten</h3>
-  <p>Alles aus diesem Kapitel zusammen, an einem echten Datensatz: Wer hat die Titanic überlebt? Die Nummern sind die Schritte der <a href="#ml-ablauf">Ablauf-Grafik</a>. Das Ziel ist eine Klasse (überlebt ja oder nein), darum steht hier die logistische Regression aus dem Kapitel Klassifikation statt der linearen Regression. Der Ablauf bleibt derselbe.</p>
-  <div class="box">
-    <pre><code>import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.compose import make_column_transformer
-from sklearn.pipeline import make_pipeline
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.linear_model import LogisticRegression
-
-# 1 + 2 · Laden, Testset sofort wegsperren
-df = pd.read_csv(&quot;titanic/data.csv&quot;).dropna(subset=[&quot;Survived&quot;]).astype({&quot;Pclass&quot;: int, &quot;Survived&quot;: int})
-X, y = df.drop(columns=&quot;Survived&quot;), df[&quot;Survived&quot;]
-X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, stratify=y, random_state=0)
-# 3 · EDA nur auf X_tr (Grafiken auf der ausführlichen Seite)
-# 4 · Feature Selection (manuell): ID, Name, Ticket, Cabin raus
-num, cat = [&quot;Age&quot;, &quot;Fare&quot;, &quot;SibSp&quot;, &quot;Parch&quot;], [&quot;Pclass&quot;, &quot;Sex&quot;, &quot;Embarked&quot;]
-# 5 + 6 · Auffüllen, One-Hot, Skalieren; 7 · L1 als automatische Feature Selection
-prep = make_column_transformer(
-    (make_pipeline(SimpleImputer(strategy=&quot;median&quot;), StandardScaler()), num),
-    (make_pipeline(SimpleImputer(strategy=&quot;most_frequent&quot;), OneHotEncoder(handle_unknown=&quot;ignore&quot;)), cat))
-model = make_pipeline(prep, LogisticRegression(l1_ratio=1, solver=&quot;liblinear&quot;))  # vor sklearn 1.8: penalty=&quot;l1&quot;
-# 8 + 9 · Cross-Validation, bestes C wählen, neu auf allen 80 % trainieren
-search = GridSearchCV(model, {&quot;logisticregression__C&quot;: [0.01, 0.1, 1, 10]}, cv=5).fit(X_tr[num + cat], y_tr)
-# 10 · Genau einmal auf dem Testset
-print(&quot;CV-Accuracy:&quot;, round(search.best_score_, 3), &quot;| Test-Accuracy:&quot;, round(search.score(X_te[num + cat], y_te), 3))</code></pre>
-    <pre class="out">CV-Accuracy: 0.803 | Test-Accuracy: 0.793</pre>
-    <p class="hint">Die Test-Accuracy liegt nahe an der CV-Schätzung: Die CV war verlässlich, es ist kein Testwissen eingeflossen. Dass das Modell nicht überangepasst ist, zeigt der Vergleich mit dem Training (Accuracy 0,805 gegenüber CV 0,803). Jeder Schritt mit Erklärung, EDA-Grafiken, Ausgaben und einer zweiten, ausführlicheren Version mit Random Forest: <a href="titanic.html">Titanic ausführlich</a>.</p>
-  </div>
   <p class="note"><b>Mit den 10 Wohnungen:</b> Hyperparameter sind hier der Polynomgrad (1 bis 9) und bei Ridge/Lasso das alpha. Du probierst jede Einstellung aus, misst jeweils den Fehler bei fehlender Wohnung (Cross-Validation) und nimmst die beste. Beim Polynomgrad gewinnt Grad 1 (123 CHF), nicht Grad 9 (Training 0 CHF, aber mehrere 100 000 bei fehlender Wohnung). Bei echten Daten bliebe zusätzlich ein Test-Set bis zum Schluss unberührt, bei nur 10 Wohnungen verzichten wir darauf.</p>
+
+  <h3 id="ml-titanic">9 · Zum Schluss: Titanic</h3>
+  <p>Alles aus diesem Kapitel zusammen, an einem echten Datensatz: Wer hat die Titanic überlebt? Die zehn Schritte der <a href="#ml-ablauf">Ablauf-Grafik</a> mit Code, Ausgaben und EDA-Grafiken, zuerst mit logistischer Regression, dann mit Random Forest: <a href="titanic.html">Titanic ausführlich</a>.</p>
 
   <h3 id="ml-methoden">10 · Übersicht: Schritte und Methoden</h3>
   <p>Alle Schritte des Ablaufs mit den Methoden, die du dort wählst, und dem passenden scikit-learn-Aufruf. Die Nummern entsprechen der Grafik «Der ganze Ablauf auf einen Blick».</p>

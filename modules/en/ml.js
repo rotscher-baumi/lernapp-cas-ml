@@ -396,37 +396,10 @@ search.fit(X_trainval, y_trainval)
 search.best_params_, search.best_estimator_</code></pre>
   <p>The name before the double underscore (<code>lasso__alpha</code>) is the name of the step in the pipeline.</p>
 
-  <h3 id="ml-titanic">9 · To finish: Titanic in 10 steps</h3>
-  <p>Everything from this chapter together, on a real data set: who survived the Titanic? The numbers are the steps of the <a href="#ml-ablauf">workflow diagram</a>. The target is a class (survived yes or no), so this uses logistic regression from the classification chapter instead of linear regression. The workflow stays the same.</p>
-  <div class="box">
-    <pre><code>import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.compose import make_column_transformer
-from sklearn.pipeline import make_pipeline
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.linear_model import LogisticRegression
-
-# 1 + 2 · Load, lock away the test set immediately
-df = pd.read_csv(&quot;titanic/data.csv&quot;).dropna(subset=[&quot;Survived&quot;]).astype({&quot;Pclass&quot;: int, &quot;Survived&quot;: int})
-X, y = df.drop(columns=&quot;Survived&quot;), df[&quot;Survived&quot;]
-X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, stratify=y, random_state=0)
-# 3 · EDA only on X_tr (charts on the detailed page)
-# 4 · Feature selection (manual): drop ID, Name, Ticket, Cabin
-num, cat = [&quot;Age&quot;, &quot;Fare&quot;, &quot;SibSp&quot;, &quot;Parch&quot;], [&quot;Pclass&quot;, &quot;Sex&quot;, &quot;Embarked&quot;]
-# 5 + 6 · Impute, one-hot, scale; 7 · L1 as automatic feature selection
-prep = make_column_transformer(
-    (make_pipeline(SimpleImputer(strategy=&quot;median&quot;), StandardScaler()), num),
-    (make_pipeline(SimpleImputer(strategy=&quot;most_frequent&quot;), OneHotEncoder(handle_unknown=&quot;ignore&quot;)), cat))
-model = make_pipeline(prep, LogisticRegression(l1_ratio=1, solver=&quot;liblinear&quot;))  # before sklearn 1.8: penalty=&quot;l1&quot;
-# 8 + 9 · Cross-validation, choose the best C, retrain on all 80 %
-search = GridSearchCV(model, {&quot;logisticregression__C&quot;: [0.01, 0.1, 1, 10]}, cv=5).fit(X_tr[num + cat], y_tr)
-# 10 · Exactly once on the test set
-print(&quot;CV-Accuracy:&quot;, round(search.best_score_, 3), &quot;| Test-Accuracy:&quot;, round(search.score(X_te[num + cat], y_te), 3))</code></pre>
-    <pre class="out">CV-Accuracy: 0.803 | Test-Accuracy: 0.793</pre>
-    <p class="hint">The test accuracy is close to the CV estimate: the CV was reliable, no test knowledge leaked in. That the model is not overfitted is shown by the comparison with training (accuracy 0.805 versus CV 0.803). Every step with explanations, EDA charts, outputs and a second, more detailed version with Random Forest: <a href="titanic.html">Titanic in detail</a>.</p>
-  </div>
   <p class="note"><b>With the 10 apartments:</b> The hyperparameters here are the polynomial degree (1 to 9) and, for Ridge/Lasso, the alpha. You try out each setting, measure the error on the left-out apartment each time (cross-validation) and take the best. For the polynomial degree, degree 1 wins (123 CHF), not degree 9 (training 0 CHF, but several 100,000 on the left-out apartment). With real data you would also keep a test set untouched until the end; with only 10 apartments we do without it.</p>
+
+  <h3 id="ml-titanic">9 · To finish: Titanic</h3>
+  <p>Everything from this chapter together, on a real data set: who survived the Titanic? The ten steps of the <a href="#ml-ablauf">workflow diagram</a> with code, output and EDA figures, first with logistic regression, then with random forest: <a href="titanic.html">Titanic in detail</a>.</p>
 
   <h3 id="ml-methoden">10 · Overview: steps and methods</h3>
   <p>All steps of the workflow with the methods you choose there and the matching scikit-learn call. The numbers match the figure «The whole workflow at a glance».</p>
