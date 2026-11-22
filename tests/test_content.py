@@ -62,10 +62,10 @@ def test_example_links_to_existing_notebooks(path: Path) -> None:
 
 
 def test_overview_links_only_to_existing_notebooks() -> None:
-    source = (ROOT / "modules" / "uebersicht.js").read_text(encoding="utf-8")
+    source = "".join((ROOT / "modules" / f).read_text(encoding="utf-8") for f in ("uebersicht.js", "kompakt.js"))
     names = set(re.findall(r"bsp\('(\w+)'\)|NB = '(\w+)'|beispiele/(\w+)\.ipynb", source))
     flat = {n for group in names for n in group if n}
-    assert flat, "the overview no longer links to example notebooks"
+    assert flat, "overview and cheat sheet no longer link to example notebooks"
     for name in flat:
         assert (NOTEBOOK_DIR / "beispiele" / f"{name}.ipynb").exists(), f"overview links to missing {name}"
 
@@ -119,3 +119,12 @@ def test_example_runs_end_to_end(path: Path) -> None:
     ).execute()
     errors = [o for c in notebook.cells if c.cell_type == "code" for o in c.outputs if o.output_type == "error"]
     assert not errors
+
+
+def test_decision_tree_links_to_existing_method_cards() -> None:
+    """Every #v-<method> link of the overview points to a card in the cheat sheet."""
+    tree = (ROOT / "modules" / "uebersicht.js").read_text(encoding="utf-8")
+    cards = set(re.findall(r'id="(v-\w+)"', (ROOT / "modules" / "kompakt.js").read_text(encoding="utf-8")))
+    links = set(re.findall(r'href="#(v-\w+)"', tree))
+    assert links, "the decision tree no longer links to method cards"
+    assert not links - cards, f"decision tree links to missing cards: {sorted(links - cards)}"
