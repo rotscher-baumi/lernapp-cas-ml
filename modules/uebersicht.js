@@ -802,6 +802,18 @@ assert (pipe2.predict(X_val) == pipe.predict(X_val)).all()   # check loading</co
 
 ${vorgehen}
 ${praxis}
+  <h3 id="ue-begriffe">${t('Die Begriffe in Kürze', 'The terms in brief')}</h3>
+  <ul>
+    <li><b>Supervised:</b> ${t('Zu den Trainingsdaten ist das Ergebnis (Label) bekannt. Das Modell soll für neue, ungesehene Daten eine Prediction liefern.', 'The result (label) is known for the training data. The model should make a prediction for new, unseen data.')} <a href="#ml">→</a></li>
+    <li><b>Classification:</b> ${t('Supervised mit vorgegebenen Klassen: Jedes Beispiel wird einer Klasse zugeordnet.', 'Supervised with given classes: every example is assigned to one class.')} <a href="#klass">→</a></li>
+    <li><b>Unsupervised:</b> ${t('Es gibt keine Zielspalte. Man sucht Struktur und Zusammenhänge in den Daten (Clustering, Dimensionsreduktion, Anomalien).', 'There is no target column. You look for structure and relationships in the data (clustering, dimensionality reduction, anomalies).')} <a href="#unsup">→</a></li>
+    <li><b>Neural Network:</b> ${t('Viele gewichtete Summen (wie lineare Regressionen), jeweils mit nichtlinearer Activation Function, in Schichten zu einem Netz verknüpft.', 'Many weighted sums (like linear regressions), each with a nonlinear activation function, linked in layers to form a network.')} <a href="#nn">→</a></li>
+    <li><b>CNN:</b> ${t('Neural Network für Bilder. Die Pixel werden nicht zu einem Vektor abgeflacht. Ein Filter mit geteilten Gewichten gleitet über das Bild, darum bleibt die Nachbarschaft erhalten.', 'Neural network for images. The pixels are not flattened into a vector. A filter with shared weights slides over the image, so the neighbourhood is preserved.')} <a href="#cnn">→</a></li>
+    <li><b>Image Processing:</b> ${t('Bilder verarbeiten oder reparieren, z. B. Blurring, Denoising, Deblurring, Super-Resolution.', 'Process or repair images, e.g. blurring, denoising, deblurring, super-resolution.')} <a href="#cv">→</a></li>
+    <li><b>Object Detection:</b> ${t('Objekte in einem Bild finden: Box, Klasse und Score pro Objekt (z. B. YOLO, Faster R-CNN).', 'Find objects in an image: box, class and score per object (e.g. YOLO, Faster R-CNN).')} <a href="#det-detection">→</a></li>
+    <li><b>Segmentation:</b> ${t('Jeder Pixel bekommt eine Klasse (Semantic Segmentation), z. B. mit U-Net. SAM trennt ein Objekt per Prompt ab.', 'Every pixel gets a class (semantic segmentation), e.g. with a U-Net. SAM cuts out one object by prompt.')} <a href="#det-seg">→</a></li>
+  </ul>
+
   <h3 id="ue-wahl">${t('Welches Modell wann?', 'Which model when?')}</h3>
   <div class="ue-tree">
     <div class="ue-q">${t('Gibt es eine Zielspalte <code>y</code> mit der richtigen Antwort?', 'Is there a target column <code>y</code> with the right answer?')}</div>
