@@ -10,7 +10,8 @@
  *   kicker    small line above the heading, e.g. "Modul 1 · Freitag 16.10"
  *   summary   one short line for the overview card
  *   html      chapter content (HTML string)
- *   quiz      optional [{ q, a }] self-test questions (HTML allowed)
+ *   quiz      optional [{ q, a }] self-test questions (HTML allowed); register() keeps the German list as quizDe,
+ *             the quiz chapter (modules/quiz.js) asks them all with spaced repetition
  *   notebooks optional [{ file, desc }] files in lernapp/notebooks
  *   init()    optional, called once after the chapter is in the page; the larger chapters only call
  *             their demos from assets/demos-<id>.js (LernApp.demos.<id>()), so modules stay content only
@@ -53,6 +54,8 @@
         console.error('LernApp.register: duplicate module id', mod.id);
         return;
       }
+      // The German questions stay available after the English overlay: the quiz chapter derives stable card ids from them
+      if (mod.quiz) mod.quizDe = mod.quiz;
       modules.push(mod);
     },
     translate: function (id, fields) { EN[id] = fields; },

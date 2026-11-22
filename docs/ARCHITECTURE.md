@@ -30,6 +30,7 @@ lernapp-cas-ml/
     demos-mathe.js           MatheDemos: Demos, die beide Mathe-Seiten teilen
     demos-kmeans.js          KMeansDemo: k-Means-Demo und gemeinsame k-Means-Helfer (`KMeansDemo.lib`)
     demos-ml.js, demos-klass.js, demos-unsup.js, demos-nn.js, demos-cnn.js, demos-cv.js, demos-det.js, demos-gen.js, demos-modell.js   Demo-Code der Kapitel ml, klass, unsup, nn, cnn, cv, det, gen und des Praxis-Teils von uebersicht (demos-modell.js) (`LernApp.demos.<id>`); `demos-det.js` und `demos-gen.js` bauen zusätzlich die statischen Grafiken der Kapitel det und gen (`LernApp.detFig`, `LernApp.genFig`), darum laden sie vor den Modulen
+    demos-quiz.js            Kapitel Quiz: `LernApp.quizLogic` (reine Funktionen: Karten-IDs, Bewertung, Runde, Statistik) und `LernApp.demos.quiz` (Oberfläche)
     search.js                Volltextsuche der Hauptseite (klebende Leiste `.topbar` um `nav.chips`)
     img/                     Grafiken, aus echten Läufen erzeugt (Titanic)
     notebook-data.js         generiert aus den Notebooks (zurzeit von keiner Seite geladen)
@@ -110,6 +111,10 @@ Konfiguration über Umgebungsvariablen: `HOST`, `PORT`, `STATE_FILE`, `JUPYTER_H
 - `scripts/build_notebook.js` und `scripts/build_lernhilfe_notebook.js` laufen mit Node und erzeugen aus den Modulen die Notebooks `Lernapp_Uebungen.ipynb` und `Lernapp_Lernhilfe.ipynb`.
 - Prüfung: `ruff check .`, `ruff format --check server.py tools tests`, `pyright` und `pytest` (Befehle mit `.venv`-Pfad in `AGENTS.project.md`). `pytest -m slow` führt zusätzlich alle Beispiel-Notebooks vollständig aus.
 
+## Quiz
+
+Das Kapitel `quiz` (`modules/quiz.js`, Code in `assets/demos-quiz.js`) liest beim Start in `init()` die Fragen aller Module aus `LernApp.modules`. Weil auf Englisch `applyEn()` das Feld `quiz` ersetzt, hält `register()` die deutsche Liste zusätzlich als `quizDe`; daraus entsteht die Karten-ID `<kapitel>:<FNV-1a-Hash des Fragetexts ohne Markup>`, gleich in beiden Sprachen. Eine Runde (`queue`) nimmt alle fälligen Karten der gewählten Kapitel und neue Karten reihum aus den Kapiteln, `interleave` mischt sie so, dass dasselbe Kapitel nicht zweimal nacheinander kommt, solange andere übrig sind. `rate` setzt das Leitner-Fach und das nächste Datum (lokales Datum `YYYY-MM-DD`). Das leere Blatt liest die `h3` und `.merk` des gewählten Kapitels erst beim Vergleichen aus dem DOM, dann haben die Überschriften ihre IDs aus `chapterToc()`. Die reinen Funktionen testet `tests/test_quiz.py` in Node ohne DOM.
+
 ## Zustand und Persistenz
 
 | Was | Wo | Schlüssel |
@@ -117,6 +122,7 @@ Konfiguration über Umgebungsvariablen: `HOST`, `PORT`, `STATE_FILE`, `JUPYTER_H
 | Sprache | `localStorage` | `cas-ml-lang` = `de` oder `en` |
 | Farbschema | `localStorage` | `cas-ml-theme` = `light`, `dark` oder `auto` |
 | Projekt-Checkliste der Übersicht | `localStorage` über `LernApp.store` | `cas-ml-checklist` = JSON-Liste der abgehakten IDs |
+| Quiz: Fächer, Fälligkeiten, Filter, leeres Blatt | `localStorage` über `LernApp.store` | `cas-ml-quiz` = JSON (Aufbau in DESIGN.md 6.6) |
 | Kopie aller Schlüssel | `data/state.json` (nur mit Server) | flaches Objekt Schlüssel → Text |
 
 In der Adresse gewinnen `?lang=en` und `?theme=dark` über den gespeicherten Wert, ohne ihn zu ändern; das dient Links und Tests. Die Sprache wird mit `location.reload()` umgeschaltet, weil sie die Kapitel neu aufbaut. Das Theme wechselt sofort über das Attribut `data-theme`.
