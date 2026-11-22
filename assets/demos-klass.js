@@ -48,21 +48,21 @@
       (function(){
         const xs=[-4,-3,-2.5,-1.5,-0.5,0.5,1,2,3,4.5],ys=[0,0,0,0,1,0,1,1,1,1];
         const W=320,H=190,PX=30,PY=20,sx=x=>PX+((x+6)/12)*(W-PX-10),sy=p=>H-PY-p*(H-PY-12);
-        function draw(){const w=+$('sgW').value,b=+$('sgB').value;$('sgWO').textContent=fmt(w,1);$('sgBO').textContent=fmt(b,1);
+        function draw(){const w=+$('sgW').value,b=+$('sgB').value,T=+$('sgT').value;$('sgWO').textContent=fmt(w,1);$('sgBO').textContent=fmt(b,1);$('sgTO').textContent=fmt(T,2);
           let s='<line class="ax" x1="'+PX+'" y1="'+sy(0)+'" x2="'+(W-10)+'" y2="'+sy(0)+'"/><line class="ax" x1="'+PX+'" y1="'+sy(1)+'" x2="'+(W-10)+'" y2="'+sy(1)+'"/>';
-          s+='<line class="dash" x1="'+PX+'" y1="'+sy(0.5)+'" x2="'+(W-10)+'" y2="'+sy(0.5)+'"/>';
+          s+='<line class="dash" x1="'+PX+'" y1="'+sy(T)+'" x2="'+(W-10)+'" y2="'+sy(T)+'"/><text class="lbl" x="'+(W-12)+'" y="'+(sy(T)-3)+'" text-anchor="end">Threshold '+fmt(T,2)+'</text>';
           for(const t of[0,0.5,1])s+='<text class="lbl" x="2" y="'+(sy(t)+3)+'">'+t+'</text>';
           for(let t=-6;t<=6;t+=3)s+='<text class="lbl" x="'+(sx(t)-4)+'" y="'+(H-4)+'">'+t+'</text>';
           let p='';for(let i=0;i<=120;i++){const x=-6+i*0.1;p+=(i?'L':'M')+sx(x).toFixed(1)+' '+sy(sigmoid(w*x+b)).toFixed(1)}
           s+='<path class="ln" d="'+p+'"/>';
-          const bd=-b/w;if(bd>-6&&bd<6)s+='<line class="res" x1="'+sx(bd)+'" y1="12" x2="'+sx(bd)+'" y2="'+sy(0)+'"/>';
-          let ok=0;xs.forEach((x,i)=>{const pr=sigmoid(w*x+b);if((pr>=0.5?1:0)===ys[i])ok++;
+          const bd=(Math.log(T/(1-T))-b)/w;if(bd>-6&&bd<6)s+='<line class="res" x1="'+sx(bd)+'" y1="12" x2="'+sx(bd)+'" y2="'+sy(0)+'"/>';
+          let ok=0;xs.forEach((x,i)=>{const pr=sigmoid(w*x+b);if((pr>=T?1:0)===ys[i])ok++;
             s+='<circle cx="'+sx(x)+'" cy="'+sy(ys[i])+'" r="5" style="fill:'+(ys[i]?'var(--accent)':'var(--surface)')+';stroke:var(--accent);stroke-width:2"/>'});
           $('sgSvg').innerHTML=s;$('sgBd').textContent=fmt(bd,2).replace('-',MU);$('sgAcc').textContent=ok+LernApp.t(' von ',' of ')+xs.length}
-        $('sgW').addEventListener('input',draw);$('sgB').addEventListener('input',draw);
-        // Drag: the decision boundary (red line) follows the pointer, b = −w · boundary
+        $('sgW').addEventListener('input',draw);$('sgB').addEventListener('input',draw);$('sgT').addEventListener('input',draw);
+        // Drag: the decision boundary (red line) follows the pointer, b = logit(threshold) − w · boundary
         const ix=LernApp.invert(sx);
-        LernApp.drag('sgSvg',{axis:'x',move:(k,x)=>LernApp.setRange('sgB',-(+$('sgW').value)*ix(x)),
+        LernApp.drag('sgSvg',{axis:'x',move:(k,x)=>{const T=+$('sgT').value;LernApp.setRange('sgB',Math.log(T/(1-T))-(+$('sgW').value)*ix(x))},
           hint:['Ziehe im Plot nach links oder rechts: Die Entscheidungsgrenze folgt der Maus.','Drag left or right in the plot: the decision boundary follows the pointer.']});
         draw()})();
 
