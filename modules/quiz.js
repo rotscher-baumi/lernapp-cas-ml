@@ -56,7 +56,7 @@
       <textarea id="qzOwn" rows="3" placeholder="${t('Deine Antwort (optional)', 'Your answer (optional)')}" aria-label="${t('Deine Antwort', 'Your answer')}"></textarea>
       <div class="btnrow"><button type="button" class="pri" id="qzShow">${t('Lösung zeigen', 'Show answer')} <kbd>${t('Leertaste', 'Space')}</kbd></button></div>
       <div class="qz-ans" id="qzAns" hidden>
-        <div class="qz-mine" id="qzMine" hidden><b>${t('Deine Antwort', 'Your answer')}</b><p id="qzMineText"></p></div>
+        <div class="qz-mine" id="qzMine" hidden><b>${t('Deine Antwort', 'Your answer')}</b><p id="qzMineText"></p><div id="qzCheck"></div></div>
         <div class="qz-a"><b>${t('Lösung', 'Answer')}</b><div id="qzA"></div></div>
         <p><a id="qzLink" href="#quiz"></a></p>
       </div>

@@ -60,6 +60,16 @@
       modules.push(mod);
     },
     translate: function (id, fields) { EN[id] = fields; },
+    // Keyword check of a typed answer: groups = [[label, variant, ...], ...]. Returns { rows: [{ label, hit }], n, all }.
+    checkHtml: function (r) { return checkHtml(r); },
+    checkAnswer: function (text, groups) {
+      const x = ' ' + norm(text) + ' ';
+      const rows = groups.map(function (g) {
+        return { label: g[0], hit: g.some(function (alt) { return x.indexOf(norm(alt)) >= 0; }) };
+      });
+      const n = rows.filter(function (r) { return r.hit; }).length;
+      return { rows: rows, n: n, all: n === rows.length, level: n === rows.length ? 'ok' : n * 2 >= rows.length ? 'part' : 'no' };
+    },
     t: t,
     // store(key) reads, store(key, text) writes localStorage (and the server copy); errors return null
     store: function (key, val) { return store(key, val); },
@@ -225,26 +235,26 @@
     }
     return h + '<div class="a">' + it.a + '</div></details>';
   }
+  // Result of checkAnswer as HTML (shared by the chapter self-test and the quiz chapter)
+  function checkHtml(r) {
+    const total = r.rows.length;
+    return '<b>' + (r.all ? t('Vollständig: alle Kernbegriffe sind drin.', 'Complete: all key terms are there.')
+      : r.level === 'part' ? t('Teilweise: ', 'Partly: ') + r.n + ' / ' + total
+      : t('Es fehlt noch viel: ', 'Much is missing: ') + r.n + ' / ' + total) + '</b><ul>' +
+      r.rows.map(function (x) { return '<li class="' + (x.hit ? 'ok' : 'no') + '">' + (x.hit ? '✓ ' : '✗ ' + t('fehlt: ', 'missing: ')) + esc(x.label) + '</li>'; }).join('') + '</ul>' +
+      '<p class="hint">' + t('Der Check sucht Begriffe, nicht Sinn. Vergleiche mit der Musterantwort.', 'The check looks for terms, not meaning. Compare with the model answer.') + '</p>';
+  }
   function wireQuiz(d) {
     const groups = JSON.parse(d.getAttribute('data-k') || '[]');
     const btn = d.querySelector('.qchk');
     if (btn) {
       btn.addEventListener('click', function () {
-        const text = ' ' + norm(d.querySelector('.qin').value) + ' ';
         const res = d.querySelector('.qres');
-        if (text.trim() === '') { res.className = 'qres'; res.textContent = t('Schreibe zuerst etwas.', 'Write something first.'); return; }
-        const rows = groups.map(function (g) {
-          const hit = g.some(function (alt) { return text.indexOf(norm(alt)) >= 0; });
-          return { label: g[0], hit: hit };
-        });
-        const n = rows.filter(function (r) { return r.hit; }).length;
-        const all = n === rows.length;
-        res.className = 'qres ' + (all ? 'ok' : n * 2 >= rows.length ? 'part' : 'no');
-        res.innerHTML = '<b>' + (all ? t('Vollständig: alle Kernbegriffe sind drin.', 'Complete: all key terms are there.')
-          : n * 2 >= rows.length ? t('Teilweise: ', 'Partly: ') + n + ' / ' + rows.length
-          : t('Es fehlt noch viel: ', 'Much is missing: ') + n + ' / ' + rows.length) + '</b><ul>' +
-          rows.map(function (r) { return '<li class="' + (r.hit ? 'ok' : 'no') + '">' + (r.hit ? '✓ ' : '✗ ' + t('fehlt: ', 'missing: ')) + esc(r.label) + '</li>'; }).join('') + '</ul>' +
-          '<p class="hint">' + t('Der Check sucht Begriffe, nicht Sinn. Vergleiche mit der Musterantwort unten.', 'The check looks for terms, not meaning. Compare with the model answer below.') + '</p>';
+        const val = d.querySelector('.qin').value;
+        if (val.trim() === '') { res.className = 'qres'; res.textContent = t('Schreibe zuerst etwas.', 'Write something first.'); return; }
+        const r = LernApp.checkAnswer(val, groups);
+        res.className = 'qres ' + r.level;
+        res.innerHTML = checkHtml(r);
         d.classList.add('checked');
       });
     }
