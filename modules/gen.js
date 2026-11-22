@@ -162,7 +162,7 @@ loss = rec + beta * kl</code></pre>
     <tr><td><b>Loss</b></td><td>Binary Cross-Entropy pro Pixel (Schwarz-Weiss) oder 256-Klassen-Softmax (Graustufen)</td><td>–</td></tr>
     <tr><td><b>Tempo</b></td><td>schnell, parallel</td><td>langsam: 784 Durchläufe für 28 × 28</td></tr>
   </table></div>
-  <div class="demo" id="pxDemo">
+  <div class="demo" id="pcnDemo">
     <div class="tag">Demo</div><h4>PixelCNN zeichnet eine 7 auf einem 8 × 8-Raster</h4>
     <p class="hint">Schiebe den Regler: Links siehst du, welche Pixel das Netz für den orangen Pixel sehen darf (blau, nur davor). Rechts das Bild, das bis dahin gewürfelt wurde. Die Wahrscheinlichkeiten sind vorgegeben und stehen für ein trainiertes Netz. «Neu würfeln» ergibt eine andere 7.</p>
     <div class="ctl"><label for="pxK">Aktueller Pixel</label><input type="range" id="pxK" min="0" max="63" step="1" value="20"><output id="pxKO"></output></div>

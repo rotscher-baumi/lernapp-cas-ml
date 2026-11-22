@@ -160,7 +160,7 @@ loss = rec + beta * kl</code></pre>
     <tr><td><b>Loss</b></td><td>binary cross-entropy per pixel (black and white) or 256-class softmax (grey levels)</td><td>–</td></tr>
     <tr><td><b>Speed</b></td><td>fast, parallel</td><td>slow: 784 passes for 28 × 28</td></tr>
   </table></div>
-  <div class="demo" id="pxDemo">
+  <div class="demo" id="pcnDemo">
     <div class="tag">Demo</div><h4>PixelCNN draws a 7 on an 8 × 8 grid</h4>
     <p class="hint">Move the slider: on the left you see which pixels the network may see for the orange pixel (blue, only those before it). On the right the image rolled so far. The probabilities are given and stand for a trained network. “Roll again” gives a different 7.</p>
     <div class="ctl"><label for="pxK">Current pixel</label><input type="range" id="pxK" min="0" max="63" step="1" value="20"><output id="pxKO"></output></div>
