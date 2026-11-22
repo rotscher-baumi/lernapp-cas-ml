@@ -21,6 +21,7 @@ package "assets/" {
   [demos-mathe.js\nMatheDemos] as dm
   [demos-kmeans.js\nKMeansDemo] as dk
   [demos-ml.js · demos-klass.js\ndemos-unsup.js · demos-nn.js\ndemos-cnn.js · demos-cv.js\ndemos-det.js · demos-gen.js\ndemos-modell.js\nLernApp.demos.<id>] as dd
+  [demos-quiz.js\nKapitel Quiz:\nLernApp.quizLogic · LernApp.demos.quiz] as dq
   [search.js\nSuche: Leiste .topbar,\nTrefferliste, CSS.highlights] as srch
   [img/\nGrafiken aus echten Läufen] as img
   [notebook-data.js\n(generiert, zurzeit\nvon keiner Seite geladen)] as nbdata
@@ -65,6 +66,8 @@ sub --> mods : genau ein Modul
 sub --> en
 sub --> dm
 index --> dk
+index --> dq
+mods ..> dq : quiz.js liest die Fragen aller Kapitel
 mods ..> dm
 mods ..> dk
 mods ..> img
