@@ -3,7 +3,7 @@ LernApp.translate('cnn', {
   nav: 'CNN',
   title: `Convolutional Neural Networks`,
   kicker: `Module 3 · Deep Learning: CNN`,
-  summary: `Convolution, filter, feature map, padding, stride, pooling, data augmentation, transfer learning`,
+  summary: `Convolution, filter, feature map, padding, stride, pooling, data augmentation, transfer learning, SimCLR`,
   html: `  <p>A convolutional neural network (CNN) is a <a href="#nn">neural network</a> with a different building block for images: instead of every neuron seeing all pixels, a small <b>filter</b> slides over the image and looks for the same pattern everywhere. Training, loss, backpropagation and optimizer stay exactly the same.</p>
   <p class="note">The demos compute in the browser with small sample images. The Keras code blocks do not run here, but in Jupyter or Colab (the course notebooks on CIFAR-10 and SVHN).</p>
 
@@ -178,7 +178,26 @@ outputs = layers.Dense(n_classes, activation="softmax")(x)
 model = keras.Model(inputs, outputs)                    # 3 · only the head learns</code></pre>
   <div class="merk"><b>Key point</b><p>Few images? Do not train from scratch, but freeze a pre-trained network, train a new head and only then fine-tune carefully. The inputs must be preprocessed as in pre-training.</p></div>
 
-  <h3 id="cnn-methoden">9 · Overview: steps and methods</h3>
+  <h3 id="cnn-simclr">9 · Learning similarity without labels: SimCLR</h3>
+  <p>Transfer learning needs a network that someone already trained with labels. In <b>self-supervised learning</b> the network invents its own task. In <b>SimCLR</b> the task is: “recognise two altered variants of the same photo.” A network that can do this has learned what makes up an image, not how the crop or the colour happened to turn out. That is exactly what you need to find duplicates and photo series. DINOv2 rests on the same idea, only with 142 million images.</p>
+  <figure class="fig" style="max-width:900px"><div style="overflow-x:auto">${LernApp.cnnFig.simclr()}</div><figcaption>Top, training: each photo yields two views. Both pass through the same ResNet and the same projector. In the matrix each row should find its partner (green); the views of the other photos in the batch are the negatives. Bottom: after training, similar scenes lie close together in the embedding space. Two photos are compared by the cosine similarity of their embeddings h.</figcaption></figure>
+  <ol>
+    <li><b>Two views:</b> each photo is altered twice at random, with <code>RandomResizedCrop</code> (the most important), flip, colour, greyscale and blur. If the changes are too weak the task is trivial; if they are too strong the variants have nothing left in common.</li>
+    <li><b>Backbone:</b> a ResNet without its classification head turns each view into a vector <code>h</code> with 512 numbers. This is the embedding you use later.</li>
+    <li><b>Projector:</b> a small MLP (512 → 128) gives <code>z</code>. The loss is computed on <code>z</code>; this keeps <code>h</code> more general. After training the projector is thrown away.</li>
+    <li><b>Loss (NT-Xent):</b> N photos give 2N views. For each one, exactly one of the other 2N − 1 is the partner. Each row of the similarity matrix (cosine, divided by the temperature τ) is a classification “which one is my partner?”, scored with cross-entropy. Large batches give more negatives per step.</li>
+  </ol>
+  <pre><code>def nt_xent(z1, z2, tau=0.2):
+    z = F.normalize(torch.cat([z1, z2]), dim=1)    # [2N, d], length 1 → dot product = cosine
+    sim = z @ z.T / tau                            # [2N, 2N]
+    sim.fill_diagonal_(float("-inf"))              # do not count itself as partner
+    n = len(z1)
+    target = torch.cat([torch.arange(n, 2 * n), torch.arange(0, n)])   # partner of A_i is B_i
+    return F.cross_entropy(sim, target)</code></pre>
+  <div class="falle"><b>Pitfall</b><p>The augmentation defines what counts as “the same”. Without a strong crop, for example, the network learns colours and brightness instead of content. And the test images (including their folders) must not be part of the unlabelled training, otherwise the result is flattered.</p></div>
+  <div class="merk"><b>Key point</b><p>SimCLR learns without labels: two views of the same photo are pulled together, all others pushed apart. Afterwards only the backbone counts: compute the embedding <code>h</code>, compare cosine similarity, choose the threshold on labelled pairs. A network pretrained on ImageNet is usually the stronger baseline.</p></div>
+
+  <h3 id="cnn-methoden">10 · Overview: steps and methods</h3>
   <p>The numbers match the figure «The whole workflow at a glance». What is missing here (optimizers, backpropagation in detail) is in the <a href="#nn-methoden">neural networks</a> chapter.</p>
   <div class="tablewrap"><table>
     <tr><th>Step</th><th>Methods to choose from</th><th>When which</th><th>Keras</th></tr>
@@ -191,7 +210,7 @@ model = keras.Model(inputs, outputs)                    # 3 · only the head lea
   </table></div>
   <div class="merk"><b>Key point</b><p>A CNN replaces the first dense layers with conv and pooling blocks: local filters with shared weights find patterns anywhere in the image, pooling shrinks it and enlarges the field of view. Data augmentation, dropout and transfer learning help against overfitting.</p></div>
 
-  <h3 id="cnn-best">10 · Best practices</h3>
+  <h3 id="cnn-best">11 · Best practices</h3>
   <p>On top of the <a href="#nn-best">best practices from Neural Networks</a>, for images:</p>
   <div class="bp-check">
     <div><b>Pretrained or your own network?</b><ul>
@@ -221,6 +240,8 @@ model = keras.Model(inputs, outputs)                    # 3 · only the head lea
     { q: `Where are most parameters of a small CNN, and how do you save them?`, a: `In the first dense layer after <code>Flatten</code>. <code>GlobalAveragePooling2D</code> instead of <code>Flatten</code>, or one more pooling, shrinks its input a lot.` },
     { q: `What is data augmentation, and when is it active?`, a: `Random changes to the training images (flip, rotate, zoom, shift) so the network learns robust features and overfits less. Only during training; validation and test stay unchanged.` },
     { q: `Why is horizontal flipping a bad augmentation for digits?`, a: `Mirrored digits are no longer valid digits (a mirrored 2 or 7). Augmentation may only produce changes after which the class stays the same.` },
+    { q: `How does SimCLR learn to recognise similar images without labels?`, a: `Each photo yields two randomly altered views (crop, colour, flip). Both pass through the same ResNet and a projector. The NT-Xent loss pulls the two views of the same photo together and pushes the views of the other photos in the batch away. The task comes from the data itself, so no labels are needed.` },
+    { q: `Why do you compare the embedding <code>h</code> and not <code>z</code> after SimCLR training?`, a: `The projector (512 → 128) only serves the loss and specialises <code>z</code> strongly on the augmentation task. The backbone embedding <code>h</code> keeps more general information and is better for comparing (cosine similarity) and for other tasks. So the projector is thrown away.` },
     { q: `What is transfer learning, and why do you freeze the base first?`, a: `Taking over a CNN pre-trained on many images and only training a new head. Frozen because the random weights of the new head produce large gradients at first, which would destroy the learned filters. Then optionally fine-tuning with a very small learning rate.` },
     { q: `A notebook trains with <code>validation_data=(x_test, y_test)</code>. What is the problem?`, a: `Epochs and setup are chosen on the test set; the test accuracy is then no longer an honest estimate. Better <code>validation_split</code> or a separate validation part, test once at the end.` },
     { q: `What shape does the input for MNIST images have in a CNN, and why?`, a: `<code>(28, 28, 1)</code>. Conv2D always expects a channel axis, even for greyscale.` },
