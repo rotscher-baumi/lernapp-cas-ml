@@ -6,7 +6,7 @@
     nav: 'CNN',
     title: `Convolutional Neural Networks`,
     kicker: `Modul 3 · Deep Learning: CNN`,
-    summary: `Convolution, Filter, Feature Map, Padding, Stride, Pooling, Data Augmentation, Transfer Learning`,
+    summary: `Convolution, Filter, Feature Map, Padding, Stride, Pooling, Data Augmentation, Transfer Learning, SimCLR`,
     html: `  <p>Ein Convolutional Neural Network (CNN) ist ein <a href="#nn">Neural Network</a> mit einem anderen Baustein für Bilder: Statt dass jedes Neuron alle Pixel sieht, gleitet ein kleiner <b>Filter</b> über das Bild und sucht überall dasselbe Muster. Training, Loss, Backpropagation und Optimizer bleiben genau gleich.</p>
   <p class="note">Die Demos rechnen im Browser mit kleinen Beispielbildern. Die Keras-Codeblöcke laufen hier nicht, sondern in Jupyter oder Colab (die Kurs-Notebooks zu CIFAR-10 und SVHN).</p>
 
@@ -181,7 +181,26 @@ outputs = layers.Dense(n_classes, activation="softmax")(x)
 model = keras.Model(inputs, outputs)                    # 3 · nur der Kopf lernt</code></pre>
   <div class="merk"><b>Merksatz</b><p>Wenige Bilder? Nicht von null trainieren, sondern ein vortrainiertes Netz einfrieren, einen neuen Kopf trainieren und erst dann vorsichtig fine-tunen. Die Eingaben müssen so vorverarbeitet werden wie beim Vortraining.</p></div>
 
-  <h3 id="cnn-methoden">9 · Übersicht: Schritte und Methoden</h3>
+  <h3 id="cnn-simclr">9 · Ähnlichkeit lernen ohne Labels: SimCLR</h3>
+  <p>Transfer Learning braucht ein Netz, das schon jemand mit Labels trainiert hat. Bei <b>Self-supervised Learning</b> erfindet das Netz die Aufgabe selbst. Bei <b>SimCLR</b> heisst sie: «Erkenne zwei veränderte Varianten desselben Fotos wieder.» Wer das kann, hat gelernt, was ein Bild ausmacht, und nicht, wie zufällig der Ausschnitt oder die Farbe ist. Genau das braucht man, um Duplikate und Fotoserien zu finden. DINOv2 beruht auf derselben Idee, nur mit 142 Millionen Bildern.</p>
+  <figure class="fig" style="max-width:900px"><div style="overflow-x:auto">${LernApp.cnnFig.simclr()}</div><figcaption>Oben das Training: Aus jedem Foto entstehen zwei Ansichten. Beide laufen durch dasselbe ResNet und denselben Projektor. In der Matrix soll jede Zeile ihren Partner (grün) finden; die Ansichten der anderen Fotos im Batch sind die Negative. Unten: Nach dem Training liegen ähnliche Szenen im Embedding-Raum nahe beieinander. Zwei Fotos vergleicht man mit der Cosine-Ähnlichkeit ihrer Embeddings h.</figcaption></figure>
+  <ol>
+    <li><b>Zwei Ansichten:</b> Jedes Foto wird zweimal zufällig verändert, mit <code>RandomResizedCrop</code> (am wichtigsten), Flip, Farbe, Graustufen und Blur. Sind die Änderungen zu schwach, ist die Aufgabe trivial; sind sie zu stark, haben die Varianten nichts mehr gemeinsam.</li>
+    <li><b>Backbone:</b> Ein ResNet ohne Klassifikations-Kopf macht aus jeder Ansicht einen Vektor <code>h</code> mit 512 Zahlen. Das ist das Embedding, das man später braucht.</li>
+    <li><b>Projektor:</b> Ein kleines MLP (512 → 128) liefert <code>z</code>. Der Loss wird auf <code>z</code> gerechnet; das macht <code>h</code> allgemeiner. Nach dem Training wirft man den Projektor weg.</li>
+    <li><b>Loss (NT-Xent):</b> Bei N Fotos gibt es 2N Ansichten. Für jede ist genau eine der anderen 2N − 1 der Partner. Jede Zeile der Ähnlichkeitsmatrix (Cosine, geteilt durch die Temperatur τ) ist eine Klassifikation «Welche ist mein Partner?», bewertet mit Cross-Entropy. Grosse Batches liefern mehr Negative pro Schritt.</li>
+  </ol>
+  <pre><code>def nt_xent(z1, z2, tau=0.2):
+    z = F.normalize(torch.cat([z1, z2]), dim=1)    # [2N, d], Länge 1 → Skalarprodukt = Cosine
+    sim = z @ z.T / tau                            # [2N, 2N]
+    sim.fill_diagonal_(float("-inf"))              # sich selbst nicht als Partner zählen
+    n = len(z1)
+    target = torch.cat([torch.arange(n, 2 * n), torch.arange(0, n)])   # Partner von A_i ist B_i
+    return F.cross_entropy(sim, target)</code></pre>
+  <div class="falle"><b>Falle</b><p>Die Augmentation definiert, was als «gleich» gilt. Fehlt zum Beispiel ein starker Crop, lernt das Netz Farben und Helligkeit statt Inhalt. Und die Testbilder (auch ihre Ordner) dürfen nicht im ungelabelten Training liegen, sonst ist das Ergebnis geschönt.</p></div>
+  <div class="merk"><b>Merksatz</b><p>SimCLR lernt ohne Labels: Zwei Ansichten desselben Fotos werden zusammengezogen, alle anderen auseinandergedrückt. Danach zählt nur das Backbone: Embedding <code>h</code> berechnen, Cosine-Ähnlichkeit vergleichen, Threshold auf gelabelten Paaren wählen. Ein auf ImageNet vortrainiertes Netz ist meist die stärkere Baseline.</p></div>
+
+  <h3 id="cnn-methoden">10 · Übersicht: Schritte und Methoden</h3>
   <p>Die Nummern entsprechen der Grafik «Der ganze Ablauf auf einen Blick». Was hier fehlt (Optimizer, Backpropagation im Detail), steht im Kapitel <a href="#nn-methoden">Neural Networks</a>.</p>
   <div class="tablewrap"><table>
     <tr><th>Schritt</th><th>Methoden zur Wahl</th><th>Wann welche</th><th>Keras</th></tr>
@@ -194,7 +213,7 @@ model = keras.Model(inputs, outputs)                    # 3 · nur der Kopf lern
   </table></div>
   <div class="merk"><b>Merksatz</b><p>Ein CNN ersetzt die ersten Dense-Schichten durch Conv- und Pooling-Blöcke: lokale Filter mit geteilten Gewichten finden Muster überall im Bild, Pooling verkleinert und vergrössert das Sichtfeld. Gegen Overfitting helfen Data Augmentation, Dropout und Transfer Learning.</p></div>
 
-  <h3 id="cnn-best">10 · Best Practices</h3>
+  <h3 id="cnn-best">11 · Best Practices</h3>
   <p>Ergänzend zu den <a href="#nn-best">Best Practices aus Neural Networks</a> gilt bei Bildern:</p>
   <div class="bp-check">
     <div><b>Vortrainiert oder eigenes Netz?</b><ul>
@@ -224,6 +243,8 @@ model = keras.Model(inputs, outputs)                    # 3 · nur der Kopf lern
       { q: `Wo stecken bei einem kleinen CNN die meisten Parameter, und wie spart man sie?`, a: `In der ersten Dense-Schicht nach <code>Flatten</code>. <code>GlobalAveragePooling2D</code> statt <code>Flatten</code> oder ein Pooling mehr verkleinern ihre Eingabe stark.` },
       { q: `Was ist Data Augmentation, und wann ist sie aktiv?`, a: `Zufällige Veränderungen der Trainingsbilder (spiegeln, drehen, zoomen, verschieben), damit das Netz robuste Merkmale lernt und weniger overfittet. Nur beim Training; Validation und Test bleiben unverändert.` },
       { q: `Warum ist horizontales Spiegeln bei Ziffern eine schlechte Augmentation?`, a: `Gespiegelte Ziffern sind keine gültigen Ziffern mehr (eine gespiegelte 2 oder 7). Augmentation darf nur Veränderungen erzeugen, nach denen die Klasse dieselbe bleibt.` },
+      { q: `Wie lernt SimCLR ohne Labels, ähnliche Bilder zu erkennen?`, a: `Aus jedem Foto entstehen zwei zufällig veränderte Ansichten (Crop, Farbe, Flip). Beide laufen durch dasselbe ResNet und einen Projektor. Der NT-Xent-Loss zieht die zwei Ansichten desselben Fotos zusammen und drückt die Ansichten der anderen Fotos im Batch weg. Die Aufgabe entsteht aus den Daten selbst, darum braucht es keine Labels.` },
+      { q: `Warum vergleicht man nach dem SimCLR-Training das Embedding <code>h</code> und nicht <code>z</code>?`, a: `Der Projektor (512 → 128) ist nur für den Loss da und spezialisiert <code>z</code> stark auf die Augmentationsaufgabe. Das Backbone-Embedding <code>h</code> behält allgemeinere Information und eignet sich besser zum Vergleichen (Cosine-Ähnlichkeit) und für andere Aufgaben. Der Projektor wird darum weggeworfen.` },
       { q: `Was ist Transfer Learning, und warum friert man die Basis zuerst ein?`, a: `Ein auf vielen Bildern vortrainiertes CNN übernehmen und nur einen neuen Kopf trainieren. Eingefroren, weil die zufälligen Gewichte des neuen Kopfs anfangs grosse Gradienten erzeugen, die die gelernten Filter zerstören würden. Danach optional Fine-Tuning mit sehr kleiner Learning Rate.` },
       { q: `Ein Notebook trainiert mit <code>validation_data=(x_test, y_test)</code>. Was ist das Problem?`, a: `Epochen und Setup werden am Testset gewählt; die Test-Accuracy ist dann keine ehrliche Schätzung mehr. Besser <code>validation_split</code> oder ein eigener Validation-Teil, Test einmal am Schluss.` },
       { q: `Welche Form hat die Eingabe für MNIST-Bilder in einem CNN, und warum?`, a: `<code>(28, 28, 1)</code>. Conv2D erwartet immer eine Kanal-Achse, auch bei Graustufen.` },

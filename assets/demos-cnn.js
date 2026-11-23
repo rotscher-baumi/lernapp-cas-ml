@@ -63,6 +63,97 @@
 
   LernApp.cnnLib = { conv2d: conv2d, relu: relu, pool: pool, outSize: outSize, cnnLayers: cnnLayers };
 
+  // ---- Static figures: modules/cnn.js and modules/en/cnn.js call these inside their html (LernApp.t knows the language) ----
+  LernApp.cnnFig = {
+    // SimCLR: two augmented views → shared ResNet → h → projector → z → NT-Xent matrix; below: embedding space and use after training
+    simclr() {
+      const T = LernApp.t;
+      const tx = (cls, x, y, s, st) => '<text class="' + cls + '" x="' + x + '" y="' + y + '"' + (st ? ' style="' + st + '"' : '') + '>' + s + '</text>';
+      const arr = (x1, y1, x2, y2, cls) => '<line class="' + (cls || 'd-arr') + '" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '"/>';
+      const cells = (x, y, n, cls) => { let s = ''; for (let i = 0; i < n; i++) s += '<rect class="' + cls + '" x="' + (x + i * 9) + '" y="' + y + '" width="8" height="22" rx="1.5"/>'; return s; };
+      const trap = (x, cy, w) => '<path class="d-hl" d="M' + x + ' ' + (cy - 35) + 'L' + (x + w) + ' ' + (cy - 15) + 'V' + (cy + 15) + 'L' + x + ' ' + (cy + 35) + 'z"/>';
+      let s = '<svg viewBox="0 0 960 640" style="min-width:720px" role="img" aria-label="' + T(
+        'SimCLR: Aus einem Foto entstehen zwei zufällig veränderte Ansichten. Beide laufen durch dasselbe ResNet zum Embedding h mit 512 Zahlen und durch einen Projektor zum Vektor z mit 128 Zahlen. Der NT-Xent-Loss vergleicht alle Ansichten im Batch: Die zwei Ansichten desselben Fotos sollen ähnlich sein, alle anderen verschieden. Nach dem Training fällt der Projektor weg; zwei Fotos gelten als gleiche Szene, wenn die Cosine-Ähnlichkeit ihrer Embeddings über einem Threshold liegt.',
+        'SimCLR: one photo yields two randomly altered views. Both pass through the same ResNet to the embedding h with 512 numbers and through a projector to the vector z with 128 numbers. The NT-Xent loss compares all views in the batch: the two views of the same photo should be similar, all others different. After training the projector is dropped; two photos count as the same scene when the cosine similarity of their embeddings is above a threshold.') + '">';
+      // Phase strips
+      [[20, 230, 'var(--muted)', '1 · ' + T('Zwei Ansichten', 'Two views'), T('zufällige Augmentation', 'random augmentation')],
+        [290, 230, 'var(--accent)', '2 · Backbone', T('ResNet-18 → Embedding h', 'ResNet-18 → embedding h')],
+        [535, 145, 'var(--ok)', '3 · ' + T('Projektor', 'Projector'), T('nur fürs Training', 'training only')],
+        [730, 210, 'var(--warn)', '4 · Loss', T('NT-Xent über den Batch', 'NT-Xent over the batch')]].forEach((p) => {
+        s += '<rect x="' + p[0] + '" y="10" width="' + p[1] + '" height="4" rx="2" style="fill:' + p[2] + '"/>' +
+          tx('d-tb', p[0] + p[1] / 2, 34, p[3], 'font-size:15px') + tx('d-m', p[0] + p[1] / 2, 54, p[4]);
+      });
+      // Photo and its two views
+      s += '<rect class="d-box" x="20" y="170" width="90" height="80" rx="4"/>' +
+        '<polygon points="28,242 55,196 70,214 86,188 102,242" style="fill:var(--ok)"/><circle cx="40" cy="186" r="7" style="fill:var(--warn)"/>' +
+        tx('d-tb', 65, 266, T('Foto', 'Photo'), 'font-size:13px') + tx('d-m', 65, 282, T('ohne Label', 'no label'));
+      s += arr(112, 195, 166, 132) + arr(112, 225, 166, 288);
+      s += '<rect class="d-box" x="170" y="80" width="80" height="80" rx="4"/>' +
+        '<polygon points="171,159 198,104 214,126 236,92 249,108 249,159" style="fill:var(--accent)"/>' +
+        tx('d-m', 210, 174, T('Crop + Farbe', 'crop + colour'));
+      s += '<rect class="d-box" x="170" y="250" width="80" height="80" rx="4"/>' +
+        '<polygon points="178,322 194,268 210,286 225,296 242,322" style="fill:var(--muted)"/><circle cx="231" cy="264" r="6" style="fill:var(--muted)"/>' +
+        tx('d-m', 210, 344, T('Flip + Graustufen', 'flip + greyscale'));
+      // Two branches with shared weights
+      [120, 290].forEach((cy, k) => {
+        s += arr(252, cy, 296, cy) + trap(300, cy, 110) + tx('d-tb', 352, cy, 'ResNet-18', 'font-size:13px') +
+          arr(412, cy, 434, cy) + cells(438, cy - 11, 8, 'd-hl') + arr(512, cy, 535, cy) +
+          '<rect class="d-ok" x="539" y="' + (cy - 20) + '" width="100" height="40" rx="6"/>' + tx('d-tb', 589, cy - 7, 'MLP', 'font-size:13px') + tx('d-tm', 589, cy + 9, '512 → 128', 'font-size:11px') +
+          arr(641, cy, 663, cy) + cells(667, cy - 11, 4, 'd-ok');
+        s += tx('d-tm', 474, k ? cy + 24 : cy - 24, 'h (512)', 'font-size:11px') + tx('d-tm', 685, k ? cy + 24 : cy - 24, 'z (128)', 'font-size:11px');
+      });
+      s += arr(355, 158, 355, 252, 'd-dash') + tx('d-m d-ml', 364, 197, T('dasselbe Netz,', 'same network,')) + tx('d-m d-ml', 364, 212, T('gleiche Gewichte', 'shared weights'));
+      s += tx('d-m', 474, 165, 'Embedding', 'fill:var(--accent)');
+      // Similarity matrix: rows/cols a1 a2 a3 b1 b2 b3; partner of ai is bi
+      const X0 = 790, Y0 = 108, C = 24, L = ['A₁', 'A₂', 'A₃', 'B₁', 'B₂', 'B₃'];
+      s += arr(706, 120, 764, 120) + arr(706, 290, 764, 200);
+      for (let i = 0; i < 6; i++) {
+        s += tx('d-tm', X0 + i * C + C / 2, Y0 - 10, L[i], 'font-size:11px') + tx('d-tm', X0 - 8, Y0 + i * C + C / 2, L[i], 'font-size:11px;text-anchor:end');
+        for (let j = 0; j < 6; j++) {
+          const cls = i === j ? 'd-dim' : Math.abs(i - j) === 3 ? 'd-ok' : 'd-box';
+          s += '<rect class="' + cls + '" x="' + (X0 + j * C + 1) + '" y="' + (Y0 + i * C + 1) + '" width="' + (C - 2) + '" height="' + (C - 2) + '" rx="2"/>';
+        }
+      }
+      s += '<rect x="' + (X0 - 1) + '" y="' + (Y0 - 1) + '" width="' + (6 * C + 2) + '" height="' + (C + 2) + '" rx="3" style="fill:none;stroke:var(--warn);stroke-width:2"/>';
+      s += tx('d-m d-ml', 738, 268, T('A/B = Ansicht 1/2, Batch: N = 3 Fotos', 'A/B = view 1/2, batch: N = 3 photos'));
+      [['d-ok', T('Partner (gleiches Foto): hoch', 'partner (same photo): high')],
+        ['d-box', T('Negative (andere Fotos): tief', 'negatives (other photos): low')],
+        ['d-dim', T('sich selbst: ausgelassen', 'itself: left out')]].forEach((l, i) => {
+        s += '<rect class="' + l[0] + '" x="738" y="' + (282 + i * 18) + '" width="12" height="12" rx="2"/>' + tx('d-m d-ml', 756, 288 + i * 18, l[1]);
+      });
+      s += '<rect x="738" y="336" width="12" height="12" rx="2" style="fill:none;stroke:var(--warn);stroke-width:2"/>' +
+        tx('d-m d-ml', 756, 342, T('pro Zeile Cross-Entropy:', 'per row cross-entropy:')) + tx('d-m d-ml', 756, 357, T('«Welche der 5 ist mein Partner?»', '“Which of the 5 is my partner?”'));
+      // Training bracket
+      s += '<path class="d-ln" d="M290 384V392H940V384"/>' +
+        tx('d-m', 615, 410, T('Backpropagation passt ResNet und Projektor an, Labels braucht es keine. τ (Temperatur) klein = harte Trennung.', 'Backpropagation updates ResNet and projector; no labels needed. Small τ (temperature) = hard separation.'));
+      // Lower left: embedding space
+      s += '<line class="d-ln" x1="20" y1="436" x2="940" y2="436" style="stroke:var(--line)"/>' +
+        tx('d-tb', 20, 462, T('Was das bewirkt: der Embedding-Raum', 'What this does: the embedding space'), 'text-anchor:start;font-size:13px') +
+        '<circle class="d-box" cx="140" cy="550" r="72"/>';
+      const pts = [[112, 520, 'var(--accent)'], [130, 530, 'var(--accent)'], [178, 590, 'var(--warn)'], [190, 576, 'var(--warn)'], [104, 594, 'var(--ok)'], [120, 602, 'var(--ok)']];
+      s += arr(112, 540, 106, 580, 'd-arr" style="stroke-dasharray:4 3') + arr(136, 540, 174, 574, 'd-arr" style="stroke-dasharray:4 3');
+      pts.forEach((p) => { s += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="6" style="fill:' + p[2] + '"/>'; });
+      s += '<circle cx="121" cy="525" r="18" style="fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 3"/>';
+      s += '<circle cx="232" cy="508" r="6" style="fill:var(--accent)"/>' + tx('d-m d-ml', 244, 508, T('Punkt = eine Ansicht, Farbe = Foto', 'dot = one view, colour = photo')) +
+        '<circle cx="232" cy="535" r="10" style="fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 3"/>' + tx('d-m d-ml', 248, 535, T('gleiches Foto: zusammen', 'same photo: together')) +
+        arr(222, 562, 242, 562, 'd-arr" style="stroke-dasharray:4 3') + tx('d-m d-ml', 248, 562, T('andere Fotos: auseinander', 'other photos: apart')) +
+        tx('d-m d-ml', 222, 594, T('Ähnliche Szenen landen so', 'Similar scenes thus end up')) + tx('d-m d-ml', 222, 609, T('nahe beieinander.', 'close together.'));
+      // Lower right: use after training
+      s += tx('d-tb', 470, 462, T('Danach: Duplikate und Serien finden', 'Afterwards: find duplicates and series'), 'text-anchor:start;font-size:13px');
+      [510, 585].forEach((cy, k) => {
+        s += '<rect class="d-box" x="470" y="' + (cy - 20) + '" width="60" height="40" rx="4"/>' + tx('d-t', 500, cy, T('Foto ', 'Photo ') + (k + 1), 'font-size:12px') +
+          arr(532, cy, 550, cy) + '<path class="d-hl" d="M554 ' + (cy - 22) + 'L624 ' + (cy - 10) + 'V' + (cy + 10) + 'L554 ' + (cy + 22) + 'z"/>' + tx('d-tm', 588, cy, 'ResNet', 'font-size:11px') +
+          arr(626, cy, 642, cy) + cells(646, cy - 11, 4, 'd-hl') + tx('d-tm', 662, k ? cy + 22 : cy - 22, 'h' + (k ? '₂' : '₁'), 'font-size:11px');
+      });
+      s += '<polyline class="d-arr" points="684,510 700,510 700,538 716,538"/><polyline class="d-arr" points="684,585 700,585 700,557 716,557"/>' +
+        '<rect class="d-hl" x="720" y="526" width="96" height="44" rx="6"/>' + tx('d-t', 768, 540, 'cos(h₁, h₂)', 'font-size:12px') + tx('d-tm', 768, 558, '−1 … 1', 'font-size:11px') +
+        arr(818, 548, 836, 548) + '<rect class="d-ok" x="840" y="508" width="100" height="80" rx="6"/>' +
+        tx('d-tb', 890, 526, '≥ Threshold?', 'font-size:12px') + tx('d-m', 890, 548, T('ja: gleiche Szene', 'yes: same scene')) + tx('d-m', 890, 566, T('nein: verschieden', 'no: different'));
+      s += tx('d-m', 705, 622, T('Der Projektor fällt weg: Verglichen wird das Embedding h, nicht z.', 'The projector is dropped: compare the embedding h, not z.'));
+      return s + '</svg>';
+    },
+  };
+
   // ---- Demos (DOM) ----
   LernApp.demos.cnn = function () {
     const T = LernApp.t;

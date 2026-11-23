@@ -28,7 +28,7 @@ lernapp-cas-ml/
     style.css                Design-Tokens hell/dunkel und alle Komponenten
     demos-mathe.js           MatheDemos: Demos, die beide Mathe-Seiten teilen
     demos-kmeans.js          KMeansDemo: k-Means-Demo und gemeinsame k-Means-Helfer (`KMeansDemo.lib`)
-    demos-ml.js, demos-klass.js, demos-unsup.js, demos-nn.js, demos-cnn.js, demos-cv.js, demos-det.js, demos-gen.js, demos-modell.js   Demo-Code der Kapitel ml, klass, unsup, nn, cnn, cv, det, gen und des Praxis-Teils von uebersicht (demos-modell.js) (`LernApp.demos.<id>`); `demos-det.js` und `demos-gen.js` bauen zusätzlich die statischen Grafiken der Kapitel det und gen (`LernApp.detFig`, `LernApp.genFig`), darum laden sie vor den Modulen
+    demos-ml.js, demos-klass.js, demos-unsup.js, demos-nn.js, demos-cnn.js, demos-cv.js, demos-det.js, demos-gen.js, demos-modell.js   Demo-Code der Kapitel ml, klass, unsup, nn, cnn, cv, det, gen und des Praxis-Teils von uebersicht (demos-modell.js) (`LernApp.demos.<id>`); `demos-cnn.js`, `demos-det.js` und `demos-gen.js` bauen zusätzlich die statischen Grafiken der Kapitel cnn, det und gen (`LernApp.cnnFig`, `LernApp.detFig`, `LernApp.genFig`), darum laden sie vor den Modulen
     demos-quiz.js            Kapitel Quiz: `LernApp.quizLogic` (reine Funktionen: Karten-IDs, Bewertung, Runde, Statistik) und `LernApp.demos.quiz` (Oberfläche)
     search.js                Volltextsuche der Hauptseite (klebende Leiste `.topbar` um `nav.chips`)
     img/                     Grafiken, aus echten Läufen erzeugt (Titanic)
