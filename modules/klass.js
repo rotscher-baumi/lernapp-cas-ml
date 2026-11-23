@@ -6,7 +6,7 @@
     nav: 'Klassifikation',
     title: `Supervised Learning: Klassifikation`,
     kicker: `Modul 2 · Supervised Learning: Klassifikation · Fr 30.10.`,
-    summary: `Logistische Regression, Metriken, Ungleichgewicht, Bäume, Ensembles, Leakage`,
+    summary: `Logistische Regression, Metriken, ROC und AUC, Ungleichgewicht, Bäume, Ensembles, Leakage`,
     html: `  <p>Gleiche Idee wie am Tag 1 (Beispiele mit bekannter Antwort), aber die Antwort ist jetzt eine <b>Klasse</b> statt einer Zahl: Betrug ja/nein, Spam ja/nein, Katze/Hund/Vogel. Alles von Tag 1 gilt weiter: Train/Test, Cross-Validation, Skalieren, Regularisierung, Hyperparameter-Suche.</p>
   <div class="grid2">
     <div><h4>Regression</h4><p>Vorhersage einer Zahl (Preis, Temperatur). Fehler: MSE, MAE.</p></div>
@@ -114,7 +114,7 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
 
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Den Threshold verschieben: Precision gegen Recall</h4>
   <p>Senkst du den Threshold, sagt das Modell öfter «positiv»: mehr TP, aber auch mehr FP. Recall steigt (oder bleibt gleich), Precision sinkt meist. Es ist ein <b>Kompromiss</b>, und welche Seite wichtiger ist, hängt vom Problem ab. Bei einer Krebs-Früherkennung willst du kaum etwas übersehen (hoher Recall), bei einer Spam-Sperre willst du keine echte Mail löschen (hohe Precision).</p>
-  <p>Die <b>ROC-Kurve</b> trägt für alle Thresholds den Recall (TPR) gegen die False Alarm Rate (FPR) auf. Ein perfektes Modell liegt oben links, Raten liegt auf der Diagonalen. Die <b>AUC</b> ist die Fläche unter der Kurve: 1 ist perfekt, 0,5 ist Zufall.</p>
+  <p>Die <b>ROC-Kurve</b> trägt für alle Thresholds den Recall (TPR) gegen die False Alarm Rate (FPR) auf. Ein perfektes Modell liegt oben links, Raten liegt auf der Diagonalen. Die <b>AUC</b> ist die Fläche unter der Kurve: 1 ist perfekt, 0,5 ist Zufall. Wie die Kurve entsteht und was die Zahl genau bedeutet, zeigt <a href="#klass-auc">Abschnitt 3</a>.</p>
   <div class="demo" id="thDemo">
     <div class="tag">Demo</div><h4>Threshold, Confusion Matrix und ROC</h4>
     <p class="hint">Wähle, wie viele echte Positive und Negative es gibt (Regler logarithmisch, 1 bis 1000). Die Form der Modell-Wahrscheinlichkeiten bleibt gleich: Die meisten Fälle sind eindeutig, nur wenige liegen im Grenzbereich (bei 10 und 10 genau 4).</p>
@@ -144,10 +144,66 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
   <div class="merk"><b>Zusammenfassung: Threshold, ROC, AUC</b><ul>
     <li><b>Threshold:</b> Das Modell liefert Wahrscheinlichkeiten, erst der Threshold macht daraus Klassen. Tieferer Threshold = mehr Recall, mehr falsche Alarme.</li>
     <li><b>ROC:</b> Jeder Threshold ergibt einen Punkt (FPR, TPR). Die ROC-Kurve verbindet alle Punkte.</li>
-    <li><b>AUC:</b> Fläche unter der ROC-Kurve, unabhängig vom Threshold. 1 = perfekt, 0,5 = Zufall. Den Threshold wählst du danach nach den Kosten der Fehler.</li>
+    <li><b>AUC:</b> Fläche unter der ROC-Kurve, unabhängig vom Threshold. 1 = perfekt, 0,5 = Zufall. Den Threshold wählst du danach nach den Kosten der Fehler. <a href="#klass-auc">Ausführlich →</a></li>
   </ul></div>
 
-  <h3 id="klass-multi">3 · Mehr als zwei Klassen</h3>
+  <h3 id="klass-auc">3 · ROC-Kurve und AUC verstehen</h3>
+  <p>Precision, Recall und F1 aus Abschnitt 2 gelten immer für <b>einen</b> Threshold. Die <b>AUC</b> (Area Under the Curve) bewertet das Modell, bevor du diesen Threshold wählst. Sie fragt nur eines: Bringt das Modell die Fälle in die richtige <b>Reihenfolge</b>, die echten Positiven vor die echten Negativen? Darum eignet sie sich, um Modelle zu vergleichen. Den Threshold wählst du danach.</p>
+
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Die ROC-Kurve Schritt für Schritt</h4>
+  <ol>
+    <li>Alle Fälle nach dem Score des Modells sortieren (z. B. <code>predict_proba</code>), den höchsten zuerst.</li>
+    <li>Start bei (0, 0): Der Threshold liegt über allen Scores, kein Fall ist positiv.</li>
+    <li>Den Threshold Fall für Fall senken. Ist der nächste Fall echt positiv, geht die Kurve um 1/P nach oben (ein TP mehr). Ist er echt negativ, geht sie um 1/N nach rechts (ein FP mehr). P und N sind die Anzahl der echten Positiven und Negativen.</li>
+    <li>Ende bei (1, 1): Der Threshold liegt unter allen Scores, jeder Fall ist positiv. Haben mehrere Fälle denselben Score, geht die Kurve dort schräg.</li>
+  </ol>
+  <p>Ein perfektes Modell geht zuerst ganz nach oben und dann nach rechts (AUC 1). Ein Modell, das rät, mischt beide Richtungen und bleibt nahe der Diagonalen (AUC 0,5).</p>
+
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Was die Zahl bedeutet</h4>
+  <p><b>Die AUC ist die Wahrscheinlichkeit, dass das Modell einem zufällig gezogenen positiven Fall einen höheren Score gibt als einem zufällig gezogenen negativen.</b> Gleichstände zählen halb. Eine AUC von 0,8 heisst also: Von 100 Paaren (ein positiver, ein negativer Fall) liegt in 80 der positive vorne. Das ist dieselbe Zahl wie die Fläche unter der Treppe: Bei P · N Paaren steht jedes Paar für ein Kästchen im Einheitsquadrat, und unter der Kurve liegen genau die richtig geordneten.</p>
+  <div class="demo" id="auDemo">
+    <div class="tag">Demo</div><h4>ROC-Kurve als Treppe, AUC als Paarvergleich</h4>
+    <p class="hint">10 echt positive (Kreis) und 10 echt negative Fälle (Quadrat) auf der Achse des Scores. «Trennung» bestimmt, wie weit die Scores der beiden Klassen auseinanderliegen. «Threshold-Schritt» senkt den Threshold Fall für Fall: Jeder Kreis rechts der Linie ist ein Schritt nach oben, jedes Quadrat ein Schritt nach rechts.</p>
+    <div class="btnrow"><button type="button" id="auNew">Neue Stichprobe</button><button type="button" id="auFlip">Score umdrehen</button></div>
+    <div class="ctl"><label for="auSep">Trennung</label><input type="range" id="auSep" min="0" max="4" step="0.1" value="1.5"><output id="auSepO"></output></div>
+    <div class="ctl"><label for="auK">Threshold-Schritt</label><input type="range" id="auK" min="0" max="20" step="1" value="20"><output id="auKO"></output></div>
+    <svg class="plot" id="auSvg" viewBox="0 0 320 130" role="img" aria-label="Scores der positiven und negativen Fälle mit Threshold"></svg>
+    <svg class="plot" id="auRoc" viewBox="0 0 320 240" role="img" aria-label="ROC-Kurve als Treppe mit Raster der Paare" style="margin-top:12px"></svg>
+    <div class="stats"><span>AUC (Fläche) <b id="auAuc"></b></span><span>Paare richtig geordnet <b id="auPairs"></b></span><span>TPR, FPR beim Schritt <b id="auPt"></b></span></div>
+    <p class="hint" id="auMsg">&nbsp;</p>
+    <p class="hint">Jedes Kästchen im Raster ist ein Paar aus einem positiven (Zeile) und einem negativen Fall (Spalte). Eingefärbt sind die Paare, in denen der positive Fall den höheren Score hat. Ihre Zahl geteilt durch 100 ist die AUC.</p>
+  </div>
+
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Faustregeln</h4>
+  <div class="tablewrap"><table>
+    <tr><th>AUC</th><th>Bedeutung</th></tr>
+    <tr><td>0,5</td><td>Zufall: Das Modell trennt die Klassen nicht.</td></tr>
+    <tr><td>unter 0,5</td><td>Schlechter als Zufall. Meist sind Labels oder Score vertauscht: Mit umgedrehtem Score wäre die AUC 1 − AUC.</td></tr>
+    <tr><td>0,7 bis 0,8</td><td>brauchbar</td></tr>
+    <tr><td>0,8 bis 0,9</td><td>gut</td></tr>
+    <tr><td>über 0,9</td><td>sehr gut. Liegt sie auf echten Daten nahe 1, zuerst <a href="#klass-leakage">Data Leakage</a> ausschliessen.</td></tr>
+  </table></div>
+  <p class="note">Das sind Faustregeln. Was reicht, hängt vom Problem ab: Bei einer Betrugserkennung kann 0,75 viel wert sein, bei einer Ziffernerkennung ist 0,95 schwach. Vergleiche immer mit einer Baseline auf denselben Daten.</p>
+
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">ROC-AUC oder PR-AUC?</h4>
+  <p>Die ROC rechnet nur mit Raten innerhalb jeder Klasse (TPR unter den Positiven, FPR unter den Negativen). Darum ändert sich die ROC-AUC kaum, wenn es zehnmal mehr Negative gibt. Probiere es in der <a href="#klass-metriken">Demo von Abschnitt 2</a> mit 10 : 1000. Die Precision dagegen bricht ein: Bei seltenen Positiven ergibt schon eine kleine False Alarm Rate mehr FP als TP. Das zeigt die <b>PR-AUC</b>, die Fläche unter der Precision-Recall-Kurve (in scikit-learn <code>average_precision_score</code>). Ihr Zufallswert ist nicht 0,5, sondern der Anteil der Positiven, z. B. 0,01 bei 1 % Positiven. Bei <a href="#klass-imbal">unausgewogenen Klassen</a> gehören beide in den Bericht.</p>
+
+  <pre><code>from sklearn.metrics import roc_auc_score, average_precision_score, roc_curve
+
+proba = model.predict_proba(X_val)[:, 1]          # Score der positiven Klasse, nicht predict()
+print(roc_auc_score(y_val, proba))                # ROC-AUC: 0,5 = Zufall
+print(average_precision_score(y_val, proba))      # PR-AUC: Zufall = Anteil der Positiven
+fpr, tpr, thresholds = roc_curve(y_val, proba)    # die Punkte der Kurve, z. B. zum Zeichnen</code></pre>
+  <div class="falle"><b>Falle: Was die AUC nicht sagt</b><ul>
+    <li><b>Keinen Threshold:</b> Zwei Modelle mit derselben AUC können beim Threshold, den du brauchst, sehr verschieden sein. Den Threshold wählst du separat auf der Validation.</li>
+    <li><b>Keine Kalibrierung:</b> Nur die Reihenfolge zählt. Quadrierst du alle Scores, bleibt die AUC gleich, aber die Scores sind keine sinnvollen Wahrscheinlichkeiten mehr.</li>
+    <li><b>Alle Thresholds zählen gleich:</b> Auch Bereiche, die du nie nutzt (z. B. 80 % False Alarms). Zählt nur ein Bereich, vergleiche dort, z. B. den Recall bei einer festen False Alarm Rate.</li>
+    <li><b><code>predict</code> statt <code>predict_proba</code>:</b> Mit 0/1-Vorhersagen hat die Kurve nur einen Punkt (Threshold 0,5), und die AUC ist zu tief.</li>
+    <li><b>Mehr als zwei Klassen:</b> Die AUC ist für zwei Klassen definiert. Bei mehreren rechnet man One-vs-Rest pro Klasse und mittelt (<code>roc_auc_score(y, proba, multi_class="ovr")</code>).</li>
+  </ul></div>
+  <div class="merk"><b>Merksatz</b><p>Die AUC misst die Reihenfolge: wie oft ein positiver Fall einen höheren Score hat als ein negativer. 0,5 ist Zufall, 1 ist perfekt. Sie vergleicht Modelle unabhängig vom Threshold. Bei seltenen Positiven zusätzlich die PR-AUC angeben, und den Threshold danach auf der Validation nach den Kosten der Fehler wählen.</p></div>
+
+  <h3 id="klass-multi">4 · Mehr als zwei Klassen</h3>
   <ul>
     <li><b>One-vs-All</b>: Pro Klasse ein Zweiklassen-Modell («diese Klasse gegen alle anderen»). Die Klasse mit der höchsten Wahrscheinlichkeit gewinnt.</li>
     <li><b>Softmax</b>: Die Verallgemeinerung der Sigmoid-Funktion auf mehrere Klassen. Alle Wahrscheinlichkeiten sind positiv und summieren sich zu 1.</li>
@@ -162,7 +218,7 @@ clf.predict_proba(X_test)    # Wahrscheinlichkeiten pro Klasse</code></pre>
 print(confusion_matrix(y_test, pred))
 print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse + Mittel</code></pre>
 
-  <h3 id="klass-imbal">4 · Unausgewogene Klassen</h3>
+  <h3 id="klass-imbal">5 · Unausgewogene Klassen</h3>
   <p>Oft ist das Interessante selten: Betrug, Defekte, Krankheiten. Ein Modell kann dann die Minderheit ignorieren und trotzdem «gut» aussehen. Zwei Dinge sind zu tun: richtig messen (nicht Accuracy) und die Daten oder das Training anpassen.</p>
   <div class="demo" id="imDemo">
     <div class="tag">Demo</div><h4>Warum Accuracy täuscht</h4>
@@ -184,7 +240,7 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
   </table></div>
   <div class="falle"><b>Falle</b><p>Resampling (Up/Downsampling, SMOTE) gehört <b>nur auf die Trainingsdaten</b>, nie auf das Test-Set. Sonst bewertest du auf künstlichen Daten und bekommst zu schöne Zahlen.</p></div>
 
-  <h3 id="klass-modelle">5 · Nicht-lineare Klassifikatoren</h3>
+  <h3 id="klass-modelle">6 · Nicht-lineare Klassifikatoren</h3>
   <p>Logistische Regression zieht eine <b>gerade</b> Grenze. Wenn die Klassen nicht so sauber trennbar sind, brauchst du flexiblere Modelle.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Wonach optimiert jedes Modell?</h4>
   <div class="tablewrap"><table>
@@ -281,7 +337,7 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 je Klasse +
     <p class="hint" id="nnMsg">&nbsp;</p>
     <p class="hint">Oben: die Entscheidungsfläche des ganzen Netzes. Mitte: Jedes Neuron schaut für sich auf die Ebene (blau = Aktivierung positiv, orange = negativ); in Klammern sein Gewicht zur Ausgabe. Das Netz kombiniert diese einfachen Bilder zur Form oben. Unten: Der Loss (Fehlermass) sinkt, solange das Netz lernt. «Zwei Gruppen» braucht nur ein Neuron, «Kreis» und XOR mehrere.</p>
   </div>
-  <h3 id="klass-ens">6 · Ensembles: viele schwache Modelle ergeben ein starkes</h3>
+  <h3 id="klass-ens">7 · Ensembles: viele schwache Modelle ergeben ein starkes</h3>
   <p>Ein einzelnes Modell macht Fehler, ein tiefer Baum lernt die Trainingsdaten sogar auswendig. Die Idee der Ensembles: Nimm <b>viele einfache Bäume</b> statt eines grossen und kombiniere sie. Es gibt zwei Wege, und der Unterschied ist die wichtigste Frage dieses Abschnitts: Arbeiten die Bäume <i>nebeneinander</i> oder <i>nacheinander</i>?</p>
   <div class="grid2">
     <div><h4>Bagging (Random Forest): die Jury</h4>
@@ -363,7 +419,7 @@ rf = RandomForestRegressor(n_estimators=200, random_state=0).fit(X, y)
 gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).fit(X, y)
 # Für «teuer ja/nein»: RandomForestClassifier / GradientBoostingClassifier</code></pre>
 
-  <h3 id="klass-leakage">7 · Data Leakage</h3>
+  <h3 id="klass-leakage">8 · Data Leakage</h3>
   <p>Leakage heisst: Das Modell sieht beim Training Information, die es bei der echten Vorhersage nicht hätte. Folge: wunderbare Testwerte und ein Modell, das im Einsatz versagt.</p>
   <ul>
     <li><b>Target Leakage</b>: Ein Merkmal enthält die Antwort schon. Beispiel aus der Vorlesung: Ein Kündigungsmodell mit 100 % Treffer, weil Anrufe beim Kundendienst («ich möchte kündigen») erst <i>nach</i> der Kündigung entstehen.</li>
@@ -373,7 +429,7 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
   </ul>
   <div class="merk"><b>Merksatz</b><p>Misstraue zu guten Zahlen. Frage bei jedem Merkmal: «Hätte ich diesen Wert zum Zeitpunkt der Vorhersage wirklich?» Verdächtig sind auffällig gute Validierungs- oder Testwerte (die im Einsatz einbrechen) und ein einzelnes Merkmal mit enormem Gewicht. Ein grosser Abstand Training zu Validation ist dagegen Overfitting, nicht Leakage.</p></div>
 
-  <h3 id="klass-methoden">8 · Übersicht: Schritte und Methoden</h3>
+  <h3 id="klass-methoden">9 · Übersicht: Schritte und Methoden</h3>
   <p>Alle Schritte des Ablaufs mit den Methoden, die du dort wählst, und dem passenden scikit-learn-Aufruf. Die Nummern entsprechen der Grafik «Der ganze Ablauf auf einen Blick».</p>
   <div class="tablewrap"><table>
     <tr><th>Schritt</th><th>Methoden zur Wahl</th><th>Wann welche</th><th>scikit-learn</th></tr>
@@ -389,7 +445,7 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
   </table></div>
   <div class="merk"><b>Merksatz</b><p>Klassifikation ist Regression plus drei Entscheidungen: stratifiziert splitten, das Ungleichgewicht behandeln und den Threshold nach den Kosten der Fehler wählen.</p></div>
 
-  <h3 id="klass-best">9 · Best Practices</h3>
+  <h3 id="klass-best">10 · Best Practices</h3>
   <p>Ergänzend zu den allgemeinen <a href="#ml-best">Best Practices aus Supervised ML</a> gilt bei Klassifikation:</p>
   <div class="bp-check">
     <div><b>Metrik und Threshold</b><ul>
@@ -441,6 +497,9 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
       { q: `Warum ist Accuracy bei 1 % Betrugsfällen ein schlechtes Mass?`, k: [["Modell ohne Betrugsmeldung hat 99 %", "nie betrug", "nichts melden", "immer negativ", "alles negativ", "immer nein", "mehrheitsklasse", "99"], ["besser: Precision, Recall, F1, AUC", "precision", "recall", "f1", "auc"], ["seltene Klasse", "selten", "unausgewogen", "ungleichgewicht"]], c: ["Ein Modell, das nie Betrug meldet, hat 99 % Accuracy und ist nutzlos; besser Precision, Recall, F1 und AUC.", "Accuracy kann bei Betrugsfällen höchstens 50 % erreichen.", "Accuracy ist nur für Regression definiert.", "Accuracy hängt nicht von der Zahl der Fälle ab, deshalb ist sie unzuverlässig."], a: `Ein Modell, das nie Betrug meldet, hat 99 % Accuracy und ist trotzdem nutzlos. Precision, Recall, F1 und AUC zeigen, wie gut die seltene Klasse erkannt wird.` },
       { q: `Du senkst den Threshold von 0,5 auf 0,2. Was passiert mit Recall und Precision?`, k: [["Recall steigt", "recall steigt", "recall hoeher", "recall nimmt zu", "mehr recall"], ["Precision sinkt", "precision sinkt", "precision faellt", "precision geringer", "weniger precision", "precision nimmt ab"], ["mehr falsche Alarme", "falsche alarme", "false positive", "false alarm", "mehr positive"]], c: ["Recall steigt, Precision sinkt meist, weil mehr falsche Alarme dazukommen.", "Recall sinkt, Precision steigt.", "Beide steigen.", "Beide bleiben gleich, nur die AUC ändert sich."], a: `Mehr Fälle werden positiv: Recall steigt (oder bleibt gleich), Precision sinkt meist, weil mehr falsche Alarme dazukommen.` },
       { q: `Was bedeutet eine AUC von 0,5, was von 1?`, k: [["0,5 = Zufall (Diagonale)", "zufall", "diagonal", "raten"], ["1 = perfekt", "perfekt", "fehlerfrei", "alle positiven vor"]], c: ["0,5 ist Zufall (ROC auf der Diagonalen), 1 ist ein perfekter Klassifikator.", "0,5 ist perfekt, 1 ist Zufall.", "0,5 heisst 50 % Accuracy, 1 heisst 100 % Precision.", "0,5 bedeutet Overfitting, 1 Underfitting."], a: `0,5 ist Zufall (ROC-Kurve auf der Diagonalen), 1 ist ein perfekter Klassifikator (alle Positiven vor allen Negativen).` },
+      { q: `Was misst die AUC, ausgedrückt als Wahrscheinlichkeit?`, k: [["positiver Fall höherer Score als negativer", "hoeheren score", "hoeher", "vor dem negativen", "vorne"], ["zufällig gezogenes Paar", "zufaellig", "paar"], ["Reihenfolge, kein Threshold", "reihenfolge", "rangfolge", "unabhaengig vom threshold"]], c: ["Die Wahrscheinlichkeit, dass ein zufälliger positiver Fall einen höheren Score bekommt als ein zufälliger negativer.", "Den Anteil richtig klassifizierter Fälle beim Threshold 0,5.", "Die Wahrscheinlichkeit, dass ein Fall positiv ist.", "Die mittlere Precision über alle Klassen."], a: `Die Wahrscheinlichkeit, dass das Modell einem zufällig gezogenen positiven Fall einen höheren Score gibt als einem zufällig gezogenen negativen (ein zufälliges Paar, Gleichstand zählt halb). Sie bewertet nur die Reihenfolge, unabhängig vom Threshold.` },
+      { q: `Bei 1 % Positiven hat dein Modell eine ROC-AUC von 0,93. Warum reicht das nicht, und was gibst du zusätzlich an?`, k: [["ROC rechnet mit Raten, viele Negative fallen nicht auf", "raten", "viele negative", "fpr"], ["Precision kann trotzdem tief sein", "precision"], ["PR-AUC, Zufall = Anteil Positive", "pr auc", "average precision", "average_precision"]], c: ["Die ROC nutzt nur Raten; trotz hoher AUC kann die Precision tief sein. Zusätzlich PR-AUC (Zufall = Anteil Positive).", "0,93 ist zu tief, erst ab 0,99 ist ein Modell brauchbar.", "Die AUC ist bei seltenen Klassen nicht definiert.", "Man gibt zusätzlich die Accuracy an, weil sie bei seltenen Klassen genauer ist."], a: `Die ROC rechnet nur mit Raten innerhalb jeder Klasse. Bei so vielen Negativen ergibt schon eine kleine FPR mehr falsche Alarme als Treffer, die Precision kann also tief sein. Zusätzlich die PR-AUC angeben (<code>average_precision_score</code>), ihr Zufallswert ist der Anteil der Positiven, hier 0,01.` },
+      { q: `Warum ist <code>roc_auc_score(y_val, model.predict(X_val))</code> falsch?`, k: [["predict liefert nur 0/1", "0 1", "nur klassen", "klassen statt"], ["Kurve mit nur einem Punkt", "einem punkt", "ein punkt", "threshold 0 5"], ["predict_proba verwenden", "predict proba"]], c: ["predict liefert nur 0/1: Die Kurve hat einen Punkt, die AUC ist zu tief. Richtig: predict_proba(X_val)[:, 1].", "roc_auc_score braucht die Trainingsdaten, nicht die Validation.", "Die Argumente sind vertauscht, y_val muss an zweiter Stelle stehen.", "Es ist richtig, predict und predict_proba ergeben dieselbe AUC."], a: `<code>predict</code> liefert nur 0/1, also nur die Klassen beim Threshold 0,5. Die ROC-Kurve hat dann einen Punkt, und die AUC ist zu tief. Richtig ist der Score: <code>predict_proba(X_val)[:, 1]</code>.` },
       { q: `Was passiert bei kNN mit k = 1 und mit k = N?`, k: [["k = 1: folgt jedem Trainingspunkt, Overfitting", "overfit", "ueberanpass", "trainingspunkt", "jedem punkt", "auswendig"], ["k = N: immer die Mehrheitsklasse", "mehrheit", "haeufigste klasse", "immer dieselbe", "underfit", "unteranpass"]], c: ["k = 1 überanpasst (folgt jedem Punkt), k = N sagt immer die Mehrheitsklasse.", "k = 1 sagt immer die Mehrheitsklasse, k = N überanpasst.", "Beide Werte liefern dasselbe Ergebnis.", "k = 1 ist Underfitting, k = N ist perfekt auf Train."], a: `k = 1 folgt jedem Trainingspunkt (Overfitting, auf den Trainingsdaten perfekt). k = N sagt immer die Mehrheitsklasse (Underfitting).` },
       { q: `Worin unterscheiden sich Bagging und Boosting?`, k: [["Bagging: parallel, Mittelung", "parallel", "mittel", "zufallsstichprobe", "bootstrap"], ["Boosting: nacheinander, Restfehler", "nacheinander", "sequentiell", "restfehler", "fehler des vorherigen", "korrigier"], ["Varianz bzw. Bias", "varianz", "variance", "bias"]], c: ["Bagging: parallel auf Stichproben, mittelt (Varianz ↓). Boosting: nacheinander, korrigiert Restfehler (Bias ↓).", "Bagging: nacheinander, korrigiert Fehler. Boosting: parallel und mittelt.", "Bagging nutzt nur einen Baum, Boosting viele.", "Beide trainieren parallel, nur die Tiefe der Bäume unterscheidet sie."], a: `Bagging trainiert viele Modelle parallel auf Zufallsstichproben und mittelt (senkt Varianz). Boosting trainiert nacheinander, jedes Modell korrigiert die Restfehler des bisherigen Gesamtmodells (senkt Bias, anfälliger für Rauschen).` },
       { q: `Wie entsteht Data Leakage, und wie verhinderst du es bei Skalierung und Imputation?`, k: [["Information aus Test- oder Zukunftsdaten im Training", "test", "zukunft"], ["nur auf Trainingsdaten fitten", "trainingsdaten", "nur train", "fit nur", "nur auf train"], ["Pipeline / Cross-Validation", "pipeline", "cross validation"]], c: ["Testwissen fliesst ins Training; alles Lernende nur auf den Trainingsdaten fitten, am besten in einer Pipeline.", "Das Modell lernt zu lange; man stoppt früher.", "Es gibt zu wenig Daten; man sammelt mehr.", "Die Klassen sind unausgewogen; man setzt SMOTE ein."], a: `Information aus Test- oder Zukunftsdaten fliesst ins Training. Alle lernenden Vorverarbeitungsschritte nur auf den Trainingsdaten fitten, am einfachsten mit einer Pipeline in der Cross-Validation.` },

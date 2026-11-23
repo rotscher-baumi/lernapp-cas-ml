@@ -182,6 +182,52 @@
           hint:['Ziehe den Threshold (senkrechte Linie) im Plot nach links oder rechts.','Drag the threshold (vertical line) left or right in the plot.']});
         prep();draw()})();
 
+      // Demo: ROC curve as a staircase and AUC as the share of correctly ordered (positive, negative) pairs
+      (function(){
+        if(!$('auDemo'))return;
+        const t=LernApp.t,N=10,W=320,PX=12,sx=p=>PX+p*(W-2*PX);
+        const RW=320,RH=240,RX=34,RY=24,RS=RH-26-RY,rx=v=>RX+v*RS,ry=v=>RH-26-v*RS;
+        let seed=7,zp=[],zn=[],flip=false;
+        function sample(){const r=mulberry32(seed);zp=[];zn=[];for(let i=0;i<N;i++)zp.push(gauss(r));for(let i=0;i<N;i++)zn.push(gauss(r))}
+        function cases(){const d=+$('auSep').value/2,sg=flip?-1:1,sc=z=>1/(1+Math.exp(-0.9*z));
+          return zp.map(z=>({s:sc(sg*(z+d)),y:1})).concat(zn.map(z=>({s:sc(sg*(z-d)),y:0}))).sort((a,b)=>b.s-a.s)}
+        function draw(){const cs=cases(),k=+$('auK').value;$('auSepO').textContent=fmt(+$('auSep').value,1);
+          // threshold between case k-1 and case k of the sorted list (k = number of cases called positive)
+          const thr=k===0?1:k>=cs.length?0:(cs[k-1].s+cs[k].s)/2;$('auKO').textContent=k+' / '+cs.length;
+          let s='<line class="ax" x1="'+PX+'" y1="65" x2="'+(W-PX)+'" y2="65"/>';
+          for(const v of[0,0.5,1])s+='<text class="lbl" x="'+(sx(v)-6)+'" y="124">'+v+'</text>';
+          const rows={1:0,0:0};
+          cs.slice().sort((a,b)=>a.s-b.s).forEach(c=>{const on=c.s>thr,col=c.y?(on?'var(--ok)':'var(--bad)'):(on?'var(--bad)':'var(--ok)'),j=rows[c.y]++%3;
+            if(c.y)s+='<circle cx="'+sx(c.s).toFixed(1)+'" cy="'+(28+j*9)+'" r="4.5" style="fill:'+col+';stroke:var(--fg);stroke-width:1"/>';
+            else s+='<rect x="'+(sx(c.s)-4.5).toFixed(1)+'" y="'+(78+j*9-4.5)+'" width="9" height="9" style="fill:'+col+';stroke:var(--fg);stroke-width:1"/>'});
+          s+='<text class="lbl" x="'+PX+'" y="12">'+t('echt positiv (Kreis)','actually positive (circle)')+'</text><text class="lbl" x="'+PX+'" y="112">'+t('echt negativ (Quadrat)','actually negative (square)')+'</text>';
+          s+='<line class="ln2" x1="'+sx(thr).toFixed(1)+'" y1="18" x2="'+sx(thr).toFixed(1)+'" y2="108"/>';
+          $('auSvg').innerHTML=s;
+          // staircase: walk the sorted cases, up for a positive, right for a negative
+          const pts=[[0,0]];let tp=0,fp=0,pairs=0;const cells=[];
+          cs.forEach(c=>{if(c.y)tp++;else{for(let i=0;i<tp;i++)cells.push([fp,i]);pairs+=tp;fp++}pts.push([fp/N,tp/N])});
+          let area=0;for(let i=1;i<pts.length;i++)area+=(pts[i][0]-pts[i-1][0])*(pts[i][1]+pts[i-1][1])/2;
+          const cw=RS/N;let g='';
+          cells.forEach(c=>{g+='<rect x="'+(rx(c[0]/N)).toFixed(1)+'" y="'+(ry((c[1]+1)/N)).toFixed(1)+'" width="'+cw.toFixed(1)+'" height="'+cw.toFixed(1)+'" style="fill:var(--accent);opacity:.22"/>'});
+          for(let i=0;i<=N;i++)g+='<line x1="'+rx(i/N).toFixed(1)+'" y1="'+ry(0)+'" x2="'+rx(i/N).toFixed(1)+'" y2="'+ry(1)+'" style="stroke:var(--line);stroke-width:.6"/><line x1="'+rx(0)+'" y1="'+ry(i/N).toFixed(1)+'" x2="'+rx(1)+'" y2="'+ry(i/N).toFixed(1)+'" style="stroke:var(--line);stroke-width:.6"/>';
+          g+='<line class="dash" x1="'+rx(0)+'" y1="'+ry(0)+'" x2="'+rx(1)+'" y2="'+ry(1)+'"/>';
+          const path=a=>a.map((p,i)=>(i?'L':'M')+rx(p[0]).toFixed(1)+' '+ry(p[1]).toFixed(1)).join('');
+          g+='<path d="'+path(pts.slice(k))+'" style="fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:4 3"/><path class="ln" d="'+path(pts.slice(0,k+1))+'"/>';
+          g+='<circle cx="'+rx(pts[k][0]).toFixed(1)+'" cy="'+ry(pts[k][1]).toFixed(1)+'" r="5.5" style="fill:var(--warn)"/>';
+          g+='<text class="lbl" x="'+(RX+10)+'" y="'+(RH-4)+'">False Alarm Rate (FPR)</text><text class="lbl" x="2" y="10">Recall (TPR)</text>';
+          g+='<text class="lbl" x="'+(RX-14)+'" y="'+(ry(0)+4)+'">0</text><text class="lbl" x="'+(RX-14)+'" y="'+(ry(1)+4)+'">1</text><text class="lbl" x="'+(rx(0)-3)+'" y="'+(ry(0)+13)+'">0</text><text class="lbl" x="'+(rx(1)-3)+'" y="'+(ry(0)+13)+'">1</text>';
+          $('auRoc').innerHTML=g;
+          $('auAuc').textContent=fmt(area,2);$('auPairs').textContent=pairs+t(' von ',' of ')+(N*N);$('auPt').textContent=fmt(pts[k][1],1)+', '+fmt(pts[k][0],1);
+          const sep=+$('auSep').value;
+          $('auMsg').textContent=flip?t('Score umgedreht: Die Treppe liegt unter der Diagonalen, die AUC ist 1 − AUC des Originals. So sieht es aus, wenn Labels oder Score vertauscht sind.','Score flipped: the staircase lies below the diagonal, the AUC is 1 − the original AUC. This is what swapped labels or a swapped score look like.')
+            :sep<0.3?t('Keine Trennung: Das Modell rät. Die AUC liegt um 0,5, schwankt aber bei nur 10 + 10 Fällen stark. Klicke mehrmals auf «Neue Stichprobe».','No separation: the model guesses. The AUC is around 0.5 but varies a lot with only 10 + 10 cases. Click «New sample» a few times.')
+            :area>=0.97?t('Fast perfekt getrennt: Die Treppe geht zuerst ganz nach oben, dann nach rechts. Fast jeder Kreis liegt vor jedem Quadrat.','Almost perfectly separated: the staircase first goes all the way up, then right. Almost every circle is ahead of every square.')
+            :t('Je mehr sich die Klassen überlappen, desto öfter liegt ein Quadrat vor einem Kreis. Jedes solche Paar fehlt in der Fläche.','The more the classes overlap, the more often a square is ahead of a circle. Every such pair is missing from the area.')}
+        $('auSep').addEventListener('input',draw);$('auK').addEventListener('input',draw);
+        $('auNew').addEventListener('click',()=>{seed+=1;sample();draw()});
+        $('auFlip').addEventListener('click',()=>{flip=!flip;$('auFlip').className=flip?'pri':'';draw()});
+        sample();draw()})();
+
       // Demo 3: imbalance
       (function(){
         function draw(){const pp=+$('imP').value;$('imPO').textContent=fmt(pp,1)+' %';

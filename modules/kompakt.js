@@ -12,6 +12,7 @@ LernApp.kompakt.de = `
   <ul>
     <li><b>Supervised:</b> Zu den Trainingsdaten ist das Ergebnis (Label) bekannt. Das Modell soll für neue, ungesehene Daten eine Prediction liefern. <a href="#ml">→</a></li>
     <li><b>Classification:</b> Supervised mit vorgegebenen Klassen: Jedes Beispiel wird einer Klasse zugeordnet. <a href="#klass">→</a></li>
+    <li><b>AUC:</b> Fläche unter der ROC-Kurve. Sie gibt an, wie wahrscheinlich ein zufälliger positiver Fall einen höheren Score bekommt als ein zufälliger negativer (0,5 = Zufall, 1 = perfekt), unabhängig vom Threshold. <a href="#klass-auc">→</a></li>
     <li><b>Unsupervised:</b> Es gibt keine Zielspalte. Man sucht Struktur und Zusammenhänge in den Daten (Clustering, Dimensionsreduktion, Anomalien). <a href="#unsup">→</a></li>
     <li><b>Neural Network:</b> Viele gewichtete Summen (wie lineare Regressionen), jeweils mit nichtlinearer Activation Function, in Schichten zu einem Netz verknüpft. <a href="#nn">→</a></li>
     <li><b>CNN:</b> Neural Network für Bilder. Die Pixel werden nicht zu einem Vektor abgeflacht. Ein Filter mit geteilten Gewichten gleitet über das Bild, darum bleibt die Nachbarschaft erhalten. <a href="#cnn">→</a></li>
@@ -93,7 +94,7 @@ LernApp.kompakt.de = `
     <tr><th>Thema</th><th>Merke</th></tr>
     <tr><td><b>Logistische Regression</b></td><td>Lineare Regression + Sigmoid. Liefert eine Wahrscheinlichkeit; die Klasse entsteht erst durch den <b>Threshold</b> (Standard 0.5), und den wählst du. Loss: Cross-Entropy.</td></tr>
     <tr><td><b>Confusion Matrix</b></td><td>TP, FP, FN, TN. <b>Precision</b> = TP/(TP+FP) (wie viele Alarme stimmen). <b>Recall</b> = TP/(TP+FN) (wie viele echte Fälle gefunden). <b>F1</b> = Mittel aus beiden. Accuracy = alle richtigen / alle.</td></tr>
-    <tr><td><b>Threshold, ROC, AUC</b></td><td>Tieferer Threshold: mehr Recall, weniger Precision (mehr False Alarms). ROC trägt Recall gegen False Alarm Rate über alle Thresholds ab, AUC ist die Fläche (0.5 = Zufall, 1 = perfekt). Bei seltenen Klassen zusätzlich Precision-Recall betrachten.</td></tr>
+    <tr><td><b>Threshold, ROC, AUC</b></td><td>Tieferer Threshold: mehr Recall, weniger Precision (mehr False Alarms). ROC trägt Recall gegen False Alarm Rate über alle Thresholds ab, AUC ist die Fläche (0,5 = Zufall, 1 = perfekt) und zugleich die Wahrscheinlichkeit, dass ein zufälliger positiver Fall einen höheren Score hat als ein negativer. Mit <code>predict_proba</code> rechnen, nicht mit <code>predict</code>. Bei seltenen Klassen zusätzlich die PR-AUC (Zufall = Anteil Positive). <a href="#klass-auc">→</a></td></tr>
     <tr><td><b>Mehrere Klassen</b></td><td>One-vs-All (ein Modell pro Klasse) oder Softmax (Wahrscheinlichkeiten summieren sich zu 1). Zusammenfassen mit Micro, Macro (jede Klasse gleich) oder Weighted (nach Klassengrösse).</td></tr>
     <tr><td><b>Unausgewogene Klassen</b></td><td>Accuracy täuscht. Auf Recall, Precision, F1, AUC schauen. Optionen: <code>class_weight</code>, Up/Downsampling, SMOTE, Threshold anpassen. Resampling nur auf Train.</td></tr>
     <tr><td><b>kNN, Naive Bayes, SVM, Baum</b></td><td>kNN: Mehrheit der k Nachbarn, skalieren, k gross = glatt. Naive Bayes: schnell, nimmt unabhängige Merkmale an. SVM: breiteste Grenze, Kernel für Krümmung, skalieren. Baum: Regeln, gut lesbar, neigt zu Overfitting (Tiefe begrenzen), skalieren unnötig.</td></tr>
