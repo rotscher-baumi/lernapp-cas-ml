@@ -221,6 +221,7 @@
       $('qzQ').innerHTML = c.q;
       $('qzOwn').value = '';
       $('qzOwn').hidden = false;
+      drawChoices(c);
       $('qzAns').hidden = true;
       $('qzRate').hidden = true;
       $('qzShow').hidden = false;
@@ -232,17 +233,43 @@
         b.innerHTML = '<kbd>' + (k + 1) + '</kbd> ' + t(g[1], g[2]) + (round.practice ? '' : '<small>' + inDays(daysBetween(d, n.due)) + '</small>');
       });
     }
-    function reveal() {
+    // Multiple choice (items with c): correct choice first in the data, shuffled here; a click reveals the answer
+    function drawChoices(c) {
+      const box = $('qzChoice');
+      box.hidden = !(c.c && c.c.length);
+      $('qzOpts').innerHTML = '';
+      if (box.hidden) return;
+      const opts = c.c.map(function (txt, i) { return { txt: txt, ok: i === 0 }; });
+      for (let i = opts.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const x = opts[i]; opts[i] = opts[j]; opts[j] = x; }
+      opts.forEach(function (o) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'qopt';
+        b.innerHTML = o.txt;
+        b.addEventListener('click', function () {
+          const all = $('qzOpts').querySelectorAll('.qopt');
+          b.classList.add(o.ok ? 'ok' : 'no');
+          if (!o.ok) opts.forEach(function (p, i) { if (p.ok) all[i].classList.add('ok'); });
+          reveal(o.ok ? 'good' : 'again');
+        });
+        $('qzOpts').appendChild(b);
+      });
+    }
+    function reveal(picked) {
       const c = round.list[round.pos], own = $('qzOwn').value.trim();
       $('qzA').innerHTML = c.a;
       $('qzMine').hidden = !own;
       $('qzMineText').textContent = own;
       // keyword check of the typed answer (items with k); suggests, but does not set, the rating
-      let sug = 'good';
+      let sug = picked === 'again' || picked === 'good' ? picked : 'good';
       const chk = $('qzCheck');
       chk.className = 'qres';
       chk.innerHTML = '';
-      if (own && c.k && c.k.length) {
+      if (picked === 'good' || picked === 'again') {
+        chk.className = 'qres ' + (picked === 'good' ? 'ok' : 'no');
+        chk.innerHTML = '<b>' + (picked === 'good' ? t('Richtig gewählt.', 'Correct choice.') : t('Nicht ganz. Die richtige Antwort ist grün markiert.', 'Not quite. The correct answer is marked green.')) + '</b>';
+        $('qzR' + sug).classList.add('sug');
+      } else if (own && c.k && c.k.length) {
         const r = L.checkAnswer(own, c.k);
         chk.className = 'qres ' + r.level;
         chk.innerHTML = L.checkHtml(r);
@@ -251,6 +278,8 @@
       }
       $('qzLink').href = '#' + c.ch;
       $('qzLink').textContent = t('Im Kapitel nachlesen', 'Read up in the chapter') + ': ' + c.nav + ' →';
+      $('qzOpts').querySelectorAll('.qopt').forEach(function (x) { x.disabled = true; });
+      $('qzChoice').hidden = !(c.c && c.c.length); // choices stay visible with the marked result
       $('qzOwn').hidden = true; // shown again as «Deine Antwort» next to the solution
       $('qzAns').hidden = false;
       $('qzRate').hidden = false;
@@ -292,13 +321,14 @@
     }
     $('qzStart').addEventListener('click', function () { start(false); });
     $('qzPractice').addEventListener('click', function () { start(true); });
-    $('qzShow').addEventListener('click', reveal);
+    $('qzShow').addEventListener('click', function () { reveal(); });
     $('qzStop').addEventListener('click', stop);
     ['again', 'hard', 'good'].forEach(function (g) { $('qzR' + g).addEventListener('click', function () { grade(g); }); });
     document.addEventListener('keydown', function (e) {
       if (!round || !visible() || e.ctrlKey || e.metaKey || e.altKey) return;
       const typing = /^(TEXTAREA|INPUT|SELECT)$/.test(e.target.tagName);
       if (!$('qzShow').hidden) {
+        if (e.target.classList && e.target.classList.contains('qopt')) return;
         if ((e.key === 'Enter' && (e.ctrlKey || !typing)) || (e.key === ' ' && !typing)) { e.preventDefault(); reveal(); }
         return;
       }
