@@ -280,7 +280,7 @@ h3[id],h4[id],.merk[id]{scroll-margin-top:72px}
 .px-bayer{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;max-width:120px;margin:2px 0}
 .px-bayer span{aspect-ratio:1;border-radius:2px;display:grid;place-items:center;font-family:var(--f-mono);font-size:9px;font-weight:600;color:#fff}
 
-/* Practice part of «Übersicht & Praxis» (demos-modell.js): model file demo, recommendation box; .bp-check is the Best-Practices grid of all chapters */
+/* Practice part of «Übersicht & Kompakt» (demos-modell.js): model file demo, recommendation box; .bp-check is the Best-Practices grid of all chapters */
 .mo-file{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start;margin:10px 0}
 @media (max-width:640px){.mo-file{grid-template-columns:1fr}}
 .mo-file svg.plot{max-width:none;margin:0}

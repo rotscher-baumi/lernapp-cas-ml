@@ -29,7 +29,8 @@ lernapp/
     search.js       Volltextsuche der Hauptseite: klebende Leiste über den Kapitel-Chips, Trefferliste, ▲▼, Markierung (CSS Custom Highlight API)
     notebook-data.js  aus den Notebooks erzeugt (nicht von Hand ändern)
   modules/          ein Kapitel pro Datei
-    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js nn.js cnn.js cv.js det.js gen.js uebersicht.js quiz.js kompakt.js titanic.js
+    ds.js git.js python.js pandas.js viz.js hood.js mathe*.js ml.js klass.js unsup.js nn.js cnn.js cv.js det.js gen.js uebersicht.js quiz.js titanic.js
+    kompakt.js      Spickzettel «Alles kompakt» (kein eigenes Kapitel: `LernApp.kompakt.de`/`.en`, von uebersicht.js unter `#kompakt` eingebettet)
     en/             englische Texte je Kapitel
     _vorlage.js     Vorlage für ein neues Kapitel
   notebooks/        Übungs-Notebooks (Jupyter / VS Code)

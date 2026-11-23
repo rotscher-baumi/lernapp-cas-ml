@@ -1,8 +1,8 @@
 /*
- * Overview and practice chapter («Übersicht & Praxis»), the last chapter: how to approach a new
- * problem (figure, Do & Don't, checklist), a model in practice (what a model is, where it comes from,
- * saving, drift; demos in assets/demos-modell.js) and the decision tree «Welches Modell wann?».
- * The tree links to the method cards in kompakt.js (#v-<method>); keep the names in both in sync.
+ * Overview chapter («Übersicht & Kompakt»), the last content chapter: how to approach a new problem
+ * (figure, Do & Don't, checklist), the decision tree «Welches Modell wann?», the cheat sheet «Alles kompakt»
+ * (modules/kompakt.js, #kompakt) and a model in practice (what a model is, where it comes from, saving, drift;
+ * demos in assets/demos-modell.js). The tree links to the method cards in kompakt.js (#v-<method>); keep the names in both in sync.
  * Translated in place: every text is t('deutsch', 'english') via LernApp.t.
  */
 (function () {
@@ -482,16 +482,17 @@ assert (pipe2.predict(X_val) == pipe.predict(X_val)).all()   # check loading</co
   LernApp.register({
     id: 'uebersicht',
     order: 95,
-    nav: t('Übersicht & Praxis', 'Overview & practice'),
-    title: t('Übersicht und Praxis: vom Problem zum Modell im Einsatz', 'Overview and practice: from the problem to a model in use'),
-    kicker: t('Zum Schluss · Vorgehen, Praxis, alle Modelle', 'To finish · approach, practice, all models'),
-    summary: t('Vorgehen bei einem neuen ML-Problem mit Checkliste, was ein Modell ist, vortrainierte Modelle, speichern und laden, Drift und neu trainieren, Steckbriefe aller Modelle von der linearen Regression bis zu Stable Diffusion, Checklisten der Strategien und eine Entscheidungshilfe', 'How to approach a new ML problem with a checklist, what a model is, pretrained models, saving and loading, drift and retraining, profiles of all models from linear regression to Stable Diffusion, strategy checklists and a decision guide'),
-    html: `
-  <p>${t('Das letzte Kapitel verbindet alles: zuerst das Vorgehen bei einem neuen ML-Problem mit Ablauf, Do &amp; Don’t und Checkliste, dann die Praxis rund um ein Modell (was ein Modell ist, woher es kommt, speichern und laden, neu trainieren), zum Schluss Steckbriefe aller Modelle und Checklisten der Strategien.', 'The last chapter ties everything together: first how to approach a new ML problem with a workflow, Do &amp; Don’t and a checklist, then the practice around a model (what a model is, where it comes from, saving and loading, retraining), finally profiles of all models and strategy checklists.')}</p>
+    nav: t('Übersicht & Kompakt', 'Overview & compact'),
+    title: t('Übersicht und Kompakt: vom Problem zum Modell im Einsatz', 'Overview and compact: from the problem to a model in use'),
+    kicker: t('Zum Schluss · Vorgehen, Spickzettel, Praxis', 'To finish · approach, cheat sheet, practice'),
+    summary: t('Vorgehen bei einem neuen ML-Problem mit Checkliste, Entscheidungshilfe «Welches Modell wann?», Spickzettel über alle Kapitel mit Steckbriefen aller Verfahren von der linearen Regression bis zu Stable Diffusion, dann die Praxis: was ein Modell ist, vortrainierte Modelle, speichern und laden, Drift und neu trainieren', 'How to approach a new ML problem with a checklist, the decision guide “Which model when?”, a cheat sheet over all chapters with profiles of every method from linear regression to Stable Diffusion, then practice: what a model is, pretrained models, saving and loading, drift and retraining'),
+    // Getter: the cheat sheet (modules/kompakt.js, modules/en/kompakt.js) loads after this file and is read when core.js renders
+    get html() {
+      return `
+  <p>${t('Das letzte Kapitel verbindet alles: zuerst das Vorgehen bei einem neuen ML-Problem mit Ablauf, Do &amp; Don’t und Checkliste, dann die Entscheidungshilfe «Welches Modell wann?», danach <a href="#kompakt">alles kompakt</a> (Spickzettel über alle Kapitel und Steckbriefe aller Verfahren), zum Schluss die Praxis rund um ein Modell (was ein Modell ist, woher es kommt, speichern und laden, neu trainieren).', 'The last chapter ties everything together: first how to approach a new ML problem with a workflow, Do &amp; Don’t and a checklist, then the decision guide “Which model when?”, then <a href="#kompakt">everything compact</a> (a cheat sheet over all chapters and profiles of every method), finally the practice around a model (what a model is, where it comes from, saving and loading, retraining).')}</p>
   <p>${t('Diese Seite fasst die Kapitel <a href="#ml">Supervised ML</a>, <a href="#klass">Klassifikation</a>, <a href="#unsup">Unsupervised</a>, <a href="#nn">Neural Networks</a>, <a href="#cnn">CNN</a>, <a href="#cv">Image Processing</a>, <a href="#det">Object Detection</a> und <a href="#gen">Generative Models</a> zum Lernen zusammen. Zu jedem Modell gibt es einen Steckbrief, zu jeder Strategie eine kurze Checkliste. Über «ausführlich →» kommst du zur Erklärung mit Demo, über «Beispiele →» zu einem Notebook mit lauffähigem Code (lokal mit Jupyter oder in Google Colab), wo es eines gibt.', 'This page summarises the chapters <a href="#ml">Supervised ML</a>, <a href="#klass">Classification</a>, <a href="#unsup">Unsupervised</a>, <a href="#nn">Neural Networks</a>, <a href="#cnn">CNN</a>, <a href="#cv">Image Processing</a>, <a href="#det">Object Detection</a> and <a href="#gen">Generative Models</a> for revision. Each model has a profile, each strategy a short checklist. “in detail →” takes you to the explanation with a demo, “Examples →” to a notebook with runnable code (locally with Jupyter or in Google Colab) where there is one.')}</p>
 
 ${vorgehen}
-${praxis}
   <h3 id="ue-wahl">${t('Welches Modell wann?', 'Which model when?')}</h3>
   <div class="ue-tree">
     <div class="ue-q">${t('Gibt es eine Zielspalte <code>y</code> mit der richtigen Antwort?', 'Is there a target column <code>y</code> with the right answer?')}</div>
@@ -512,7 +513,10 @@ ${praxis}
     </div>
   </div>
   <div class="merk">${t('<b>Merksatz</b><p>Beginne immer mit einem einfachen Modell als Baseline. Ein komplexeres Modell lohnt sich nur, wenn es auf der Validierung klar besser ist.</p>', '<b>Key point</b><p>Always start with a simple model as a baseline. A more complex model is only worth it if it is clearly better on the validation set.</p>')}</div>
-`,
+${LernApp.kompakt[LernApp.lang] || LernApp.kompakt.de}
+${praxis}
+`;
+    },
     notebooks: [
       { file: 'beispiele/09_Modelle_Praxis.ipynb', desc: t(`Pipeline gegen Baseline, speichern mit joblib und Metadaten, laden und prüfen, was ohne Scaler passiert, Drift simulieren, auf drei Arten neu trainieren und auf festen und aktuellen Testdaten vergleichen, Weitertrainieren mit <code>partial_fit</code>, Model Card.`, `Pipeline against a baseline, saving with joblib and metadata, loading and checking, what happens without the scaler, simulating drift, retraining in three ways and comparing on fixed and recent test data, continuing training with <code>partial_fit</code>, model card.`) },
     ],
