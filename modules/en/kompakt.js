@@ -9,6 +9,7 @@ LernApp.kompakt.en = `
   <ul>
     <li><b>Supervised:</b> The result (label) is known for the training data. The model should make a prediction for new, unseen data. <a href="#ml">→</a></li>
     <li><b>Classification:</b> Supervised with given classes: every example is assigned to one class. <a href="#klass">→</a></li>
+    <li><b>AUC:</b> Area under the ROC curve. It says how likely a random positive case gets a higher score than a random negative one (0.5 = chance, 1 = perfect), independent of the threshold. <a href="#klass-auc">→</a></li>
     <li><b>Unsupervised:</b> There is no target column. You look for structure and relationships in the data (clustering, dimensionality reduction, anomalies). <a href="#unsup">→</a></li>
     <li><b>Neural Network:</b> Many weighted sums (like linear regressions), each with a nonlinear activation function, linked in layers to form a network. <a href="#nn">→</a></li>
     <li><b>CNN:</b> Neural network for images. The pixels are not flattened into a vector. A filter with shared weights slides over the image, so the neighbourhood is preserved. <a href="#cnn">→</a></li>
@@ -90,7 +91,7 @@ LernApp.kompakt.en = `
     <tr><th>Topic</th><th>Remember</th></tr>
     <tr><td><b>Logistic regression</b></td><td>Linear regression + sigmoid. Returns a probability; the class only comes from the <b>threshold</b> (default 0.5), and you choose it. Loss: cross-entropy.</td></tr>
     <tr><td><b>Confusion matrix</b></td><td>TP, FP, FN, TN. <b>Precision</b> = TP/(TP+FP) (how many alarms are right). <b>Recall</b> = TP/(TP+FN) (how many real cases found). <b>F1</b> = mean of both. Accuracy = all correct / all.</td></tr>
-    <tr><td><b>Threshold, ROC, AUC</b></td><td>Lower threshold: more recall, less precision (more false alarms). ROC plots recall against false alarm rate over all thresholds, AUC is the area (0.5 = chance, 1 = perfect). For rare classes also look at precision-recall.</td></tr>
+    <tr><td><b>Threshold, ROC, AUC</b></td><td>Lower threshold: more recall, less precision (more false alarms). ROC plots recall against false alarm rate over all thresholds, AUC is the area (0.5 = chance, 1 = perfect) and at the same time the probability that a random positive case has a higher score than a negative one. Compute it with <code>predict_proba</code>, not <code>predict</code>. For rare classes also report the PR-AUC (chance = share of positives). <a href="#klass-auc">→</a></td></tr>
     <tr><td><b>Several classes</b></td><td>One-vs-all (one model per class) or softmax (probabilities sum to 1). Summarise with micro, macro (every class equal) or weighted (by class size).</td></tr>
     <tr><td><b>Imbalanced classes</b></td><td>Accuracy misleads. Look at recall, precision, F1, AUC. Options: <code>class_weight</code>, up/downsampling, SMOTE, adjust threshold. Resampling on train only.</td></tr>
     <tr><td><b>kNN, naive Bayes, SVM, tree</b></td><td>kNN: majority of the k neighbours, scale, large k = smooth. Naive Bayes: fast, assumes independent features. SVM: widest margin, kernel for curvature, scale. Tree: rules, easy to read, tends to overfit (limit depth), no scaling needed.</td></tr>

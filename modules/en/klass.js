@@ -3,7 +3,7 @@ LernApp.translate('klass', {
   nav: 'Classification',
   title: `Supervised Learning: classification`,
   kicker: `Module 2 · Supervised Learning: classification · Fri 30.10.`,
-  summary: `Logistic regression, metrics, imbalance, trees, ensembles, leakage`,
+  summary: `Logistic regression, metrics, ROC and AUC, imbalance, trees, ensembles, leakage`,
   html: `  <p>Same idea as on day 1 (examples with a known answer), but the answer is now a <b>class</b> instead of a number: fraud yes/no, spam yes/no, cat/dog/bird. Everything from day 1 still applies: train/test, cross-validation, scaling, regularisation, hyperparameter search.</p>
   <div class="grid2">
     <div><h4>Regression</h4><p>Predicts a number (price, temperature). Error: MSE, MAE.</p></div>
@@ -111,7 +111,7 @@ clf.predict_proba(X_test)    # probabilities per class</code></pre>
 
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Moving the threshold: Precision against Recall</h4>
   <p>If you lower the threshold, the model says «positive» more often: more TP, but also more FP. Recall rises (or stays the same), Precision usually falls. It is a <b>trade-off</b>, and which side matters more depends on the problem. In early cancer detection you hardly want to miss anything (high Recall); in a spam filter you do not want to delete any real mail (high Precision).</p>
-  <p>The <b>ROC curve</b> plots, for all thresholds, the hit rate (TPR = Recall) against the false alarm rate (FPR). A perfect model lies at the top left, guessing lies on the diagonal. The <b>AUC</b> is the area under the curve: 1 is perfect, 0.5 is chance.</p>
+  <p>The <b>ROC curve</b> plots, for all thresholds, the hit rate (TPR = Recall) against the false alarm rate (FPR). A perfect model lies at the top left, guessing lies on the diagonal. The <b>AUC</b> is the area under the curve: 1 is perfect, 0.5 is chance. How the curve comes about and what the number means exactly is shown in <a href="#klass-auc">section 3</a>.</p>
   <div class="demo" id="thDemo">
     <div class="tag">Demo</div><h4>Threshold, Confusion Matrix and ROC</h4>
     <p class="hint">Choose how many actual positives and negatives there are (sliders are logarithmic, 1 to 1000). The shape of the model probabilities stays the same: most cases are clear-cut, only a few are borderline (exactly 4 at 10 and 10).</p>
@@ -141,10 +141,66 @@ clf.predict_proba(X_test)    # probabilities per class</code></pre>
   <div class="merk"><b>Summary: threshold, ROC, AUC</b><ul>
     <li><b>Threshold:</b> The model gives probabilities; only the threshold turns them into classes. Lower threshold = more Recall, more false alarms.</li>
     <li><b>ROC:</b> Each threshold gives a point (FPR, TPR). The ROC curve connects all points.</li>
-    <li><b>AUC:</b> Area under the ROC curve, independent of the threshold. 1 = perfect, 0.5 = chance. You then choose the threshold based on the costs of the errors.</li>
+    <li><b>AUC:</b> Area under the ROC curve, independent of the threshold. 1 = perfect, 0.5 = chance. You then choose the threshold based on the costs of the errors. <a href="#klass-auc">In detail →</a></li>
   </ul></div>
 
-  <h3 id="klass-multi">3 · More than two classes</h3>
+  <h3 id="klass-auc">3 · Understanding the ROC curve and AUC</h3>
+  <p>Precision, recall and F1 from section 2 always hold for <b>one</b> threshold. The <b>AUC</b> (area under the curve) rates the model before you pick that threshold. It asks only one thing: does the model put the cases in the right <b>order</b>, the actual positives ahead of the actual negatives? That makes it a good way to compare models. You choose the threshold afterwards.</p>
+
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">The ROC curve step by step</h4>
+  <ol>
+    <li>Sort all cases by the model's score (e.g. <code>predict_proba</code>), highest first.</li>
+    <li>Start at (0, 0): the threshold is above all scores, no case is positive.</li>
+    <li>Lower the threshold case by case. If the next case is actually positive, the curve goes up by 1/P (one more TP). If it is actually negative, it goes right by 1/N (one more FP). P and N are the numbers of actual positives and negatives.</li>
+    <li>End at (1, 1): the threshold is below all scores, every case is positive. Where several cases share a score, the curve goes diagonally.</li>
+  </ol>
+  <p>A perfect model first goes all the way up, then right (AUC 1). A model that guesses mixes both directions and stays close to the diagonal (AUC 0.5).</p>
+
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">What the number means</h4>
+  <p><b>The AUC is the probability that the model gives a randomly drawn positive case a higher score than a randomly drawn negative one.</b> Ties count half. An AUC of 0.8 therefore means: out of 100 pairs (one positive, one negative case), the positive one is ahead in 80. That is the same number as the area under the staircase: with P · N pairs, every pair is one cell of the unit square, and exactly the correctly ordered ones lie under the curve.</p>
+  <div class="demo" id="auDemo">
+    <div class="tag">Demo</div><h4>ROC curve as a staircase, AUC as a pair comparison</h4>
+    <p class="hint">10 actually positive (circle) and 10 actually negative cases (square) on the score axis. «Separation» sets how far apart the scores of the two classes are. «Threshold step» lowers the threshold case by case: every circle right of the line is a step up, every square a step right.</p>
+    <div class="btnrow"><button type="button" id="auNew">New sample</button><button type="button" id="auFlip">Flip the score</button></div>
+    <div class="ctl"><label for="auSep">Separation</label><input type="range" id="auSep" min="0" max="4" step="0.1" value="1.5"><output id="auSepO"></output></div>
+    <div class="ctl"><label for="auK">Threshold step</label><input type="range" id="auK" min="0" max="20" step="1" value="20"><output id="auKO"></output></div>
+    <svg class="plot" id="auSvg" viewBox="0 0 320 130" role="img" aria-label="Scores of the positive and negative cases with threshold"></svg>
+    <svg class="plot" id="auRoc" viewBox="0 0 320 240" role="img" aria-label="ROC curve as a staircase with the grid of pairs" style="margin-top:12px"></svg>
+    <div class="stats"><span>AUC (area) <b id="auAuc"></b></span><span>Pairs in the right order <b id="auPairs"></b></span><span>TPR, FPR at this step <b id="auPt"></b></span></div>
+    <p class="hint" id="auMsg">&nbsp;</p>
+    <p class="hint">Every cell of the grid is a pair of one positive (row) and one negative case (column). Shaded are the pairs in which the positive case has the higher score. Their number divided by 100 is the AUC.</p>
+  </div>
+
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">Rules of thumb</h4>
+  <div class="tablewrap"><table>
+    <tr><th>AUC</th><th>Meaning</th></tr>
+    <tr><td>0.5</td><td>Chance: the model does not separate the classes.</td></tr>
+    <tr><td>below 0.5</td><td>Worse than chance. Usually labels or score are swapped: with the flipped score the AUC would be 1 − AUC.</td></tr>
+    <tr><td>0.7 to 0.8</td><td>usable</td></tr>
+    <tr><td>0.8 to 0.9</td><td>good</td></tr>
+    <tr><td>above 0.9</td><td>very good. If it is close to 1 on real data, rule out <a href="#klass-leakage">data leakage</a> first.</td></tr>
+  </table></div>
+  <p class="note">These are rules of thumb. What is enough depends on the problem: in fraud detection 0.75 can be worth a lot, in digit recognition 0.95 is weak. Always compare with a baseline on the same data.</p>
+
+  <h4 style="margin:12px 0 4px;font-family:var(--f-display)">ROC-AUC or PR-AUC?</h4>
+  <p>The ROC only uses rates within each class (TPR among the positives, FPR among the negatives). That is why the ROC-AUC hardly changes when there are ten times more negatives. Try it in the <a href="#klass-metriken">demo of section 2</a> with 10 : 1000. Precision, on the other hand, collapses: with rare positives even a small false alarm rate gives more FP than TP. The <b>PR-AUC</b>, the area under the precision-recall curve (in scikit-learn <code>average_precision_score</code>), shows this. Its chance level is not 0.5 but the share of positives, e.g. 0.01 with 1 % positives. With <a href="#klass-imbal">imbalanced classes</a> report both.</p>
+
+  <pre><code>from sklearn.metrics import roc_auc_score, average_precision_score, roc_curve
+
+proba = model.predict_proba(X_val)[:, 1]          # score of the positive class, not predict()
+print(roc_auc_score(y_val, proba))                # ROC-AUC: 0.5 = chance
+print(average_precision_score(y_val, proba))      # PR-AUC: chance = share of positives
+fpr, tpr, thresholds = roc_curve(y_val, proba)    # the points of the curve, e.g. for plotting</code></pre>
+  <div class="falle"><b>Pitfall: what the AUC does not tell you</b><ul>
+    <li><b>No threshold:</b> two models with the same AUC can be very different at the threshold you need. You choose the threshold separately on the validation set.</li>
+    <li><b>No calibration:</b> only the order counts. If you square all scores, the AUC stays the same, but the scores are no longer meaningful probabilities.</li>
+    <li><b>All thresholds count equally:</b> including regions you never use (e.g. 80 % false alarms). If only one region matters, compare there, e.g. the recall at a fixed false alarm rate.</li>
+    <li><b><code>predict</code> instead of <code>predict_proba</code>:</b> with 0/1 predictions the curve has only one point (threshold 0.5), and the AUC is too low.</li>
+    <li><b>More than two classes:</b> the AUC is defined for two classes. With several, compute one-vs-rest per class and average (<code>roc_auc_score(y, proba, multi_class="ovr")</code>).</li>
+  </ul></div>
+  <div class="merk"><b>Key point</b><p>The AUC measures the order: how often a positive case has a higher score than a negative one. 0.5 is chance, 1 is perfect. It compares models independently of the threshold. With rare positives also report the PR-AUC, and then choose the threshold on the validation set by the cost of the errors.</p></div>
+
+  <h3 id="klass-multi">4 · More than two classes</h3>
   <ul>
     <li><b>One-vs-All</b>: One two-class model per class («this class against all others»). The class with the highest probability wins.</li>
     <li><b>Softmax</b>: The generalisation of the sigmoid function to several classes. All probabilities are positive and add up to 1.</li>
@@ -159,7 +215,7 @@ clf.predict_proba(X_test)    # probabilities per class</code></pre>
 print(confusion_matrix(y_test, pred))
 print(classification_report(y_test, pred))   # Precision, Recall, F1 per class + averages</code></pre>
 
-  <h3 id="klass-imbal">4 · Imbalanced classes</h3>
+  <h3 id="klass-imbal">5 · Imbalanced classes</h3>
   <p>Often the interesting thing is rare: fraud, defects, diseases. A model can then ignore the minority and still look «good». Two things need doing: measure correctly (not accuracy) and adjust the data or the training.</p>
   <div class="demo" id="imDemo">
     <div class="tag">Demo</div><h4>Why accuracy deceives</h4>
@@ -181,7 +237,7 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 per class +
   </table></div>
   <div class="falle"><b>Pitfall</b><p>Resampling (up/downsampling, SMOTE) belongs <b>only on the training data</b>, never on the test set. Otherwise you evaluate on artificial data and get numbers that look too good.</p></div>
 
-  <h3 id="klass-modelle">5 · Non-linear classifiers</h3>
+  <h3 id="klass-modelle">6 · Non-linear classifiers</h3>
   <p>Logistic regression draws a <b>straight</b> boundary. If the classes cannot be separated that cleanly, you need more flexible models.</p>
   <h4 style="margin:12px 0 4px;font-family:var(--f-display)">What does each model optimise?</h4>
   <div class="tablewrap"><table>
@@ -278,7 +334,7 @@ print(classification_report(y_test, pred))   # Precision, Recall, F1 per class +
     <p class="hint" id="nnMsg">&nbsp;</p>
     <p class="hint">Top: the decision region of the whole network. Middle: each neuron looks at the plane on its own (blue = positive activation, orange = negative); in brackets its weight towards the output. The network combines these simple pictures into the shape above. Bottom: the loss (error measure) falls while the network learns. «Two groups» needs just one neuron, «Circle» and XOR need several.</p>
   </div>
-  <h3 id="klass-ens">6 · Ensembles: many weak models make a strong one</h3>
+  <h3 id="klass-ens">7 · Ensembles: many weak models make a strong one</h3>
   <p>A single model makes mistakes, and a deep tree even memorises the training data. The idea of ensembles: take <b>many simple trees</b> instead of one big one and combine them. There are two ways, and the difference is the key question of this section: do the trees work <i>side by side</i> or <i>one after another</i>?</p>
   <div class="grid2">
     <div><h4>Bagging (random forest): the jury</h4>
@@ -360,7 +416,7 @@ rf = RandomForestRegressor(n_estimators=200, random_state=0).fit(X, y)
 gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).fit(X, y)
 # For «expensive yes/no»: RandomForestClassifier / GradientBoostingClassifier</code></pre>
 
-  <h3 id="klass-leakage">7 · Data Leakage</h3>
+  <h3 id="klass-leakage">8 · Data Leakage</h3>
   <p>Leakage means: during training the model sees information it would not have for the real prediction. Result: wonderful test scores and a model that fails in use.</p>
   <ul>
     <li><b>Target leakage</b>: A feature already contains the answer. Example from the lecture: a churn model with 100 % hits, because calls to customer service («I want to cancel») only happen <i>after</i> the cancellation.</li>
@@ -370,7 +426,7 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
   </ul>
   <div class="merk"><b>Key point</b><p>Distrust numbers that are too good. Ask for every feature: «Would I really have this value at the time of the prediction?» Suspicious signs are strikingly good validation or test scores (which collapse in production) and a single feature with an enormous weight. A large gap between training and validation, on the other hand, is overfitting, not leakage.</p></div>
 
-  <h3 id="klass-methoden">8 · Overview: steps and methods</h3>
+  <h3 id="klass-methoden">9 · Overview: steps and methods</h3>
   <p>All steps of the workflow with the methods you choose there and the matching scikit-learn call. The numbers match the figure «The whole workflow at a glance».</p>
   <div class="tablewrap"><table>
     <tr><th>Step</th><th>Methods to choose from</th><th>When which</th><th>scikit-learn</th></tr>
@@ -386,7 +442,7 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
   </table></div>
   <div class="merk"><b>Key point</b><p>Classification is regression plus three decisions: split stratified, handle the imbalance and choose the threshold by the cost of errors.</p></div>
 
-  <h3 id="klass-best">9 · Best practices</h3>
+  <h3 id="klass-best">10 · Best practices</h3>
   <p>On top of the general <a href="#ml-best">best practices from Supervised ML</a>, for classification:</p>
   <div class="bp-check">
     <div><b>Metric and threshold</b><ul>
@@ -415,6 +471,9 @@ gb = GradientBoostingRegressor(n_estimators=50, max_depth=1, learning_rate=0.3).
     { q: `Why is accuracy a bad measure with 1 % fraud cases?`, k: [["a model that never reports fraud has 99 %", "never report", "never flag", "always negative", "always no", "majority class", "99"], ["better: Precision, Recall, F1, AUC", "precision", "recall", "f1", "auc"], ["rare class", "rare", "imbalanced", "imbalance"]], c: ["A model that never reports fraud has 99 % accuracy and is useless; better use Precision, Recall, F1 and AUC.", "Accuracy can reach at most 50 % with fraud cases.", "Accuracy is only defined for regression.", "Accuracy does not depend on the number of cases, so it is unreliable."], a: `A model that never reports fraud has 99 % accuracy and is still useless. Precision, Recall, F1 and AUC show how well the rare class is detected.` },
     { q: `You lower the threshold from 0.5 to 0.2. What happens to Recall and Precision?`, k: [["Recall rises", "recall rises", "recall goes up", "recall increases", "higher recall", "more recall"], ["Precision falls", "precision falls", "precision usually falls", "precision drops", "precision decreases", "lower precision", "less precision", "precision goes down"], ["more false alarms", "false alarm", "false positive", "more positive"]], c: ["Recall rises, Precision usually falls, because more false alarms are added.", "Recall falls, Precision rises.", "Both rise.", "Both stay the same, only the AUC changes."], a: `More cases become positive: Recall rises (or stays the same), Precision usually falls, because more false alarms are added.` },
     { q: `What does an AUC of 0.5 mean, and what does 1 mean?`, k: [["0.5 = chance (diagonal)", "chance", "random", "diagonal", "guess"], ["1 = perfect", "perfect", "flawless", "all positives ahead"]], c: ["0.5 is chance (ROC on the diagonal), 1 is a perfect classifier.", "0.5 is perfect, 1 is chance.", "0.5 means 50 % accuracy, 1 means 100 % precision.", "0.5 means overfitting, 1 underfitting."], a: `0.5 is chance (ROC curve on the diagonal), 1 is a perfect classifier (all positives ahead of all negatives).` },
+    { q: `What does the AUC measure, expressed as a probability?`, k: [["positive case gets a higher score than a negative one", "higher score", "ahead of the negative", "ahead"], ["randomly drawn pair", "random", "pair"], ["order, no threshold", "order", "ranking", "independent of the threshold"]], c: ["The probability that a random positive case gets a higher score than a random negative one.", "The share of correctly classified cases at threshold 0.5.", "The probability that a case is positive.", "The mean precision over all classes."], a: `The probability that the model gives a randomly drawn positive case a higher score than a randomly drawn negative one (a random pair, ties count half). It only rates the order, independent of the threshold.` },
+    { q: `With 1 % positives your model has a ROC-AUC of 0.93. Why is that not enough, and what do you report as well?`, k: [["ROC uses rates, many negatives go unnoticed", "rates", "many negatives", "fpr"], ["precision can still be low", "precision"], ["PR-AUC, chance = share of positives", "pr auc", "average precision", "average_precision"]], c: ["The ROC only uses rates; despite a high AUC, precision can be low. Also report the PR-AUC (chance = share of positives).", "0.93 is too low, a model is only usable from 0.99.", "The AUC is not defined for rare classes.", "You also report the accuracy, because it is more precise with rare classes."], a: `The ROC only uses rates within each class. With so many negatives even a small FPR gives more false alarms than hits, so precision can be low. Also report the PR-AUC (<code>average_precision_score</code>); its chance level is the share of positives, here 0.01.` },
+    { q: `Why is <code>roc_auc_score(y_val, model.predict(X_val))</code> wrong?`, k: [["predict only returns 0/1", "0 1", "only classes", "classes instead"], ["curve with only one point", "one point", "threshold 0 5"], ["use predict_proba", "predict proba"]], c: ["predict only returns 0/1: the curve has one point, the AUC is too low. Correct: predict_proba(X_val)[:, 1].", "roc_auc_score needs the training data, not the validation data.", "The arguments are swapped, y_val must come second.", "It is correct, predict and predict_proba give the same AUC."], a: `<code>predict</code> only returns 0/1, i.e. only the classes at threshold 0.5. The ROC curve then has one point, and the AUC is too low. Use the score instead: <code>predict_proba(X_val)[:, 1]</code>.` },
     { q: `What happens in kNN with k = 1 and with k = N?`, k: [["k = 1: follows every training point, overfitting", "overfit", "training point", "every point", "memoris", "memoriz"], ["k = N: always the majority class", "majority", "most common class", "always the same", "underfit"]], c: ["k = 1 overfits (follows every point), k = N always predicts the majority class.", "k = 1 always predicts the majority class, k = N overfits.", "Both values give the same result.", "k = 1 is underfitting, k = N is perfect on training."], a: `k = 1 follows every training point (overfitting, perfect on training). k = N always predicts the majority class (underfitting).` },
     { q: `How do bagging and boosting differ?`, k: [["bagging: parallel, averaging", "parallel", "average", "mean", "random sample", "bootstrap"], ["boosting: one after another, remaining errors", "one after another", "sequential", "residual", "remaining error", "corrects", "correct the"], ["variance resp. bias", "variance", "bias"]], c: ["Bagging: parallel on samples, averages (variance ↓). Boosting: one after another, corrects remaining errors (bias ↓).", "Bagging: one after another, corrects errors. Boosting: parallel and averages.", "Bagging uses a single tree, boosting many.", "Both train in parallel, only the depth of the trees differs."], a: `Bagging trains many models in parallel on random samples and averages them (reduces variance). Boosting trains one after another; each model corrects the remaining errors of the overall model so far (reduces bias, more prone to noise).` },
     { q: `How does data leakage arise, and how do you prevent it with scaling and imputation?`, k: [["information from test or future data in training", "test", "future"], ["fit only on the training data", "training data", "only train", "fit only", "only on train"], ["Pipeline / cross-validation", "pipeline", "cross validation"]], c: ["Test knowledge flows into training; fit everything that learns only on the training data, best inside a Pipeline.", "The model trains too long; you stop earlier.", "There is too little data; you collect more.", "The classes are imbalanced; you apply SMOTE."], a: `Information from test or future data flows into the training. Fit all learning preprocessing steps only on the training data, most easily with a Pipeline inside the cross-validation.` },
