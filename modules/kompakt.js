@@ -1,16 +1,11 @@
-/* Module: Kompakt, the last chapter. Cheat sheet over the ML chapters; the content is a short form of ml, klass, unsup, nn, cnn, cv, det, gen and modell.
- * It also holds the one list of methods (cards #v-<method>, linked from the decision tree in uebersicht.js).
+/* Cheat sheet «Alles kompakt», shown inside the chapter uebersicht (section #kompakt, after «Welches Modell wann?»).
+ * A short form of the chapters ml, klass, unsup, nn, cnn, cv, det and gen; it also holds the one list of methods
+ * (cards #v-<method>, linked from the decision tree in uebersicht.js).
  * Rule (AGENTS.project.md): whenever one of these chapters changes in content, update the matching table here and in modules/en/kompakt.js. */
-(function () {
-  LernApp.register({
-    id: 'kompakt',
-    order: 95.5,
-    nav: 'Kompakt',
-    title: 'Alles kompakt',
-    kicker: 'Spickzettel · Module 2 und 3',
-    summary: `Supervised ML, Klassifikation, Unsupervised, Neural Networks, CNN, Computer Vision, Generative Models und ein Modell in der Praxis auf einer Seite`,
-    html: `
-  <p>Der Spickzettel über die Kapitel <a href="#ml">Supervised ML</a>, <a href="#klass">Klassifikation</a>, <a href="#unsup">Unsupervised</a>, <a href="#nn">Neural Networks</a>, <a href="#cnn">CNN</a>, <a href="#cv">Image Processing</a>, <a href="#det">Object Detection &amp; Segmentation</a>, <a href="#gen">Generative Models</a> und den Praxis-Teil von <a href="#ue-praxis">Übersicht &amp; Praxis</a>. Die Erklärungen, Demos und der Selbsttest stehen in den Kapiteln, die Steckbriefe einzelner Modelle in <a href="#uebersicht">Übersicht &amp; Praxis</a>.</p>
+LernApp.kompakt = LernApp.kompakt || {};
+LernApp.kompakt.de = `
+  <h3 id="kompakt">Alles kompakt: der Spickzettel</h3>
+  <p>Der Spickzettel über die Kapitel <a href="#ml">Supervised ML</a>, <a href="#klass">Klassifikation</a>, <a href="#unsup">Unsupervised</a>, <a href="#nn">Neural Networks</a>, <a href="#cnn">CNN</a>, <a href="#cv">Image Processing</a>, <a href="#det">Object Detection &amp; Segmentation</a> und <a href="#gen">Generative Models</a>. Die Erklärungen, Demos und der Selbsttest stehen in den Kapiteln.</p>
 
   <h3 id="k-begriffe">Begriffe und Verfahren in Kürze</h3>
   <p>Zuerst die Grundbegriffe, danach jedes Verfahren einmal mit Zweck, Einsatz, Reglern sowie Vor- und Nachteilen. Wie du das passende wählst, steht unter <a href="#ue-wahl">Welches Modell wann?</a>.</p>
@@ -199,19 +194,4 @@
     <tr><td><b>Best Practices</b></td><td>Vortrainiert vor selbst trainiert, klein anfangen, Bilder aus festen Seeds ansehen statt nur den Loss, Vielfalt und Kopien prüfen, FID nur gleich eingestellt vergleichen und erzeugte Bilder kennzeichnen. <a href="#gen-best">→</a></td></tr>
   </table></div>
   <p class="note"><a href="#gen">Zum Kapitel →</a></p>
-
-  <h3 id="k-modell">Ein Modell in der Praxis</h3>
-  <div class="tablewrap"><table>
-    <tr><th>Thema</th><th>Merke</th></tr>
-    <tr><td><b>Was ist ein Modell?</b></td><td><code>ŷ = f(x; θ)</code>: Architektur (Form der Funktion, wählst du), Parameter θ (lernt das Training), Hyperparameter (steuern das Training, wählst du auf der Validation). Training ändert die Parameter, Inferenz (<code>predict</code>) nicht.</td></tr>
-    <tr><td><b>Woher?</b></td><td>Selbst trainieren (Tabellendaten, eigene Aufgabe), fertig übernehmen (zero-shot), Transfer Learning (Basis einfrieren, neuer Kopf; wenig Daten) oder Fine-Tuning (obere Schichten mit kleiner Learning Rate; mehr Daten).</td></tr>
-    <tr><td><b>Speichern</b></td><td>Die ganze Pipeline speichern, nicht nur den Schätzer: Ohne den Scaler rechnet das geladene Modell Unsinn, ohne Fehlermeldung. Dazu Metadaten (Version, Datum, Metrik, Library-Versionen) und eine Model Card.</td></tr>
-    <tr><td><b>Formate</b></td><td>scikit-learn: joblib. Keras: <code>.keras</code>. PyTorch: <code>state_dict</code>. Austausch: ONNX. Achtung: pickle und joblib führen beim Laden Code aus; fremde Dateien nur als <code>.safetensors</code> oder mit <code>weights_only=True</code>.</td></tr>
-    <tr><td><b>Drift</b></td><td>Data Drift: Die Eingaben verteilen sich anders. Concept Drift: Der Zusammenhang zwischen x und y ändert sich. Erkennen: Eingaben und Metrik im Einsatz überwachen.</td></tr>
-    <tr><td><b>Neu trainieren</b></td><td>Komplett neu (alte + neue Daten), nur auf neuen Daten (vergisst seltene alte Fälle), weitertrainieren (<code>partial_fit</code>, Gefahr: Catastrophic Forgetting) oder nur den Kopf neu. Die neue Version muss auf festen und aktuellen Testdaten besser sein, sonst bleibt die alte. Testdaten nie ins Training.</td></tr>
-    <tr><td><b>Best Practices</b></td><td>Vortrainierte Modelle zuerst zero-shot auf den eigenen Daten testen, nach Rahmenbedingungen wählen statt nach Erscheinungsdatum, Fine-Tuning nur mit genug passenden Daten. Pipeline mit Metadaten und Model Card speichern, im Einsatz Eingaben und Metrik überwachen, alte Version für den Rollback behalten. <a href="#ue-dodont">→</a></td></tr>
-  </table></div>
-  <p class="note"><a href="#ue-praxis">Zum Kapitel →</a></p>
-`,
-  });
-})();
+`;

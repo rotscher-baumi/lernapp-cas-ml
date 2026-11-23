@@ -89,6 +89,8 @@ Ein Kapitel ist eine sofort ausgeführte Funktion, die `LernApp.register` mit ei
 
 Die englische Fassung eines Kapitels liegt in `modules/en/<id>.js` und ruft `LernApp.translate(id, {...})` auf. Jedes angegebene Feld ersetzt das deutsche; das ganze `html` wird ausgetauscht. Kapitel, deren Text schon im Code mit `LernApp.t('de', 'en')` zweisprachig ist, hinterlegen ein leeres Objekt.
 
+Ausnahme Spickzettel: `modules/kompakt.js` und `modules/en/kompakt.js` melden kein Kapitel an, sondern legen nur HTML unter `LernApp.kompakt.de` und `.en` ab. `uebersicht.js` liest es über einen Getter `html` erst beim Rendern (die Dateien laden nach `uebersicht.js`) und bettet es als Abschnitt `#kompakt` ein.
+
 ### Design (`assets/style.css`)
 
 Alle Farben sind Tokens auf `:root` (`--bg`, `--fg`, `--accent`, ...). Der dunkle Satz gilt bei `prefers-color-scheme: dark`, solange `<html>` kein `data-theme="light"` trägt, und immer bei `data-theme="dark"`. Demos und SVG-Grafiken benutzen dieselben Tokens, darum passen sie sich automatisch an. `--ch-r`, `--ch-g`, `--ch-b` sind die Farben der Bild-channels R, G, B (Kapitel Computer Vision, Abschnitt «Was in einem Bild steckt»).

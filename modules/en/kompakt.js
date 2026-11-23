@@ -1,11 +1,8 @@
-/* English texts for the module "kompakt" (ML cheat sheet). Fields replace the German ones when the language is EN. */
-LernApp.translate('kompakt', {
-  nav: 'Compact',
-  title: 'Everything compact',
-  kicker: 'Cheat sheet · Modules 2 and 3',
-  summary: `Supervised ML, classification, unsupervised, neural networks, CNN, computer vision, generative models and models in practice on one page`,
-  html: `
-  <p>The cheat sheet over the chapters <a href="#ml">Supervised ML</a>, <a href="#klass">Classification</a>, <a href="#unsup">Unsupervised</a>, <a href="#nn">Neural Networks</a>, <a href="#cnn">CNN</a>, <a href="#cv">Image Processing</a>, <a href="#det">Object Detection &amp; Segmentation</a>, <a href="#gen">Generative Models</a> and the practice part of <a href="#ue-praxis">Overview &amp; practice</a>. The explanations, demos and self-test are in the chapters, profiles of single models in <a href="#uebersicht">Overview &amp; practice</a>.</p>
+/* English text of the cheat sheet «Alles kompakt» (shown inside the chapter uebersicht, see modules/kompakt.js). */
+LernApp.kompakt = LernApp.kompakt || {};
+LernApp.kompakt.en = `
+  <h3 id="kompakt">Everything compact: the cheat sheet</h3>
+  <p>The cheat sheet over the chapters <a href="#ml">Supervised ML</a>, <a href="#klass">Classification</a>, <a href="#unsup">Unsupervised</a>, <a href="#nn">Neural Networks</a>, <a href="#cnn">CNN</a>, <a href="#cv">Image Processing</a>, <a href="#det">Object Detection &amp; Segmentation</a> and <a href="#gen">Generative Models</a>. The explanations, demos and self-test are in the chapters.</p>
 
   <h3 id="k-begriffe">Terms and methods in brief</h3>
   <p>First the basic terms, then every method once with its purpose, use, controls, pros and cons. How to pick the right one is under <a href="#ue-wahl">Which model when?</a>.</p>
@@ -194,18 +191,4 @@ LernApp.translate('kompakt', {
     <tr><td><b>Best practices</b></td><td>Pretrained before self-trained, start small, look at images from fixed seeds instead of just the loss, check diversity and copies, compare FID only with equal settings and label generated images. <a href="#gen-best">→</a></td></tr>
   </table></div>
   <p class="note"><a href="#gen">To the chapter →</a></p>
-
-  <h3 id="k-modell">A model in practice</h3>
-  <div class="tablewrap"><table>
-    <tr><th>Topic</th><th>Remember</th></tr>
-    <tr><td><b>What is a model?</b></td><td><code>ŷ = f(x; θ)</code>: architecture (shape of the function, you choose it), parameters θ (learned by training), hyperparameters (steer the training, you choose them on validation). Training changes the parameters, inference (<code>predict</code>) does not.</td></tr>
-    <tr><td><b>Where from?</b></td><td>Train yourself (tabular data, your own task), take a finished one (zero-shot), transfer learning (freeze the base, new head; little data) or fine-tuning (upper layers with a small learning rate; more data).</td></tr>
-    <tr><td><b>Saving</b></td><td>Save the whole pipeline, not only the estimator: without the scaler the loaded model computes nonsense, with no error message. Add metadata (version, date, metric, library versions) and a model card.</td></tr>
-    <tr><td><b>Formats</b></td><td>scikit-learn: joblib. Keras: <code>.keras</code>. PyTorch: <code>state_dict</code>. Exchange: ONNX. Careful: pickle and joblib run code when loading; load foreign files only as <code>.safetensors</code> or with <code>weights_only=True</code>.</td></tr>
-    <tr><td><b>Drift</b></td><td>Data drift: the inputs are distributed differently. Concept drift: the relationship between x and y changes. Detect it by monitoring inputs and the metric in production.</td></tr>
-    <tr><td><b>Retraining</b></td><td>Completely new (old + new data), only on new data (forgets rare old cases), continue training (<code>partial_fit</code>, risk: catastrophic forgetting) or only a new head. The new version must be better on fixed and current test data, otherwise the old one stays. Never put test data into training.</td></tr>
-    <tr><td><b>Best practices</b></td><td>Test pretrained models zero-shot on your own data first, choose by constraints rather than release date, fine-tune only with enough suitable data. Save the pipeline with metadata and a model card, monitor inputs and metric in use, keep the old version for a rollback. <a href="#ue-dodont">→</a></td></tr>
-  </table></div>
-  <p class="note"><a href="#ue-praxis">To the chapter →</a></p>
-`,
-});
+`;

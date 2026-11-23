@@ -1,4 +1,4 @@
-/* Demos of the practice part of «Übersicht & Praxis» (model file, which way, drift). modules/uebersicht.js calls LernApp.demos.modell() once the chapter is in the page. */
+/* Demos of the practice part of «Übersicht & Kompakt» (model file, which way, drift). modules/uebersicht.js calls LernApp.demos.modell() once the chapter is in the page. */
 (function () {
   const { $, fmt } = LernApp;
 
